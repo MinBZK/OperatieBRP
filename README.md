@@ -1,6 +1,6 @@
 # Broncode programmatuur operatie Basisregistratie Personen (BRP)
 
-Het ministerie van Binnenlandse Zaken en Koninkrijksrelaties heeft de broncode openbaar gemaakt van de programmatuur die was geschreven voor nieuwe centrale ict-systemen voor de basisregistratie personen (BRP). Dit project is in juli 2017 gestopt.
+Het ministerie van Binnenlandse Zaken en Koninkrijksrelaties (BZK) heeft de broncode openbaar gemaakt van de programmatuur die was geschreven voor nieuwe centrale ict-systemen voor de basisregistratie personen (BRP). Dit project is in juli 2017 gestopt.
 
 # Open source
 De broncode is gepubliceerd als open source software onder de licentievoorwaarden GNU Affero General Public License, versie 3 zoals gepubliceerd door de Free Software Foundation. 
