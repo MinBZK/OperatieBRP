@@ -1,0 +1,34 @@
+    <div class="row">
+        <div class="col-xs-1 btn-group btn-group-sm" ng-if="!config.geenNieuw">
+            <button ng-click="nieuwItem()" type="submit" ng-disabled="status.nieuw" class="btn btn-primary">Nieuw</button>
+        </div>
+        <div class="col-xs-6 text-center" ng-if="waarde[kolom.display].totalElements > waarde[kolom.display].size">
+            <pagination class="pagination-sm" items-per-page="waarde[kolom.display].size" total-items="waarde[kolom.display].totalElements" ng-model="paginaNummer" ng-change="pagineren(paginaNummer)" ></pagination>
+        </div>
+    </div>
+    <div ng-if="waarde[kolom.display].totalElements > 0">
+        <div class="row">
+            <div class="col-xs-12 table-responsive">
+                <table class="table table-hover table-striped table-condensed">
+                    <thead>
+                        <tr>
+                            <th ng-repeat="veld in kolom.velden">
+                                <span>{{veld.name}}</span>
+                            </th>
+                            <th ng-if="config.verwijderen"/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr id="{{kolom.name + '_' + $index}}" ng-repeat="(pi, subitem) in waarde[kolom.display].content" ng-click="viewItem(pi)" class="klikbaar">
+                            <td ng-repeat="veld in kolom.velden">
+                                <brp-lijstveld id="{{kolom.name + '_' + veld.name + '_' + pi}} "kolom='{{veld}}' waarde="subitem"/>
+                            </td>
+                            <td ng-if="config.verwijderen">
+                            	<a ng-click="verwijderItem(subitem)" title="Groep {{subitem.Naam}} verwijderen"><img src="img/bin.png" height="20" width="20"></a>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>

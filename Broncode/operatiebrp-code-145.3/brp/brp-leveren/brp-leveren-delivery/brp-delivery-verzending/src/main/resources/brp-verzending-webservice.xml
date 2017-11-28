@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:http-conf="http://cxf.apache.org/transports/http/configuration"
+    xmlns:sec="http://cxf.apache.org/configuration/security"
+    xmlns:cxf="http://cxf.apache.org/core"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://cxf.apache.org/transports/http/configuration http://cxf.apache.org/schemas/configuration/http-conf.xsd
+        http://cxf.apache.org/configuration/security http://cxf.apache.org/schemas/configuration/security.xsd
+        http://cxf.apache.org/core http://cxf.apache.org/schemas/core.xsd
+    ">
+
+    <!--<http-conf:conduit name="{http://www.bzk.nl/brp/levering/kennisgeving}KennisgevingPort.http-conduit">-->
+    <http-conf:conduit name="https://.*">
+        <http-conf:tlsClientParameters disableCNCheck="${security.disable.cn.check:true}">
+            <sec:keyManagers keyPassword="${security.keystore.keywachtwoord}">
+                <sec:keyStore type="JKS" password="${security.keystore.wachtwoord}"
+                              file="${security.keystore.bestand}"/>
+            </sec:keyManagers>
+            <sec:trustManagers>
+                <sec:keyStore type="JKS" password="${security.truststore.wachtwoord}"
+                              file="${security.truststore.bestand}"/>
+            </sec:trustManagers>
+        </http-conf:tlsClientParameters>
+        <http-conf:client AllowChunking="false"/>
+    </http-conf:conduit>
+
+    <http-conf:conduit name="http://.*">
+        <http-conf:client AllowChunking="false" />
+    </http-conf:conduit>
+
+    <bean id="logInbound" class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
+    <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
+
+    <cxf:bus id="cxfBus">
+        <cxf:features>
+            <cxf:logging/>
+        </cxf:features>
+        <cxf:outInterceptors>
+            <ref bean="logOutbound"/>
+        </cxf:outInterceptors>
+        <cxf:outFaultInterceptors>
+            <ref bean="logOutbound"/>
+        </cxf:outFaultInterceptors>
+    </cxf:bus>
+
+</beans>

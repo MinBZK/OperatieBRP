@@ -1,0 +1,85 @@
+pipeline {
+    agent {
+        label 'brp-art'
+    }
+    tools {
+        nodejs 'NodeJS'
+    }
+    stages {
+        stage('Checkout') {
+            steps {
+                // Get the code
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: '*/roodsprint']],
+                    doGenerateSubmoduleConfigurations: false,
+                    extensions: [
+                        [$class: 'LocalBranch', localBranch: 'roodsprint'],
+                        [$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [[path: 'brp/beheer-selectie/beheer-ng2']]]
+                    ],
+                    submoduleCfg: [],
+                    userRemoteConfigs: [[
+                        credentialsId: '41a3ccc6-713d-4688-824d-b948355d06da',
+                        url: 'ssh://fac-git.modernodam.nl/operatiebrp-code.git'
+                        ]
+                    ]])
+            }
+        }
+        stage('Install modules') {
+            steps {
+                dir('brp/beheer-selectie/beheer-ng2') {
+                    sh 'rm -rf node_modules'
+                    sh 'npm install --no-shrinkwrap'
+                }
+            }
+        }
+        stage('Build') {
+            steps {
+                dir('brp/beheer-selectie/beheer-ng2') {
+                    sh 'ng build'
+                }
+            }
+        }
+
+        stage('Unit test') {
+            steps {
+                dir('brp/beheer-selectie/beheer-ng2') {
+                    sh 'ng test --sr'
+                }
+            }
+        }
+
+        stage('QA (lint)') {
+            steps {
+                dir('brp/beheer-selectie/beheer-ng2') {
+                    sh 'ng lint'
+                }
+            }
+        }
+
+        // stage('End to End test') {
+        //     steps {
+        //         dir('brp/beheer-selectie/beheer-ng2') {
+        //             sh 'ng e2e'
+        //         }
+        //     }
+        // }
+
+        stage('Build (prod)') {
+            steps {
+                dir('brp/beheer-selectie/beheer-ng2') {
+                    sh 'ng build --prod'
+                }
+            }
+        }
+
+        // stage('Docker distributie') {
+        //     steps {
+        //         dir('brp/beheer-selectie/beheer-ng2') {
+        //             sh 'scripts/docker-distributie.sh'
+        //             sh 'scripts/docker-release.sh'
+        //         }
+        //     }
+        // }
+    }
+}

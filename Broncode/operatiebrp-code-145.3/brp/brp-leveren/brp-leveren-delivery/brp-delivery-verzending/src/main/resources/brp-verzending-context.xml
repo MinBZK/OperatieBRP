@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <context:property-placeholder
+            ignore-resource-not-found="false"
+            location="classpath*:brp-*.properties"/>
+
+    <import resource="classpath:alg-util-common-logging.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+    <import resource="classpath:alg-util-jmx-beans.xml"/>
+
+    <task:annotation-driven/>
+    <context:component-scan base-package="nl.bzk.brp.delivery.verzending" scoped-proxy="targetClass"/>
+
+    <import resource="classpath:brp-verzending-webservice.xml"/>
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <import resource="classpath:brp-verzending-jms-consumer-afnemer-queue-beans.xml"/>
+    <import resource="classpath:brp-verzending-jms-consumer-bijh-notificatie-queue-beans.xml"/>
+    <import resource="classpath:brp-verzending-jms-consumer-vrijbericht-queue-beans.xml"/>
+    <import resource="classpath:brp-verzending-jms-producer-lo3queue-beans.xml"/>
+    <import resource="classpath:archivering-service-algemeen-context.xml"/>
+    <import resource="classpath:archivering-delivery-dal-non-jta-context.xml"/>
+    <import resource="classpath:protocollering-service-algemeen-context.xml"/>
+    <import resource="classpath:protocollering-delivery-dal-non-jta-context.xml"/>
+
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="verzending"/>
+    </bean>
+
+</beans>

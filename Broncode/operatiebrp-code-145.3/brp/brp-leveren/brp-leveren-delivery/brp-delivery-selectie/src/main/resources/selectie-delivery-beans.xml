@@ -1,0 +1,59 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+        http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <context:component-scan base-package="nl.bzk.brp.delivery.selectie.job"/>
+
+    <context:property-placeholder location="classpath*:brp-*.properties"/>
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+
+    <task:annotation-driven/>
+
+    <bean name="jobScheduler" class="nl.bzk.brp.delivery.selectie.job.SelectieRunJobScheduler"
+          lazy-init="false"/>
+
+    <bean name="jmxSupportSelectieJob" class="nl.bzk.brp.delivery.selectie.job.JmxSupportSelectieJob"
+          lazy-init="false"/>
+
+    <import resource="classpath:selectie-service-beans.xml"/>
+    <import resource="classpath:delivery-jms-selectie-publicatie-beans.xml"/>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <import resource="classpath:delivery-selectie-dataaccess-beans.xml"/>
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:maakbericht-service-beans.xml"/>
+    <import resource="classpath:delivery-algemeen-beans.xml"/>
+
+    <import resource="classpath:alg-util-jmx-beans.xml" />
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="selectie"/>
+    </bean>
+
+    <jms:listener-container container-type="default" connection-factory="jmsSelectieTaakResultaatQueueConnectionFactory"
+                            destination-type="queue"
+                            concurrency="1">
+        <jms:listener
+                destination="#{T(nl.bzk.brp.domain.internbericht.selectie.SelectieTaakQueue).SELECTIE_TAAK_RESULTAAT_QUEUE.queueNaam}"
+                ref="selectieTaakResultaatQueueMessageListener"/>
+    </jms:listener-container>
+
+    <bean id="jmsSelectieTaakResultaatQueueConnectionFactory"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsSelectieTaakResultaatQueueActiveMQConnectionFactory"/>
+        <property name="sessionCacheSize" value="1"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsSelectieTaakResultaatQueueActiveMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${brp.selectie.messagebroker.jms.client.url}"/>
+        <property name="clientIDPrefix" value="selectie-selectietaakresultaatqueue"/>
+        <property name="connectionIDPrefix" value="selectie-selectietaakresultaatqueue"/>
+        <property name="nonBlockingRedelivery" value="false"/>
+    </bean>
+</beans>

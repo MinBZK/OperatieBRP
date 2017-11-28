@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-leveren-service</artifactId>
+        <groupId>nl.bzk.brp.leveren</groupId>
+        <version>145.3</version>
+    </parent>
+    <artifactId>brp-service-afnemerindicatie</artifactId>
+    <name>BRP Service - Afnemerindicatie</name>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-algemeen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-maakbericht</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>archivering-service-algemeen</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-domain-algemeen</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-algemeen</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-xsds-for-tests</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-test-resources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp</groupId>
+                                    <artifactId>brp-koppelvlak</artifactId>
+                                    <version>${koppelvlak.versie}</version>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+                                    <includes>xsd/**/*.xsd,xsd/**/*.xml</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>brp-leveren-service</artifactId>
+        <groupId>nl.bzk.brp.leveren</groupId>
+        <version>145.3</version>
+    </parent>
+
+    <artifactId>brp-service-bevraging</artifactId>
+    <name>BRP Service - Bevraging</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-dataaccess-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-maakbericht</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-algemeen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>archivering-service-algemeen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>protocollering-service-algemeen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-domain-expressie</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-domain-berichtmodel-intern</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.algemeenbrp</groupId>
+            <artifactId>alg-util-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-aspects</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-domain-algemeen</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-algemeen</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>aspectj-maven-plugin</artifactId>
+                <version>${aspectj.plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.aspectj</groupId>
+                        <artifactId>aspectjtools</artifactId>
+                        <version>1.8.3</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <!-- De phase wordt bewust op het 'late' prepare-package gezet, zodat de aspectj weaving voor Spring
+                             geen (negatieve) invloed heeft op de cobertura coverage meting. -->
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <source>${jdk.version}</source>
+                            <target>${jdk.version}</target>
+                            <aspectLibraries>
+                                <aspectLibrary>
+                                    <groupId>org.springframework</groupId>
+                                    <artifactId>spring-aspects</artifactId>
+                                </aspectLibrary>
+                            </aspectLibraries>
+                            <sources>
+                                <source>
+                                    <basedir>${project.basedir}/src/main/java</basedir>
+                                    <includes>
+                                        <include>nl/bzk/brp/business/**/*.java</include>
+                                    </includes>
+                                </source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <context:property-placeholder location="classpath*:brp-*.properties"/>
+
+    <context:component-scan base-package="nl.bzk.brp.delivery.selectie.schrijver"/>
+
+    <import resource="classpath:selectie-service-schrijver-beans.xml"/>
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <import resource="classpath:delivery-jms-selectie-publicatie-beans.xml"/>
+    <import resource="classpath:selectie-fileaccess-delivery-beans.xml"/>
+    <import resource="classpath:brp-delivery-selectie-schrijver-gba.xml"/>
+
+    <import resource="classpath:alg-util-jmx-beans.xml"/>
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="selectie-schrijver"/>
+    </bean>
+
+    <jms:listener-container container-type="default"
+                            connection-factory="jmsSelectieSchrijfTaakQueueConnectionFactory"
+                            destination-type="queue"
+                            concurrency="${brp.selectie.schrijver.jms.concurrency}">
+        <jms:listener
+                destination="#{T(nl.bzk.brp.domain.internbericht.selectie.SelectieTaakQueue).SELECTIE_SCHRIJF_TAAK_QUEUE.queueNaam}"
+                ref="selectieSchrijfTaakQueueMessageListener"/>
+
+        <jms:listener
+                destination="#{T(nl.bzk.brp.domain.internbericht.selectie.SelectieTaakQueue).SELECTIE_MAAK_RESULTAAT_QUEUE.queueNaam}"
+                ref="maakSelectieResultaatTaakQueueMessageListener"/>
+
+        <jms:listener
+                destination="#{T(nl.bzk.brp.domain.internbericht.selectie.SelectieTaakQueue).SELECTIE_MAAK_GEEN_RESULTAAT_NETWERK_QUEUE.queueNaam}"
+                ref="maakSelectieGeenResultaatNetwerkTaakQueueMessageListener"/>
+
+    </jms:listener-container>
+
+    <bean id="jmsSelectieSchrijfTaakQueueConnectionFactory"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory"
+                  ref="jmsSelectieSchrijfTaakQueueActiveMQConnectionFactory"/>
+        <property name="sessionCacheSize" value="${brp.selectie.schrijver.jms.concurrency}"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsSelectieSchrijfTaakQueueActiveMQConnectionFactory"
+          class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${brp.selectie.messagebroker.jms.client.url}"/>
+        <property name="clientIDPrefix" value="selectie-selectieschrijftaakqueue"/>
+        <property name="connectionIDPrefix" value="selectie-selectieschrijftaakqueue"/>
+        <property name="nonBlockingRedelivery" value="false"/>
+    </bean>
+
+</beans>

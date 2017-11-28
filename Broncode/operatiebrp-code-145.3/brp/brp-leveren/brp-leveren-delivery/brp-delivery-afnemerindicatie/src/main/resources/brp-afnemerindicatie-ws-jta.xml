@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+    <bean id="atomikosSystemProperties" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject">
+            <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+                <property name="targetClass" value="java.lang.System"/>
+                <property name="targetMethod" value="getProperties"/>
+            </bean>
+        </property>
+        <property name="targetMethod" value="putAll"/>
+        <property name="arguments">
+            <props>
+                <prop key="com.atomikos.icatch.no_file">true</prop>
+                <prop key="com.atomikos.icatch.hide_init_file_path">false</prop>
+                <prop key="com.atomikos.icatch.service">com.atomikos.icatch.standalone.UserTransactionServiceFactory</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="atomikosUserTransactionService" class="com.atomikos.icatch.config.UserTransactionServiceImp" init-method="init" destroy-method="shutdownForce" depends-on="atomikosSystemProperties">
+        <constructor-arg>
+            <props>
+                <prop key="com.atomikos.icatch.max_timeout">${atomikos.max.timeout:300000}</prop>
+                <prop key="com.atomikos.icatch.default_jta_timeout">${atomikos.default.timeout:10000}</prop>
+                <prop key="com.atomikos.icatch.max_actives">${atomikos.max.actives:50}</prop>
+                <prop key="com.atomikos.icatch.enable_logging">${atomikos.enable_logging:true}</prop>
+                <prop key="com.atomikos.icatch.tm_unique_name">${atomikos.unique.name:brp-afnemerindicatie}-</prop>
+                <prop key="com.atomikos.icatch.serial_jta_transactions">true</prop>
+                <prop key="com.atomikos.icatch.force_shutdown_on_vm_exit">false</prop>
+                <prop key="com.atomikos.icatch.log_base_name">${atomikos.unique.name:brp-afnemerindicatie}-tmlog-</prop>
+                <prop key="com.atomikos.icatch.log_base_dir">${atomikos.base.dir:target/atomikos}</prop>
+                <prop key="com.atomikos.icatch.checkpoint_interval">500</prop>
+                <prop key="com.atomikos.icatch.threaded_2pc">false</prop>
+            </props>
+        </constructor-arg>
+    </bean>
+
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close" depends-on="atomikosUserTransactionService">
+        <property name="startupTransactionService" value="false"/>
+        <property name="forceShutdown" value="true"/>
+    </bean>
+
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp" depends-on="atomikosUserTransactionService">
+        <property name="transactionTimeout">
+            <value>${atomikos.default.timeout:10}</value>
+        </property>
+    </bean>
+
+</beans>
+

@@ -1,0 +1,39 @@
+
+<div ng-controller="ItemController" ng-if="!lijstZichtbaar && !jsonZichtbaar && user">
+    <div ng-form="editHoofdForm" class="form-horizontal">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <div ng-switch="status.nieuw">
+                    <div ng-switch-when="true">
+                        <h4 class="panel-title">{{titel}} toevoegen</h4>
+                    </div>
+                    <div ng-switch-default>
+                        <h4 class="panel-title" ng-if="!readonly">{{titel}} wijzigen</h4>
+                        <h4 class="panel-title" ng-if="readonly">{{titel}}</h4>
+                    </div>
+                </div>
+            </div>
+            <div class="panel-body">
+                <div ng-repeat="column in columns" ng-if="(column.toonOpBewerken && !(status.nieuw && column.nieuwReadonly))">
+                    <div class="form-group clearrow {{column.required && !((!status.nieuw && column.readonly) || (status.nieuw && column.nieuwReadonly)) ? 'required' : ''}}">
+                        <div class="col-md-2 col-sm-4 col-xs-12">
+                            <label class="text-left control-label">{{column.name}}</label>
+                        </div>
+                        <div class="col-md-{{column.breedte}} col-sm-8 col-xs-12">
+                            <brp-veld kolom="{{column}}" waarde="onderhandenitem.item" itemstatus="status"></brp-veld>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-12 btn-group btn-group-sm" role="group" ng-show="hasRole('ROLE_BRP-FB')">
+                        <a ng-click="annuleren()" ng-if="!geenSluiten" class="btn btn-default">{{!editHoofdForm.$dirty ? 'Sluiten' : 'Annuleren'}}</a>
+                        <a ng-click="opslaan(editHoofdForm)" class="btn btn-primary" ng-disabled="editHoofdForm.$invalid || !editHoofdForm.$dirty" ng-if="!readonly">Opslaan</a>
+                    </div>
+                    <div class="col-xs-12 btn-group btn-group-sm" role="group" ng-show="!hasRole('ROLE_BRP-FB')">
+                        <a ng-click="annuleren()" ng-if="!geenSluiten" class="btn btn-default">Sluiten</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

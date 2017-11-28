@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean class="nl.bzk.brp.delivery.jms.afnemer.PlaatsAfnemerBerichtServiceImpl"/>
+
+    <!-- Uitgaande berichten queue -->
+    <bean id="afnemersJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cachedConnectionFactoryAfnemers"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="defaultDestination" ref="afnemerQueue"/>
+    </bean>
+
+    <bean id="jmsConnectionFactoryAfnemers" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${brp.jms.client.url}" />
+        <property name="redeliveryPolicy">
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="0" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="cachedConnectionFactoryAfnemers"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsConnectionFactoryAfnemers"/>
+        <property name="sessionCacheSize" value="10"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsTransactionManagerAfnemers" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="cachedConnectionFactoryAfnemers" />
+    </bean>
+
+    <bean id="afnemerQueue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="#{T(nl.bzk.brp.domain.internbericht.verzendingmodel.SynchronisatieBerichtGegevensQueue).NAAM.queueNaam}"/>
+    </bean>
+</beans>

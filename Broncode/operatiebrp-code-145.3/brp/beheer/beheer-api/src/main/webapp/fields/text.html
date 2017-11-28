@@ -1,0 +1,22 @@
+<div ng-if="!((!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly))">
+    <input
+        id="{{kolom.id}}"
+        name="{{kolom.id}}"
+        ng-model="waarde[kolom.display]"
+        ng-minlength="{{kolom.minlength}}"
+        ng-maxlength="{{kolom.maxlength}}"
+        ng-pattern="{{kolom.pattern}}"
+        ng-required="{{kolom.required}}"
+        ng-readonly="(!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly)"
+        ng-trim="{{kolom.trim}}"
+        class="form-control {{((!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly)) ? 'readonly' : ''}}"/>
+    <div ng-show="editForm.$submitted || editForm[kolom.id].$touched">
+        <span ng-show="editForm[kolom.id].$error.required">Dit veld is verplicht</span>
+        <span ng-show="editForm[kolom.id].$error.minlength">Dit veld moet minimaal {{kolom.minlength}} tekens lang zijn</span>
+        <span ng-show="editForm[kolom.id].$error.maxlength">Dit veld mag maximaal {{kolom.maxlength}} tekens lang zijn</span>
+        <span ng-show="editForm[kolom.id].$error.pattern">Dit veld voldoet niet aan het verplichte patroon</span>
+    </div>
+</div>
+<div id="{{kolom.id}}" ng-if="(!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly)">
+    {{waarde[kolom.display]}}
+</div>

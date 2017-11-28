@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-extension-jaxws.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+    <import resource="classpath:brp-bijhouding-business-beans.xml"/>
+    <import resource="classpath:archivering-delivery-dal-jta-context.xml" />
+    <import resource="brp-bijhouding-ws-jta.xml"/>
+    <import resource="brp-bijhouding-jms.xml"/>
+    <import resource="brp-bijhouding-datasource.xml"/>
+    <import resource="brp-bijhouding-jmx.xml"/>
+
+    <context:annotation-config/>
+    <context:component-scan base-package="nl.bzk.brp.bijhouding.ws" />
+
+	<context:property-placeholder system-properties-mode="OVERRIDE"
+                                  location="classpath*:brp-*.properties"
+                                  ignore-resource-not-found="true" />
+
+	<bean id="wss4jOutInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+		<constructor-arg>
+			<map>
+				<entry key="action" value="Timestamp Signature" />
+				<entry key="user" value="${security.privatekey.alias}" />
+				<entry key="signaturePropRefId" value="signatureProperties" />
+				<entry key="signatureProperties">
+					<props>
+						<prop key="org.apache.ws.security.crypto.provider">org.apache.ws.security.components.crypto.Merlin</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.type">jks</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.password">${security.keystore.private.password}</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.alias">${security.privatekey.alias}</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.file">${security.keystore.private.file}</prop>
+					</props>
+				</entry>
+				<entry key="signatureKeyIdentifier" value="DirectReference"/>
+				<!--<entry key="signatureParts" value="{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp;{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body"/>-->
+				<entry key="signatureParts" value="{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body;{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp"/>
+				<entry key="passwordCallbackRef">
+                    <bean class="nl.bzk.brp.bijhouding.ws.util.ServerPasswordCallback">
+						<property name="password" value="${security.privatekey.password}" />
+					</bean>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+    <bean id="bijhoudingWebService" class="nl.bzk.brp.bijhouding.ws.BijhoudingWebService"/>
+
+    <jaxws:endpoint id="bhgAfstamming" implementor="#bijhoudingWebService"
+                    address="/bhgAfstamming" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgAfstamming">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <jaxws:endpoint id="bhgNaamGeslacht" implementor="#bijhoudingWebService"
+                    address="/bhgNaamGeslacht" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgNaamGeslacht">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <jaxws:endpoint id="bhgDocumentVerzoekMededeling" implementor="#bijhoudingWebService"
+                    address="/bhgDocumentVerzoekMededeling" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgDocumentVerzoekMededeling">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <jaxws:endpoint id="bhgHuwelijkGeregistreerdPartnerschap" implementor="#bijhoudingWebService"
+                    address="/bhgHuwelijkGeregistreerdPartnerschap" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgHuwelijkGeregistreerdPartnerschap">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <jaxws:endpoint id="bhgVerblijfAdres" implementor="#bijhoudingWebService"
+                    address="/bhgVerblijfAdres" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgVerblijfAdres">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <jaxws:endpoint id="bhgNationaliteit" implementor="#bijhoudingWebService"
+                    address="/bhgNationaliteit" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgNationaliteit">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <jaxws:endpoint id="bhgReisdocument" implementor="#bijhoudingWebService"
+                    address="/bhgReisdocument" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgReisdocument">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <jaxws:endpoint id="bhgOverlijden" implementor="#bijhoudingWebService"
+                    address="/bhgOverlijden" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgOverlijden">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <jaxws:endpoint id="bhgVerkiezingen" implementor="#bijhoudingWebService"
+                    address="/bhgVerkiezingen" xmlns:s="http://www.bzk.nl/brp/bijhouding/service"
+                    serviceName="s:BijhoudingService" endpointName="s:bhgVerkiezingen">
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+</beans>

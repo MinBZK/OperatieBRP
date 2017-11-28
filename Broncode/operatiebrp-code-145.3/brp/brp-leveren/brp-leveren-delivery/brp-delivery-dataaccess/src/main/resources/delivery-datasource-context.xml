@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+	">
+
+    <context:property-placeholder location="classpath:brp-*.properties"/>
+
+    <bean id="templateDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+          abstract="true">
+        <property name="maxWait" value="30000"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+    </bean>
+
+    <bean id="masterDataSource" parent="templateDataSource" name="masterDataSource">
+        <property name="driverClassName" value="${jdbc.master.driverClassName}"/>
+        <property name="url" value="${jdbc.master.url}"/>
+        <property name="username" value="${jdbc.master.username}"/>
+        <property name="password" value="${jdbc.master.password}"/>
+        <property name="initialSize" value="${jdbc.master.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.master.pool.maxActive:20}"/>
+        <property name="minIdle" value="${jdbc.master.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.master.pool.maxIdle:20}"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultReadOnly" value="${jdbc.readonly:false}"/>
+        <property name="minEvictableIdleTimeMillis" value="${jdbc.master.pool.minEvictableIdleTimeMillis:300000}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${jdbc.master.pool.timeBetweenEvictionRunsMillis:600000}"/>
+        <property name="defaultTransactionIsolation"
+                  value="${jdbc.transactionisolation:2}"/> <!-- default TRANSACTION_READ_COMMITTED, voor read-only: TRANSACTION_NONE = 0) -->
+    </bean>
+</beans>

@@ -1,0 +1,110 @@
+<div class="row" ng-show="lijstZichtbaar && user">
+    <div class="col-xs-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <a id="lijstzoeken" class="headingsearch" data-toggle="collapse" data-target="#collapseZoek" ng-if="filters.length > 0">Zoeken</a>
+                <h4 class="panel-title">{{titel}}</h4>
+            </div>
+            <div class="panel-body">
+                <div class="row" ng-if="filters.length > 0">
+                    <div class="col-xs-12">
+                        <div id="collapseZoek" class="panel panel-default panel-collapse collapse {{zoekenZichtbaar ? 'in' : 'out'}}">
+                            <form class="form-horizontal">
+                                <div ng-repeat="filter in filters" class="form-group form-group-sm">
+                                    <label class="col-md-3 col-sm-3 col-xs-12">{{filter.name}}</label>
+                                    <div class="col-md-6 col-sm-9 col-xs-12">
+                                        <brp-zoekveld kolom="{{filter}}" waarde="filterValues"></brp-zoekveld>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-offset-3 col-sm-6 col-xs-12 btn-group btn-group-sm">
+                                        <button ng-click="zoeken()" type="submit" class="btn btn-primary">Zoeken</button>
+                                        <button ng-click="leegMaken()" type="submit" class="btn btn-default">Leeg maken</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-3 text-left" ng-if="!geenNieuw">
+                        <a class="btn btn-default btn-sm" ng-click="nieuwItem()">Nieuw</a>
+                    </div>
+                    <div class="col-xs-3 text-left" ng-if="geenNieuw">
+                    </div>
+                    <div class="col-xs-6 text-center">
+                        <pagination class="pagination-sm" items-per-page="instelling.size" total-items="lijst.totalElements" ng-model="paginaNummer" ng-change="pagineren()" ></pagination>
+                    </div>
+                    <div class="col-xs-3 text-right">
+                        <label>Aantal per pagina:</label>
+                        <select ng-change="zoeken()" ng-model="instelling.size">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-12">
+                        <table id="table_{{titel}}" class="table {{readonly ? '' : 'table-hover'}} table-striped table-condensed table-responsive">
+                            <label>Aantal resultaten: {{lijst.totalElements}}</label>
+                            <colgroup ng-if="vastebreedte">
+                                <col ng-repeat="column in columns" ng-if="column.toonOpLijst" class="{{'col-xs-' + column.lijstbreedte}}"/>
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th ng-repeat="column in columns" ng-if="column.toonOpLijst">
+                                        <a href="" ng-click="sorteren(column.sort)" ng-if="column.sort" >{{column.name}}</a>
+                                        <span ng-if="!(column.sort)">{{column.name}}</span>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="{{'rij_' + $index}}" ng-repeat="(pi, item) in lijst.content" ng-click="viewItem($event)" class="klikbaar">
+                                    <td ng-repeat="column in columns" ng-if="column.toonOpLijst">
+                                        <brp-lijstveld id="{{column.name + '_' + pi}}" kolom='{{column}}' waarde="item"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-xs-3" ng-if="!geenNieuw">
+                        <a class="btn btn-default btn-sm" ng-click="nieuwItem()">Nieuw</a>
+                    </div>
+                    <div class="col-xs-3 text-left" ng-if="geenNieuw">
+                    </div>
+                    <div class="col-xs-6 text-center">
+                        <pagination class="pagination-sm" items-per-page="instelling.size" total-items="lijst.totalElements" ng-model="paginaNummer" ng-change="pagineren()" ></pagination>
+                    </div>
+                    <div class="col-xs-3 text-right">
+                        <label>Aantal per pagina:</label>
+                        <select ng-change="zoeken()" ng-model="instelling.size">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                            <option value="200">200</option>
+                            <option value="500">500</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12" ng-include="itemPagina"></div>
+</div>
+
+<div class="row">
+    <div class="col-xs-12" ng-include="jsonPagina"></div>
+</div>

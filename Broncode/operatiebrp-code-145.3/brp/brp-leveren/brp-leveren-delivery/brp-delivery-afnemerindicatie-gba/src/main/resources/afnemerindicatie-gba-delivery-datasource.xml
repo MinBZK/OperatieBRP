@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean name="masterDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init"
+          destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="gbaMasterDatabase"/>
+            </bean>
+        </property>
+        <property name="xaDataSourceClassName" value="${jdbc.master.database.driver:org.postgresql.xa.PGXADataSource}"/>
+        <property name="xaProperties">
+            <bean class="nl.bzk.algemeenbrp.jta.database.XAPropertiesAdapter">
+                <property name="driver" value="${jdbc.master.database.driver:org.postgresql.xa.PGXADataSource}"/>
+                <property name="host" value="${jdbc.master.database.host:localhost}"/>
+                <property name="port" value="${jdbc.master.database.port:5432}"/>
+                <property name="name" value="${jdbc.master.database.name:brp}"/>
+                <property name="user" value="${jdbc.master.username:postgres}"/>
+                <property name="password" value="${jdbc.master.password:postgres}"/>
+            </bean>
+        </property>
+        <property name="maxPoolSize" value="${brp.bevraging.database.maxpool:20}"/>
+        <property name="minPoolSize" value="${brp.bevraging.database.minpool:1}"/>
+    </bean>
+</beans>

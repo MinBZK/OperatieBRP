@@ -1,0 +1,61 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <context:property-placeholder location="classpath*:brp-*.properties"
+                                  ignore-resource-not-found="true"/>
+
+    <task:annotation-driven/>
+
+    <context:component-scan base-package="nl.bzk.brp.delivery.mutatielevering"/>
+
+    <import resource="classpath:alg-util-common-logging.xml"/>
+    <import resource="classpath:maakbericht-service-beans.xml"/>
+    <import resource="classpath:mutatielevering-service-beans.xml"/>
+    <import resource="classpath:mutatielevering-jms.xml"/>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:delivery-jms-afnemer-beans.xml"/>
+    <import resource="classpath:delivery-algemeen-beans.xml"/>
+
+    <import resource="gba-algemeen-beans.xml"/>
+    <import resource="lo3-conversie-beans.xml"/>
+
+    <aop:aspectj-autoproxy>
+        <aop:include name="timingAspect"/>
+    </aop:aspectj-autoproxy>
+
+    <bean id="timingAspect" class="org.perf4j.slf4j.aop.TimingAspect"/>
+
+    <import resource="classpath:alg-util-jmx-beans.xml"/>
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="levering"/>
+    </bean>
+
+    <bean class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+        <property name="serviceUrl" value="service:jmx:simple://0.0.0.0:${jmx.port:3481}"/>
+        <property name="environmentMap">
+            <map>
+                <entry key="jmx.remote.authenticator">
+                    <bean class="nl.bzk.algemeenbrp.util.jmx.authenticator.PropertiesAuthenticator">
+                        <constructor-arg>
+                            <props>
+                                <prop key="admin">admin</prop>
+                            </props>
+                        </constructor-arg>
+                    </bean>
+                </entry>
+                <entry key="jmx.remote.accesscontroller">
+                    <bean class="nl.bzk.algemeenbrp.util.jmx.access.AllAccessController"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+</beans>

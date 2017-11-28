@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0"
+         xmlns="http://java.sun.com/xml/ns/javaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         metadata-complete="true">
+
+    <!-- metadata-complete="true", reden gebruik zie: https://issues.apache.org/bugzilla/show_bug.cgi?id=52326 -->
+
+    <display-name>BRP Selectie</display-name>
+
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:selectie-delivery-beans.xml</param-value>
+    </context-param>
+    <context-param>
+        <param-name>log4jContextName</param-name>
+        <param-value>Selectie</param-value>
+    </context-param>
+
+    <session-config>
+        <session-timeout>60</session-timeout>
+    </session-config>
+    <welcome-file-list>
+        <welcome-file>versie.html</welcome-file>
+    </welcome-file-list>
+
+    <filter>
+        <filter-name>ParameterValidationFilter</filter-name>
+        <filter-class>com.matthewcasperson.validation.filter.ParameterValidationFilter
+        </filter-class>
+        <init-param>
+            <param-name>configFile</param-name>
+            <param-value>/WEB-INF/xml/pvf.xml</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>ParameterValidationFilter</filter-name>
+        <url-pattern>*</url-pattern>
+    </filter-mapping>
+</web-app>
