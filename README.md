@@ -6,4 +6,4 @@ Het ministerie van Binnenlandse Zaken en Koninkrijksrelaties (BZK) heeft de bron
 De broncode is gepubliceerd als open source software onder de licentievoorwaarden GNU Affero General Public License, versie 3 zoals gepubliceerd door de Free Software Foundation. 
 
 # Disclaimer
-Het Ministerie van BZK heeft zich naar beste vermogen ingespannen om de meest recente versie van de ontwikkelde programmatuur en de bijbehorende technische en functionele documentatie samen te stellen. Het Ministerie van BZK aanvaardt geen aansprakelijkheid met betrekking tot het gebruik (met inbegrip van het kopiëren, verhandelen, heruitgeven, of anderszins) van de programmatuur en documentatie
+Het Ministerie van BZK heeft zich naar beste vermogen ingespannen om de meest recente versie van de ontwikkelde programmatuur en de bijbehorende technische en functionele documentatie samen te stellen. Het Ministerie van BZK aanvaardt geen aansprakelijkheid met betrekking tot het gebruik (met inbegrip van het kopiëren, verhandelen, heruitgeven, of anderszins) van de programmatuur en documentatie.
