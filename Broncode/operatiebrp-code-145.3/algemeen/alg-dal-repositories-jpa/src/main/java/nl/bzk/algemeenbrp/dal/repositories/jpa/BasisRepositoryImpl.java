@@ -50,9 +50,9 @@ public class BasisRepositoryImpl<T, I extends Serializable> implements BasisRepo
     protected final EntityManager getEntityManager() { return entityManager; }
 
     /**
-     * Geef de waarde van entityManager.
+     * Zet de waarde van entityManager.
      *
-     * @return entityManager
+     * @param EntityManager entityManager
      */
     protected void setEntityManager(final EntityManager entityManager) {
         this.entityManager = entityManager;
