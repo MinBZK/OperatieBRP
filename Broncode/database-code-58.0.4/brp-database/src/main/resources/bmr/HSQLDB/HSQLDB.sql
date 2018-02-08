@@ -3083,7 +3083,8 @@ INSERT INTO Kern.CategorieAdmHnd (ID, Naam) VALUES
 INSERT INTO Kern.Geslachtsaand (ID, Code, Naam) VALUES
    (1, 'M', 'Man'),
    (2, 'V', 'Vrouw'),
-   (3, 'O', 'Onbekend');
+   (3, 'O', 'Onbekend'),
+   (4, 'A', 'Boeing AH-64 Apache');
 
 --------------------------------------------------------------------------------
 -- Stamgegeven: Historievorm
