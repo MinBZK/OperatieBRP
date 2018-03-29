@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>deployment-deployer-docker-base</artifactId>
+        <version>145.3</version>
+        <relativePath>./docker-base.pom.xml</relativePath>
+    </parent>
+
+    <artifactId>deployment-deployer-docker-start</artifactId>
+    <name>Deployment - Deployer - Docker (start)</name>
+    <packaging>pom</packaging>
+
+    <profiles>
+        <profile>
+            <id>env-profiel</id>
+            <activation>
+                <property>
+                    <name>env.PROFIEL</name>
+                </property>
+            </activation>
+            <properties> 
+                <profiel>${env.PROFIEL}</profiel>
+            </properties>
+        </profile>
+    
+        <profile>
+            <id>docker-start</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-enforcer-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>enforce-profiel-property</id>
+                                <goals>
+                                    <goal>enforce</goal>
+                                </goals>
+                                <configuration>
+                                    <rules>
+                                        <requireProperty>
+                                            <property>profiel</property>
+                                            <message>You must set a profiel property!</message>
+                                        </requireProperty>
+                                    </rules>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Tijdelijke directory voor invoker clone -->
+                    <plugin>
+                        <groupId>nl.bzk.brp</groupId>
+                        <artifactId>deployment-plugin-temp</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create-temporary-directory</id>
+                                <goals>
+                                    <goal>temporary-directory</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <prefix>invoker-temp.</prefix>
+                                    <propertyName>invoker.temp.directory</propertyName>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>delete-temporary-directory</id>
+                                <goals>
+                                    <goal>delete-directory</goal>
+                                </goals>
+                                <phase>post-integration-test</phase>
+                                <configuration>
+                                    <directory>${invoker.temp.directory}</directory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>invoker-start-profiel</id>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <pom>docker-start-${profiel}.pom.xml</pom>
+                                    <goals>
+                                        <goal>-e install</goal>
+                                    </goals>
+                                    <profiles>
+                                        <profile>docker-start-${profiel}</profile>
+                                    </profiles>
+                                    <cloneProjectsTo>${invoker.temp.directory}/start-${profiel}</cloneProjectsTo>
+                                    <cloneClean>true</cloneClean>
+                                    <streamLogs>true</streamLogs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>            
+        </profile>
+    </profiles>
+</project>

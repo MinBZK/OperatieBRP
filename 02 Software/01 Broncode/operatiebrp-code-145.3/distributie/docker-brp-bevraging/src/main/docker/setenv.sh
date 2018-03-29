@@ -1,0 +1,3 @@
+#!/bin/sh
+# TODO opschonen
+export ROUTERINGCENTRALE_PORT_61616_TCP_PORT=61616

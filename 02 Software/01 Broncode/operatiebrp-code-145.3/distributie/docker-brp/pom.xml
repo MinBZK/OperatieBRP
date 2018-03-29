@@ -1,0 +1,56 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>distributie-docker</artifactId>
+        <version>145.3</version>
+        <relativePath>../docker</relativePath>
+    </parent>
+
+    <artifactId>distributie-docker-brp</artifactId>
+    <packaging>pom</packaging>
+    <name>Distributie - Docker - BRP - Root POM</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.properties</groupId>
+            <artifactId>brp-test-properties</artifactId>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-docker-properties</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>nl.bzk.brp.properties</groupId>
+                                            <artifactId>brp-test-properties</artifactId>
+                                            <version>${project.version}</version>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}/dockerenv</outputDirectory>
+                                            <includes>config/brp-alles-docker.properties</includes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

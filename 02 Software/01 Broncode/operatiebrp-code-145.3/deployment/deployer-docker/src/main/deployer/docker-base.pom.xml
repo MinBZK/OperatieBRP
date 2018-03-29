@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.bzk.brp</groupId>
+    <artifactId>deployment-deployer-docker-base</artifactId>
+    <name>Deployment - Deployer - Docker (base)</name>
+    <version>145.3</version>
+    <packaging>pom</packaging>
+
+    <distributionManagement>
+        <repository>
+            <id>brpcentral</id>
+            <name>Releases</name>
+            <url>https://www.modernodam.nl/nexus3/repository/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>brpcentral</id>
+            <name>Snapshots</name>
+            <url>https://www.modernodam.nl/nexus3/repository/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+        <!-- Docker -->
+        <docker.connect />
+        <docker.tls />
+        
+        <!-- Applicatie -->
+        <image.registry />
+        <image.version>latest</image.version>
+
+        <!-- Nexus -->
+        <image.registry.skip>true</image.registry.skip>
+        <image.registry.username>${settings.servers.server.brpcentral.username}</image.registry.username>
+        <image.registry.password>${settings.servers.server.brpcentral.password}</image.registry.password>
+        <command.arguments />
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>deployment-plugin-dockerservice</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+        <extensions>
+            <extension>
+                <groupId>com.github.shyiko.servers-maven-extension</groupId>
+                <artifactId>servers-maven-extension</artifactId>
+                <version>1.3.0</version>
+            </extension>
+        </extensions>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.10</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.4.0</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>build-helper-maven-plugin</artifactId>
+                    <version>1.12</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>1.4.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-invoker-plugin</artifactId>
+                    <version>2.0.0</version>
+                    <configuration>
+                        <properties>
+                            <docker.host>${docker.host}</docker.host>
+                            <image.version>${image.version}</image.version>
+                            <image.registry>${image.registry}</image.registry>
+                            <image.registry.username>${image.registry.username}</image.registry.username>
+                            <image.registry.password>${image.registry.password}</image.registry.password>
+                            <command.arguments>${command.arguments}</command.arguments>
+                        </properties>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>nl.bzk.brp</groupId>
+                    <artifactId>deployment-plugin-dockerservice</artifactId>
+                    <version>${project.version}</version>
+                    <configuration>
+                        <registry>${image.registry}</registry>
+                        <dockerArguments>${docker.connect} ${docker.tls}</dockerArguments>
+                        <debug>false</debug>
+                        <mode>run</mode>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>nl.bzk.brp</groupId>
+                    <artifactId>deployment-plugin-temp</artifactId>
+                    <version>${project.version}</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>docker-host</id>
+            <activation>
+                <property>
+                    <name>docker.host</name>
+                </property>
+            </activation>
+            <properties>
+                <docker.connect>-H ${docker.host}</docker.connect>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>env-docker-host</id>
+            <activation>
+                <property>
+                    <name>env.DOCKER_HOST</name>
+                </property>
+            </activation>
+            <properties>
+                <docker.host>${env.DOCKER_HOST}</docker.host>
+                <docker.connect>-H ${docker.host}</docker.connect>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>docker-tls</id>
+            <activation>
+                <property>
+                    <name>docker.cert.path</name>
+                </property>
+            </activation>
+            <properties>
+                <docker.tls>--tls --tlscacert=${docker.cert.path}\ca.pem --tlscert=${docker.cert.path}\cert.pem --tlskey=${docker.cert.path}\key.pem</docker.tls>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>env-docker-tls</id>
+            <activation>
+                <property>
+                    <name>env.DOCKER_CERT_PATH</name>
+                </property>
+            </activation>
+            <properties>
+                <docker.cert.path>${env.DOCKER_CERT_PATH}</docker.cert.path>
+                <docker.tls>--tls --tlscacert=${env.DOCKER_CERT_PATH}\ca.pem --tlscert=${env.DOCKER_CERT_PATH}\cert.pem --tlskey=${env.DOCKER_CERT_PATH}\key.pem</docker.tls>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>env-image-version</id>
+            <activation>
+                <property>
+                    <name>env.IMAGE_VERSION</name>
+                </property>
+            </activation>
+            <properties>
+                <image.version>${env.IMAGE_VERSION}</image.version>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>image-registry</id>
+            <activation>
+                <property>
+                    <name>image.registry</name>
+               </property>
+            </activation>
+            <properties>
+                <image.registry.skip>false</image.registry.skip>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>env-image-registry</id>
+            <activation>
+                <property>
+                    <name>env.IMAGE_REGISTRY</name>
+                </property>
+            </activation>
+            <properties>
+                <image.registry>${env.IMAGE_REGISTRY}</image.registry>
+                <image.registry.skip>false</image.registry.skip>
+            </properties>
+        </profile>
+    </profiles>
+</project>

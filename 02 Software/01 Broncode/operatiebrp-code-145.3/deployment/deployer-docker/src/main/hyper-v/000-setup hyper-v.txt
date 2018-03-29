@@ -1,0 +1,32 @@
+voor de test gaan we een netwerk gebruiken met statische ip-nummers.
+dit om de configuratie te vergemakkelijken en herhaalbaarder te maken. Tevens werken we
+dan om het probleem heen wat optreed met certificaten die niet meer geldig zijn als het 
+ip-nummer is gewijzigd
+
+
+maak in Hyper-V een virtual network switch met de naam 'cit-dok' van het type 'internal'
+
+ga naar de network and sharing centre in Windows en edit de properties voor de 'vEthernet (cit-dok)' 
+Edit de settings voor IPv4 en zet het IP-nummer op 192.168.55.100 en het subnet mask op 255.255.255.0
+
+
+
+Het netwerk komt er als volgt uit te zien:
+
+192.168.55.100  Host machine
+192.168.55.110  Node 0 (Registry)
+192.168.55.121  Node 1 (Swarm manager)
+192.168.55.122  Node 2
+192.168.55.123  Node 3
+
+We werken met een insecure registry. Dus daar moeten wat 'speciale' settings voor gedaan worden.
+
+Zorg ervoor dat de docker 'deamon' die je gaat gebruiken om te pushen naar de registry ook de insecure registry accepteerd.
+
+{
+  "registry-mirrors": [],
+  "insecure-registries": [
+    "192.168.55.110:5000"
+  ],
+  "debug": false
+}

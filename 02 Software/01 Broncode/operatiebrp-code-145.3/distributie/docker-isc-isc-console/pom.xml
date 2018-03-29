@@ -1,0 +1,108 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>distributie-docker-isc</artifactId>
+        <version>145.3</version>
+        <relativePath>../docker-isc</relativePath>
+    </parent>
+
+    <artifactId>distributie-docker-isc-isc-console</artifactId>
+    <packaging>pom</packaging>
+    <name>Distributie - Docker - ISC - ISC Console</name>
+
+    <properties>
+        <docker.image.name>isc/isc-console</docker.image.name>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>distributie-docker-basis-tomcat-runtime</artifactId>
+            <type>pom</type>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-isc-console-webapp</artifactId>
+            <type>war</type>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-isc-console-datasource</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.algemeenbrp</groupId>
+            <artifactId>alg-webapp-jmx</artifactId>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-assembly</id>
+                                <phase>pre-integration-test</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-build</id>
+                                <phase>post-integration-test</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>docker-deploy</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-deploy</id>
+                                <phase>install</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-tag</id>
+                                <phase>install</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

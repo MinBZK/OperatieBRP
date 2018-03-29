@@ -1,0 +1,140 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="
+            http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
+            http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+
+    <id>brp</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+
+    <fileSets>
+        <fileSet>
+            <directory>src/main/brp/log4j</directory>
+            <outputDirectory>log4j</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/brp/drivers</directory>
+            <outputDirectory>drivers</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/brp/release-instructies/release ${parsedVersion.majorVersion}</directory>
+            <outputDirectory>release</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>target/brp-sql/sql</directory>
+            <outputDirectory>/sql/brp</outputDirectory>
+            <excludes>
+                <!-- handleiding niet meenemen in de software package -->
+                <exclude>**/*.pdf</exclude>
+            </excludes>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <file>
+            <source>target/brp_properties/config/brp-alles-oplevering.properties</source>
+            <destName>brp properties/brp-alles.properties</destName>
+        </file>
+    </files>
+
+    <dependencySets>
+        <!-- synchronisatie en attendering -->
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-delivery-mutatielevering:jar</include>
+            </includes>
+            <outputFileNameMapping>mutatielevering${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-delivery-synchronisatie:war</include>
+            </includes>
+            <outputFileNameMapping>synchronisatie${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-delivery-verzending:war</include>
+            </includes>
+            <outputFileNameMapping>verzending${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                 <include>nl.bzk.brp:brp-delivery-protocollering:war</include>
+            </includes>
+            <outputFileNameMapping>protocollering${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-delivery-afnemerindicatie:war</include>
+            </includes>
+            <outputFileNameMapping>afnemerindicaties${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-message-broker:war</include>
+            </includes>
+            <outputFileNameMapping>brp-message-broker${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-delivery-ah-publicatie:war</include>
+            </includes>
+            <outputFileNameMapping>ah-publicatie${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <!-- bijhouding -->
+        <dependencySet>
+            <outputDirectory>artefacten/bijhouding</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp.bijhouding:brp-bijhouding-delivery-ws:war</include>
+            </includes>
+            <outputFileNameMapping>bijhouding${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <!-- bevraging -->
+        <dependencySet>
+            <outputDirectory>artefacten/bevraging</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-delivery-bevraging:war</include>
+            </includes>
+            <outputFileNameMapping>bevraging${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <!-- beheer -->
+        <dependencySet>
+            <outputDirectory>artefacten/beheer</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp.beheer:brp-beheer-api:war</include>
+            </includes>
+            <outputFileNameMapping>beheer${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+
+    </dependencySets>
+
+</assembly>

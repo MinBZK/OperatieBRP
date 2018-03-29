@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>distributie-zip</artifactId>
+        <groupId>nl.bzk.brp</groupId>
+        <version>145.3</version>
+        <relativePath>../zip</relativePath>
+    </parent>
+
+    <artifactId>distributie-zip-test-brp-leveren</artifactId>
+    <name>Distributie - Zip - Test - BRP Leveren Test</name>
+
+    <properties>
+        <jbehave.version>4.0.1</jbehave.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>brp-api-test</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.art</groupId>
+            <artifactId>brp-docker-test</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>brp-api-testtool</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- JBehave reporting -->
+        <dependency>
+            <groupId>org.jbehave.site</groupId>
+            <artifactId>jbehave-site-resources</artifactId>
+            <version>3.1.1</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave</groupId>
+            <artifactId>jbehave-core</artifactId>
+            <version>${jbehave.version}</version>
+            <classifier>resources</classifier>
+            <type>zip</type>
+        </dependency>
+    </dependencies>
+
+    <profiles>
+        <profile>
+            <id>zip</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.10</version>
+                        <executions>
+                            <execution>
+                                <id>unpack-testcases</id>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <phase>generate-resources</phase>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>nl.bzk.brp</groupId>
+                                            <artifactId>brp-api-test</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>test-jar</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}/brp-api-test</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>nl.bzk.brp.art</groupId>
+                                            <artifactId>brp-docker-test</artifactId>
+                                            <version>${project.version}</version>
+                                            <type>test-jar</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}/brp-docker-test</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>unpack-blobs</id>
+                                <phase>generate-resources</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>make-assembly-3.1</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <finalName>brp-test-leveren</finalName>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/zip.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

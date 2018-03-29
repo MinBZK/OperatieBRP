@@ -1,0 +1,60 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.algemeenbrp</groupId>
+        <artifactId>alg-webapp</artifactId>
+        <version>145.3</version>
+        <relativePath>../alg-webapp</relativePath>
+    </parent>
+
+    <artifactId>alg-webapp-jmx</artifactId>
+    <packaging>war</packaging>
+    <name>Algemeen - Webapplicaties - JMX Server Connector</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.algemeenbrp</groupId>
+            <artifactId>alg-util-jmxagent</artifactId>
+        </dependency>
+
+        <!-- OWASP validation filter -->
+        <dependency>
+            <groupId>com.matthewcasperson</groupId>
+            <artifactId>parameter_validation_filter</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <archiveClasses>true</archiveClasses>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.eclipse.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <configuration>
+                    <jvmArgs>-Xmx1024M -Xdebug -Xnoagent -Xrunjdwp:transport=dt_socket,address=14000,server=y,suspend=y
+                    </jvmArgs>
+                    <waitForChild>true</waitForChild>
+                    <useTestScope>true</useTestScope>
+                    <webApp>
+                        <contextPath>/alg-webapp-jmx</contextPath>
+                    </webApp>
+                    <httpConnector>
+                        <port>${jetty.port}</port>
+                    </httpConnector>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

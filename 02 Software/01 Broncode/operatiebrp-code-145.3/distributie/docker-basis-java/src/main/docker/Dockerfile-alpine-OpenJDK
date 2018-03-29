@@ -1,0 +1,25 @@
+FROM alg-docker-alpine
+MAINTAINER Operatie BRP
+
+LABEL nl.brp.bzk.applicatie=java
+
+ENV JAVA_VERSION=7u91 \
+    JAVA_ALPINE_VERSION=7.91.2.6.3-r1 \
+    JAVA_HOME=/usr/lib/jvm/java-1.7-openjdk/jre
+
+# Install OpenJDK Java 7 and check the JAVA_HOME is set correctly
+    
+RUN set -x \
+    && apk upgrade --update \
+    && apk add --update \
+       openjdk7-jre="$JAVA_ALPINE_VERSION" \
+    && rm -rf /var/cache/apk/* \
+    && { \
+          echo '#!/bin/sh'; \
+          echo 'set -e'; \
+          echo; \
+          echo 'dirname "$(dirname "$(readlink -f "$(which javac || which java)")")"'; \
+       } > /usr/local/bin/check-java-home.sh \
+    && chmod +x /usr/local/bin/check-java-home.sh \
+    && [ "$JAVA_HOME" = "$(check-java-home.sh)" ] \
+    && rm /usr/local/bin/check-java-home.sh

@@ -1,0 +1,53 @@
+docker-machine create cit-dok-00 --driver hyperv --hyperv-memory 4096 --hyperv-cpu-count 1 --hyperv-virtual-switch cit-dok
+
+
+(dit hangt (bij de stap 'Waiting for SSH to be available...') of crashed : dit is niet erg, 
+omdat docker-machine niet goed kan connecten met de virtual machine.
+We doen de eerste stap direct op de virtual machine en daarna connect het wel goed)
+
+
+in de virtual machine connection (die staat ingelogd als root op de boot2docker)
+
+sudo vi /var/lib/boot2docker/bootsync.sh
+
+#!/bin/sh
+/etc/init.d/services/dhcp stop
+ifconfig eth0 192.168.55.110 netmask 255.255.255.0 broadcast 192.168.55.255 up
+
+sudo chmod 755 /var/lib/boot2docker/bootsync.sh
+
+
+Nu buiten de virtual machine via docker-machine de boel herstarten (nu connect docker-machine wel aan de virtual machine)
+
+docker-machine restart cit-dok-00
+
+
+
+en nieuwe certificaten voor het nieuwe IP nummer genereren (dit completeert ook de rest van de 
+configuratie die niet is uitgevoerd door de crash aan het begin)
+
+docker-machine regenerate-certs -f cit-dok-00
+
+
+
+
+
+docker-machine create cit-dok-01 --driver hyperv --hyperv-memory 4096 --hyperv-cpu-count 2 --hyperv-virtual-switch cit-dok --engine-insecure-registry=192.168.55.110:5000
+
+Geef deze machine het ip-nummer 192.168.55.121
+
+
+
+docker-machine create cit-dok-02 --driver hyperv --hyperv-memory 4096 --hyperv-cpu-count 2 --hyperv-virtual-switch cit-dok --engine-insecure-registry=192.168.55.110:5000
+
+Geef deze machine het ip-nummer 192.168.55.122
+
+
+
+
+docker-machine create cit-dok-03 --driver hyperv --hyperv-memory 4096 --hyperv-cpu-count 2 --hyperv-virtual-switch cit-dok --engine-insecure-registry=192.168.55.110:5000
+
+Geef deze machine het ip-nummer 192.168.55.123
+
+
+

@@ -1,0 +1,20 @@
+op cit-dok-00.modernodam.nl
+
+docker run --name consul -d -p 8500:8500 -h consul progrium/consul -server -bootstrap
+
+
+
+op cit-dok-xx.modernodam.nl (01, 02, 03, 05, 06, 07 en 08)
+
+sudo -i
+
+cd /etc/systemd/system/docker.service.d
+vi override.conf
+
+--cluster-advertise eno16777984:2375 --cluster-store consul://cit-dok-00.modernodam.nl:8500 
+
+systemctl daemon-reload
+systemctl restart docker
+
+exit
+exit

@@ -1,0 +1,79 @@
+docker-machine create cit-dok-00 --driver hyperv --hyperv-memory 1024 --hyperv-cpu-count 1 --hyperv-virtual-switch cit-dok --engine-insecure-registry=192.168.55.110:5000
+
+(dit hangt (bij de stap 'Waiting for SSH to be available...') of crashed : dit is niet erg, 
+omdat docker-machine niet goed kan connecten met de virtual machine.
+We doen de eerste stap direct op de virtual machine en daarna connect het wel goed)
+
+in de virtual machine connection (die staat ingelogd als root op de boot2docker)
+
+sudo vi /var/lib/boot2docker/bootsync.sh
+
+#!/bin/sh
+/etc/init.d/services/dhcp stop
+ifconfig eth0 192.168.55.110 netmask 255.255.255.0 broadcast 192.168.55.255 up
+
+sudo chmod 755 /var/lib/boot2docker/bootsync.sh
+
+
+Nu buiten de virtual machine via docker-machine de boel herstarten (nu connect docker-machine wel aan de virtual machine)
+
+docker-machine restart cit-dok-00
+
+
+en nieuwe certificaten voor het nieuwe IP nummer genereren
+
+docker-machine regenerate-certs -f cit-dok-00
+
+
+en de rest van de configuratie die niet is uitgevoerd door de crash aan het begin 
+
+docker-machine provision cit-dok-00
+
+
+op de cit-dok-00 machine dient een key-value store te draaien waarvan de nodes die tesamen het cluster vormen gebruik van kunnen maken
+
+docker pull progrium/consul
+docker pull registry
+docker save -o docker-cluster-consul.tar progrium/consul
+docker save -o docker-cluster-registry.tar registry
+
+@FOR /f "tokens=*" %i IN ('docker-machine env cit-dok-00') DO @%i
+docker load -i docker-cluster-consul.tar
+docker load -i docker-cluster-registry.tar
+docker run --name consul -d -p 8500:8500 -h consul progrium/consul -server -bootstrap
+@FOR /f "tokens=*" %i IN ('docker-machine env --unset') DO @%i
+
+
+
+
+
+docker-machine create cit-dok-01 --driver hyperv --hyperv-memory 4096 --hyperv-cpu-count 2 --hyperv-virtual-switch cit-dok --engine-insecure-registry=192.168.55.110:5000 --engine-opt="cluster-store=consul://192.168.55.110:8500" --engine-opt="cluster-advertise=eth0:2376"
+
+Geef deze machine het ip-nummer 192.168.55.121
+
+docker-machine restart cit-dok-01
+docker-machine regenerate-certs -f cit-dok-01
+docker-machine provision cit-dok-01
+
+
+
+
+docker-machine create cit-dok-02 --driver hyperv --hyperv-memory 4096 --hyperv-cpu-count 2 --hyperv-virtual-switch cit-dok --engine-insecure-registry=192.168.55.110:5000 --engine-opt="cluster-store=consul://192.168.55.110:8500" --engine-opt="cluster-advertise=eth0:2376"
+
+Geef deze machine het ip-nummer 192.168.55.122
+
+docker-machine restart cit-dok-02
+docker-machine regenerate-certs -f cit-dok-02
+docker-machine provision cit-dok-02
+
+
+
+
+docker-machine create cit-dok-03 --driver hyperv --hyperv-memory 4096 --hyperv-cpu-count 2 --hyperv-virtual-switch cit-dok --engine-insecure-registry=192.168.55.110:5000 --engine-opt="cluster-store=consul://192.168.55.110:8500" --engine-opt="cluster-advertise=eth0:2376"
+
+Geef deze machine het ip-nummer 192.168.55.123
+
+docker-machine restart cit-dok-03
+docker-machine regenerate-certs -f cit-dok-03
+docker-machine provision cit-dok-03
+

@@ -1,0 +1,126 @@
+REM
+REM We gaan de ISC databases draaien op CIT-DOK-01
+REM
+
+echo DATABASES (ISC)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-01.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=isc-routeringdatabase
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-01.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=isc-voiscdatabase
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-01.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=isc-iscdatabase
+
+
+
+REM
+REM We gaan de BRP databases draaien op CIT-DOK-02
+REM
+
+echo DATABASES (BRP)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-02.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-database
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-02.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-archiveringdatabase
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-02.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-protocolleringdatabase
+
+REM
+REM We gaan de tooling databases draaien op CIT-DOK-03
+REM
+echo LOGGING
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-03.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=logging-elasticsearch
+
+echo DATABASES (Tools)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-03.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=migr-mailboxdatabase
+
+
+
+REM
+REM We gaan de logging en tooling draaien op CIT-DOK-07
+REM
+
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-07.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=logging-logstash
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-07.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=migr-mailbox
+
+
+REM
+REM We gaan ISC messaging draaien op CIT-DOK-05
+REM
+
+echo MESSAGING (ISC)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-05.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=isc-routering
+
+
+
+REM
+REM We gaan BRP messaging draaien op CIT-DOK-06
+REM
+
+echo MESSAGING (BRP)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-messagebroker
+
+
+
+REM
+REM We gaan ISC draaien op CIT-DOK-05
+REM
+
+echo ISC
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-05.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=isc-synchronisatie
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-05.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=isc-voisc
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-05.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=isc-isc
+
+
+
+REM
+REM We gaan BRP draaien op CIT-DOK-06
+REM
+
+echo BRP
+
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-sleutelbos
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-admhnd-publicatie
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-afnemerindicaties
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-bevraging
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-bijhouding
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-gbacentrale
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-mutatielevering
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-protocollering
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-synchronisatie
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-06.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-verzending
+
+
+
+REM
+REM We gaan de beheer applicaties draaien op CIT-DOK-08
+REM
+
+echo LOGGING
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-08.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=logging-kibana
+
+echo ISC-MANAGEMENT
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-08.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=isc-iscconsole
+
+echo BRP-MANAGEMENT
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=-H cit-dok-08.modernodam.nl:2375" -Dregistry=cit-dok-00.modernodam.nl:5000/ -Dservice=brp-beheer
+
+
+
+
+REM
+REM Controle
+REM
+echo CONTROLE CIT-DOK-01
+docker -H cit-dok-01.modernodam.nl:2375 ps -a
+
+echo CONTROLE CIT-DOK-02
+docker -H cit-dok-02.modernodam.nl:2375 ps -a
+
+echo CONTROLE CIT-DOK-03
+docker -H cit-dok-03.modernodam.nl:2375 ps -a
+
+echo CONTROLE CIT-DOK-05
+docker -H cit-dok-05.modernodam.nl:2375 ps -a
+
+echo CONTROLE CIT-DOK-06
+docker -H cit-dok-06.modernodam.nl:2375 ps -a
+
+echo CONTROLE CIT-DOK-07
+docker -H cit-dok-07.modernodam.nl:2375 ps -a
+
+echo CONTROLE CIT-DOK-08
+docker -H cit-dok-08.modernodam.nl:2375 ps -a

@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 18-05-2017 -->
+<!-- -->
+<!-- Wijzigingen: -->
+<!-- 1) Berichtspecificaties 'RegistreerOnderzoek' uitgebreid met AH 'Registratie niet aangetroffen op adres' -->
+<!-- 2) Berichtspecificaties 'CorrigeerOnderzoek' toegevoegd. -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020005">
+	<include schemaLocation="brp0200_bhgOnderzoek_Basis.xsd"/>
+	<element name="bhg_ondRegistreerOnderzoek" type="brp:Bijhouding_RegistreerOnderzoek_Onderzoek"/>
+	<element name="bhg_ondRegistreerOnderzoek_R" type="brp:BijhoudingResultaat_Onderzoek_RegistreerOnderzoek_Onderzoek"/>
+	<element name="bhg_ondCorrigeerOnderzoek" type="brp:Bijhouding_CorrigeerOnderzoek_Onderzoek"/>
+	<element name="bhg_ondCorrigeerOnderzoek_R" type="brp:BijhoudingResultaat_Onderzoek_CorrigeerOnderzoek_Onderzoek"/>
+	<!-- -->
+	<!-- Bericht Registreer onderzoek -->
+	<complexType name="Bijhouding_RegistreerOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="aanvangOnderzoek" type="brp:Handeling_AanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="wijzigingOnderzoek" type="brp:Handeling_WijzigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="registratieNietAangetroffenOpAdres" type="brp:Handeling_RegistratieNietAangetroffenOpAdres_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="beeindigingOnderzoek" type="brp:Handeling_BeeindigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling Aanvang onderzoek  -->
+	<complexType name="Handeling_AanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Handeling_AanvangOnderzoek">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_AanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling Wijziging onderzoek  -->
+	<complexType name="Handeling_WijzigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Handeling_WijzigingOnderzoek">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_WijzigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling_Registratie niet aangetroffen op adres  -->
+	<complexType name="Handeling_RegistratieNietAangetroffenOpAdres_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Handeling_RegistratieNietAangetroffenOpAdres">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_RegistratieNietAangetroffenOpAdres_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling Beeindiging onderzoek  -->
+	<complexType name="Handeling_BeeindigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Handeling_BeeindigingOnderzoek">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_BeeindigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- BijhoudingResultaat RegistreerOnderzoek -->
+	<complexType name="BijhoudingResultaat_Onderzoek_RegistreerOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="aanvangOnderzoek" type="brp:Handeling_AanvangOnderzoek_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="wijzigingOnderzoek" type="brp:Handeling_WijzigingOnderzoek_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="registratieNietAangetroffenOpAdres" type="brp:Handeling_RegistratieNietAangetroffenOpAdres_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="beeindigingOnderzoek" type="brp:Handeling_BeeindigingOnderzoek_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Bericht Corrigeer Onderzoek -->
+	<complexType name="Bijhouding_CorrigeerOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="correctieOnderzoek" type="brp:Handeling_CorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>					
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling Correctie onderzoek  -->
+	<complexType name="Handeling_CorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Handeling_CorrectieOnderzoek">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenRechtsgrondcodeAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_CorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- BijhoudingResultaat RegistreerOnderzoek -->
+	<complexType name="BijhoudingResultaat_Onderzoek_CorrigeerOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="correctieOnderzoek" type="brp:Handeling_CorrectieOnderzoek_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

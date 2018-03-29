@@ -1,0 +1,95 @@
+REM
+REM We gaan de logging en de databases draaien op CIT-DOK-01
+REM
+
+set DOCKER_CERT_PATH_CIT_DOK_01=%USERPROFILE%\.docker\machine\machines\cit-dok-01
+set DOCKER_TLS_CIT_DOK_01=--tls --tlscacert=%DOCKER_CERT_PATH_CIT_DOK_01%\ca.pem --tlscert=%DOCKER_CERT_PATH_CIT_DOK_01%\cert.pem --tlskey=%DOCKER_CERT_PATH_CIT_DOK_01%\key.pem
+set DOCKER_ARGS_CIT_DOK_01=-H 192.168.55.121:2376 %DOCKER_TLS_CIT_DOK_01%
+
+echo LOGGING
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=logging-elasticsearch
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=logging-logstash
+
+
+echo DATABASES (ISC)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=migr-mailboxdatabase
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=isc-routeringdatabase
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=isc-voiscdatabase
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=isc-iscdatabase
+
+echo DATABASES (BRP)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-database
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-archiveringdatabase
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_01%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-protocolleringdatabase
+
+
+
+REM
+REM We gaan de messaging en de mailbox draaien op CIT-DOK-02
+REM
+
+set DOCKER_CERT_PATH_CIT_DOK_02=%USERPROFILE%\.docker\machine\machines\cit-dok-02
+set DOCKER_TLS_CIT_DOK_02=--tls --tlscacert=%DOCKER_CERT_PATH_CIT_DOK_02%\ca.pem --tlscert=%DOCKER_CERT_PATH_CIT_DOK_02%\cert.pem --tlskey=%DOCKER_CERT_PATH_CIT_DOK_02%\key.pem
+set DOCKER_ARGS_CIT_DOK_02=-H 192.168.55.122:2376 %DOCKER_TLS_CIT_DOK_02%
+
+echo MESSAGING (ISC)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_02%" -Dregistry=192.168.55.110:5000/ -Dservice=migr-mailbox
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_02%" -Dregistry=192.168.55.110:5000/ -Dservice=isc-routering
+
+echo MESSAGING (BRP)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_02%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-messagebroker
+
+
+
+REM
+REM We gaan de applicaties draaien op CIT-DOK-03
+REM
+
+set DOCKER_CERT_PATH_CIT_DOK_03=%USERPROFILE%\.docker\machine\machines\cit-dok-03
+set DOCKER_TLS_CIT_DOK_03=--tls --tlscacert=%DOCKER_CERT_PATH_CIT_DOK_03%\ca.pem --tlscert=%DOCKER_CERT_PATH_CIT_DOK_03%\cert.pem --tlskey=%DOCKER_CERT_PATH_CIT_DOK_03%\key.pem
+set DOCKER_ARGS_CIT_DOK_03=-H 192.168.55.123:2376 %DOCKER_TLS_CIT_DOK_03%
+
+echo ISC
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=isc-synchronisatie
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=isc-voisc
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=isc-isc
+
+echo BRP
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-sleutelbos
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-admhnd-publicatie
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-afnemerindicaties
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-bevraging
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-bijhouding
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-gbacentrale
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-mutatielevering
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-protocollering
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-synchronisatie
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_03%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-verzending
+
+
+
+REM
+REM We gaan de beheer applicaties draaien op CIT-DOK-02
+REM
+
+echo LOGGING
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_02%" -Dregistry=192.168.55.110:5000/ -Dservice=logging-kibana
+
+echo ISC-MANAGEMENT
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_02%" -Dregistry=192.168.55.110:5000/ -Dservice=isc-iscconsole
+
+echo BRP-MANAGEMENT
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single "-DdockerArguments=%DOCKER_ARGS_CIT_DOK_02%" -Dregistry=192.168.55.110:5000/ -Dservice=brp-beheer
+
+
+REM
+REM Controle
+REM
+echo CONTROLE CIT-DOK-01
+docker %DOCKER_ARGS_CIT_DOK_01% ps -a
+
+echo CONTROLE CIT-DOK-02
+docker %DOCKER_ARGS_CIT_DOK_02% ps -a
+
+echo CONTROLE CIT-DOK-01
+docker %DOCKER_ARGS_CIT_DOK_03% ps -a

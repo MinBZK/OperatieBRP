@@ -1,0 +1,219 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 07-04-2017 -->
+<!-- ... -->
+<!-- Wijzigingen: -->
+<!-- 1) Wijzigingen administratieve handelingen: -->
+<!--	- 'Wijziging geslachtsnaam' wordt 'Wijziging naam'-->
+<!--	- 'Wijziging voornaam' vervalt -->
+<!-- 	- 'Correctie naamsgegevens' wordt 'Correctie naam' -->
+<!-- 2) Naamgevingconventies complexTypes doorgevoerd; XSD-verbetering -->
+<!-- 3) Nadere uitwerking administraieve handelingen: -->
+<!-- 	- Wijziging/Correctie naam -->
+<!-- 	- Wijziging/Correctie geslachtsaanduiding -->	
+<!-- 	- Wijziging/Correctie naamgebruik -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020004">
+	<include schemaLocation="brp0200_bhgNaamGeslacht_Basis.xsd"/>
+	<element name="bhg_nmgRegistreerNaamGeslacht" type="brp:Bijhouding_RegistreerNaamGeslacht_NamGsl"/>
+	<element name="bhg_nmgRegistreerNaamGeslacht_R" type="brp:BijhoudingResultaat_RegistreerNaamGeslacht_NamGsl"/>
+	<element name="bhg_nmgCorrigeerNaamGeslacht" type="brp:Bijhouding_CorrigeerNaamGeslacht_NamGsl"/>
+	<element name="bhg_nmgCorrigeerNaamGeslacht_R" type="brp:BijhoudingResultaat_CorrigeerNaamGeslacht_NamGsl"/>
+	<!-- ... -->
+	<!-- Bijhoudingsbericht RegistreerNaamGeslacht -->
+	<complexType name="Bijhouding_RegistreerNaamGeslacht_NamGsl">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="wijzigingNaam" type="brp:Handeling_WijzigingNaam_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="wijzigingGeslachtsaanduiding" type="brp:Handeling_WijzigingGeslachtsaanduiding_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="wijzigingNaamgebruik" type="brp:Handeling_WijzigingNaamgebruik_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling WijzigingGeslachtsnaam -->
+	<complexType name="Handeling_WijzigingNaam_NamGsl">
+		<complexContent>
+			<restriction base="brp:Handeling_WijzigingNaam">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bezienVanuitPersonen" type="brp:Container_AdministratieveHandelingBezienVanuitPersonen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_WijzigingNaam_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling WijzigingGeslachtsaanduiding -->
+	<complexType name="Handeling_WijzigingGeslachtsaanduiding_NamGsl">
+		<complexContent>
+			<restriction base="brp:Handeling_WijzigingGeslachtsaanduiding">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bezienVanuitPersonen" type="brp:Container_AdministratieveHandelingBezienVanuitPersonen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_WijzigingGeslachtsaanduiding_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling WijzigingNaamgebruik -->
+	<complexType name="Handeling_WijzigingNaamgebruik_NamGsl">
+		<complexContent>
+			<restriction base="brp:Handeling_WijzigingNaamgebruik">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_WijzigingNaamgebruik_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Bijhoudingsresultaatbericht RegistreerNaamGeslacht -->
+	<complexType name="BijhoudingResultaat_RegistreerNaamGeslacht_NamGsl">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="wijzigingNaam" type="brp:Handeling_WijzigingNaam_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="wijzigingGeslachtsaanduiding" type="brp:Handeling_WijzigingGeslachtsaanduiding_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="wijzigingNaamgebruik" type="brp:Handeling_WijzigingNaamgebruik_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Bijhoudingsbericht CorrigeerNaamGeslacht-->
+	<complexType name="Bijhouding_CorrigeerNaamGeslacht_NamGsl">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="correctieNaam" type="brp:Handeling_CorrectieNaam_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="correctieGeslachtsaanduiding" type="brp:Handeling_CorrectieGeslachtsaanduiding_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="correctieNaamgebruik" type="brp:Handeling_CorrectieNaamgebruik_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling CorrectieNaam -->
+	<complexType name="Handeling_CorrectieNaam_NamGsl">
+		<complexContent>
+			<restriction base="brp:Handeling_CorrectieNaam">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_CorrectieNaam_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling CorrectieGesslachtsaanduiding -->
+	<complexType name="Handeling_CorrectieGeslachtsaanduiding_NamGsl">
+		<complexContent>
+			<restriction base="brp:Handeling_CorrectieGeslachtsaanduiding">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_CorrectieGeslachtsaanduiding_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling CorrectieNaamgebruik -->
+	<complexType name="Handeling_CorrectieNaamgebruik_NamGsl">
+		<complexContent>
+			<restriction base="brp:Handeling_CorrectieNaamgebruik">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenAkteDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_CorrectieNaamgebruik_NamGsl" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Bijhoudingsresultaatbericht CorrigeerNaamGeslacht -->
+	<complexType name="BijhoudingResultaat_CorrigeerNaamGeslacht_NamGsl">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="correctieNaam" type="brp:Handeling_CorrectieNaam_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="correctieGeslachtsaanduiding" type="brp:Handeling_CorrectieGeslachtsaanduiding_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="correctieNaamgebruik" type="brp:Handeling_CorrectieNaamgebruik_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

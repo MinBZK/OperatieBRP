@@ -1,0 +1,1 @@
+psql -d voisc -U migratie -W -f voisc_mailbox.sql

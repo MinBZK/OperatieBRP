@@ -1,0 +1,1 @@
+for /f %%i in ('docker volume ls -q') do docker volume rm %%i

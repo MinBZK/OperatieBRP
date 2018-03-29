@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>deployment-deployer-docker-base</artifactId>
+        <version>145.3</version>
+        <relativePath>./docker-base.pom.xml</relativePath>
+    </parent>
+
+    <artifactId>deployment-deployer-docker-install-tar</artifactId>
+    <name>Deployment - Deployer - Docker (install - tar)</name>
+    <packaging>pom</packaging>
+
+    <build>
+        <defaultGoal>clean install</defaultGoal>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>docker-install</id>
+            <build>
+                <plugins>
+                    <!-- Network -->
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-create-network</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <commandlineArgs>${docker.connect} ${docker.tls} network create -d ${network.type} --subnet=10.13.1.0/24 brp</commandlineArgs>
+                                    <successCodes>
+                                        <successCode>0</successCode>
+                                        <!-- Error negeren als netwerk al bestaat -->
+                                        <successCode>1</successCode>
+                                    </successCodes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <!-- Tijdelijke directory voor invoker clone -->
+                    <plugin>
+                        <groupId>nl.bzk.brp</groupId>
+                        <artifactId>deployment-plugin-temp</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create-temporary-directory</id>
+                                <goals>
+                                    <goal>temporary-directory</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <prefix>invoker-temp.</prefix>
+                                    <propertyName>invoker.temp.directory</propertyName>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>delete-temporary-directory</id>
+                                <goals>
+                                    <goal>delete-directory</goal>
+                                </goals>
+                                <phase>post-integration-test</phase>
+                                <configuration>
+                                    <directory>${invoker.temp.directory}</directory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>invoker-install-load</id>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <pom>docker-install-load.pom.xml</pom>
+                                    <goals>
+                                        <goal>-U install -Pdocker-install-load -Dapplication.version=${application.version}</goal>
+                                    </goals>
+                                    <cloneProjectsTo>${invoker.temp.directory}/install-load</cloneProjectsTo>
+                                    <cloneClean>true</cloneClean>
+                                    <streamLogs>true</streamLogs>
+                                </configuration>
+                            </execution>
+                            
+                            <execution>
+                                <id>invoker-install-registry</id>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                                <configuration>
+                                    <pom>docker-install-registry.pom.xml</pom>
+                                    <goals>
+                                        <goal>install -Pdocker-install-registry</goal>
+                                    </goals>
+                                    <cloneProjectsTo>${invoker.temp.directory}/install-registry</cloneProjectsTo>
+                                    <cloneClean>true</cloneClean>
+                                    <streamLogs>true</streamLogs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

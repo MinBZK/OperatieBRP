@@ -1,0 +1,54 @@
+<!-- Voorbeeldbericht BRPXML bijhouding vanuit ISC - "Overlijden" - versie 2.4 dd. 2016-08-19-->
+<!-- ... -->
+<!-- Casus: -->
+<!-- -  Voor Maria da Silva; bsn: 238651974 wordt Tb02-bericht ontvangen ivm Overlijden op 2015-07-03 (akte is 2.A of 2.G)-->
+<!-- ... -->
+<!-- Aannames/uitgangspunten: -->
+<!-- 1) Geen parameter BZVU-persoon nodig; bijhouding obv TS Persoon, zoals bijgelezen door ISC. Kan wel cf. berichtspecificaties; na definitieve besluit obv PoC verder restricten -->
+<!-- 5) Via Tb02 kunnen ook buitenlandsePlaats/Landcode anders dan NL worden doorgegeven; of dit in de praktijk ook kan nader af te stemmen -->
+<!-- ... -->
+<!-- Wijzigingen t.o.v. v2.1/2.2/2.3: -->
+<!-- 1) Wijziging waarde attribuut'objecttype' bij element 'bron'; dit is nu 'AdministratieveHandelingBron' ipv 'ActieBron'. -->
+<!-- 2) Besluit granulariteit ISC-handelingen doorgevoerd; aanpassing naam AH naar 'GBA Overlijden in Nederland'. -->
+<!-- 3) Enkele tekstuele aanpassingen -->
+<!-- 4) Element 'Datum aanvang geldigheid' vervallen bij Acties die alleen FH-groepen raken. -->
+<!-- 5) Inhoud zendende partij is geen constante meer, maar code van de feitgemeente -->
+<!-- 6) LandGebiedcode niet meer in bericht; wordt automatisch afgeleid door BRP. -->
+<!-- 7) Element 'identificatie' verwijderd uit objecttype Document -->
+<!-- -->
+<brp:isc_migRegistreerOverlijden xmlns:brp="http://www.bzk.nl/brp/brp0200" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bzk.nl/brp/brp0200 ../xsd/brp0200_iscMigratievoorziening_Berichten.xsd">
+	<brp:stuurgegevens brp:communicatieID="identificatie00B">
+		<brp:zendendePartij>053001</brp:zendendePartij> <!-- Partijcode van de Feitgemeente waar het Tb02 bericht vandaan komt -->
+		<brp:zendendeSysteem>ISC</brp:zendendeSysteem> <!-- Constante -->
+		<brp:referentienummer>88409eeb-1aa5-43fc-8614-43055123a165</brp:referentienummer> <!-- Door ISC te bepalen referentienummer -->
+		<brp:tijdstipVerzending>2015-07-02T15:32:03.234+02:00</brp:tijdstipVerzending> <!-- Tijdstip waarop ISC het bericht aanmaakt -->
+	</brp:stuurgegevens>
+	<brp:parameters brp:communicatieID="identificatie01B">
+		<brp:verwerkingswijze>Bijhouding</brp:verwerkingswijze> <!-- Constante -->
+	</brp:parameters>
+	<brp:gBAOverlijdenInNederland brp:objecttype="AdministratieveHandeling" brp:communicatieID="identificatie02B">
+		<brp:partijCode>053001</brp:partijCode> <!-- Gemeente waar het Tb02 bericht vandaan komt -->
+		<brp:bronnen>
+			<brp:bron brp:objecttype="AdministratieveHandelingBron" brp:communicatieID="Bron1">
+				<brp:document brp:objecttype="Document" brp:communicatieID="identificatie03B">
+					<brp:soortNaam>Historie conversie</brp:soortNaam> <!-- Verplicht BRP -->
+					<brp:aktenummer>2AA0001</brp:aktenummer> <!-- 01.81.20 (Aktenummer) -->
+					<brp:partijCode>053001</brp:partijCode> <!-- 01.81.10 (Registergemeente akte) -->
+				</brp:document>
+			</brp:bron>
+		</brp:bronnen>
+		<brp:acties>
+			<brp:registratieOverlijden brp:objecttype="Actie" brp:communicatieID="identificatie04B">
+				<brp:bronnen>
+					<brp:bron brp:objecttype="ActieBron" brp:referentieID="Bron1" brp:communicatieID="identificatie05B"/>
+				</brp:bronnen>
+				<brp:persoon brp:objecttype="Persoon" brp:objectSleutel="VersleuteldPersoon01" brp:communicatieID="identificatie06B">
+					<brp:overlijden brp:communicatieID="identificatie07B">
+						<brp:datum>2015-07-03</brp:datum> <!-- 06.08.10 Datum overlijden en 01.85.10 (Ingangsdatum geldigheid)  -->
+						<brp:gemeenteCode>0530</brp:gemeenteCode> <!-- 06.08.20 Plaats overlijden -->
+					</brp:overlijden>
+				</brp:persoon>
+			</brp:registratieOverlijden>
+		</brp:acties>
+	</brp:gBAOverlijdenInNederland>
+</brp:isc_migRegistreerOverlijden>

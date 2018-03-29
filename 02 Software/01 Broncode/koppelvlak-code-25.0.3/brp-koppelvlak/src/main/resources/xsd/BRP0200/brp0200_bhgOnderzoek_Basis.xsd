@@ -1,0 +1,585 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 18-05-2017 -->
+<!-- -->
+<!-- Wijzigingen: -->
+<!-- 1) Aanpassing Wijziging onderzoek; alleen status nog wijzigbaar. Overige via Correctie onderzoek -->
+<!-- 2) Aanpassing Beeindiging onderzoek; alleen datum einde nog wijzigbaar. Overige via Correctie onderzoek -->
+<!-- 3) Toevoeging specificaties 'Registratie niet aangetroffen op adres' en 'Correctie onderzoek' -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020006">
+	<include schemaLocation="brp0200_brpBijhouding_Basis.xsd"/>
+	<!-- ... -->
+	<!-- Container Acties Aanvang onderzoek -->
+	<complexType name="Container_Handeling_Acties_AanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_AanvangOnderzoek">
+				<sequence>
+					<element name="registratieAanvangOnderzoek" type="brp:Actie_RegistratieAanvangOnderzoekAanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Actie Registratie aanvang onderzoek -->
+	<complexType name="Actie_RegistratieAanvangOnderzoekAanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieAanvangOnderzoek">
+				<sequence>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieAanvangOnderzoekAanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieAanvangOnderzoekAanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="onderzoeken" type="brp:Container_PersoonOnderzoekenAanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonOnderzoekenAanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_PersoonOnderzoeken">
+				<sequence>
+					<element name="onderzoek" type="brp:Objecttype_PersoonOnderzoekAanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonOnderzoekAanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Onderzoek">
+				<sequence>
+					<element name="onderzoek" type="brp:Groep_OnderzoekOnderzoekAanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="gegevensInOnderzoek" type="brp:Container_OnderzoekGegevensInOnderzoekAanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Onderzoek"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_OnderzoekOnderzoekAanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Groep_OnderzoekOnderzoek">
+				<sequence>
+					<element name="datumAanvang" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="omschrijving" type="brp:OnderzoekOmschrijving" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_OnderzoekGegevensInOnderzoekAanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_OnderzoekGegevensInOnderzoek">
+				<sequence>
+					<element name="gegevenInOnderzoek" type="brp:Objecttype_GegevenInOnderzoekAanvangOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="unbounded" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_GegevenInOnderzoekAanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_GegevenInOnderzoek">
+				<sequence>
+					<element name="elementNaam" type="brp:NaamEnumeratiewaardeLang" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="objectSleutelGegeven" type="brp:Sleutelwaardetekst" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="voorkomenSleutelGegeven" type="brp:Sleutelwaardetekst" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="GegevenInOnderzoek"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonOnderzoekPersoonAanvangOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence/>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Container Acties Wijziging onderzoek -->
+	<complexType name="Container_Handeling_Acties_WijzigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_WijzigingOnderzoek">
+				<sequence>
+					<element name="registratieWijzigingOnderzoek" type="brp:Actie_RegistratieWijzigingOnderzoekWijzigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Actie Registratie wijziging onderzoek -->
+	<complexType name="Actie_RegistratieWijzigingOnderzoekWijzigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieWijzigingOnderzoek">
+				<sequence>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieWijzigingOnderzoekWijzigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieWijzigingOnderzoekWijzigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="onderzoeken" type="brp:Container_PersoonOnderzoekenWijzigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonOnderzoekenWijzigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_PersoonOnderzoeken">
+				<sequence>
+					<element name="onderzoek" type="brp:Objecttype_PersoonOnderzoekWijzigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonOnderzoekWijzigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Onderzoek">
+				<sequence>
+					<element name="onderzoek" type="brp:Groep_OnderzoekOnderzoekWijzigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Onderzoek"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_OnderzoekOnderzoekWijzigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Groep_OnderzoekOnderzoek">
+				<sequence>
+					<element name="statusNaam" type="brp:StatusOnderzoekNaam" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Container Acties Registratie niet aangetroffen op adres -->
+	<complexType name="Container_Handeling_Acties_RegistratieNietAangetroffenOpAdres_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_RegistratieNietAangetroffenOpAdres">
+				<sequence>
+					<element name="registratieAangetroffenOpAdres" type="brp:Actie_RegistratieAangetroffenOpAdres_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Actie Registratie niet aangetroffen op adres -->
+	<complexType name="Actie_RegistratieAangetroffenOpAdres_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieAangetroffenOpAdres">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieNietAangetroffenOpAdres_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieNietAangetroffenOpAdres_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="adressen" type="brp:Container_PersoonAdressenRegistratieNietAangetroffenOpAdres_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonAdressenRegistratieNietAangetroffenOpAdres_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_PersoonAdressen">
+				<sequence>
+					<element name="adres" type="brp:Objecttype_PersoonAdresRegistratieNietAangetroffenOpAdres_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonAdresRegistratieNietAangetroffenOpAdres_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonAdres">
+				<sequence>
+					<element name="indicatiePersoonAangetroffenOpAdres" type="brp:Nee" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonAdres"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Container Acties Beeindiging onderzoek -->
+	<complexType name="Container_Handeling_Acties_BeeindigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_BeeindigingOnderzoek">
+				<sequence>
+					<element name="registratieEindeOnderzoek" type="brp:Actie_RegistratieEindeOnderzoekBeeindigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Actie Registratie einde onderzoek -->
+	<complexType name="Actie_RegistratieEindeOnderzoekBeeindigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieEindeOnderzoek">
+				<sequence>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieEindeOnderzoekBeeindigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieEindeOnderzoekBeeindigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="onderzoeken" type="brp:Container_PersoonOnderzoekenBeeindigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonOnderzoekenBeeindigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_PersoonOnderzoeken">
+				<sequence>
+					<element name="onderzoek" type="brp:Objecttype_PersoonOnderzoekBeeindigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonOnderzoekBeeindigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Onderzoek">
+				<sequence>
+					<element name="onderzoek" type="brp:Groep_OnderzoekOnderzoekBeeindigingOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Onderzoek"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_OnderzoekOnderzoekBeeindigingOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Groep_OnderzoekOnderzoek">
+				<sequence>
+					<element name="datumEinde" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Container Acties Correctie onderzoek -->
+	<complexType name="Container_Handeling_Acties_CorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_CorrectieOnderzoek">
+				<sequence>
+					<element name="vervalOnderzoek" type="brp:Actie_VervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="correctievervalOnderzoek" type="brp:Actie_CorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="correctieregistratieOnderzoek" type="brp:Actie_CorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Actie Verval onderzoek -->
+	<complexType name="Actie_VervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Actie_VervalOnderzoek">
+				<sequence>
+					<element name="nadereAanduidingVerval" type="brp:NadereAanduidingVerval" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_VervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_VervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="onderzoeken" type="brp:Container_PersoonOnderzoekenVervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonOnderzoekenVervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_PersoonOnderzoeken">
+				<sequence>
+					<element name="onderzoek" type="brp:Objecttype_OnderzoekVervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_OnderzoekVervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Onderzoek">
+				<sequence/>
+				<attribute ref="brp:objecttype" use="required" fixed="Onderzoek"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Actie Correctieverval onderzoek -->
+	<complexType name="Actie_CorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Actie_CorrectievervalOnderzoek">
+				<sequence>
+					<element name="nadereAanduidingVerval" type="brp:NadereAanduidingVerval" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_CorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_CorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="onderzoeken" type="brp:Container_PersoonOnderzoekenCorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonOnderzoekenCorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_PersoonOnderzoeken">
+				<sequence>
+					<element name="onderzoek" type="brp:Objecttype_OnderzoekCorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_OnderzoekCorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Onderzoek">
+				<sequence>
+					<element name="onderzoek" type="brp:Groep_OnderzoekOnderzoekCorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Onderzoek"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_OnderzoekOnderzoekCorrectievervalOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Groep_OnderzoekOnderzoek">
+				<sequence/>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="required"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Actie Correctieregistratie onderzoek -->
+	<complexType name="Actie_CorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Actie_CorrectieregistratieOnderzoek">
+				<sequence>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_CorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_CorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="onderzoeken" type="brp:Container_PersoonOnderzoekenCorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonOnderzoekenCorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Container_PersoonOnderzoeken">
+				<sequence>
+					<element name="onderzoek" type="brp:Objecttype_OnderzoekCorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_OnderzoekCorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Onderzoek">
+				<sequence>
+					<element name="onderzoek" type="brp:Groep_OnderzoekOnderzoekCorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Onderzoek"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_OnderzoekOnderzoekCorrectieregistratieOnderzoekCorrectieOnderzoek_Onderzoek">
+		<complexContent>
+			<restriction base="brp:Groep_OnderzoekOnderzoek">
+				<sequence>
+					<element name="datumAanvang" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="datumEinde" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="omschrijving" type="brp:OnderzoekOmschrijving" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="statusNaam" type="brp:StatusOnderzoekNaam" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

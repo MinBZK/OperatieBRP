@@ -1,0 +1,1 @@
+for /f %%i in ('docker service ls -q') do docker service rm %%i

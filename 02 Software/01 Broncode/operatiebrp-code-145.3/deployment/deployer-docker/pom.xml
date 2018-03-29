@@ -1,0 +1,92 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>deployment-deployer</artifactId>
+        <version>145.3</version>
+        <relativePath>../deployer</relativePath>
+    </parent>
+
+    <artifactId>deployment-deployer-docker</artifactId>
+    <packaging>pom</packaging>
+    <name>Deployment - Deployer - Docker</name>
+
+    <modules>
+        <!--
+         | Let op: alle pom files staan als modules zodat ze meegaan met het ophogen
+         | van het versie nummer bij de release en dat dus ook de 'juiste' plugin versie, etc
+         | wordt gebruikt.
+         -->
+        <module>src/main/deployer/docker-base.pom.xml</module>
+
+        <!-- Setup environment -->
+        <module>src/main/deployer/docker-deinstall.pom.xml</module>
+        <module>src/main/deployer/docker-install.pom.xml</module>
+        <module>src/main/deployer/docker-install-load.pom.xml</module>
+        <module>src/main/deployer/docker-install-registry.pom.xml</module>
+        <module>src/main/deployer/docker-install-tar.pom.xml</module>
+        <module>src/main/deployer/docker-remove.pom.xml</module>
+
+        <!-- Test omgevingen -->
+        <module>src/main/deployer/docker-start.pom.xml</module>
+        <module>src/main/deployer/docker-start-brp-afnemerindicatie-gba.pom.xml</module>
+        <module>src/main/deployer/docker-start-brp-alles.pom.xml</module>
+        <module>src/main/deployer/docker-start-brp-archivering-gba.pom.xml</module>
+        <module>src/main/deployer/docker-start-brp-beheer.pom.xml</module>
+        <module>src/main/deployer/docker-start-brp-bevraging-gba.pom.xml</module>
+        <module>src/main/deployer/docker-start-brp-bijhouding.pom.xml</module>
+        <module>src/main/deployer/docker-start-brp-bijhouding-gba.pom.xml</module>
+        <module>src/main/deployer/docker-start-brp-selectie.pom.xml</module>
+        <module>src/main/deployer/docker-start-ggoviewer.pom.xml</module>
+        <module>src/main/deployer/docker-start-i-en-t.pom.xml</module>
+        <module>src/main/deployer/docker-start-integratie.pom.xml</module>
+        <module>src/main/deployer/docker-start-isc.pom.xml</module>
+        <module>src/main/deployer/docker-start-isc-beheer.pom.xml</module>
+        <module>src/main/deployer/docker-start-iv.pom.xml</module>
+        <module>src/main/deployer/docker-start-iv-logging.pom.xml</module>
+        <module>src/main/deployer/docker-start-iv-naarbrp.pom.xml</module>
+        <module>src/main/deployer/docker-start-iv-naarlo3.pom.xml</module>
+        <module>src/main/deployer/docker-start-proefsynchronisatie.pom.xml</module>
+        <module>src/main/deployer/docker-start-sync-init.pom.xml</module>
+        <module>src/main/deployer/docker-start-sync-sync.pom.xml</module>
+        <module>src/main/deployer/docker-start-voisc.pom.xml</module>
+
+        <!-- CIT -->
+        <module>src/main/deployer/cit-deinstall.pom.xml</module>
+        <module>src/main/deployer/cit-install.pom.xml</module>
+        <module>src/main/deployer/cit-start.pom.xml</module>
+        <module>src/main/deployer/cit-remove.pom.xml</module>
+    </modules>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>zip-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/zip.xml</descriptor>
+                            </descriptors>
+                            <filters>
+                                <filter>src/main/assembly/zip.properties</filter>
+                            </filters>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>
+

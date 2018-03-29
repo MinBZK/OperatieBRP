@@ -1,0 +1,65 @@
+echo LOGGING
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=logging-elasticsearch
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=logging-logstash
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=logging-kibana && echo port 5601
+
+echo DATABASES (IV)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=migr-gbavdatabase && echo port 5832
+
+echo DATABASES (ISC)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=migr-mailboxdatabase && echo port 6032
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=isc-routeringdatabase && echo port 5532
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=isc-voiscdatabase && echo port 5632
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=isc-iscdatabase && echo port 5732
+
+echo DATABASES (BRP)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-database && echo port 5432
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-archiveringdatabase && echo port 5452
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-protocolleringdatabase && echo port 5472
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-sleutelbos
+
+echo MESSAGING (IV)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=iv-hornetq && echo port 5445 && echo service:jmx:serialize+ssl://localhost:3381
+
+echo MESSAGING (ISC)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=migr-mailbox && echo port 1212 && echo service:jmx:serialize+ssl://localhost:3481
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=isc-routering && echo port 61617 && echo service:jmx:serialize+ssl://localhost:3483
+
+echo MESSAGING (BRP)
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-messagebroker && echo port 61616 && echo service:jmx:serialize+ssl://localhost:3580
+
+echo IV
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=iv-logging
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=iv-synchronisatienaarbrp
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=iv-synchronisatienaarlo3
+
+echo ISC
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=isc-synchronisatie && echo service:jmx:serialize+ssl://localhost:3485
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=isc-voisc && echo service:jmx:serialize+ssl://localhost:3482
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=isc-isc && echo service:jmx:serialize+ssl://localhost:3484
+
+echo ISC-MANAGEMENT
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=isc-iscconsole && echo http://localhost:8080/jbpm-console && echo service:jmx:serialize+ssl://localhost:3486
+
+echo BRP
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-admhnd-publicatie && echo service:jmx:serialize+ssl://localhost:3589
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-afnemerindicaties && echo service:jmx:serialize+ssl://localhost:3584
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-bevraging && echo service:jmx:serialize+ssl://localhost:3588
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-bijhouding && echo service:jmx:serialize+ssl://localhost:3587
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-gbacentrale && echo service:jmx:serialize+ssl://localhost:3581
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-mutatielevering && echo service:jmx:serialize+ssl://localhost:3582
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-protocollering && echo service:jmx:serialize+ssl://localhost:3586
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-synchronisatie && echo service:jmx:serialize+ssl://localhost:3583
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-verzending && echo service:jmx:serialize+ssl://localhost:3585
+
+echo BRP-MANAGEMENT
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=brp-beheer && echo http://localhost:8280/brp-beheer && echo service:jmx:serialize+ssl://localhost:3590
+
+
+echo TOOLS
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=migr-controle
+
+
+echo UITVOEREN IV
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=iv-naarvoisc-create -Daction=execute
+call mvn nl.bzk.brp:deployment-plugin-dockerservice:single -Dservice=iv-naarvoisc-run -Daction=execute

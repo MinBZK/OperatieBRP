@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>deployment-deployer-docker-base</artifactId>
+        <version>145.3</version>
+        <relativePath>./docker-base.pom.xml</relativePath>
+    </parent>
+
+    <artifactId>deployment-deployer-docker-start-i-en-t</artifactId>
+    <name>Deployment - Deployer - Docker (start - I&amp;T)</name>
+    <packaging>pom</packaging>
+
+    <profiles>
+        <profile>
+            <id>docker-start-i-en-t</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>nl.bzk.brp</groupId>
+                        <artifactId>deployment-plugin-dockerservice</artifactId>
+                        <executions>
+                            <execution>
+                                <id>install</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <steps>
+                                        <step>
+                                            <!-- Logging -->
+                                            <services>
+                                                <service>
+                                                    <name>logging-elasticsearch</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>logging-logstash</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>logging-kibana</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                            </services>
+                                            <delay>5</delay>
+                                        </step>
+
+                                        <step>
+                                            <!-- Databases -->
+                                            <services>
+                                                <service>
+                                                    <name>brp-database</name>
+                                                    <version>${image.version}</version>
+                                                    <serviceArguments>
+                                                        ${docker.brp-database.serviceArguments}
+                                                    </serviceArguments>
+                                                </service>
+                                                <service>
+                                                    <name>brp-archiveringdatabase</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-protocolleringdatabase</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>tools-afnemervoorbeeld-database</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>isc-iscdatabase</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>isc-voiscdatabase</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>migr-mailboxdatabase</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>migr-gbavdatabase</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                            </services>
+                                            <delay>5</delay>
+                                        </step>
+
+                                        <step>
+                                            <!-- IV -->
+                                            <services>
+                                                <service>
+                                                    <name>iv-hornetq</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>iv-logging</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>iv-synchronisatienaarbrp</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>iv-synchronisatienaarlo3</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                            </services>
+                                            <delay>5</delay>
+                                        </step>
+
+                                        <step>
+                                            <!-- Sleutelbos -->
+                                            <services>
+                                                <service>
+                                                    <name>brp-sleutelbos</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                            </services>
+                                            <action>create</action>
+                                            <delay>5</delay>
+                                        </step>
+
+                                        <step>
+                                            <!-- ISC -->
+                                            <services>
+                                                <service>
+                                                    <name>migr-mailbox</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>isc-routering</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>isc-synchronisatie</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>isc-isc</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>isc-voisc</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>isc-iscconsole</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                            </services>
+                                            <delay>5</delay>
+                                        </step>
+                                        <step>
+                                            <!-- BRP -->
+                                            <services>
+                                                <service>
+                                                    <name>tools-afnemervoorbeeld</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>brp-messagebroker</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>brp-admhnd-publicatie</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-afnemerindicatie</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-afnemerindicatie-gba</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-archivering-gba</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-bevraging</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-bevraging-gba</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-bevraging-gba-ws</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-bijhouding</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-bijhouding-gba</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-mutatielevering</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-synchronisatie</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-verzending</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>brp-vrijbericht</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+
+                                                <service>
+                                                    <name>brp-beheer</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                            </services>
+                                            <delay>5</delay>
+                                        </step>
+
+                                        <step>
+                                            <!-- Monitoring -->
+                                            <services>
+                                                <service>
+                                                    <name>tools-graphite</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                                <service>
+                                                    <name>migr-jmxcollector</name>
+                                                    <version>${image.version}</version>
+                                                </service>
+                                            </services>
+                                        </step>
+                                    </steps>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

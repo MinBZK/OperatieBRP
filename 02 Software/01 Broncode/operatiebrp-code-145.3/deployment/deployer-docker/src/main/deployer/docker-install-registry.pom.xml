@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>deployment-deployer-docker-base</artifactId>
+        <version>145.3</version>
+        <relativePath>./docker-base.pom.xml</relativePath>
+    </parent>
+
+    <artifactId>deployment-deployer-docker-install-registry</artifactId>
+    <name>Deployment - Deployer - Docker (install - registry)</name>
+    <packaging>pom</packaging>
+
+    <properties>
+        <tag.executable />
+        <tag.commandlineArgs />
+    </properties>
+
+    <profiles>
+
+        <profile>
+            <id>mac</id>
+            <activation>
+                <os>
+                    <family>mac</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-tag-push-images-repo</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>/bin/sh</executable>
+                                    <commandlineArgs>-c "for image in `docker ${docker.host} ${docker.tls} images --filter "label=nl.bzk.brp.applicatie" --format "{{.Repository}}:{{.Tag}}"`; do docker ${docker.host} ${docker.tls} tag $image ${registry.url}$image; docker ${docker.host} ${docker.tls} push ${registry.url}$image; done"</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>unix</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-tag-push-images-repo</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>/bin/sh</executable>
+                                    <commandlineArgs>-c "for image in `docker ${docker.host} ${docker.tls} images --filter "label=nl.bzk.brp.applicatie" --format "{{.Repository}}:{{.Tag}}"`; do docker ${docker.host} ${docker.tls} tag $image ${registry.url}$image; docker ${docker.host} ${docker.tls} push ${registry.url}$image; done"</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>windows</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-tag-push-images-repo</id>
+                                <phase>none</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>cmd</executable>
+                                    <arguments>
+                                        <argument>/C</argument>
+                                        <argument>for /f %i in ('docker ${docker.host} ${docker.tls} images --filter "label=nl.bzk.brp.applicatie" --format "{{.Repository}}:{{.Tag}}"') do docker ${docker.host} ${docker.tls} tag %i ${registry.url}%i &amp; docker ${docker.host} ${docker.tls} push ${registry.url}%i &amp; docker ${docker.host} ${docker.tls} rmi ${registry.url}%i</argument>
+                                    </arguments>
+                                    <successCodes>
+                                        <successCode>0</successCode>
+                                        <!-- FOR loop geeft '1' als de lijst leeg is -->
+                                        <successCode>1</successCode>
+                                    </successCodes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        
+        <profile>
+            <id>docker-install-registry</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <!-- Setup registry -->
+                            <execution>
+                                <id>docker-setup-registry</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <commandlineArgs>${registry.host} ${registry.tls} run -d -p 5000:5000 --name registry ${registry.image}</commandlineArgs>
+                                    <skip>${registry.skip}</skip>
+                                </configuration>
+                            </execution>
+
+                            <!-- Tag and push images -->
+                            <execution>
+                                <id>docker-tag-push-images-repo</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${registry.skip}</skip>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+</project>

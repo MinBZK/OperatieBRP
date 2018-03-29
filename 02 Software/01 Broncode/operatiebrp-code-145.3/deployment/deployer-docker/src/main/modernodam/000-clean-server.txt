@@ -1,0 +1,42 @@
+sudo -i
+
+systemctl stop puppet
+systemctl stop docker
+
+cd /var/lib
+rm -rf docker
+
+ip a
+ip link del docker0
+ip link del docker_gwbridge
+REM ook voor andere docker devices doen (veth en br-)
+
+
+cd /etc/sysconfig
+rm -f iptables.save
+iptables -t filter -F FORWARD
+iptables -t filter -F DOCKER
+iptables -t filter -X DOCKER
+iptables -t filter -F DOCKER-ISOLATION
+iptables -t filter -X DOCKER-ISOLATION
+iptables -t nat -F POSTROUTING
+iptables -t nat -F OUTPUT
+iptables -t nat -F INPUT
+iptables -t nat -F PREROUTING
+iptables -t nat -F DOCKER
+iptables -t nat -X DOCKER
+iptables -t nat -F DOCKER-INGRESS
+iptables -t nat -X DOCKER-INGRESS
+iptables -t mangle -F PREROUTING
+iptables -t mangle -F INPUT
+iptables -t mangle -F FORWARD
+iptables -t mangle -F OUTPUT
+iptables -t mangle -F POSTROUTING
+iptables-save > iptables
+
+systemctl reload iptables
+systemctl start docker
+systemctl start puppet
+
+exit
+exit

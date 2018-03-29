@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <!-- Alle functionele logging en warnings naar Console -->
+      <Filters>
+        <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT" onMismatch="NEUTRAL"/>
+        <ThresholdFilter level="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
+      </Filters>
+      <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %X - %msg%n"/>
+    </Console>
+    <RollingRandomAccessFile name="Systeem" fileName="logs/systeem.log" filePattern="logs/systeem-%d{yyyy-MM-dd}-%i.log.gz">
+      <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT"/>
+      <PatternLayout>
+        <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %X - %msg%n</pattern>
+      </PatternLayout>
+      <Policies>
+        <OnStartupTriggeringPolicy />
+        <TimeBasedTriggeringPolicy/>
+        <SizeBasedTriggeringPolicy size="250 MB"/>
+      </Policies>
+      <DefaultRolloverStrategy fileIndex="nomax" compressionLevel="9"/>
+    </RollingRandomAccessFile>
+    <RollingRandomAccessFile name="Functioneel" fileName="logs/functioneel.log" filePattern="logs/functioneel-%d{yyyy-MM-dd}-%i.log.gz">
+      <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT" onMismatch="DENY"/>
+      <PatternLayout>
+        <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %X - %msg%n</pattern>
+      </PatternLayout>
+      <Policies>
+        <OnStartupTriggeringPolicy />
+        <TimeBasedTriggeringPolicy/>
+        <SizeBasedTriggeringPolicy size="250 MB"/>
+      </Policies>
+      <DefaultRolloverStrategy fileIndex="nomax" compressionLevel="9"/>
+    </RollingRandomAccessFile>
+    <Syslog name="Logstash" format="RFC5424" host="logstash" port="5514" protocol="UDP" connectTimeoutMillis="5000" reconnectionDelayMillis="5000"
+            facility="LOCAL0" messageId="log" newLine="true" mdcId="mdc" includeMDC="true" id="migrvoisc" appName="MIGR-VOISC"/>
+  </Appenders>
+  <Loggers>
+    <AsyncRoot level="INFO">
+      <AppenderRef ref="Console"/>
+      <AppenderRef ref="Systeem"/>
+      <AppenderRef ref="Functioneel"/>
+      <AppenderRef ref="Logstash"/>
+    </AsyncRoot>
+    <AsyncLogger name="com.atomikos" level="ERROR"/>
+    <AsyncLogger name="org.hibernate.cache.ehcache.AbstractEhcacheRegionFactory" level="ERROR"/>
+    <AsyncLogger name="org.hibernate.internal.util.xml.DTDEntityResolver" level="ERROR"/>
+  </Loggers>
+</Configuration>

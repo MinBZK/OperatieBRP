@@ -1,0 +1,19 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+    http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+">
+    <preConditions onFail="HALT">
+        <dbms type="postgresql"/>
+    </preConditions>
+
+    <changeSet id="dropConstraintsAndIndexes" author="brp">
+        <comment>Drop alle constraints en indexen voor het snel inserten van data.</comment>
+        <comment>Wordt momenteel gebruikt door de whitebox vuller.</comment>
+
+        <sqlFile path="liquibase/kern/helper/01-constraintsDrop.sql" splitStatements="false"/>
+        <sqlFile path="liquibase/kern/helper/01-indexesDrop.sql" splitStatements="false"/>
+        <sqlFile path="liquibase/kern/helper/99-dropIndicesHisTabellenActieId.sql" splitStatements="false"/>
+    </changeSet>
+</databaseChangeLog>

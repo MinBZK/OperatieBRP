@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>deployment-deployer-docker-base</artifactId>
+        <version>145.3</version>
+        <relativePath>./docker-base.pom.xml</relativePath>
+    </parent>
+
+    <artifactId>deployment-deployer-docker-deinstall</artifactId>
+    <name>Deployment - Deployer - Docker (deinstall)</name>
+    <packaging>pom</packaging>
+
+
+    
+    <profiles>
+        <profile>
+            <id>docker-deinstall</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-remove-network</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <commandlineArgs>${docker.connect} ${docker.tls} network rm brp</commandlineArgs>
+                                    <successCodes>
+                                        <successCode>0</successCode>
+                                        <!-- Error negeren als netwerk niet bestaat -->
+                                        <successCode>1</successCode>
+                                    </successCodes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>nl.bzk.brp</groupId>
+                        <artifactId>deployment-plugin-dockerservice</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-remove-all-images</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-images</goal>
+                                </goals>
+                                <configuration>
+                                    <filter>label=nl.bzk.brp.applicatie</filter>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-remove-all-volumes</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-volumes</goal>
+                                </goals>
+                                <configuration>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>        
+        </profile>
+    </profiles>
+</project>

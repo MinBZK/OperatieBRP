@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>deployment-deployer-docker-base</artifactId>
+        <version>145.3</version>
+        <relativePath>./docker-base.pom.xml</relativePath>
+    </parent>
+
+    <artifactId>deployment-deployer-docker-cit-deinstall</artifactId>
+    <name>Deployment - Deployer - Docker (cit-deinstall)</name>
+    <packaging>pom</packaging>
+
+    <profiles>
+        <profile>
+            <id>cit-deinstall</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-remove-network</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>docker</executable>
+                                    <commandlineArgs>-H cit-dok-01.modernodam.nl network rm brp</commandlineArgs>
+                                    <successCodes>
+                                        <successCode>0</successCode>
+                                        <!-- Error negeren als netwerk niet bestaat -->
+                                        <successCode>1</successCode>
+                                    </successCodes>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>nl.bzk.brp</groupId>
+                        <artifactId>deployment-plugin-dockerservice</artifactId>
+                        <executions>
+                            <!-- CIT-DOK-01 -->
+                            <execution>
+                                <id>docker-remove-all-images-cit-dok-01</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-images</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-01.modernodam.nl:2375</dockerArguments>
+                                    <filter>label=nl.bzk.brp.applicatie</filter>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-remove-all-volumes-cit-dok-01</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-volumes</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-01.modernodam.nl:2375</dockerArguments>
+                                </configuration>
+                            </execution>
+
+                            <!-- CIT-DOK-02 -->
+                            <execution>
+                                <id>docker-remove-all-images-cit-dok-02</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-images</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-02.modernodam.nl:2375</dockerArguments>
+                                    <filter>label=nl.bzk.brp.applicatie</filter>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-remove-all-volumes-cit-dok-02</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-volumes</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-02.modernodam.nl:2375</dockerArguments>
+                                </configuration>
+                            </execution>
+
+                            <!-- CIT-DOK-03 -->
+                            <execution>
+                                <id>docker-remove-all-images-cit-dok-03</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-images</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-03.modernodam.nl:2375</dockerArguments>
+                                    <filter>label=nl.bzk.brp.applicatie</filter>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-remove-all-volumes-cit-dok-03</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-volumes</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-03.modernodam.nl:2375</dockerArguments>
+                                </configuration>
+                            </execution>
+
+                            <!-- CIT-DOK-05 -->
+                            <execution>
+                                <id>docker-remove-all-images-cit-dok-05</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-images</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-05.modernodam.nl:2375</dockerArguments>
+                                    <filter>label=nl.bzk.brp.applicatie</filter>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-remove-all-volumes-cit-dok-05</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-volumes</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-05.modernodam.nl:2375</dockerArguments>
+                                </configuration>
+                            </execution>
+
+                            <!-- CIT-DOK-06 -->
+                            <execution>
+                                <id>docker-remove-all-images-cit-dok-06</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-images</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-06.modernodam.nl:2375</dockerArguments>
+                                    <filter>label=nl.bzk.brp.applicatie</filter>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-remove-all-volumes-cit-dok-06</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-volumes</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-06.modernodam.nl:2375</dockerArguments>
+                                </configuration>
+                            </execution>
+
+                            <!-- CIT-DOK-07 -->
+                            <execution>
+                                <id>docker-remove-all-images-cit-dok-07</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-images</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-07.modernodam.nl:2375</dockerArguments>
+                                    <filter>label=nl.bzk.brp.applicatie</filter>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-remove-all-volumes-cit-dok-07</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-volumes</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-07.modernodam.nl:2375</dockerArguments>
+                                </configuration>
+                            </execution>
+
+                            <!-- CIT-DOK-08 -->
+                            <execution>
+                                <id>docker-remove-all-images-cit-dok-08</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-images</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-08.modernodam.nl:2375</dockerArguments>
+                                    <filter>label=nl.bzk.brp.applicatie</filter>
+                                    <ignoreFailures>true</ignoreFailures>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>docker-remove-all-volumes-cit-dok-08</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>remove-volumes</goal>
+                                </goals>
+                                <configuration>
+                                    <dockerArguments>-H cit-dok-08.modernodam.nl:2375</dockerArguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

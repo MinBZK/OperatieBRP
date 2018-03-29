@@ -1,0 +1,59 @@
+<!-- Voorbeeldbericht BRPXML bijhouding vanuit ISC - "Omzetting GeregistreerdPartnerschap in Huwelijk" - versie 2.5 dd. 2017-03-09 -->
+<!-- ... -->
+<!-- Casus: -->
+<!-- -  Voor Maria da Silva; bsn: 238651974 wordt Tb02-bericht 'Omzetting gergistreerd partnerschap in huwelijk' (akte 3.H) ontvangen -->
+<!-- -	Omzetting van het Geregistreerd partnerschap dat zij had met Willy dos Santos da Victória (niet ingeschreven Braziliaan) in een huwelijk… -->
+<!-- -	Omzetting op 13 juni 2015; partnergegevens Willy (Gerelateerde) worden meegegeven voor registratie huwelijk ... -->
+<!-- ... -->
+<!-- Wijzigingen t.o.v. v2.1/2.2/2.3: -->
+<!-- 1) Wijziging waarde attribuut'objecttype' bij element 'bron'; dit is nu 'AdministratieveHandelingBron' ipv 'ActieBron'. -->
+<!-- 2) Besluit granulariteit ISC-handelingen doorgevoerd; naamswijziging handeling naar 'GBA Omztting geregistreerd partnerschap in huwelijk'. -->
+<!-- 3) Parameter 'bezienVanuitPersoon' verwijderd; hiervoor straks 'uitgeslotenGerelateerden' -->
+<!-- 4) Enkele tekstuele aanpassingen -->
+<!-- 5) Wijziging naamgeving actie; specifieker gemaakt of Huwelijk of GP -->
+<!-- 6) Element 'Datum aanvang geldigheid' vervallen bij Acties die alleen FH-groepen raken. -->
+<!-- 7) Inhoud zendende partij is geen constante meer, maar code van de feitgemeente -->
+<!-- 8) LandGebiedCode niet meer in bericht; wordt automatisch afgeleid. -->
+<!-- 9) Element 'identificatie' verwijderd uit objecttype Document -->
+<!-- 10) Element DatumAanvangGeldigheid toegevoegd aan actie 'Registratie einde geregistreerd partnerschap'; eis vanuit Bouwteam -->
+<!-- -->
+<brp:isc_migRegistreerHuwelijkGeregistreerdPartnerschap xmlns:brp="http://www.bzk.nl/brp/brp0200" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bzk.nl/brp/brp0200 ../xsd/brp0200_iscMigratievoorziening_Berichten.xsd">
+	<brp:stuurgegevens brp:communicatieID="identificatie00B">
+		<brp:zendendePartij>053001</brp:zendendePartij> <!-- Partijcode van de Feitgemeente waar het Tb02 bericht vandaan komt -->
+		<brp:zendendeSysteem>ISC</brp:zendendeSysteem> <!-- Constante -->
+		<brp:referentienummer>88409eeb-1aa5-43fc-8614-43055123a165</brp:referentienummer> <!-- Door ISC te bepalen referentienummer -->
+		<brp:tijdstipVerzending>2015-06-13T15:32:03.234+02:00</brp:tijdstipVerzending> <!-- Tijdstip waarop ISC het bericht aanmaakt -->
+	</brp:stuurgegevens>
+	<brp:parameters brp:communicatieID="identificatie01B">
+		<brp:verwerkingswijze>Bijhouding</brp:verwerkingswijze> <!-- Constante -->
+	</brp:parameters>
+	<brp:gBAOmzettingGeregistreerdPartnerschapInHuwelijk brp:objecttype="AdministratieveHandeling" brp:communicatieID="identificatie02B">
+		<brp:partijCode>053001</brp:partijCode> <!-- Gemeente waar het Tb02 bericht vandaan komt -->
+		<brp:bronnen>
+			<brp:bron brp:objecttype="AdministratieveHandelingBron" brp:communicatieID="Bron1">
+				<brp:document brp:objecttype="Document" brp:communicatieID="identificatie04B">
+					<brp:soortNaam>Historie conversie</brp:soortNaam> <!-- GKJ: Verplicht in Bijhouding; zie tabel SoortDocument -->
+					<brp:aktenummer>3AH0001</brp:aktenummer> <!-- 05.81.20 (Aktenummer) -->
+					<brp:partijCode>053001</brp:partijCode> <!-- 05.81.10 (Registergemeente akte) -->
+				</brp:document>
+			</brp:bron>
+			<!-- GKJ: Kan er een 'Bron2' zijn voor evt. wijziging naamgebruik (01.61.10) via Tb02? -->
+		</brp:bronnen>			
+		<brp:acties>
+			<brp:registratieEindeGeregistreerdPartnerschap brp:objecttype="Actie" brp:communicatieID="identificatie05B">
+				<brp:datumAanvangGeldigheid>2015-06-13</brp:datumAanvangGeldigheid>
+				<brp:bronnen>
+					<brp:bron brp:objecttype="ActieBron" brp:referentieID="Bron1" brp:communicatieID="identificatie06B"/>
+				</brp:bronnen>
+				<!-- GKJ: In Bijhouding TechnischeSleutel Relatie-object verplicht; uitgangspunt is dat dit kan worden bijgelezen -->
+				<brp:geregistreerdPartnerschap brp:objecttype="Relatie" brp:objectSleutel="123456" brp:communicatieID="identificatie07B"> <!-- brp:huwelijk of brp:geregistreerdPartnerschap adhv 05.15.10 (Soort verbintenis) -->
+					<brp:relatie brp:communicatieID="identificatie08B">
+						<brp:redenEindeCode>Z</brp:redenEindeCode> <!-- 05.07.40 reden ontbinding -->
+						<brp:datumEinde>2015-06-13</brp:datumEinde> <!-- 05.07.10 (Datum ontbinding) en 05.85.10 (Ingangsdatum geldigheid) -->
+						<brp:gemeenteEindeCode>0530</brp:gemeenteEindeCode> <!-- 05.07.20 (Plaats ontbinding); 05.07.30 (Land ontbinding) wordt afgeleid BRP) -->
+					</brp:relatie>
+				</brp:geregistreerdPartnerschap>
+			</brp:registratieEindeGeregistreerdPartnerschap>
+		</brp:acties>
+	</brp:gBAOmzettingGeregistreerdPartnerschapInHuwelijk>
+</brp:isc_migRegistreerHuwelijkGeregistreerdPartnerschap>

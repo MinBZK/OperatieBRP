@@ -1,0 +1,99 @@
+<!-- Voorbeeldbericht BRPXML bijhouding vanuit ISC - "Sluiting Huwelijk/geregistreerd partnerschap" - versie 2.6 dd. 2017-01-17 -->
+<!-- ... -->
+<!-- Casus: -->
+<!-- -  Voor Maria da Silva; bsn: 238651974 wordt Tb02-bericht ontvangen (akte is 3.A); -->
+<!-- -	Treedt in het huwelijk met Willy dos Santos da Victória (niet ingeschreven Braziliaan) -->
+<!-- -	Huwelijkssluiting op 13 juni 2015 ... -->
+<!-- -	Maria is niet-Nederlander en wenst wijziging van haar geslachtsnaam naar Santos da Silva -->
+<!-- ... -->
+<!-- Wijzigingen t.o.v. v2.2/2.3/2.4/2.5: -->
+<!-- 1) Wijziging waarde attribuut'objecttype' bij element 'bron'; dit is nu 'AdministratieveHandelingBron' ipv 'ActieBron' -->
+<!-- 2) Besluit granulariteit ISC-handelingen doorgevoerd; meer onderscheid in handelingen mbt huwelijk en geregistreerd partnerschap. -->
+<!-- 3) Naamswijizging igv HGP niet mogelijk; nevenactie is komen te vervallen. -->
+<!-- 4) Enkele tekstuele aanpassingen -->
+<!-- 5) Wijziging naamgeving actie; specifieker gemaakt of Huwelijk of GP -->
+<!-- 6) Element 'Datum aanvang geldigheid' vervallen bij Acties die alleen FH-groepen raken -->
+<!-- 7) SoortPersoon gewijzigd; of 'I'(ngeschrevene) of 'P'(seudo-persoon). -->
+<!-- 8) Inhoud zendende partij is geen constante meer, maar code van de feitgemeente -->
+<!-- 9) LandGebiedCode niet meer in bericht; wordt afgeleid door BRP. -->
+<!-- 10) Element 'identificatie' verwijderd uit objecttype Document -->
+<!-- 11) DAG toegevoegd aan de actie Registratie aanvang huwelijk -->
+<!-- 12) Soort Persoon bij niet-ingeschreven partner niet meer in bericht; wordt afgeleid door BRP -->
+<!-- ... -->
+<brp:isc_migRegistreerHuwelijkGeregistreerdPartnerschap xmlns:brp="http://www.bzk.nl/brp/brp0200" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bzk.nl/brp/brp0200 ../xsd/brp0200_iscMigratievoorziening_Berichten.xsd">
+	<brp:stuurgegevens brp:communicatieID="identificatie00B">
+		<brp:zendendePartij>053001</brp:zendendePartij> <!-- Partijcode van de Feitgemeente waar het Tb02 bericht vandaan komt -->
+		<brp:zendendeSysteem>ISC</brp:zendendeSysteem> <!-- Constante -->
+		<brp:referentienummer>88409eeb-1aa5-43fc-8614-43055123a165</brp:referentienummer> <!-- Door ISC te bepalen referentienummer -->
+		<brp:tijdstipVerzending>2015-06-13T15:32:03.234+02:00</brp:tijdstipVerzending> <!-- Tijdstip waarop ISC het bericht aanmaakt -->
+	</brp:stuurgegevens>
+	<brp:parameters brp:communicatieID="identificatie01B">
+		<brp:verwerkingswijze>Bijhouding</brp:verwerkingswijze> <!-- Constante -->
+	</brp:parameters>
+	<brp:gBAVoltrekkingHuwelijkInNederland brp:objecttype="AdministratieveHandeling" brp:communicatieID="identificatie02B">
+		<brp:partijCode>053001</brp:partijCode> <!-- Gemeente waar het Tb02 bericht vandaan komt -->
+		<brp:bronnen>
+			<brp:bron brp:objecttype="AdministratieveHandelingBron" brp:communicatieID="Bron1">
+				<brp:document brp:objecttype="Document" brp:communicatieID="identificatie04B">
+					<brp:soortNaam>Historie conversie</brp:soortNaam> <!-- GKJ: Verplicht in Bijhouding; zie tabel SoortDocument; check op specificaties Conversie -->
+					<brp:aktenummer>3AA0001</brp:aktenummer> <!-- 05.81.20 (Aktenummer) -->
+					<brp:partijCode>053001</brp:partijCode> <!-- 05.81.10 (Registergemeente akte) -->
+				</brp:document>
+			</brp:bron>
+			<brp:bron brp:objecttype="AdministratieveHandelingBron" brp:communicatieID="Bron2">
+				<brp:document brp:objecttype="Document" brp:communicatieID="identificatie05B">
+					<brp:soortNaam>Akte van naamskeuze</brp:soortNaam> <!-- GKJ: Verplicht in Bijhouding; zie tabel SoortDocument -->
+					<brp:aktenummer>1AH0001</brp:aktenummer> <!-- 05.81.20 (Aktenummer) -->
+					<brp:partijCode>053001</brp:partijCode> <!-- 05.81.10 (Registergemeente akte) -->
+				</brp:document>
+			</brp:bron>
+		</brp:bronnen>			
+		<brp:acties>
+			<brp:registratieAanvangHuwelijk brp:objecttype="Actie" brp:communicatieID="identificatie06B">
+				<brp:datumAanvangGeldigheid>2015-06-13</brp:datumAanvangGeldigheid>
+				<brp:bronnen>
+					<brp:bron brp:objecttype="ActieBron" brp:referentieID="Bron1" brp:communicatieID="identificatie07B"/>
+				</brp:bronnen>
+				<brp:huwelijk brp:objecttype="Relatie" brp:communicatieID="identificatie08B"> <!-- brp:huwelijk of brp:geregistreerdPartnerschap adhv 05.15.10 (Soort verbintenis) -->
+					<brp:relatie brp:communicatieID="identificatie09B">
+						<brp:datumAanvang>2015-06-13</brp:datumAanvang> <!-- 05.06.10 (Datum sluiting) en 05.85.10 (Ingangsdatum geldigheid) -->
+						<brp:gemeenteAanvangCode>0530</brp:gemeenteAanvangCode> <!-- 05.06.20 (Plaats sluiting); 05.06.30 (Land sluiting) wordt afgeleid door BRP -->
+					</brp:relatie>
+					<brp:betrokkenheden>
+						<brp:partner brp:objecttype="Betrokkenheid" brp:communicatieID="identificatie10B">
+							<!-- Persoon (Maria) gevonden op basis van identificatie (categorie 01) -->
+							<brp:persoon brp:objecttype="Persoon" brp:objectSleutel="QRSx4+h1Ky4LT5SjOtd5v+zNgtzW6GJn" brp:communicatieID="identificatie11B"/>
+						</brp:partner>
+						<brp:partner brp:objecttype="Betrokkenheid" brp:communicatieID="identificatie12B">
+							<!-- Persoon (Willy) uit categorie 05 -->
+							<brp:persoon brp:objecttype="Persoon" brp:communicatieID="identificatie13B">
+								<brp:identificatienummers brp:communicatieID="identificatie14B">
+									<brp:burgerservicenummer>103962438</brp:burgerservicenummer> <!-- 05.01.10 (Administratienummer) -->
+									<brp:administratienummer>2301342693</brp:administratienummer> <!-- 05.01.20 (Burgerservicenummer) -->
+								</brp:identificatienummers>
+								<brp:samengesteldeNaam brp:communicatieID="identificatie15B">
+									<brp:indicatieNamenreeks>N</brp:indicatieNamenreeks> <!-- Constante -->
+									<!-- <brp:predicaatCode>J</brp:predicaatCode>  05.02.20 (Adellijke titel/predikaat); in bericht één van beide mogelijk: BRAL0213  -->
+									<brp:voornamen>Willy </brp:voornamen> <!-- 05.02.10 (Voornamen) -->
+									<brp:adellijkeTitelCode>B</brp:adellijkeTitelCode>  <!-- 05.02.20 (Adellijke titel/predikaat) -->
+									<brp:voorvoegsel>dos</brp:voorvoegsel> <!-- 05.02.30 (Voorvoegsel) -->
+									<brp:scheidingsteken> </brp:scheidingsteken> <!-- Constante; spatie -->
+									<brp:geslachtsnaamstam>Santos da Victória</brp:geslachtsnaamstam> <!-- 05.02.40 (Geslachtsnaam) -->
+								</brp:samengesteldeNaam>
+								<brp:geboorte brp:communicatieID="identificatie16B">
+									<brp:datum>1985-09-19</brp:datum> <!-- 05.03.10 (Geboortedatum) -->
+									<!-- <brp:gemeenteCode>053001<brp:gemeenteCode>  GKJ: 05.03.20 is gemeentecode of buitenlandse plaats -->
+									<brp:buitenlandsePlaats>Maceió</brp:buitenlandsePlaats> <!-- 05.03.20 (Geboorteplaats) -->
+									<brp:landGebiedCode>6008</brp:landGebiedCode><!-- 05.03.20 (Geboorteland) -->
+								</brp:geboorte>
+								<brp:geslachtsaanduiding brp:communicatieID="identificatie17B">
+									<brp:code>M</brp:code> <!-- 05.04.10 (Geslachtsaanduiding) -->
+								</brp:geslachtsaanduiding>
+							</brp:persoon>
+						</brp:partner>
+					</brp:betrokkenheden>
+				</brp:huwelijk>
+			</brp:registratieAanvangHuwelijk>
+		</brp:acties>
+	</brp:gBAVoltrekkingHuwelijkInNederland>
+</brp:isc_migRegistreerHuwelijkGeregistreerdPartnerschap>
