@@ -1,4 +1,0 @@
-DROP TABLE IF EXISTS activemq_msgs CASCADE;
-DROP TABLE IF EXISTS activemq_lock CASCADE;
-DROP TABLE IF EXISTS activemq_acks CASCADE;
-

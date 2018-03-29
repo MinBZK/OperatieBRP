@@ -1,9 +1,0 @@
-export enum SelectieTaakStatus {
-  IN_TE_PLANNEN = 1,
-  INGEPLAND = 2,
-  NIET_GELEVERD = 4,
-  GEANNULEERD = 5,
-  UITVOERING_MISLUKT = 7,
-  UITVOERING_AFGEBROKEN = 8,
-  AFGEKEURD = 10
-}
