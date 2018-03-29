@@ -1,0 +1,58 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+stage="M02";
+
+. ./env
+. ./functions
+
+echo "{";
+echo "\"info\" : {";
+
+brp_db_host=${BRP_ISC_DB_HOST};
+brp_db_name=${BRP_ISC_DB_NAME};
+brp_db_user=${BRP_ISC_DB_USER};
+brp_db_password=${BRP_ISC_DB_PASSWORD};
+# backup the brp database for next stage
+nextstage="";
+case ${stage} in
+	"IV")
+		nextstage="M01";
+
+		# verwijder alle oude backups
+		rm ${BACKUP_LOCATION}/*
+
+		brp_db_host=${BRP_IV_DB_HOST};
+		brp_db_user=${BRP_IV_DB_USER};
+		brp_db_name=${BRP_IV_DB_NAME};
+		brp_db_password=${BRP_IV_DB_PASSWORD};
+		;;
+	"TC")
+		nextstage="M01";
+		
+		brp_db_host=${BRP_IV_DB_HOST};
+		brp_db_user=${BRP_IV_DB_USER};
+		brp_db_name=${BRP_IV_DB_NAME};
+		brp_db_password=${BRP_IV_DB_PASSWORD};
+		;;
+	"M"*)
+		
+		count=$(( 10#${stage//M/} ));
+		count=$(( count + 1 ));
+		nextstage=M$( printf "%02d" ${count} );
+		rm ${BACKUP_LOCATION}/*M0[${count}-9]* 
+		;;
+	*)
+		echo "blup";
+		;;
+esac
+
+temp_file="${BACKUP_LOCATION}/${nextstage}_run.sql";
+echo "\"status\" : \"maak backup db ${temp_file}\",";
+export PGPASSWORD=${brp_db_password};
+pg_dump -c -U ${brp_db_user} -h ${brp_db_host} ${brp_db_name} > ${temp_file};
+. ./available
+
+echo "}";
+echo "}";

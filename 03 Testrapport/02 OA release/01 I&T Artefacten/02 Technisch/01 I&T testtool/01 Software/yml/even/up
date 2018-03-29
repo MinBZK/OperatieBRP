@@ -1,0 +1,81 @@
+#!/bin/bash
+
+. ./env
+
+if [ ! -z "$1" ];
+then
+	export BRP_DATABASE_NAME=$1
+fi
+
+TMP_MAILBOX_EXPORT_VOISC=./db/voisc_lo3mailbox.export
+TMP_MAILBOX_EXPORT_ISC=./db/isc_lo3mailbox.export
+
+# UC105
+export PGPASSWORD=gb4v;
+psql -U gbav -h ${GBAV_DATABASE_HOST} gbav < ./db/extract-isc-verzender.sql > ${TMP_MAILBOX_EXPORT_ISC}
+psql -U gbav -h ${GBAV_DATABASE_HOST} gbav < ./db/extract-voisc-mailbox.sql > ${TMP_MAILBOX_EXPORT_VOISC}
+
+if [ "$( docker network ls | grep brp )" == "" ];
+then
+        docker network create brp
+fi
+
+if [ $( docker ps -a | grep elasticsearch | wc -l ) -eq 0 ];
+then
+	docker-compose -p int -f integratie.yml up -d logging-elasticsearch
+fi
+
+if [ $( docker ps -a | grep logstash | wc -l ) -eq 0 ];
+then
+	docker-compose -p int -f integratie.yml up -d logging-logstash
+fi
+
+docker-compose -p int -f integratie.yml up -d isc-iscdatabase isc-voiscdatabase brp-activemqdatabase brp-protocolleringdatabase brp-archiveringdatabase migr-ggodatabase migr-mailboxdatabase
+# isc-routeringsdatabase verwijderd ivm R144
+
+sleep 40; 
+
+export PGPASSWORD=M1gratie;
+psql --tuples-only -U migratie -h localhost -p 5632 -d voisc -f ${TMP_MAILBOX_EXPORT_VOISC} 2> ./tmp/db_voisc.log
+psql --tuples-only -U migratie -h localhost -p 5732 -d isc -f ${TMP_MAILBOX_EXPORT_ISC} 2> ./tmp/db_isc.log
+psql --tuples-only -U migratie -h localhost -p 5732 -d isc -f ./db/update_lock_timeout.sql
+
+sleep 10;
+
+docker-compose -p int -f integratie.yml up -d brp-sleutelbos migr-mailbox
+docker-compose -p int -f integratie.yml up -d brp-messagebroker isc-routering brp-selectie-messagebroker
+
+sleep 10;
+
+docker-compose -p int -f integratie.yml up -d brp-synchronisatie isc-synchronisatie
+docker-compose -p int -f integratie.yml up -d brp-afnemerindicaties brp-afnemerindicaties-gba brp-bijhouding-gba brp-bijhouding 
+
+if [ "${BRP_VERSION}" == "137.1" ];
+then
+	docker-compose -p int -f integratie.yml up -d brp-mutatielevering brp-protocollering brp-admhnd-publicatie brp-vrijbericht brp-selectie-verwerker brp-selectie-schrijver
+	docker-compose -p int -f integratie.yml up -d brp-archivering brp-verzending brp-bevraging brp-bevraging-gba brp-bevraging-gba-ws isc-isc isc-voisc
+else
+	docker-compose -p int -f integratie.yml up -d brp-mutatielevering brp-archivering-gba brp-admhnd-publicatie brp-vrijbericht brp-selectie-verwerker brp-selectie-schrijver
+	docker-compose -p int -f integratie.yml up -d brp-verzending brp-bevraging brp-bevraging-gba brp-bevraging-gba-ws isc-isc isc-voisc
+fi
+
+sleep 10;
+
+# fix timeout atomikos for brp-afnemerindicaties-gba
+. ./copy_conf_brp
+
+if [ $( docker ps -a | grep brp-beheer | wc -l ) -eq 0 ];
+then
+	docker-compose -p int -f integratie.yml up -d brp-beheer
+fi
+
+docker-compose -p int -f integratie.yml up -d isc-iscconsole migr-ggoviewer
+
+if [ $( docker ps -a | grep kibana | wc -l ) -eq 0 ];
+then
+	docker-compose -p int -f integratie.yml up -d logging-kibana
+fi
+
+# Even de datovergangnaarbrp zetten omdat anders de VOISC niet gevuld wordt. Dit is opgelost in een BMR wijziging zodat die met de uitlevering van de BRP database meekomt alleen is die niet officieel opgeleverd nog
+export PGPASSWORD=brp;
+psql -U brp -h ${BRP_DATABASE_IP} -p 5432 -d brp -c "update kern.partij set datovergangnaarbrp = '20120101' where code = '199902'";

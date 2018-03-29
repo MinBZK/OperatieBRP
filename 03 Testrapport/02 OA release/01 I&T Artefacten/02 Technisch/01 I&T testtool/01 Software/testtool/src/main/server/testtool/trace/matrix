@@ -1,0 +1,64 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+. ./env
+
+echo "{"
+echo "\"data\" : {";
+
+echo "\"logisch\" : [";
+k=0;
+for i in ${REGEL_DIR}/*; 
+do
+	for j in `grep -e "^|Object\|Entiteit" $i | sed 's/ //g'`; 
+	do
+		arr=(${j//|/ });
+		for l in "${!arr[@]}";
+		do
+			if [ "${arr[$l]}" != "Object" -a "${arr[$l]}" != "Entiteit" -a "${arr[$l]}" != "Kenmerk" ];
+			then
+				if [ ${k} -gt 0 ];
+				then
+	 				echo ", ";
+				fi
+
+				echo "\"${arr[$l]}\"";
+				k=$(( k + 1 ));	
+			fi
+		done
+	done
+done
+
+echo "],";
+echo "\"fysiek\" : [";
+
+list=`ls ${FYSIEK_DIR}/*/*.story| sed 's/ /##/g'`;
+k=0;
+l=0;
+for i in ${list}; 
+do
+	f=`basename "${i//##/ }"`;
+
+	m=0;
+	koppel=(`sed -n '/Logisch/,/Verwa/p' "${i//##/ }" | grep -v Verwa | tr -d '\n' | tr -d '\r' | sed 's/Log/\nLog/g' | sed 's/^[^:]*: //' | sed 's/ //g'`);
+	for j in `grep -e "^Scenario" "${i//##/ }" | sed 's/^[^:]*://' | sed 's/ /##/g' | sed 's/"/\\\\"/g' | tr -d '\r'`;
+	do
+		if [ ${l} -gt 0 ];
+		then
+			echo ", ";
+		fi
+
+		echo "{"
+		echo "\"scenario\" : \"${j//##/ }\",";
+		echo "\"koppel\" : \"${koppel[$m]//_0/_L0}\"";
+		l=$(( l + 1 ));	
+		m=$(( m + 1 ));	
+		echo "}";
+	done
+	k=$(( k + 1 ));	
+done
+
+echo "]";
+echo "}";
+echo "}";

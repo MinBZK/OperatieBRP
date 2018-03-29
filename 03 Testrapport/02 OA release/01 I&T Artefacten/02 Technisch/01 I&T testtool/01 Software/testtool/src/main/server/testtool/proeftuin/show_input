@@ -1,0 +1,27 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+. ./env
+
+echo "["
+
+count=0;
+for i in ${MULTIPLIER_GEMEENTE_DIR}/*; 
+do
+	if [ ! -e ${i} ];
+	then
+		break;
+	fi
+
+	if [ ${count} -gt 0 ];
+	then
+		echo ", ";
+	fi
+
+	basename=`basename $i`;
+	echo "\"${basename}\"";	
+	count=$((count + 1));
+done
+
+echo "]";

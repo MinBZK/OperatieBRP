@@ -1,0 +1,90 @@
+<style>
+	.table td, tr > th {
+	   text-align: center;   
+	}
+</style>
+<div class="container-fluid" ng-controller="stageOverviewController" ng-init="list();">
+
+	<div class="row">
+		<div class="col-md-8"></div>
+		<div class="col-md-4">
+			<div class="panel panel-info">
+				<div class="panel-heading">filter</div>
+				<div class="panel-body">
+					<input type="text" class="form-control input-sm" ng-model="filter" />
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="table-responsive">
+		<table class="table table-hover table-bordered table-striped table-fixed" in-view-container>
+			<thead>
+				<tr>
+					<th rowspan="2">
+						<i class="icon-asterisk"></i>
+					</th>
+					<th rowspan="2">
+						<i class="icon-user"></i>
+					</th>
+					<th rowspan="2">
+						<i class="icon-th"></i>
+					</th>
+					<th rowspan="2">IV</th>
+					<th rowspan="2">TC</th>
+					<th colspan="3">M01</th>
+					<th colspan="3">M02</th>
+				</tr>
+				<tr>
+					<th>MDB</th>
+					<th>GBA</th>
+					<th>BRP</th>
+					<th>MDB</th>
+					<th>GBA</th>
+					<th>BRP</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="(key, n) in content | filter:filter | filter:btn:true | orderBy: 'test'" ng-init="show=((content | filter:filter | filter:btn:true | orderBy: 'test')[key-1].test != n.test)">
+					<th rowspan="{{ occurences[n.test] }}" ng-if="show">
+						{{ n.test }}
+					</th>
+					<th>
+						<div class="row">
+							<div class="col-xs-12 col-md-12">{{ n.anr }}</div>
+						</div>
+					</th>
+					<th>
+						<div class="row">
+							<div class="col-xs-12 col-md-12">{{ n.excel }}</div>
+						</div>
+					</th>
+					<td>
+						<button ng-class="n.results['IV'].class ? n.results['IV'].class : 'disabled'" class="btn btn-xs" ng-click="openType('IV', '', n.anr)">IV</button>
+					</td>
+					<td>
+						<button ng-class="n.results['TC'].class ? n.results['TC'].class : 'disabled'" class="btn btn-xs" ng-click="openType('TC', '', n.anr)">TC</button>
+					</td>
+					<td>
+						<button ng-class="n.results['M01']['SQL'].class ? n.results['M01']['SQL'].class : 'disabled'" class="btn btn-xs" ng-click="openType('M01', '', n.anr, 'SQL')">MDB</button>
+					</td>
+					<td>
+						<button ng-class="n.results['M01']['GBA'].class ? n.results['M01']['GBA'].class : 'disabled'" class="btn btn-xs" ng-click="openType('M01', '', n.anr, 'GBA')">GBA</button>
+					</td>
+					<td>
+						<button ng-class="n.results['M01']['BRP'].class ? n.results['M01']['BRP'].class : 'disabled'" class="btn btn-xs" ng-click="openType('M01', '', n.anr, 'BRP')">BRP</button>
+					</td>
+					<td>
+						<button ng-class="n.results['M02']['SQL'].class ? n.results['M02']['SQL'].class : 'disabled'" class="btn btn-xs" ng-click="openType('M02', '', n.anr, 'SQL')">MDB</button>
+					</td>
+					<td>
+						<button ng-class="n.results['M02']['GBA'].class ? n.results['M02']['GBA'].class : 'disabled'" class="btn btn-xs" ng-click="openType('M02', '', n.anr, 'GBA')">GBA</button>
+					</td>
+					<td>
+						<button ng-class="n.results['M02']['BRP'].class ? n.results['M02']['BRP'].class : 'disabled'" class="btn btn-xs" ng-click="openType('M02', '', n.anr, 'BRP')">BRP</button>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</div>

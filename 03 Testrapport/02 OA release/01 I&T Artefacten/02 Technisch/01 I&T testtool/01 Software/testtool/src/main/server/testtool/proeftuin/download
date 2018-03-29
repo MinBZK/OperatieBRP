@@ -1,0 +1,31 @@
+#!/bin/bash
+
+. ./env
+. ./functions
+
+readParams;
+
+ext="${bestand##*.}";
+case ${ext,,} in
+	jpg) 
+		echo "Content-Type: image/jpeg";
+		;;
+
+	zip) 
+		echo "Content-Type: application/zip";
+		;;
+
+	*)
+		echo "Content-Type: text/plain";
+		;;
+esac
+
+if [ "${bestand}" != "" -a -e ${MULTIPLIER_OUTPUT_DIR}/${bestand} ];
+then
+	echo "Content-Disposition: attachment; filename=\"${bestand}\""
+	echo "Content-Length: `stat -c %s ${MULTIPLIER_OUTPUT_DIR}/${bestand}`"
+fi
+
+echo 
+
+cat ${MULTIPLIER_OUTPUT_DIR}/${bestand}

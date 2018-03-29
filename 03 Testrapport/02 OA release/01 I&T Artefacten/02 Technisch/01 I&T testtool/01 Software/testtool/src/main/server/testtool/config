@@ -1,0 +1,106 @@
+#!/bin/bash
+
+. ./env
+
+for x in ${STAGES};
+do
+	for y in ${FLAVOURS};
+	do
+		if [ "${x}" != "IV" -o "${y}" == "SQL" ] && [ "${x}" != "TC" -o "${y}" == "GBA" ];
+		then
+			if [ ! -d "${STAGES_LOCATION}/${x}/${y}/expected" ];
+			then
+				mkdir -p "${STAGES_LOCATION}/${x}/${y}/expected";
+			fi
+
+			if [ ! -d "${STAGES_LOCATION}/${x}/${y}/raw" ];
+			then
+				mkdir -p "${STAGES_LOCATION}/${x}/${y}/raw";
+			fi
+
+			if [ ! -d "${STAGES_LOCATION}/${x}/${y}/actual" ];
+			then
+				mkdir -p "${STAGES_LOCATION}/${x}/${y}/actual";
+			fi
+
+			if [ ! -d "${STAGES_LOCATION}/${x}/${y}/tmp" ];
+			then
+				mkdir -p "${STAGES_LOCATION}/${x}/${y}/old";
+			fi
+
+			if [ ! -d "${STAGES_LOCATION}/${x}/${y}/old" ];
+			then
+				mkdir -p "${STAGES_LOCATION}/${x}/${y}/old";
+			fi
+		fi
+	done
+done
+
+find ${OUTPUT_LOCATION} -type d -exec chmod 777 {} \;
+find ${OUTPUT_LOCATION} -type f -exec chmod 666 {} \;
+
+if [ ! -d "${BACKUP_LOCATION}" ];
+then
+	mkdir -p "${BACKUP_LOCATION}";
+fi
+
+if [ ! -d "${RESPONSE_LOCATION}" ];
+then
+	mkdir -p "${RESPONSE_LOCATION}";
+fi
+
+if [ ! -d "${RESULTS_LOCATION}" ];
+then
+	mkdir -p "${RESULTS_LOCATION}";
+fi
+
+if [ ! -d "${PL_LOCATION}" ];
+then
+	mkdir -p "${PL_LOCATION}";
+fi
+
+if [ ! -d "${AUTORISATIES_REQUEST_LOCATION}" ];
+then
+	mkdir -p "${AUTORISATIES_REQUEST_LOCATION}";
+fi
+
+if [ ! -d "${AUTORISATIES_RESPONSE_LOCATION}" ];
+then
+	mkdir -p "${AUTORISATIES_RESPONSE_LOCATION}";
+fi
+
+if [ ! -d "${UPLOAD_LOCATION}" ];
+then
+	mkdir -p "${UPLOAD_LOCATION}";
+fi
+
+if [ ! -d "${LEVERING_LOCATION}" ];
+then
+	mkdir -p "${LEVERING_LOCATION}";
+fi
+
+if [ ! -d "${BIJHOUDING_LOCATION}" ];
+then
+	mkdir -p "${BIJHOUDING_LOCATION}";
+fi
+
+if [ ! -d "${TEMP_DIR}" ];
+then
+	mkdir -p "${TEMP_DIR}";
+fi
+
+if [ ! -e ${BSN_LIST_FILE} ];
+then
+	> ${BSN_LIST_FILE};
+fi
+
+if [ ! -e ${UPLOAD_BSN_LIST_FILE} ];
+then
+	> ${UPLOAD_BSN_LIST_FILE};
+fi
+
+if [ ! -e ${AFTERBURNER_DB_SCRIPTS} ];
+then
+	mkdir -p ${AFTERBURNER_DB_SCRIPTS};
+fi
+

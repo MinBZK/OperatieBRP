@@ -1,0 +1,59 @@
+<div>
+	<div ng-if="flavour != 'GBA' && flavour != 'BRP'">
+		<table class="table">
+			<thead>
+				<tr ng-if="datakey==0">
+					<th colspan="2" class="cell text-center">{{ timestamp | date : 'dd-MM-yyyy HH:mm:ss' }}</th>
+				</tr>
+				<tr>
+					<th class="cell">key</th>
+					<th class="cell">value</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr ng-repeat="(key, value) in data track by $index" ng-init="datakey2=key">
+					<td ng-if="other[datakey][key] != value" class="cell key {{ style }}"><strong>{{ key }}</strong></td>
+					<td ng-if="other[datakey][key] != value" class="cell value {{ style }}">{{ value }}</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div ng-if="flavour == 'BRP'">
+		<div ng-repeat="header in headers">
+			<table class="table table-bordered">
+				<tr>
+					<th colspan="2">{{ header }}</th>
+				</tr>
+				<tr>
+					<th>key</th>
+					<th>value</th>
+				</tr>
+				<tr ng-repeat="(key, value) in data[header] track by $index" ng-init="datakey2=key">
+					<td ng-if="other[header][key] != value" class="{{ style }}"><strong>{{ key }}</strong></td>
+					<td ng-if="other[header][key] != value" class="{{ style }}">{{ value }}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div ng-if="flavour == 'GBA'">
+		<div ng-repeat="(key, value) in data track by $index" ng-init="datakey2=key">
+			<table class="table">
+				<thead>
+					<tr ng-if="key==0">
+						<th colspan="2" class="cell text-center">{{ timestamp | date : 'dd-MM-yyyy HH:mm:ss' }}</th>
+					</tr>
+					<tr>
+						<th class="cell">key</th>
+						<th class="cell">value</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr ng-repeat="(k, v) in value track by $index">
+						<td ng-if="other[datakey][datakey2][k] != v" class="cell key {{ style }}"><strong>{{ ELEMENTS[k] }}</strong> <small>({{ k }})</small></td>
+						<td ng-if="other[datakey][datakey2][k] != v" class="cell value {{ style }}">{{ v }}</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

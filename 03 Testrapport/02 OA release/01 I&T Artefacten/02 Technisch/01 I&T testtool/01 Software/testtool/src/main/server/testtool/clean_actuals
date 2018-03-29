@@ -1,0 +1,37 @@
+#!/bin/bash
+echo Content-type: text/plain
+
+stage="M01"
+
+. ./env
+. ./functions
+
+echo ""
+
+. ./meta
+
+while [ -e "${STAGES_LOCATION}/${stage}" ];
+do
+	rm -r ${STAGES_LOCATION}/${stage}/*/actual 2> /dev/null
+	rm -r ${STAGES_LOCATION}/${stage}/*/raw 2> /dev/null
+	rm -r ${STAGES_LOCATION}/${stage}/*/old 2> /dev/null
+	rm -r ${STAGES_LOCATION}/${stage}/*/tmp 2> /dev/null
+
+	if [ "${stage}" != "TC" -a "${stage}" != "IV" ];
+	then
+		clean_bsn ${stage} ${BSN_LIST_FILE}
+		clean_bsn ${stage} ${UPLOAD_BSN_LIST_FILE}
+
+		count=$(( 10#${stage//M/} ));
+		count=$(( count + 1 ));
+		stage=M$( printf "%02d" ${count} );
+	else
+		stage="M01";
+	fi
+done
+
+sleep 2;
+
+. ./config
+
+sleep 2;

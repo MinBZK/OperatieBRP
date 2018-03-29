@@ -1,0 +1,8 @@
+#!/bin/bash
+
+for i in `docker ps -a | grep "brp-afnemerindicaties-gba\|brp-bevraging-gba" | awk '{print $1}'`;
+do
+	docker cp ./conf/brp/brp-alles-*.properties $i:/opt/appserver/env/;
+	docker stop $i;
+	docker start $i;
+done

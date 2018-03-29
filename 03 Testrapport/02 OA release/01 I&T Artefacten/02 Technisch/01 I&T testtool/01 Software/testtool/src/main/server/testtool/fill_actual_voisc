@@ -1,0 +1,104 @@
+#!/bin/bash
+echo Content-type: text/plain
+
+if [ "${1}" != "" ];
+then
+        stage="${1}";
+	if [ "${2}" != "" ];
+	then
+		bsn_file=${2};
+		if [ "${3}" != "" ];
+		then
+			max=${3};
+		fi
+	fi
+fi
+
+flavour="GBA";
+
+. ./env
+. ./functions
+
+if [ "${bsn_file}" == "" ];
+then
+        bsn_file=${BSN_LIST_FILE};
+fi
+
+echo ""
+
+function getvars {
+	line=$1;
+
+	export bnr=`echo ${line} | cut -c 9-12 | tr '[:lower:]' '[:upper:]'`;
+	export afn=`echo ${line} | sed 's/^.*|\(.*\)$/\1/'`;
+	export ber=`echo ${line} | sed 's/^\(.*\)|.*$/\1/'`;
+
+	abbr=`echo ${bnr} | cut -c 1-2`;
+	if [ "${abbr}" == "AG" -o "${abbr}" == "NG" -o "${abbr}" == "WA" ];
+	then
+		# cut 100, more than one occurences of 0110010
+		export anr=`echo ${line} | cut -c -100 | sed 's/^.*0110010\([0-9]\{10\}\).*$/\1/'`;
+	else 
+		if [ "${abbr}" == "GV" ];
+		then
+			export anr=`echo ${line} | cut -c 13-22`;
+		fi
+	fi
+}
+
+line=`cat "${GBA_QUERY_FILE}" | sed 's/^#.*$//' | tr -d '\n' | head -1`;
+db=`echo ${line} | awk -F ';' '{print $1}'`;
+determine_db "${db}";
+query=`echo ${line} | awk -F ';' '{print $2}'`;
+
+# once max provided, modify query
+if [ "${max}" != "" ];
+then
+	query=$( echo ${query} | sed "s/and/and id>${max} and/" );
+fi
+
+echo query=${query};
+
+export PGPASSWORD=${db_password}
+# only supports Agxx Gvxx Ngxx Waxx messages
+lines=`psql -A -h ${db_host} -U ${db_user} -d ${db_name} -p ${db_port} -t -S -c "${query}" | sed 's/ /_/g' | grep -E '00000000(Ag[0-9][0-9]|Gv[0-9][0-9]|Wa[0-9][0-9]|Ng[0-9][0-9])'`;
+
+#reset all files
+rm ${RAW_LOCATION}/*.GBA 2> /dev/null
+
+# place in actual directory
+for i in ${lines};
+do
+	getvars ${i}
+	echo "bnr: ${bnr}, anr: ${anr}, afn: ${afn}"
+	file="${RAW_LOCATION}/LO3-${bnr}_${anr}_${afn}.GBA"
+	
+	if [ -e ${file} ];
+	then
+		echo "${ber//_/ }" >> ${file}
+	else
+		echo "${ber//_/ }" > ${file}
+	fi
+
+	mes=`echo ${ber}`;
+	abbr=`echo ${bnr} | cut -c 1-2`;
+	case ${abbr} in 
+		AG)
+			ber=`echo ${mes} | cut -c 22-`;
+			;;
+		NG)
+			ber=`echo ${mes} | cut -c 13-`;
+			;;
+		GV)
+			ber=`echo ${mes} | cut -c 23-`;
+			;;
+		WA)
+			ber=`echo ${mes} | cut -c 31-`;
+			;;
+	esac
+
+        excel=$( grep ${anr} ${bsn_file} | head -n 1 | awk '{print $2}' );
+        bsn=$( grep ${anr} ${bsn_file} | head -n 1 | awk '{print $3}' );
+        save_to_bsn "${stage}" "${excel}" "${bsn}" "${anr}" "${bsn_file}";
+done
+

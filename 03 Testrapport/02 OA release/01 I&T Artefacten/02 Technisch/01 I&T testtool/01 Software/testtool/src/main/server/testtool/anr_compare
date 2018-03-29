@@ -1,0 +1,37 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+dat=`date`;
+
+. ./env
+. ./functions
+
+i=0;
+echo "[";
+
+list=`grep -e "-\{0,1\}${stage}-\{0,1\}" ${BSN_LIST_FILE} | sed 's/ /_/g'`;
+
+for b in ${list};
+do
+        a1=`echo $b | awk -F '_' '{print $2}' | tr -d '-'`;
+        a2=`echo $b | sed 's/.*_\(.*\)_.*$/\1/'`;
+        a3=`echo $b | sed 's/.*_\(.*\)$/\1/' | tr -d '\r'`;
+
+	if [ $i -gt 0 ];
+	then
+		echo ", ";
+	fi
+
+	echo "{"
+	echo '	"bsn":"'${a2}'",';
+	echo '	"anr":"'${a3}'",';
+	echo '	"excel":"'${a1}'",';
+
+	stage_compare "${stage}" "" "${flavour}" "${a3}";
+
+	echo "}"
+	i=$(($i+1));
+done
+echo "]";
+

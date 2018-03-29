@@ -1,0 +1,153 @@
+#!/bin/bash -x
+# needed for diacritic characters
+export LANG=en_US.UTF-8
+
+. ./env
+. ./functions
+
+f=$1
+j=$2
+anr=$3
+
+basename=`basename "$j" .txt`;
+
+HEAD_LENGTH=1;
+HEAD_LENGTH_LENGTH=4;
+CATEGORY_LENGTH=2;
+SUB_LENGTH=4;
+LENGTH_LENGTH=3;
+
+walk=0;
+filter_file="${j}";
+filter_group=`basename "${filter_file}" | sed 's/\([^_]*\)_.*/\1/'`;
+message=`cat "${f}" | sed 's/ /#/g'`;
+
+# als bericht niet leeg is
+if [ "${message//#/}" != "" ];
+then
+
+	bnr=`echo ${message} | cut -c 9-12 | tr '[:lower:]' '[:upper:]'`;
+	abbr=`echo ${bnr} | cut -c 1-2`;
+	case ${abbr} in
+		LG)
+			message=`echo ${message} | cut -c 49-`;
+			;;
+		AG)
+			message=`echo ${message} | cut -c 22-`;
+			;;
+		NG)
+			message=`echo ${message} | cut -c 13-`;
+			;;
+		GV)
+			message=`echo ${message} | cut -c 23-`;
+			;;
+		WA)
+			message=`echo ${message} | cut -c 31-`;
+			;;
+	esac
+	
+	walk=$(( walk + HEAD_LENGTH ));
+	message_length=`echo ${message:$walk:$HEAD_LENGTH_LENGTH} | sed 's/^0*//'`;
+	walk=$(( walk + HEAD_LENGTH_LENGTH ));
+	
+	total=0;
+	out="";
+	
+	# associative array
+	declare -A group_arr=();
+	
+	for (( walk=${walk}; ${walk} < ${message_length}; walk=$(( walk + 1 )) ))
+	do
+		group=${message:$walk:$CATEGORY_LENGTH};
+		walk=$(( walk + CATEGORY_LENGTH ));
+		
+		group_length=${message:$walk:$LENGTH_LENGTH};
+		group_length=`echo ${group_length} | sed 's/^0*//'`;
+		walk=$(( walk + LENGTH_LENGTH ));
+	
+		if [[ ${group} == ${filter_group} ]];
+		then
+			# waar stond de placeholder
+			instruction=($( grep ${anr} ${PLACEHOLDER_LIST_FILE} | awk '{print $4}' | sed 's/\(VandaagPlus\|VandaagMinus\)\([[:digit:]]*\)/\1 \2/' ));
+			placeholder=($( grep ${anr} ${PLACEHOLDER_LIST_FILE} | awk '{print $5}' | sed 's/\./ /' ));
+			placeholder_group=${placeholder[0]};
+			placeholder_rubr=${placeholder[1]};
+	
+			content="";
+			# associative array
+			declare -A rubr_arr=();
+	
+			for (( subwalk=${walk}; ${subwalk} < $(( walk + group_length )); subwalk=$(( subwalk + 1 )) ))
+			do
+				rubr=${message:$subwalk:$SUB_LENGTH};
+				subwalk=$(( subwalk + SUB_LENGTH ));
+		
+				rubr_length=${message:$subwalk:$LENGTH_LENGTH};
+				rubr_length=`echo ${rubr_length} | sed 's/^0*//'`;
+				subwalk=$(( subwalk + LENGTH_LENGTH ));
+	
+				if [[ true ]];
+				then
+					if [ "${placeholder}" != "" ];
+					then
+						if [ ${group##0} -eq ${placeholder_group} -a ${rubr##0} -eq ${placeholder_rubr} ];
+						then
+							calc_date="";
+							if [ "${instruction[0]}" == "VandaagPlus" ];
+							then
+								calc_date=$( date '+%Y%m%d' -d "+${instruction[1]} days" );
+							elif [ "${instruction[0]}" == "VandaagMinus" ];
+							then
+								calc_date=$( date '+%Y%m%d' -d "-${instruction[1]} days" );
+							fi
+	
+							if [ "${calc_date}" == "${message:$subwalk:$rubr_length}" ];
+							then
+								new_text="MATCH";
+								replace_with=`grep ${rubr} ${filter_file} | awk -F ';' '{print $3}' | tr -d '\r\n'`;
+	
+								if [ "${replace_with}" != "" ];
+								then
+									new_text=$( echo ${replace_with} );
+								fi
+	
+								rubr_arr[${rubr}]=`printf "%s%03d%s" "${rubr}" "${#new_text}" "${new_text}"`;
+							else
+								rubr_arr[${rubr}]=`printf "%s%03d%s" "${rubr}" "${rubr_length}" "${message:$subwalk:$rubr_length}"`;		
+							fi
+						else
+							rubr_arr[${rubr}]=`printf "%s%03d%s" "${rubr}" "${rubr_length}" "${message:$subwalk:$rubr_length}"`;		
+						fi
+					else
+						rubr_arr[${rubr}]=`printf "%s%03d%s" "${rubr}" "${rubr_length}" "${message:$subwalk:$rubr_length}"`;		
+					fi
+				fi
+	
+				content=`printf "%s%s" "${content}" "${rubr_arr[${rubr}]}"`;
+		
+				subwalk=$(( subwalk + rubr_length ));
+				subwalk=$(( subwalk - 1 ));
+			done
+	
+			out=`printf "%s%s%03d%s" "${out}" "${group}" "${#content}" "${content}"`;
+			group_arr[${#content}]=$( printf "%s%s%03d%s" "${group_arr[${#content}]}" "${group}" "${#content}" "${content}" );
+		fi
+		
+		walk=$(( walk + group_length - 1 ));
+	done
+	
+	keys=$(
+		for i in ${!group_arr[@]};
+		do
+			echo ${i};
+		done | sort -n 
+	);
+	
+	printf "%05d%s" "${#out}"
+	for i in ${keys};
+	do
+		printf "%s" "${group_arr[${i}]//#/ }"
+	done
+else
+	echo "00000";
+fi

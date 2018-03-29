@@ -1,0 +1,77 @@
+#!/bin/bash
+echo Content-type: application/json
+echo
+
+POST_DATA=$(</dev/stdin)
+
+dat=`date`;
+
+. ./env
+
+declare -a var_array;
+b=`echo ${POST_DATA} | tr -d '{}' | sed 's/ /__/g' | sed 's/","/"\n"/g' | sed 's/],"/\n "/g'`;
+mapfile -t var_array <<< "${b}";
+
+TEMP_SQL_FILE=${TEMP_DIR}/gbav_ai_query-${anr}.sql;
+echo "-- START" > ${TEMP_SQL_FILE};
+
+k=0;
+only_once=0;
+while (( ${#var_array[@]} > $k ));
+do
+	element=$( echo ${var_array[k]} | sed 's/^.*\[//' );
+        var=(${element//:/ });
+        value=`echo ${var[1]} | sed 's/^\"\(.*\)\"$/\1/' | sed 's/"//g' | sed 's/^\]$//' | sed 's/\].*$//'`
+	key=$( echo ${var[0]} | sed 's/^.*\[//' | sed 's/^\]$//' | sed 's/"//g' );
+
+	if [ "${key}" != "" ];
+	then
+        	export ${key}="${value}";
+	fi
+
+        k=$(( $k + 1 ));
+
+	if [ "${anr}" != "" -a "${bsn}" != "" -a ${only_once} -eq 0 ];
+	then
+		sed "s/{anr}/${anr}/g" ${GBAV_DB_SCRIPTS}/delete_ai.sql | sed "s/{bsn}/${bsn}/g"  >> ${TEMP_SQL_FILE};
+		only_once=1;
+	fi
+
+	if [ "${stapel}" != "" -a "${volgnummer}" != "" -a "${ingangsdatum}" != "" -a "${afnemer}" != "" ];
+	then
+		if [ "${afnemer}" == "-" ];
+		then
+			afnemer="NULL";
+		fi
+
+		sed "s/{anr}/${anr}/g" ${GBAV_DB_SCRIPTS}/add_ai.sql | sed "s/{bsn}/${bsn}/g" | sed "s/{stapel}/${stapel}/g" | sed "s/{volgnummer}/${volgnummer}/g" | sed "s/{afnemer}/${afnemer//__/ }/g" | sed "s/{ingangsdatum}/${ingangsdatum}/g" >> ${TEMP_SQL_FILE}
+
+		stapel="";
+		volgnummer="";
+		ingangsdatum="";
+		afnemer="";
+	fi
+
+done
+
+export PGPASSWORD=${GBAV_DB_PASSWORD}
+echo "{";
+. ./meta
+echo ",";
+if [ -n "${TEMP_SQL_FILE}" ];
+then
+	psql --single-transaction -A -h ${GBAV_DB_HOST} -U ${GBAV_DB_USER} -d ${GBAV_DB_NAME} -q -1 -f ${TEMP_SQL_FILE} 2> ${TEMP_DIR}/query.error;
+
+	err=`cat ${TEMP_DIR}/query.error`;
+	if [ -n "${err}" ];
+	then
+		echo '"status" : "nok",';
+		echo '"error" : "'`sed 's/\"//g' ${TEMP_DIR}/query.error`'"';
+	else
+		echo '"status" : "ok"';
+	fi
+else
+	echo '"status" : "nok",';
+	echo '"error" : "verkeerd formaat bericht aangeboden"';
+fi
+echo "}";

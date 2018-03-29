@@ -1,0 +1,59 @@
+#!/bin/bash
+echo Content-type: application/json
+
+if [ "${1}" != "" ];
+then
+	upload="true";
+fi
+
+. ./env
+. ./functions
+
+echo ""
+
+echo "{";
+echo "\"info\": {";
+. ./meta
+echo ",";
+. ./available
+echo ",";
+echo "\"start\" : \"`date`\"";
+echo "},";
+
+echo "\"data\" : [";
+
+flav=${flavour};
+stag=${stage};
+substag=${substage};
+
+i=0;
+for b in `grep "${stage}" ${BSN_LIST_FILE} | sed 's/ /#/g'`;
+do
+	if [ $i -gt 0 ];
+        then
+                echo ", ";
+        fi
+
+        anr=`echo $b | awk -F '#' '{print $4}'`;
+	bsn=`echo $b | awk -F '#' '{print $3}'`;
+	excel=`echo $b | awk -F '#' '{print $2}'`;
+        tst=`echo ${b} | awk -F '#' '{print $2}' | sed 's/-.*//'`;
+
+	echo "{"
+        echo '  "anr":"'${anr}'",';
+        echo '  "test":"'${tst}'",';
+	echo "\"bsn\" : \"${bsn}\",";
+	echo "\"excel\" : \"${excel}\",";
+
+	bash ./comment "${anr}";
+
+	echo ',';
+	echo '"results" :';
+	compare ${anr} | tee ${RESULTS_LOCATION}/${anr}.json
+	echo "}";
+
+	i=$(( i + 1 ));
+done
+
+echo "]";
+echo "}";

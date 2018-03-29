@@ -1,0 +1,12 @@
+#!/bin/bash
+echo Content-type: text/plain
+echo ""
+
+. ./env
+
+export PGPASSWORD=${BRP_ISC_DB_PASSWORD};
+echo "draai SQL afterburner"
+psql -h ${BRP_ISC_DB_HOST} ${BRP_ISC_DB_NAME} -U ${BRP_ISC_DB_USER} -f ${AFTERBURNER_DB_SCRIPTS}/afterburner.sql -q 2> ${AFTERBURNER_DB_SCRIPTS}/afterburner.sql.error
+sleep 2
+
+echo "klaar";

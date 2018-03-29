@@ -1,0 +1,33 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+dat=`date`;
+
+. ./env
+. ./functions
+
+i=0;
+echo "{";
+
+. ./meta
+echo ",";
+
+list=`echo ${script} | tr ',' ' '`;
+for script in ${list};
+do
+        . ./files
+        if [ -n "${ACTUAL_FILE}" ];
+        then
+                log=${log}`cp -v ${ACTUAL_FILE} ${EXPECTED_LOCATION}/ 2>&1`;
+        else
+                log="${log}lijst is leeg ${ACTUAL_FILE}";
+        fi
+done
+
+echo "\"status\" : \"ok\", ";
+log=`echo ${log} | tr '\n' ','`;
+echo "\"log\" : \"${log}\"";
+echo "}";
+
+compare ${anr} > ${RESULTS_LOCATION}/${anr}.json

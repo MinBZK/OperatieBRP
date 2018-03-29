@@ -1,0 +1,39 @@
+#!/bin/bash
+
+. ./env
+
+echo "\"available\" : [";
+
+i=0;
+for j in `ls ${BACKUP_LOCATION}/*sql 2> /dev/null`;
+do
+	stage_temp=$( basename "${j}" _run.sql );
+	if [ -d "${MUT_LOCATION}/${stage_temp}" ];
+	then
+		f=`basename ${j} .sql`;
+
+		if [ $i -gt 0 ];
+		then
+			echo ", ";
+		fi
+
+		echo "\"${stage_temp}\"";
+		i=$(($i+1));
+	fi
+done
+echo "]";
+
+echo ",";
+i=0;
+echo "\"stages_available\" : [";
+for j in $( cat ${BSN_LIST_FILE} ${OTHER_BSN_LIST_FILE} | awk '{print $1}' | tr ',' '\n' | grep -v -e "IV\|TC" | sort | uniq );
+do
+	if [ $i -gt 0 ];
+	then
+		echo ", ";
+	fi
+
+	echo "\"${j}\"";
+	i=$(($i+1));
+done
+echo "]";

@@ -1,0 +1,95 @@
+#!/bin/bash
+
+. ./env
+
+date;
+
+stage=${1};
+mut_location="${2}";
+bsn_file="${3}";
+
+substage="GBA";
+
+if [ ! -e "${GBA_TEST_LOCATION}/${stage}" ]; 
+then 
+	mkdir -p "${GBA_TEST_LOCATION}/${stage}"; 
+else
+	rm -r "${GBA_TEST_LOCATION}/${stage}"/*;
+fi; 
+
+if [ "${stage}" != "" -a "${mut_location}" != "" -a -e "${mut_location}/testcase.properties" ];
+then
+	save_location="${PL_LOCATION}/${stage}";
+	if [ ! -d "${save_location}" ];
+	then
+		mkdir -p "${save_location}";
+	fi
+
+	echo "start ${GBA_TEST_LOCATION}/${stage}";
+
+	# maak locatie in migr_test	
+	test_location="${GBA_TEST_LOCATION}"/${stage}; 
+
+	cp -v "${mut_location}"/testcase.properties "${test_location}";
+
+	for j in $( ls "${mut_location}"/*xls "${mut_location}"/*csv 2> /dev/null | grep -v properties | sed 's/ /#/g' );
+	do
+		ext="${j##*.}";
+		b=`basename "${j}" .${ext}`;
+		be=$(echo 0100-uit-mailbox-`basename "${j}"`);
+		loc=${test_location}/`echo ${b} | sed 's/^[^-]*-//'`;
+	
+		if [ -d "${loc}" ]; 
+		then
+			rm -r "${loc}"; 
+		fi
+		mkdir -p ${loc};
+
+		excel=$(sed 's/^[^-]*-//' <<< ${b});
+        	if [ "${ext}" == "xls" ];
+		then
+			${XLS_TO_CSV} "${j//#/ }" "${stage}" "${excel}" > "${save_location}"/${b}.csv
+		else
+			cp "${j//#/ }" "${save_location}"/${b}.csv
+		fi
+		. ./variables "${save_location}"/${b}.csv < "${TAG_VARIABLE_LOCATION}";
+		
+		save_to_bsn "${stage}" "${excel}" "${bsn}" "${anr}" "${bsn_file}";
+		bash ./save_to_placeholder "${stage}" "${excel}" "${anr}";
+	
+		for i in "${GBA_TEMPLATE_LOCATION}"/*;
+		do
+			f=`echo ${i} | sed "s/{xls}/${be}/"`;
+			b2=`basename "${f}"`;
+			cp -v "${i}" "${loc}/${b2}";
+	
+			for k in `grep "\{.*\}" "${i}" | sed 's/.*{\([^}]*\)}.*/\1/'`;
+			do
+				eval var='${'${k}'}'
+				sed -i "s#{${k}}#${var}#g" "${loc}/${b2}";
+			done
+		done
+
+		cp -v "${j//#/ }" "${loc}/${be}";
+
+		# kopieer custom properties bestand bij de pl
+		if [ -e "${mut_location}/${b}.properties" ];
+		then
+			cp -v "${mut_location}/${b}.properties" "${loc}"/${be}.properties
+		fi
+
+		if [ -e "${mut_location}/${b}.jbpm" ];
+		then
+			echo ${anr} $( cat "${mut_location}/${b}.jbpm" | tr -d '\n\r ' ) >> ${OUTPUT_LOCATION}/DOORZETTEN.txt
+		fi
+	done
+
+	date;
+	echo "draai script ${MIGR_TEST_LOCATION}/${MIGR_TEST_SCRIPT} met argumenten ${GBA_TEST_LOCATION} ${stage}";	
+	cd ${MIGR_TEST_LOCATION} && ${MIGR_TEST_SCRIPT} "${GBA_TEST_LOCATION}" ${stage} ;
+	cd ${OLDPWD} ;
+	date;
+	echo "klaar";
+fi
+
+sleep 2

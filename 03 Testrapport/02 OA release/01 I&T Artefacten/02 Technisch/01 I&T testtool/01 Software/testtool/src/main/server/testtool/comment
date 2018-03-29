@@ -1,0 +1,25 @@
+#!/bin/bash
+
+. ./env
+
+anr=$1;
+ 
+comment="";
+if [ -e "${COMMENTS_LOCATION}"/${anr}.txt ];
+then
+	comment=$( cat "${COMMENTS_LOCATION}"/${anr}.txt | sed 's/^/"/' | sed 's/$/",/' | sed '$s/\,//g' );
+fi
+
+echo '  "commentArray": [';
+echo "${comment//\"/\\\"}" | sed 's/^\\"/"/' | sed 's/\\"$/"/' | sed 's/\\",$/",/';
+echo '],';
+
+omschrijving="";
+if [ -e "${OMSCHRIJVING_LOCATION}"/${anr}.txt ];
+then
+	omschrijving=$( cat "${OMSCHRIJVING_LOCATION}"/${anr}.txt | sed 's/^/"/' | sed 's/$/",/' | sed '$s/\,//g' );
+fi
+
+echo '  "omschrijvingArray": [';
+echo "${omschrijving//\"/\\\"}" | sed 's/^\\"/"/' | sed 's/\\"$/"/' | sed 's/\\",$/",/';
+echo ']';

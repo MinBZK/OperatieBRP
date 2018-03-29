@@ -1,0 +1,13 @@
+#!/bin/bash
+. ./env
+
+TEMP_FILE="./tmp/dump_brp.sql";
+
+export PGPASSWORD=brp
+pg_dump -c -U brp -h localhost brp > ${TEMP_FILE};
+
+export PGPASSWORD=brp
+psql -h ${BRP_DB_HOST} -U brp brp -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname='brp' AND pid <> pg_backend_pid();"
+psql -h ${BRP_DB_HOST} -U brp brp -c "DROP SCHEMA kern CASCADE; DROP SCHEMA autaut CASCADE; TRUNCATE TABLE ber.ber CASCADE;"
+psql -h ${BRP_DB_HOST} -U brp brp -f ${TEMP_FILE};
+

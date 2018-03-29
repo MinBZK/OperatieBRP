@@ -1,0 +1,133 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+dat=`date`;
+
+if [ "${1}" != "" ];
+then
+	stage="${1}";
+	if [ "${2}" != "" ];
+	then
+		count="${2}";
+	fi
+fi
+
+. ./env
+. ./functions
+
+function check {
+	local file="${1}";
+
+	line=`cat "${file}" | sed 's/^#.*$//' | tr -d '\r\n' | head -1`;
+	local db=`echo ${line} | awk -F ';' '{print $1}'`
+	local query=`echo ${line} | awk -F ';' '{print $2}'`
+	local expected_result=`echo ${line} | awk -F ';' '{print $3}'`
+	local timeout=`echo ${line} | awk -F ';' '{print $4}'`
+	local first_timeout=`echo ${line} | awk -F ';' '{print $5}'`
+
+	if [ "${first_timeout}" == "" ];
+	then
+		first_timeout=0;
+	fi
+
+	if [ "${count}" == "0" ];
+	then
+		sleep ${first_timeout};
+		echo "\"firstTimeout\" : \"${first_timeout}\",";
+	elif [ "${db}" != "BESTAND" ];
+	then
+		determine_db "${db}";
+	
+		actual_result="";
+		echo "\"db\" : \"name=${db_name} host=${db_host} user=${db_user} port=${db_port}\",";
+		export PGPASSWORD=${db_password};
+		actual_result=`psql -t -q -p ${db_port} -U ${db_user} -d ${db_name} -h ${db_host} -c "${query}"`;
+		actual_result=`echo ${actual_result//[[:space:]]/}`;
+	else
+		sec=$( date +%s );
+		most_recent=$( ls -t ${LEVERING_LOCATION}/*xml 2> /dev/null | head -1 );
+		if [ -e "${most_recent}" ];
+		then
+			stat=$( stat -c %Y "${most_recent}" );
+			diff=$(( sec - stat ));
+		else
+			diff=$(( query + 1 ));
+		fi
+
+		expected_result="1";
+		actual_result="0";
+
+		if [ ${diff} -gt ${query} ];
+		then
+			actual_result="1";
+		fi
+	fi
+
+	if [ "${expected_result}" != "${actual_result}" ];
+	then	
+		sleep ${timeout};
+		echo "\"timeout\" : \"${timeout}\"";
+		export TIMEOUT="${timeout}";
+	else
+		echo "\"timeout\" : \"0\"";
+		export TIMEOUT=0;
+	fi
+
+}
+
+echo "{"
+case "${stage}" in
+	IV)
+		echo "\"${stage}\" :  {";
+		check "${IV_LOCATION}"/${stage}.controle
+		echo "}";
+		;;
+	TC)
+		echo "\"${stage}\" :  {";
+		check "${IV_LOCATION}"/${stage}.controle
+		echo "}";
+		;;
+	M*)
+		j=0;
+		for i in "${MUT_CONTROLES}"/*.controle;
+		do
+			if [ $j -gt 0 ];
+			then
+				echo ",";
+			fi
+
+			name=`basename "${i}" .controle`;
+			echo "\"${name}\" :  {";
+			if [ -e "$i" ];
+			then
+				check "${i}";
+			fi
+			echo "}";
+
+			j=$(( j + 1 ));
+		done
+		;;
+	U*)
+		j=0;
+		for i in "${UPLOAD_CONTROLES}"/*.controle;
+		do
+			if [ $j -gt 0 ];
+			then
+				echo ",";
+			fi
+
+			name=`basename "${i}" .controle`;
+			echo "\"${name}\" :  {";
+			if [ -e "$i" ];
+			then
+				check "${i}";
+			fi
+			echo "}";
+
+			j=$(( j + 1 ));
+		done
+		;;
+esac
+echo "}";
+

@@ -1,0 +1,16 @@
+#!/bin/bash
+echo Content-type: text/plain
+
+. ./env
+
+echo ""
+
+echo "{";
+echo "\"afterburner\" : [";
+cat ${AFTERBURNER_DB_SCRIPTS}/afterburner.sql | sed 's/\([\"\]\)/\\\1/g' | sed 's/\t/    /g' | sed 's/^/"/' | sed 's/$/",/' | sed '$s/\,//g';
+echo "],";
+echo "\"log\" : [";
+cat ${AFTERBURNER_DB_SCRIPTS}/afterburner.sql.error | sed 's/\([\"\]\)/\\\1/g' | sed 's/\t/    /g' | sed 's/^/"/' | sed 's/$/",/' | sed '$s/\,//g'
+echo "]";
+
+echo "}";

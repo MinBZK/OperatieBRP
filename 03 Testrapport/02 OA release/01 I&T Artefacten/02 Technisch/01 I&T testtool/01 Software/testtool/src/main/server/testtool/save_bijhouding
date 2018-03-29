@@ -1,0 +1,17 @@
+#!/bin/bash
+echo "Content-Type: application/soap+xml; charset=utf-8";
+echo "Status: 200 OK";
+
+echo "";
+
+. ./env
+
+dat=$( echo $(( $(date +%s%N)/100 )) );
+POST_DATA=$(</dev/stdin);
+
+dir="${BIJHOUDING_LOCATION}";
+bestand="${dir}"/${dat}.xml
+
+echo "${POST_DATA}" | xmllint --format - > "${bestand}";
+
+echo '<soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/"><soap:Body></soap:Body></soap:Envelope>';

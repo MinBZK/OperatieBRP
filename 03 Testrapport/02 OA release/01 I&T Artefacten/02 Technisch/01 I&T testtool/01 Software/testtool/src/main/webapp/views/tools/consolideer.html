@@ -1,0 +1,141 @@
+<style>
+	.autocomplete-custom-template .item-title,
+	.autocomplete-custom-template .item-metadata {
+		display: block;
+		line-height: 2;
+	}
+	.autocomplete-custom-template li {
+		border-bottom: 1px solid #ccc;
+		height: auto;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		white-space: normal;
+	}
+	.autocomplete-custom-template li:last-child {
+		border-bottom-width: 0;
+	}
+</style>
+
+<div class="container" ng-init="init();" ng-controller="consolideerController">
+
+	<div class="row"><h1> </h1></div>
+	<div class="row"><h1> </h1></div>
+
+	<div class="panel panel-default">
+		<div class="panel-body">
+			<form name="myform">
+				<div class="row">
+					<div class="col-md-12 col-sm-12">
+				
+						<md-select ng-model="typeSelectedItem" placeholder="Type" class="md-no-underline" required>
+							<md-option value="SQL">SQL</md-option>
+							<md-option value="GBA">GBA</md-option>
+							<md-option value="BRP">BRP</md-option>
+						</md-select>
+
+						<md-checkbox ng-model="alleControles" aria-label="Alle controles">
+							Alle controles <strong>OF</strong>:
+						</md-checkbox>
+		
+						<md-autocomplete md-selected-item="controleSelectedItem"
+							md-no-cache="true"
+							ng-disabled="controleIsDisabled"
+							md-search-text="controleSearchText" 
+							md-items="item in querySearch(controleSearchText, controles)" 
+							md-item-text="item.display" md-min-length="0"
+							md-floating-label="Controle"
+							md-menu-class="autocomplete-custom-template"
+							ng-required="!alleControles">
+							<md-item-template>
+								<span md-highlight-text="controleSearchText">{{ item }}</span>
+							</md-item-template>
+						</md-autocomplete>
+
+						<md-checkbox ng-model="alleMomenten" aria-label="Alle momenten">
+							Alle momenten <strong>OF</strong>:
+						</md-checkbox>
+
+						<md-autocomplete md-selected-item="momentSelectedItem"
+							ng-disabled="momentIsDisabled"
+							md-search-text="momentSearchText" 
+							md-items="item in querySearch(momentSearchText, momenten)" 
+							md-item-text="item.display" md-min-length="0"
+							md-floating-label="Moment"
+							md-menu-class="autocomplete-custom-template"
+							ng-required="!alleMomenten">
+							<md-item-template>
+								<span md-highlight-text="momentSearchText">{{ item }}</span>
+							</md-item-template>
+						</md-autocomplete>
+						
+						<md-checkbox ng-model="heeftExpected" aria-label="Alleen als expecteds">
+							Alleen als expecteds aanwezig zijn
+						</md-checkbox>
+					</div>
+				</div>		
+				<div class="row">
+					<div class="col-md-11 col-sm-11" flex>
+						<md-autocomplete md-selected-item="anummerSelectedItem"
+							md-search-text="anummerSearchText" 
+							md-items="item in querySearch(anummerSearchText, anummers);" 
+							md-item-text="item[0]" md-min-length="0"
+							md-floating-label="A-nummer"
+							md-menu-class="autocomplete-custom-template">
+							<md-item-template>
+								<span class="item-title">
+									<i class="icon-user"></i> 
+									<span>{{ item[0] }}</span>
+								</span>
+								<span class="item-metadata">
+									<span>
+										<span>
+											<i class="icon-th"></i> 
+											<span>{{ item[1] }}</span>
+										</span>
+										<span>
+											<i class="icon-bookmark"></i> 
+											<span>{{ item[2] }}</span>
+										</span>
+									</span>
+								</span>
+							</md-item-template>
+						</md-autocomplete>
+					</div>
+					<div class="col-md-1 col-sm-1" flex>
+						<button type="button" class="pull-right btn btn-md btn-primary" ng-click="toevoegen();">Toevoegen</button>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-12 col-sm-12" flex>
+						<div ng-if="negeerAnummers.length > 0">
+							<md-divider></md-divider>
+							<h6>Lijst negeer A-nummers</h6>
+							<md-divider></md-divider>
+						</div>
+						<md-list>
+							<md-list-item class="md-1-line" ng-repeat="item in negeerAnummers track by $index">
+								<div class="md-list-item-text" layout="column">
+									<div flex>
+										<span><i class="icon-user"></i> {{ item[0] }} <i class="icon icon-remove" style="color: red;" ng-click="delete($index);"></i></span>
+									</div>
+								</div>
+								<md-divider></md-divider>
+							</md-list-item>
+						</md-list>					
+					</div>
+				</div>
+				
+				<div class="row"><br /></div>
+				
+				<div class="row">
+					<div class="col-md-12 col-sm-12">
+						<a class="btn btn-md btn-primary has-spinner" id="consolideer" ng-click="consolideer();">
+							<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+							Consolideer
+						</a>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

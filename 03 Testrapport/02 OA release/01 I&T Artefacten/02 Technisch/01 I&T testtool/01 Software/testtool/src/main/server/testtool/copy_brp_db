@@ -1,0 +1,41 @@
+#!/bin/bash
+echo Content-type: text/plain
+
+. ./env
+
+echo ""
+
+temp_file="${TEMP_DIR}/dump_brp.sql";
+
+brp_db_host=${BRP_ISC_DB_HOST};
+brp_db_name=${BRP_ISC_DB_NAME};
+brp_db_user=${BRP_ISC_DB_USER};
+brp_db_password=${BRP_ISC_DB_PASSWORD};
+
+echo "\"info\": {";
+# remove 'old' backups
+if [ -n "${stage}" -a "${stage}" != "IV" ];
+then
+	temp_file="${BACKUP_LOCATION}/${stage}_run.sql"
+else 
+	export PGPASSWORD=${BRP_IV_DB_PASSWORD};
+	pg_dump -c -U ${BRP_IV_DB_USER} -h ${BRP_IV_DB_HOST} ${BRP_IV_DB_NAME} > ${temp_file};
+fi
+
+echo "\"backup bestand\" : \"${temp_file}\",";
+echo "\"start\" : \"`date`\",";
+echo "\"argumenten\" : \"${stage}\",";
+
+export PGPASSWORD=${brp_db_password};
+psql -h ${brp_db_host} -U ${brp_db_user} ${brp_db_name} -c "SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname='brp' AND pid <> pg_backend_pid();"
+psql -h ${brp_db_host} -U ${brp_db_user} ${brp_db_name} -c "DROP SCHEMA kern CASCADE; DROP SCHEMA autaut CASCADE; TRUNCATE TABLE ber.ber CASCADE;"
+psql -h ${brp_db_host} -U ${brp_db_user} ${brp_db_name} -f ${temp_file} 2> "${TEMP_DIR}/dump.error";
+
+echo "\"ingelezen bestand op db\" : \"${brp_db_host} ${brp_db_user} ${brp_db_name}\",";
+
+. ./available
+
+echo ",";
+echo "\"klaar\" : \"`date`\"";
+echo "}";
+

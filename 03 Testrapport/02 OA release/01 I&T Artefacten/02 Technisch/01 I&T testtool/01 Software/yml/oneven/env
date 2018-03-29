@@ -1,0 +1,64 @@
+#!/bin/bash
+
+USE_SPG=0;
+
+export DOCKER_IP=$( hostname -i )
+export DOCKER_REGISTRY=
+
+if [[ $( hostname ) == "sit-dok01"* ]];
+then
+	export BRP_VERSION=release-143
+	export ALG_VERSION=release-143
+	export MIGRATIE_VERSION=release-143
+	export BRP_DB_HOST=sit-db01
+	export GBAV_DATABASE_IP=192.168.206.51
+	
+elif [[ $( hostname ) == "sit-dok03"* ]];
+then
+	export BRP_VERSION=release-144.3
+	export ALG_VERSION=release-144.3
+	export MIGRATIE_VERSION=release-144.3
+	export BRP_DB_HOST=sit-db08
+	export GBAV_DATABASE_IP=192.168.206.76
+	
+elif [[ $( hostname ) == "sit-dok05"* ]];
+then
+	export BRP_VERSION=release-145
+	export ALG_VERSION=release-145
+	export MIGRATIE_VERSION=release-145
+	export BRP_DB_HOST=sit-db07
+	export GBAV_DATABASE_IP=192.168.206.61
+	
+elif [[ $( hostname ) == "sit-dok07"* ]];
+then
+	export BRP_VERSION=137.1
+	export ALG_VERSION=137.1
+	export MIGRATIE_VERSION=137.1
+	export BRP_DB_HOST=sit-db02
+	export GBAV_DATABASE_IP=192.168.206.53
+	
+elif [[ $( hostname ) == "rvig-dok01"* ]];
+then
+	export BRP_VERSION=release-139.1
+	export ALG_VERSION=release-139.1
+	export MIGRATIE_VERSION=release-139.1
+	export BRP_DB_HOST=rvig-db01
+	export GBAV_DATABASE_IP=192.168.206.72
+	
+fi
+
+# hostname is niet configurabel
+export GBAV_DB_ENV_HOSTNAME=migr-gbavdatabase
+export GBAV_DB_ENV_PORT=5432
+
+if [ ${USE_SPG} -eq 0 ];
+then
+	export GBAV_DB_ENV_NAME=gbav
+	export GBAV_DB_ENV_USERNAME=gbav
+	export GBAV_DB_ENV_PASSWORD=gb4v
+else
+	export GBAV_DB_ENV_NAME=spg
+	export GBAV_DB_ENV_USERNAME=brp
+	export GBAV_DB_ENV_PASSWORD=brp
+fi
+

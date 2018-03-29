@@ -1,0 +1,75 @@
+#!/bin/bash
+dat=`date +%Y%m%d%H%M%S`;
+
+echo Content-type: text/csv
+echo Content-disposition: attachment\; name="export"\; filename="export-it_${dat}.csv"
+echo ""
+
+. ./env
+. ./functions
+
+count_ok=0;
+count_nok=0;
+count_nc=0;
+
+echo "test;anr;bsn;excel;IV;TC;M01;M02;opmerking"
+for b in `cat ${BSN_LIST_FILE} | sort -k2 | sed 's/ /#/g'`;
+do
+	tst=`echo $b | awk -F '#' '{print $2}' | sed 's/-.*//'`;
+	bsn=`echo $b | awk -F '#' '{print $3}'`;
+	anr=`echo $b | awk -F '#' '{print $4}'`
+	excel=`echo $b | awk -F '#' '{print $2}'`
+
+	for i in IV TC M01 M02;
+	do
+		val=$(cat ${RESULTS_LOCATION}/${anr}.json | tr -d '\n' | sed 's/, "TC"/,\n"TC"/' | sed 's/, "M01"/,\n"M01"/' | sed 's/, "M02"/,\n"M02"/' | grep "${i}" | sed 's/.*"status" : "//g' | sed 's/"}}\?,\?:\?$//g' );
+		case ${val} in 
+			ok)
+				val="OK"
+				export count_ok=$(( count_ok + 1 ));
+				export count_${i}_ok=$(( count_${i}_ok + 1 ));
+				;;
+			nok)
+				val="NOK"
+				export count_nok=$(( count_nok + 1 ));
+				export count_${i}_nok=$(( count_${i}_nok + 1 ));
+				;;
+			notchecked)
+				val="NC"
+				export count_nc=$(( count_nc + 1 ));
+				export count_${i}_nc=$(( count_${i}_nc + 1 ));
+				;;
+			*)
+				val="-";
+				;;
+		esac
+		export ${i}=${val};
+	done
+
+        omschrijving="";
+        if [ -e "${OMSCHRIJVING_LOCATION}"/${anr}.txt ];
+        then
+                omschrijving=$( cat "${OMSCHRIJVING_LOCATION}"/${anr}.txt | sed 's/\n/ /g' | sed 's/\[\([^\|]*\)|.*/\1/g' );
+        fi
+
+        comment="";
+        if [ -e "${COMMENTS_LOCATION}"/${anr}.txt ];
+        then
+                comment=$( cat "${COMMENTS_LOCATION}"/${anr}.txt | sed 's/\n/ /g' | sed 's/\[\([^\|]*\)|.*/\1/g' );
+        fi
+
+	echo "${omschrijving};=\"${tst}\";=\"${anr}\";=\"${bsn}\";=\"${excel}\";${IV};${TC};${M01};${M02};${comment}";
+done
+
+echo ";";
+echo ";";
+echo ";";
+echo ";";
+
+echo "totaal OK per stadium;;;;${count_IV_ok};${count_TC_ok};${count_M01_ok};${count_M02_ok};"
+echo "totaal NOK per stadium;;;;${count_IV_nok};${count_TC_nok};${count_M01_nok};${count_M02_nok};"
+echo "totaal NC per stadium;;;;${count_IV_nc};${count_TC_nc};${count_M01_nc};${count_M02_nc};"
+echo "totaal OK;;;${count_ok};;;;;"
+echo "totaal NOK;;;${count_nok};;;;;"
+echo "totaal NC;;;${count_nc};;;;;"
+echo "totaal;;;$((count_ok + count_nok + count_nc));;;;;"

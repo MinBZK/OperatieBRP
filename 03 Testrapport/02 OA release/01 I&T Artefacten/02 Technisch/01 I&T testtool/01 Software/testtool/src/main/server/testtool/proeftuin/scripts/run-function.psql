@@ -1,0 +1,50 @@
+create or replace function insert_gjb_data() returns integer as $$
+
+declare
+  maxima record;
+begin
+  select coalesce(MAX(lo3_bericht.lo3_bericht_id), 0) as b,
+         coalesce(MAX(lo3_bericht.bericht_activiteit_id), 0) as a,
+         coalesce(MAX(lo3_pl.pl_id), 0) as p
+    into maxima
+    from lo3_bericht, lo3_pl;
+
+  raise notice 'Maxima: b=%, a=%, p=%', maxima.b, maxima.a, maxima.p;
+
+  INSERT INTO lo3_bericht
+       ( lo3_bericht_id,
+         bericht_activiteit_id,
+         aanduiding_in_uit, medium, originator_or_recipient, bericht_data )
+  SELECT volgnummer + maxima.b + agent*100,
+         volgnummer + maxima.a + agent*100,
+         'I', 'N', agent, bericht
+    FROM gjb_data;
+
+  raise notice 'LO3 bericht -- done';
+
+  INSERT INTO lo3_pl
+       ( pl_id,
+         mutatie_dt,
+         mutatie_activiteit_id )
+  SELECT volgnummer + maxima.p + agent*100,
+         current_date,
+         volgnummer + maxima.a + agent*100
+    FROM gjb_data;
+
+  raise notice 'LO3 pl -- done';
+
+  INSERT INTO lo3_pl_persoon
+       ( pl_id,
+         persoon_type, stapel_nr, volg_nr, a_nr, burger_service_nr )
+  SELECT volgnummer + maxima.p + agent*100,
+         'P', 0, 0, anr::bigint, bsn::bigint
+    FROM gjb_data;
+
+  raise notice 'LO3 pl persoon -- done';
+
+  return 0;
+end
+
+$$ language plpgsql;
+
+select insert_gjb_data();

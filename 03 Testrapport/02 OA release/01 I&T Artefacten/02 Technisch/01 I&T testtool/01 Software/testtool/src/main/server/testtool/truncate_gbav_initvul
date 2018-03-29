@@ -1,0 +1,26 @@
+#!/bin/bash
+echo Content-type: text/plain
+echo ""
+
+. ./env
+
+export PGPASSWORD=${GBAV_DB_PASSWORD}
+
+if [ $type == "ai" ];
+then
+	psql -h ${GBAV_DB_HOST} ${GBAV_DB_NAME} --user ${GBAV_DB_USER} -c 'TRUNCATE TABLE initvul.initvullingresult_afnind CASCADE'
+	psql -h ${GBAV_DB_HOST} ${GBAV_DB_NAME} --user ${GBAV_DB_USER} -c 'TRUNCATE TABLE initvul.initvullingresult_afnind_regel CASCADE'
+	psql -h ${GBAV_DB_HOST} ${GBAV_DB_NAME} --user ${GBAV_DB_USER} -c 'TRUNCATE TABLE initvul.initvullingresult_afnind_stapel CASCADE'
+fi
+
+if [ $type == "aut" ];
+then
+	psql -h ${GBAV_DB_HOST} ${GBAV_DB_NAME} --user ${GBAV_DB_USER} -c 'TRUNCATE TABLE initvul.initvullingresult_aut CASCADE'
+fi
+
+if [ $type == "pl" ];
+then
+	psql -h ${GBAV_DB_HOST} ${GBAV_DB_NAME} --user ${GBAV_DB_USER} -c 'TRUNCATE TABLE initvul.initvullingresult CASCADE'
+fi
+
+sleep 2;

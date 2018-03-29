@@ -1,0 +1,79 @@
+<style>
+.drop-box {
+    background: #F8F8F8;
+    border: 5px dashed #DDD;
+    width: 100%;
+    height: 400px;
+    text-align: center;
+    padding-top: 25px;
+    margin: 10px;
+}
+.dragover {
+    border: 5px dashed #666;
+}
+</style>
+<div ng-controller="uploadController">
+
+	<status running="running" />
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="pull-right">
+				<a class="btn btn-md btn-danger" ng-click="resetAll();" ng-if="showResults">
+					Verwijder upload PL'en
+				</a>
+				<a class="btn btn-md btn-primary" ng-click="openResults();" ng-if="showResults">
+					Ga naar de resultaten
+				</a>
+			</div>
+		</div>	
+	</div>
+
+	<div class="row">
+		<div class="col-md-6 col-sm-7">
+			<div ngf-drop ngf-select ng-model="files" class="drop-box" 
+				ngf-drag-over-class="'dragover'" ngf-multiple="true" ngf-allow-dir="true"
+				accept="application/vnd.ms-excel,text/csv,text/xml" 
+				ngf-pattern="'application/vnd.ms-excel,text/csv,text/xml'">Sleep hier de SOAP, XLS en CSV bestanden heen</div>
+		</div>
+		<div class="col-md-6 col-sm-5">
+			<div class="row">
+			</div>
+			<div class="row"><h1> </h1></div>
+			<div class="row">
+				<div class="col-md-5 col-sm-5">
+					<div class="panel panel-default">
+						<div class="panel-heading">Geuploade bestanden</div>
+						<div class="panel-body">
+							<ul class="list-group">
+								<li class="list-group-item" ng-repeat="file in files">
+									{{ file.name }}
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-7 col-sm-7" ng-init="showUploadedFiles();">
+					<div class="panel panel-default">
+						<div class="panel-heading">Mutaties</div>
+						<div class="panel-body">
+							<ul class="list-group">
+								<li class="list-group-item" ng-repeat="file in uploaded_files">
+									{{ file.naam }}
+									<i class="icon icon-remove pull-right" style="color: red;" ng-click="deleteFile(file.naam);"></i>
+								</li>
+							</ul>
+						</div>
+						<div class="panel-footer text-center">
+							<a class="btn btn-md btn-primary has-spinner" id="execute" ng-click="execute();" ng-if="uploaded_files.length>0">
+								<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+								Uitvoeren
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+</div>

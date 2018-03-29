@@ -1,0 +1,142 @@
+#!/bin/bash
+
+. ./env
+. ./functions
+
+stage=${1};
+afnemerindicaties_location=${2};
+type=${3};
+
+if [ "${type}" == "BRP" ];
+then
+	if [ "${stage}" != "" -a "${afnemerindicaties_location}" != "" -a -e "${afnemerindicaties_location}/Plaatsen.properties" ];
+	then
+		save_location="${STAGES_OUTPUT_LOCATION}/${stage}/AI/raw";
+		if [ ! -d "${save_location}" ];
+		then
+			mkdir "${save_location}";
+		fi
+	
+		# wachten tot applicatie opgestart is
+		res=1;
+		while [ ${res} -ne  0 ];
+		do
+			wget -q -T 2 "http://${BRP_ONDERHOUD_AFNEMERINDICATIES_HOST}:${BRP_ONDERHOUD_AFNEMERINDICATIES_PORT}/${BRP_ONDERHOUD_AFNEMERINDICATIES_WSDL_PATH}" -O ${TEMP_DIR}/test.txt
+			res=$?;
+			sleep 20;
+		done
+		
+		# plaatsen ai via soap
+		endpoint=`cat "${afnemerindicaties_location}"/Plaatsen.properties | grep -e "^endpoint="| sed 's/^endpoint=\/\?//'`;
+		count=0;
+		
+		log_file=${TEMP_DIR}/afterburner.log;
+		for i in `cat "${afnemerindicaties_location}"/Afnemerindicaties.txt | tr '\t' ';'`;
+		do
+			echo `date` "${count}: plaats $i via webservice" >> ${log_file}
+			bsn=( ${i//;/ } );
+			bsn[2]=`echo ${bsn[2]} | tr -d '\r\n'`;
+	
+			temp_file="${save_location}"/${bsn[0]}_${bsn[1]}_${bsn[2]}_request.xml
+			sed "s/{bsn}/${bsn[0]}/" "${afnemerindicaties_location}"/Plaatsen_afnemerindicatie_levaut.xml | sed "s/{partijcode}/${bsn[1]}/" | sed "s/{levaut}/${bsn[2]}/" > ${temp_file}
+			wget -q --post-file=${temp_file} --header='Content-Type: text/xml;charset=UTF-8' "http://${BRP_ONDERHOUD_AFNEMERINDICATIES_HOST}:${BRP_ONDERHOUD_AFNEMERINDICATIES_PORT}/${endpoint}" -O "${save_location}"/${bsn[0]}_${bsn[1]}_${bsn[2]}_response.xml >> ${log_file}
+
+			anr=`grep ${bsn[0]} ${BSN_LIST_FILE} | awk '{print $4}' | tr -d ' _\-\r\n'`;
+			if [ "${anr}" != "" ];
+			then
+				save_to_bsn "${stage}" "" "${bsn[0]}" "${anr}" "${BSN_LIST_FILE}";
+			fi
+	
+			echo `date` "klaar met ${count}" >> ${log_file}
+			count=$(( count + 1 ));
+			usleep 100000;
+		done
+		
+		echo "klaar ${count}";
+	fi
+
+elif [ "${type}" == "GBA" ];
+then
+	if [ -e "${afnemerindicaties_location}"/testcase.properties ];
+	then
+		. ./variables /dev/null < ${TAG_VARIABLE_LOCATION}
+	
+		type="AI_${stage}";
+	
+		mkdir -p "${PL_LOCATION}/${type}";
+		template_file="${PL_LOCATION}/${type}/Bericht.csv";
+		${XLS_TO_CSV} "${afnemerindicaties_location}"/Bericht.xls dummy dummy | sed 's/;$//' > ${template_file}
+	
+		output_dir="${GBA_TEST_LOCATION}/${type}"
+		if [ ! -e "${output_dir}" ];
+		then
+			mkdir "${output_dir}";
+		else
+			rm -r "${output_dir}"/* 2> /dev/null;
+		fi;
+
+		count=0;
+
+		cp -v "${afnemerindicaties_location}"/testcase.properties "${output_dir}";
+		for i in `cat "${afnemerindicaties_location}"/Afnemerindicaties.txt | tr '\t' ';'`;
+		do
+			if [ "${i//[[:space:]]/}" != "" ];
+			then
+				line=( ${i//;/ } );
+				line[1]=`echo ${line[1]} | tr -d '\r\n'`;
+		
+				if [ ${count} -eq 0 ];
+				then
+					header=( ${line[@]} );
+				else
+					k=0;
+					while (( ${#line[@]} > $k ));
+					do
+						export ${header[${k}]}=${line[${k}]};
+						k=$(( k + 1 ));
+	
+					done
+	
+					command="cat ${template_file}";
+					# check environment
+					for j in `grep { "${template_file}" | sed 's/.*\({[^}]*}\).*/\1/' | tr -d '{}'`;
+					do
+						eval var='${'${j}'}';
+						command="${command} | sed 's#{${j}}#${var}#g'"
+					done
+
+					be="0100-uit-mailbox-${Anummer}.xls";
+					loc=${output_dir}/${Anummer}-${verzendendePartij};
+					mkdir ${loc};
+	
+					eval ${command} > ${PL_LOCATION}/${type}/${be}.csv;
+					${CSV_TO_XLS} ${PL_LOCATION}/${type}/${be}.csv ${loc}/${be}
+
+					save_to_bsn "${stage}" "" "" "${Anummer}" "${BSN_LIST_FILE}";
+	
+					for i in "${GBA_TEMPLATE_LOCATION}"/*;
+					do
+						f=`echo ${i} | sed "s/{xls}/${be}/"`;
+		       				b2=`basename "${f}"`;
+						cp -v "${i}" "${loc}/${b2}";
+	
+	    					for k in `grep "\{.*\}" "${i}" | sed 's/.*{\([^}]*\)}.*/\1/'`;
+						do
+							eval var='${'${k}'}'
+				       			sed -i "s#{${k}}#${var}#g" "${loc}/${b2}";
+						done
+					done
+				fi
+	
+				count=$(( count + 1 ));
+			fi
+		done
+
+		date;
+		echo "draai script ${MIGR_TEST_LOCATION}/${MIGR_TEST_SCRIPT} met argumenten ${GBA_TEST_LOCATION} ${type}";
+		cd ${MIGR_TEST_LOCATION} && ${MIGR_TEST_SCRIPT} "${GBA_TEST_LOCATION}" ${type} ;
+		cd ${OLDPWD} ;
+		date;
+		echo "klaar";
+	fi
+fi

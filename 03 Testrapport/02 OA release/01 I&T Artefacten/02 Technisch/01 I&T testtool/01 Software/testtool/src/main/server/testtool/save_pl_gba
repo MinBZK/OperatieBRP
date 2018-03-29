@@ -1,0 +1,66 @@
+#!/bin/bash
+echo Content-type: application/json
+echo
+
+POST_DATA=$(</dev/stdin)
+
+dat=`date`;
+
+. ./env
+. ./functions
+
+export PGPASSWORD=${GBAV_DB_PASSWORD}
+
+declare -a var_array;
+b=`echo ${POST_DATA} | tr -d '{}' | sed 's/ /__/g' | sed 's/","/"\n"/g'`;
+mapfile -t var_array <<< "${b}";
+
+k=0;
+while (( ${#var_array[@]} > $k ));
+do
+        var=(${var_array[k]//\":\"/\" \"});
+        value=`echo ${var[1]} | sed 's/^\"\(.*\)\"$/\1/'`
+        export ${var[0]//\"/}="${value}";
+        k=$(( $k + 1 ));
+done
+
+query=${TEMP_DIR}/gbav_query-${anr}.sql
+out=`psql -A -h ${GBAV_DB_HOST} -U ${GBAV_DB_USER} -d ${GBAV_DB_NAME} -t -S -c "SELECT 1 FROM lo3_pl_persoon WHERE a_nr='${anr}'"`;
+b=`echo ${bericht} | sed "s/'/''/g" | sed 's/__/ /g' | sed 's#\/#\\\/#g' | sed 's/\&/\\\&/g'`;
+datum_opschorting=$( echo ${bericht} | sed 's/.*6710008\([[:digit:]]\{8\}\).*/\1/' );
+reden_opschorting=$( echo ${bericht} | sed 's/.*6720001\([A-Z]\).*/\1/' );
+if [ "${out}" == "" ];
+then
+	if [ ${#reden_opschorting} -eq 1 ];
+	then
+		sed "s/{anr}/${anr}/g" ${GBAV_DB_SCRIPTS}/add_bericht_opschorting.sql | sed "s/{datum_opschorting}/${datum_opschorting}/g" |sed "s/{reden_opschorting}/${reden_opschorting}/g" | sed "s/{bsn}/${bsn}/g" | sed "s/{bericht}/${b}/g" | sed "s/{originator_or_recipient}/${originator_or_recipient}/g" | sed "s/{mutatie_dt}/${mutatie_dt//__/ }/g" > ${query}
+	else
+		sed "s/{anr}/${anr}/g" ${GBAV_DB_SCRIPTS}/add_bericht.sql | sed "s/{bsn}/${bsn}/g" | sed "s/{bericht}/${b}/g" | sed "s/{originator_or_recipient}/${originator_or_recipient}/g" | sed "s/{mutatie_dt}/${mutatie_dt//__/ }/g" > ${query}
+	fi
+else 
+	sed "s/{anr}/${anr}/g" ${GBAV_DB_SCRIPTS}/update_bericht.sql | sed "s/{bsn}/${bsn}/g" | sed "s/{bericht}/${b}/g" | sed "s/{originator_or_recipient}/${originator_or_recipient}/g" | sed "s/{mutatie_dt}/${mutatie_dt//__/ }/g" > ${query}
+fi
+
+f=`cat ${query}`;
+
+echo "{";
+if [ -n "${f}" ];
+then
+	psql --single-transaction -A -h ${GBAV_DB_HOST} -U ${GBAV_DB_USER} -d ${GBAV_DB_NAME} -q -1 -f ${query} 2> ${TEMP_DIR}/query${anr}.error;
+
+	err=`cat ${TEMP_DIR}/query${anr}.error`;
+	if [ -n "${err}" ];
+	then
+		echo '"status" : "nok",';
+		echo '"error" : "'`sed 's/\"//g' ${TEMP_DIR}/query${anr}.error`'"';
+	else
+		echo '"status" : "ok"';
+
+		save_to_bsn "IV" "${excel}" "${bsn}" "${anr}"; 
+		save_to_bsn "TC" "${excel}" "${bsn}" "${anr}"; 
+	fi
+else
+	echo '"status" : "nok",';
+	echo '"error" : "verkeerd formaat bericht aangeboden"';
+fi
+echo "}";

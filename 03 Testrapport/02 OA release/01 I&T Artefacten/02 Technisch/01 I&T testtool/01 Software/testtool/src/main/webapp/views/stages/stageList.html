@@ -1,0 +1,168 @@
+<style>	
+	tr .row {
+    	cursor: pointer;
+	}
+	
+	.pull-right {
+	  float: right;
+	}
+	
+	.table .row {
+		font-size: 8pt;
+	}
+	
+	.table .cell, .table .head {
+		padding: 1px;
+		border-left: none;
+		border-right: none;
+	}
+
+	.modal-dialog {
+		width: 970px;
+    	margin-left: 240px;
+    	background-color: white;
+    }
+	
+</style>
+<div class="container" ng-init="list();">
+	<div class="row">
+		<div class="col-md-3 col-sm-3">
+			<ng-include src="'views/fragments/headerPanel.html'" />
+		</div>
+		<div class="col-md-2">
+			<button ng-if="showScripts && (flavour=='BRP' || flavour=='RESBIJ' || flavour=='RESBEV')" class="btn btn-lg btn-default" ng-click="showRaw();">Toon XML</button>
+			<button ng-if="showScripts && flavour=='GBA'" class="btn btn-lg btn-default" ng-click="showRaw();">Toon bericht</button>
+		</div>
+		<div class="col-md-4" ng-if="showBtn && showScripts">
+			<button ng-if="flavour == 'GBA' && stage != 'TC'" class="btn btn-lg btn-success" ng-click="copyAll(stage, '', flavour, anr, afnemer, berichtnummer);">Actual <span class="glyphicon glyphicon-arrow-right"></span> Expected</button>
+			<button ng-if="flavour == 'BRP'" class="btn btn-lg btn-success" ng-click="copyAll(stage, '', flavour, anr, afnemer, berichttype);">Actual <span class="glyphicon glyphicon-arrow-right"></span> Expected</button>
+			<button ng-if="flavour == 'RESBIJ'" class="btn btn-lg btn-success" ng-click="copyAll(stage, '', flavour, anr, berichttype);">Actual <span class="glyphicon glyphicon-arrow-right"></span> Expected</button>
+			<button ng-if="flavour == 'RESBEV'" class="btn btn-lg btn-success" ng-click="copyAll(stage, '', flavour, anr, berichttype);">Actual <span class="glyphicon glyphicon-arrow-right"></span> Expected</button>
+			<button ng-if="flavour == 'SQL' || stage == 'TC'" class="btn btn-lg btn-success" ng-click="copyAll(stage, '', flavour, anr);">Actual <span class="glyphicon glyphicon-arrow-right"></span> Expected</button>
+		</div>
+		<div class="col-md-4" ng-if="!showScripts || !showBtn">
+			<button ng-if="stage == 'IV'" class="btn btn-lg btn-primary" ng-click="showPL();">Open</button>
+		</div>
+		<div class="col-md-3">
+			<div class="panel panel-info">
+				<div class="panel-heading">filter</div>
+				<div class="panel-body">
+					<div class="row">
+						<div class="col-md-12">
+							<button class="btn btn-xs btn-primary" ng-click="btn={}; showBtn=false;"><span class="badge">{{ total }}</span></button>
+							<button class="btn btn-xs btn-success" ng-click="btn={'status': 'ok'}; showBtn=false;"><span class="badge">{{ ok }}</span></button>
+							<button class="btn btn-xs btn-warning" ng-click="btn={'status': 'notchecked'}; showBtn=true;"><span class="badge">{{ notchecked }}</span></button>
+							<button class="btn btn-xs btn-danger" ng-click="btn={'status': 'nok'}; showBtn=true;"><span class="badge">{{ nok }}</span></button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th ng-if="showBtn && showScripts"><input type="checkbox" ng-model="selectAll" ng-click="checkAll(selectAll);" /></th>
+				<th ng-repeat="h in header" ng-if="h != 'correct' && h != 'totaal'" data-sortable="true" data-field="{{ h }}">{{ h }}</th>
+			</tr>
+		</thead>
+		<tbody>
+			<tr ng-repeat="n in content | custom:btn">
+				<td ng-if="showBtn && showScripts && ! n.showCompare">
+					<input type="checkbox" ng-init="checkbox[n.naam]=false;" ng-model="checkbox[n.naam]" />
+				</td>
+				<td ng-if="! n.showCompare && (key != 'correct' && key != 'totaal')" ng-init="n.anr ? anr = n.anr : anr = anr; 
+					n.afnemer ? afnemer = n.afnemer : afnemer = afnemer; 
+					n.berichtnummer ? berichtnummer = n.berichtnummer : berichtnummer = berichtnummer;
+					n.berichttype ? berichttype = n.berichttype : berichttype = berichttype;
+					n.volgnr ? volgnr = n.volgnr : volgnr = volgnr;"				
+					ng-repeat="(key, value) in n" 
+					ng-click="flavour == 'GBA' ? ( stage =='TC' ? 
+						open(stage, substage, 'GBA', anr, n.naam) 
+						: open(stage, substage, 'GBA', anr, afnemer, berichtnummer, n.naam) ) 
+					: (flavour == 'BRP' ? 
+						open(stage, substage, 'BRP', anr, afnemer, berichttype, volgnr, n.naam) 
+						:  (flavour == 'RESBIJ' || flavour == 'RESBEV' ? 
+							open(stage, substage, flavour, anr, berichttype, volgnr, n.naam) 
+							: open(stage, substage, flavour, anr, n.naam) ) )">
+					<div ng-if="key != 'status'" ng-bind-html="value | stripPercent"></div>
+					<div ng-if="key == 'status'">
+						<button ng-if="value == 'ok'" class="btn btn-xs btn-success">ok</button>
+						<button ng-if="value == 'nok'" class="btn btn-xs btn-danger">niet gecontroleerd/ok</button>
+						<button ng-if="value == 'error'" class="btn btn-xs btn-danger">technische fout</button>
+						<button ng-if="value == 'notchecked'" class="btn btn-xs btn-warning">niet volledig gecontroleerd</button>
+					</div>
+				</td>
+				<td colspan="6" ng-if="n.showCompare">				
+					<div class="table data">
+						<div class="row" ng-if="n.status=='nok'">
+							<div class="col-md-1 col-sm-1"></div>
+							<div class="col-md-5 col-sm-5">
+								<div ng-repeat="(datakey, item) in n.data[0]">
+									<compare-element-table ng-if="! (item | equals:n.data[1][datakey])" style="error" data="item" other="n.data[1][datakey]" flavour="flavour" datakey="datakey" timestamp="n.timestamps.actual" headers="n.headers[0]" />	
+								</div>
+							</div>
+							<div class="col-md-5 col-sm-5">
+								<div ng-repeat="(datakey, item) in n.data[1]">
+									<compare-element-table ng-if="! (item | equals:n.data[0][datakey])" style="error" data="item" other="n.data[0][datakey]" flavour="flavour" datakey="datakey" timestamp="n.timestamps.expected" headers="n.headers[1]" />	
+								</div>
+							</div>
+							<div class="col-md-1 col-sm-1"></div>
+						</div>
+						<div class="row" ng-if="n.status=='notchecked'">
+							<div class="col-md-1 col-sm-1"></div>
+							<div class="col-md-10 col-sm-10">
+								<div ng-repeat="(datakey, item) in n.data[0]">
+									<compare-element-table ng-if="! (item | equals:n.data[1][datakey])" style="warning" data="item" flavour="flavour" datakey="datakey" timestamp="n.timestamps.actual" headers="n.headers[0]" />	
+								</div>
+							</div>
+							<div class="col-md-1 col-sm-1"></div>
+						</div>
+						<div class="row" ng-if="n.status=='ok'">
+							<div class="col-md-1 col-sm-1"></div>
+							<div class="col-md-10 col-sm-10">
+								<div ng-repeat="(datakey, item) in n.data[0]">
+									<compare-element-table style="success" data="item" flavour="flavour" datakey="datakey" timestamp="n.timestamps.actual" headers="n.headers[0]" />	
+								</div>
+							</div>
+							<div class="col-md-1 col-sm-1"></div>
+						</div>
+					</div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<div class="modal fade" id="loggingModal" tabindex="-1" role="dialog" aria-labelledby="loggingLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h4 class="modal-title" id="myModalLabel">Logging</h4>
+			</div>
+			<div class="modal-body">
+				<pre><div id="log"></div></pre>
+				<pre><div id="query"></div></pre>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">Sluiten</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="rawModal" tabindex="-1" role="dialog" aria-labelledby="rawLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-header">
+			<h4 class="modal-title">Berichtinhoud</h4>
+		</div>
+		<div class="modal-content">
+			<div ng-if="flavour=='BRP' || flavour=='RESBIJ' || flavour=='RESBEV'" class="col-md-12" hljs hljs-source="rawData"></div>
+			<div ng-if="flavour=='GBA'" class="col-md-12" style="word-wrap: break-word;">{{ rawData }}</div>
+		</div>
+		<div class="modal-footer"></div>
+	</div>
+</div>
+
+

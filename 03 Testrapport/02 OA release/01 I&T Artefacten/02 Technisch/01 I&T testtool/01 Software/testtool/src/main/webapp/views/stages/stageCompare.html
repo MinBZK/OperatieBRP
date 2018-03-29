@@ -1,0 +1,77 @@
+<style>
+	a {
+		color: #000000;
+	}
+	
+	div .success {
+		background-color: #dff0d8;
+	}
+	
+	div .error {
+		background-color: #f2dede;
+	}
+	
+	.modal-dialog {
+		width: 970px;
+    	margin-left: 240px;
+    	background-color: white;
+    }
+</style>
+<div class="container" ng-init="show();">
+	<div ng-class="alert">{{ alertMessage }}</div>
+
+	<div class="row">
+		<div class="col-md-3">
+			<ng-include src="'views/fragments/headerPanel.html'" />
+		</div>
+		<div class="col-md-2">
+			<button ng-if="flavour=='BRP'" class="btn btn-lg btn-default" ng-click="showRaw('actual');">Toon XML</button>
+			<button ng-if="flavour=='GBA'" class="btn btn-lg btn-default" ng-click="showRaw('actual');">Toon bericht</button>
+		</div>
+		<div class="col-md-4">
+			<button ng-if="flavour == 'GBA' && stage != 'TC'" class="btn btn-lg btn-success" ng-click="copy(stage, substage, flavour, anr, afnemer, berichtnummer, script);">Actual <span class="glyphicon glyphicon-arrow-right"></span> Expected</button>
+			<button ng-if="flavour == 'BRP'" class="btn btn-lg btn-success" ng-click="copy(stage, substage, flavour, anr, afnemer, berichttype, volgnr, script);">Actual <span class="glyphicon glyphicon-arrow-right"></span> Expected</button>
+			<button ng-if="(flavour != 'GBA' || stage == 'TC') && flavour !='BRP'" class="btn btn-lg btn-success" ng-click="copy(stage, substage, flavour, anr, script);">Actual <span class="glyphicon glyphicon-arrow-right"></span> Expected</button>
+		</div>
+		<div class="col-md-1"></div>
+		<div class="col-md-2 pull-right">
+			<button ng-if="flavour == 'GBA' && stage != 'TC'" class="btn btn-lg btn-danger" ng-click="delete(stage, substage, flavour, anr, afnemer, berichtnummer, script);"><span class="glyphicon glyphicon-warning-sign"></span> Verwijder Expected</button>
+			<button ng-if="flavour == 'BRP'" class="btn btn-lg btn-danger" ng-click="delete(stage, substage, flavour, anr, afnemer, berichttype, volgnr, script);"><span class="glyphicon glyphicon-warning-sign"></span> Verwijder Expected</button>
+			<button ng-if="flavour == 'SQL' || stage == 'TC'" class="btn btn-lg btn-danger" ng-click="delete(stage, substage, flavour, anr, script);"><span class="glyphicon glyphicon-warning-sign"></span> Verwijder Expected</button>
+		</div>
+		
+	</div>
+
+	<div class="row">
+		<div class="col-md-6">
+			<div class="row">
+				<div class="col-md-12 text-center"><h5>{{ timestamps.actual | date : 'dd-MM-yyyy HH:mm:ss' }}</h5></div>
+			</div>
+			<div ng-repeat="(p, item) in data[0]">
+				<compare-element data="data[0]" other="data[1]" flavour="flavour" datakey="p" status="status_table_actual" headers="headers[0]"></compare-element>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div class="row">
+				<div class="col-md-12 text-center"><h5>{{ timestamps.expected | date : 'dd-MM-yyyy HH:mm:ss' }}</h5></div>
+			</div>
+			<div ng-repeat="(p, item) in data[1]">					
+				<compare-element data="data[1]" other="data[0]" flavour="flavour" datakey="p" status="status_table_expected" headers="headers[1]"></compare-element>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="rawModal" tabindex="-1" role="dialog" aria-labelledby="rawLabel">
+	<div class="modal-dialog" role="document">
+		<div class="modal-header">
+			<h4 class="modal-title">Berichtinhoud</h4>
+		</div>
+		<div class="modal-content">
+			<div ng-if="flavour=='BRP'" class="col-md-12" hljs hljs-source="rawData"></div>
+			<div ng-if="flavour=='GBA'" class="col-md-12" style="word-wrap: break-word;">{{ rawData }}</div>
+		</div>
+		<div class="modal-footer"></div>
+	</div>
+</div>

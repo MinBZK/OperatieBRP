@@ -1,0 +1,184 @@
+#!/bin/bash
+
+. ./env
+. ./functions
+
+persist=$2;
+if [ "$2" == "1" ];
+then
+	persist=1;
+else
+	persist=0;
+fi
+
+function process {
+	if [ "${cut}" != "" ];
+	then
+		value=$( echo ${value} | sed "s/[^>]*${grep}//" | cut -c -${cut} );
+	fi
+
+	if [ "${strip}" != "" ];
+	then
+		value=$( echo ${value} | tr -d "${strip}" );
+	fi
+
+	if [ "${till}" != "" ];
+	then
+		value=$( echo ${value} | sed "s/[^>]*${grep}//" | sed "s/${till}.*$//" );
+	fi
+
+	if [ "${replace}" != "" ];
+	then
+		value=$( echo ${value} | tr ${replace//;/ } );
+	fi
+
+	if [ "${default}" != "" -a "${value}" == "" ];
+	then
+		value=${default};
+	fi
+}
+
+while read line;
+do
+	if [[ "${line}" == "#"* ]];
+	then
+		continue;
+	fi
+
+	if [ "${line//[[:space:]]*/}" == "" ];
+	then
+		continue;
+	fi
+
+	from="";
+	grep="";
+	head="";
+	kolom="";
+	cut="";
+	query="";
+	regel="";
+	replace="";
+	default="";
+	strip="";
+	json_property="";
+	till="";
+
+	v=$( echo $line | sed 's/^[^=]*=//' | tr -d '{}' | sed 's/|/\n/g' );
+	property=$( echo $line | sed 's/^\([^=]*\)=.*$/\1/' );
+	mapfile -t var_array <<< "${v}";
+	k=0;
+
+	while (( ${#var_array[@]} > $k ));
+	do
+	        element=$( echo ${var_array[k]} | sed 's/^.*\[//' | sed 's/ /#/g' );
+	        var=(${element//:\"/ \"});
+		if [ ${#var[@]} -eq 1 ];
+		then
+			key="";
+			value=${element};
+		else
+	        	key=$( echo ${var[0]} | sed 's/^.*\[//' | sed 's/^\]$//' | sed 's/"//g' );
+			if [ "${key}" == "query" ];
+			then
+				# om haakjes te ondersteunen, translate ( naar % en ) naar @
+	        		value=`echo ${var[1]} | tr '(' '%' | tr ')' '@' | sed 's/^\"\(.*\)\"$/\1/' | sed 's/"//g' | sed 's/^\]$//' | sed 's/\].*$//' | tr -d '[[:space:]]'`
+			else
+	        		value=`echo ${var[1]} | sed 's/^\"\(.*\)\"$/\1/' | sed 's/"//g' | sed 's/^\]$//' | sed 's/\].*$//' | tr -d '[[:space:]]'`
+			fi
+		fi
+
+		case ${key} in
+			vanaf)
+				from=${value};
+				;;
+			zoek)
+				grep=${value};
+				;;
+			voorkomen) 
+				head=${value};
+				;;
+			lengte) 
+				cut=${value};
+				;;
+			query) 
+				query=${value};
+				;;
+			kolom) 
+				kolom=${value};
+				;;
+			regel) 
+				regel=${value};
+				;;
+			strip) 
+				strip=${value};
+				;;
+			vervang) 
+				replace=${value};
+				;;
+			tot) 
+				till=${value};
+				;;
+			standaard) 
+				default=${value};
+				;;
+			property) 
+				json_property=${value};
+				;;
+			*)
+				;;
+		esac;
+		k=$(( $k + 1 ));
+	done
+
+	eval var='${'${property}'}';
+	if [ ${persist} -eq 0 -o "${var}" == "" ];
+	then
+		if [ "${json_property}" != "" ];
+		then
+			value=$( grep \"${json_property}\" "$1" | sed 's/.*:[[:space:]]\?//' | sed 's/["]\?[,]\?$//' );
+			if [ "${head}" != "" ];
+			then
+				value=$( echo "${value}" | awk "NR == ${head}" );
+			fi
+		elif [ "${grep}" != "" ];
+		then
+			if [ "${from}" != "" ];
+			then
+				value=$( grep --after 10 ${from} "$1" | grep ${grep} );
+			else
+				value=$( grep ${grep} "$1" );
+			fi
+
+			if [ "${head}" != "" ];
+			then
+				value=$( echo "${value}" | awk "NR == ${head}" );
+			fi
+	
+			if [ "${kolom}" != "" ];
+			then
+				value=$( echo ${value} | awk -F ';' "{print \$${kolom}}" );
+			fi
+
+			process;
+		elif [ "${query}" != "" ];
+		then
+			value=(${query//;/ });
+			determine_db "${value[0]}";
+			# support voor single quotes in queries
+			value[1]=$( echo ${value[1]} | sed 's/#/ /g' | sed "s/'/\\\'/g" );
+			query=$( eval echo "${value[1]}" );
+
+			# om haakjes te ondersteunen
+			query=$( echo ${query} | tr '%' '(' | tr '@' ')' );
+			export PGPASSWORD=${db_password};
+			value=`psql -A -h ${db_host} -U ${db_user} -d ${db_name} -p ${db_port} -t -S -c "${query}"`;
+	
+		elif [ "${regel}" != "" ];
+		then
+			value=$( awk "NR == ${regel}" "$1" );
+			process;
+		fi
+	
+		export "${property}"="${value///}";
+	fi
+done

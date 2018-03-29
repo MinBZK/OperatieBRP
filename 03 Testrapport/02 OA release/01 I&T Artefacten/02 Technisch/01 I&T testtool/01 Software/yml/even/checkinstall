@@ -1,0 +1,13 @@
+#!/bin/bash
+
+for c in `docker ps | grep -v CONTAINER | grep -v logstash | awk '{print $1}'`;
+do
+  log=`docker logs $c 2>&1 | grep -e " SEVERE \| ERROR \|FATAL\|Exception" | grep -v -e "Logstash\|appender\| INFO "`
+  if [ "${log}" != "" ];
+  then
+    containername=`docker ps -a | grep $c | awk '{print $NF}'`;
+    ip=`docker inspect -f '{{.NetworkSettings.IPAddress}}' $c`;
+    echo "*********    container ${containername} ${c} ${ip} is een beetje stuk    *********"
+    echo "kijk maar: ${log}"
+  fi
+done

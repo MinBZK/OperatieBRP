@@ -1,0 +1,28 @@
+#!/bin/bash
+echo Content-type: text/plain
+echo ""
+
+. ./env
+
+date
+
+ssh -f -t ${IV_HOST} "cd ./yml/ && ./up"
+
+sleep 60;
+echo "initvul database kopieren";
+
+#uitgezet ivm mismatch pg_dump: server version: 9.6.3; pg_dump version: 9.5.4. Sowieso zou deze stap eruit moeten want we gebruiken nu het SQL statement uit de docker omgeving, welke de echte database setup bevat...
+export PGPASSWORD=${BRP_GBAV_DB_PASSWORD};
+#pg_dump -h ${BRP_GBAV_DB_HOST} -p ${BRP_GBAV_DB_PORT} -U ${BRP_GBAV_DB_USER} -c -n ${BRP_GBAV_DB_SCHEMA} -d ${BRP_GBAV_DB_NAME} > "${TEMP_DIR}/initvul.sql";
+
+export PGPASSWORD=${GBAV_DB_PASSWORD};
+psql -h ${GBAV_DB_HOST} -U ${GBAV_DB_USER} -d ${GBAV_DB_NAME} -c "DROP SCHEMA IF EXISTS ${BRP_GBAV_DB_SCHEMA} CASCADE";
+
+sleep 10;
+
+psql -h ${GBAV_DB_HOST} -U ${GBAV_DB_USER} -d ${GBAV_DB_NAME} < "${TEMP_DIR}/initvul.sql";
+
+echo "klaar";
+date
+
+sleep 5;

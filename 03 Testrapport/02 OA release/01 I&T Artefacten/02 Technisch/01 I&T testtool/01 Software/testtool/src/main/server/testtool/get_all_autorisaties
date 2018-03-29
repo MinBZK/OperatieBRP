@@ -1,0 +1,26 @@
+#!/bin/bash
+echo Content-type: application/json;
+echo "";
+
+. ./env
+. ./functions
+
+query="select l.id from autaut.levsautorisatie l where l.naam = 'BRP Volledig Afnemers'";
+export PGPASSWORD=${BRP_ISC_DB_PASSWORD};
+results=$( psql -t -q -h ${BRP_ISC_DB_HOST} ${BRP_ISC_DB_NAME} -U ${BRP_ISC_DB_USER} -c "${query}" );
+
+count=0;
+echo "[";
+for i in ${results}; 
+do
+	if [ $count -gt 0 ];
+	then
+		echo ",";
+	fi
+
+	echo "\"${i}\"";
+	count=$(( count + 1 ));
+
+done
+echo "]";
+

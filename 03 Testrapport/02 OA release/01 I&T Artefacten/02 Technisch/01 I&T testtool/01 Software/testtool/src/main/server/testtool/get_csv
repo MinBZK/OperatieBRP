@@ -1,0 +1,62 @@
+#!/bin/bash
+export LANG=en_US.UTF-8
+
+echo Content-type: application/json
+echo ""
+
+dat=`date`;
+
+. ./env
+. ./functions
+. ./init
+
+log=`cd "${IV_PL_LOCATION}" && svn up --non-interactive`;
+
+echo "[";
+c=0;
+
+if [ ! -d "${PL_LOCATION}/IV" ];
+then
+	mkdir "${PL_LOCATION}/IV";
+fi
+
+for i in "${IV_PL_LOCATION}"/*;
+do
+	if [ -e "${i}" ];
+	then
+		save_location="${PL_LOCATION}/IV";
+	        if [ ! -d "${save_location}" ];
+	        then
+	                mkdir "${save_location}";
+	        fi
+	
+		b=`basename "${i}"`;
+		be=`basename "${i}" .xls`;
+	        if [ $c -gt 0 ];
+	        then
+	                echo ", ";
+	        fi
+	
+		echo "{"
+		echo \"file\" : \"${b}\",;
+	
+		excel=$(sed 's/[^-]*-//' <<< ${be});
+	
+		${XLS_TO_CSV} "${i}" "IV" "${excel}" > ${save_location}/${be}.csv
+		. ./variables ${save_location}/${be}.csv < ${TAG_VARIABLE_LOCATION};
+	
+		echo \"excel\" : \"${excel}\",;
+	
+		save_to_bsn "IV" "${excel}" "${bsn}" "${anr}"; 
+		save_to_bsn "TC" "${excel}" "${bsn}" "${anr}"; 
+		bash ./save_to_placeholder "IV" "${excel}" "${anr}"; 
+	
+		compare ${anr} > ${RESULTS_LOCATION}/${anr}.json &
+	
+		echo \"data\" : \"`sed 's/"/\\\\"/g' ${save_location}/${be}.csv | sed 's/^\([^;]*;[^;]*;[^;]*\);$/\1/' | tr '\n' '%' | sed 's/\(;\{0,1\}%;\{0,1\}\)*$//g'`\";
+		echo "}"
+	        c=$(( c + 1 ));
+	fi
+done
+echo "]";
+

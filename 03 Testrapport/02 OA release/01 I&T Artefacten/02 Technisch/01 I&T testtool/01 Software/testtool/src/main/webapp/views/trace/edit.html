@@ -1,0 +1,51 @@
+<div class="container-fluid" ng-controller="editController" ng-init="view();">
+	<div ng-class="alert">{{ alertMessage }}</div>
+
+	<div class="row">
+		<h4>
+			<span class="col-md-12 label-primary label" style="white-space: normal;">
+				{{ omschrijving }}
+			</span>
+		</h4>
+		<h4>
+			<span class="col-md-12 label-warning label" style="white-space: normal;">
+				{{ aanname }}
+			</span>
+		</h4>
+	</div>
+
+
+	<div class="row">
+		<div class="col-md-12">
+			<table class="table table-hover table-striped table-condensed gradienttable" ng-repeat="b in header track by $index" ng-init="i=$index">
+				<thead>
+					<th>Entiteit</th>
+					<th>Kenmerk</th>
+					<th ng-repeat="n in header[i] track by $index"><input type="text" class="form-control input-md" ng-model="header[i][$index]" /></th>
+					<th>
+						<button class="btn btn-md btn-primary" ng-click="addKolom(i);">+</button>
+						<button class="btn btn-md btn-primary" ng-click="removeKolom(i);">-</button>
+					</th>
+				</thead>
+			
+				<tbody>
+					<tr ng-repeat="n in entiteit[i] track by $index" ng-init="l=$index">
+						<td ng-if="n != ' ' || $index != (entiteit[i].length - 1)"><input type="text" class="form-control input-md" ng-model="entiteit[i][$index]" /></td>
+						<td ng-if="n == ' ' && $index == (entiteit[i].length - 1) && entiteit[i].length != 1">
+							<button class="btn btn-md btn-primary" ng-click="addRij(i);">+</button>
+							<button class="btn btn-md btn-primary" ng-click="removeRij(i);">-</button>
+						</td>
+						<td ng-if="entiteit[i].length == 1"> </td>
+						<td ng-if="kenmerk[i][$index] != 'Resultaat'" >
+							<input type="text" class="form-control input-md" ng-model="kenmerk[i][$index]" />
+						</td>
+						<td ng-if="kenmerk[i][$index] == 'Resultaat'" ><strong>Resultaat</strong></td>
+						<td ng-repeat="r in rows[i][l] track by $index">
+							<textarea class="form-control input-lg" ng-model="rows[i][l][$index]"></textarea>
+						</td>			
+					</tr>
+				</tbody>
+			</table>
+		</div>
+	</div>
+</div>

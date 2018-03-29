@@ -1,0 +1,10 @@
+#!/bin/bash
+echo "Content-Type: text/plain"
+
+echo ""
+
+. ./env
+
+PGPASSWORD=${GBAV_DB_PASSWORD} psql -w -U${GBAV_DB_USER} -h${GBAV_DB_HOST} -dpostgres < ${MULTIPLIER_DB_SCRIPTS}/reset-gbav.1.psql
+PGPASSWORD=${GBAV_DB_PASSWORD} psql -w -U${GBAV_DB_USER} -h${GBAV_DB_HOST} -d${GBAV_DB_NAME} < ${MULTIPLIER_DB_SCRIPTS}/gbav-20151208.sql
+PGPASSWORD=${GBAV_DB_PASSWORD} psql -w -U${GBAV_DB_USER} -h${GBAV_DB_HOST} -d${GBAV_DB_NAME}  < ${MULTIPLIER_DB_SCRIPTS}/createInitVullingTables.sql

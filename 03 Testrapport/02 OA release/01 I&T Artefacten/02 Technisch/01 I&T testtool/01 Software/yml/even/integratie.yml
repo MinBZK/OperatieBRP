@@ -1,0 +1,1269 @@
+# BRP versie 144
+#
+# BRP Databases
+#
+brp-database:
+  image: ${DOCKER_REGISTRY}brp/database:${BRP_VERSION}
+  container_name: brp-database
+  net: brp
+  ports:
+    - "5432:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=brpdb"
+
+brp-activemqdatabase:
+  image: ${DOCKER_REGISTRY}brp/database-leeg:${BRP_VERSION}
+  container_name: brp-activemqdatabase
+  net: brp
+  ports:
+    - "5442:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=brpdb"
+
+brp-archiveringdatabase:
+  image: ${DOCKER_REGISTRY}brp/database-ber:${BRP_VERSION}
+  container_name: brp-archiveringdatabase
+  net: brp
+  ports:
+    - "5452:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=brpdb"
+
+brp-protocolleringdatabase:
+  image: ${DOCKER_REGISTRY}brp/database-prot:${BRP_VERSION}
+  container_name: brp-protocolleringdatabase
+  net: brp
+  ports:
+    - "5472:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=brpdb"
+
+#
+# BRP Overig
+#
+brp-sleutelbos:
+  image: ${DOCKER_REGISTRY}brp/sleutel:${BRP_VERSION}
+  container_name: brp-sleutelbos
+  net: brp
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+
+#
+# BRP Message broker
+#
+brp-messagebroker:
+  image: ${DOCKER_REGISTRY}brp/message-broker:${BRP_VERSION}
+  container_name: brp-messagebroker
+  net: brp
+  ports:
+    - "11990:11990"
+    - "61616:61616"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ACTIVEMQDB_ENV_HOSTNAME: brp-activemqdatabase
+    ACTIVEMQDB_ENV_PORT: 5432
+    ACTIVEMQDB_ENV_DBNAME: brp
+    ACTIVEMQDB_ENV_DBUSER: brp
+    ACTIVEMQDB_ENV_DBPASS: brp
+    JAVA_OPTS: -Xms128M -Xmx1G
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11990
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+brp-selectie-messagebroker:
+  image: ${DOCKER_REGISTRY}brp/selectie-message-broker:${BRP_VERSION}
+  container_name: brp-selectie-messagebroker
+  net: brp
+  ports:
+    - "11989:11990"
+    - "61618:61616"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ACTIVEMQDB_ENV_HOSTNAME: brp-activemqdatabase
+    ACTIVEMQDB_ENV_PORT: 5432
+    ACTIVEMQDB_ENV_DBNAME: brp
+    ACTIVEMQDB_ENV_DBUSER: brp
+    ACTIVEMQDB_ENV_DBPASS: brp
+    JAVA_OPTS: -Xms128M -Xmx1G
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11989
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+
+#
+# BRP Componenten
+#
+brp-gbacentrale:
+  image: ${DOCKER_REGISTRY}brp/gba-centrale:${BRP_VERSION}
+  container_name: brp-gbacentrale
+  net: brp
+  ports:
+    - "11991:11991"
+  volumes:
+    - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ISCROUTERING_ENV_PORT: 61616
+    ISCROUTERING_ENV_HOSTNAME: isc-routering
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    JAVA_OPTS: -Xmx1G
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11991
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-mutatielevering:
+  image: ${DOCKER_REGISTRY}brp/mutatielevering:${BRP_VERSION}
+  container_name: brp-mutatielevering
+  net: brp
+  ports:
+    - "8180:8080"
+    - "3582:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    JAVA_OPTS: -Xms128M -Xmx1G
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-synchronisatie:
+  image: ${DOCKER_REGISTRY}brp/synchronisatie:${BRP_VERSION}
+  container_name: brp-synchronisatie
+  net: brp
+  ports:
+    - "8380:8080"
+    - "11993:11993"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms64M -Xmx512M
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11993
+  volumes_from:
+    - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-archivering:
+  image: ${DOCKER_REGISTRY}brp/archivering:${BRP_VERSION}
+  container_name: brp-archivering
+  net: brp
+  ports:
+    - "9780:8080"
+    - "3588:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms64M -Xmx512M
+  volumes_from:
+    - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-archivering-gba:
+  image: ${DOCKER_REGISTRY}brp/archivering-gba:${BRP_VERSION}
+  container_name: brp-archivering-gba
+  net: brp
+  ports:
+    - "9780:8080"
+    - "3588:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms64M -Xmx512M
+  volumes_from:
+    - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-afnemerindicaties:
+  image: ${DOCKER_REGISTRY}brp/afnemerindicatie:${BRP_VERSION}
+  container_name: brp-afnemerindicaties
+  net: brp
+  ports:
+    - "8480:8080"
+    - "3592:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms64M -Xmx1G
+  volumes_from:
+    - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-afnemerindicaties-gba:
+  image: ${DOCKER_REGISTRY}brp/afnemerindicatie-gba:${BRP_VERSION}
+  container_name: brp-afnemerindicaties-gba
+  net: brp
+  ports:
+    - "9280:8080"
+    - "3593:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms64M -Xmx512M
+  volumes_from:
+    - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-verzending:
+  image: ${DOCKER_REGISTRY}brp/verzending:${BRP_VERSION}
+  container_name: brp-verzending
+  net: brp
+  ports:
+    - "8580:8080"
+    - "3585:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms512M -Xmx1536M
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-protocollering:
+  image: ${DOCKER_REGISTRY}brp/protocollering:${BRP_VERSION}
+  container_name: brp-protocollering
+  net: brp
+  ports:
+    - "8680:8080"
+    - "11996:11996"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    JAVA_OPTS: -Xms32M -Xmx256M
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11996
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-bijhouding:
+  image: ${DOCKER_REGISTRY}brp/bijhouding:${BRP_VERSION}
+  container_name: brp-bijhouding
+  net: brp
+  ports:
+    - "8780:8080"
+    - "3587:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    JAVA_OPTS: -Xms64M -Xmx512M
+  volumes_from:
+      - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-bijhouding-gba:
+  image: ${DOCKER_REGISTRY}brp/bijhouding-gba:${BRP_VERSION}
+  container_name: brp-bijhouding-gba
+  net: brp
+  ports:
+    - "9180:8080"
+    - "3590:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    JAVA_OPTS: -Xms64M -Xmx512M
+  volumes_from:
+      - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-bevraging:
+  image: ${DOCKER_REGISTRY}brp/bevraging:${BRP_VERSION}
+  container_name: brp-bevraging
+  net: brp
+  ports:
+    - "8980:8080"
+    - "11998:11998"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    JAVA_OPTS: -Xms128M -Xmx1G
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11998
+  volumes_from:
+      - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-bevraging-gba:
+  image: ${DOCKER_REGISTRY}brp/bevraging-gba:${BRP_VERSION}
+  container_name: brp-bevraging-gba
+  net: brp
+  ports:
+    - "9880:8080"
+    - "3591:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    JAVA_OPTS: -Xms128M -Xmx1G
+  volumes_from:
+      - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-bevraging-gba-ws:
+  image: ${DOCKER_REGISTRY}brp/bevraging-gba-ws:${BRP_VERSION}
+  container_name: brp-bevraging-gba-ws
+  net: brp
+  ports:
+    - "9380:8080"
+    - "3595:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    JAVA_OPTS: -Xms128M -Xmx1G
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 12998
+  volumes_from:
+      - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-admhnd-publicatie:
+  image: ${DOCKER_REGISTRY}brp/admhnd-publicatie:${BRP_VERSION}
+  container_name: brp-admhnd-publicatie
+  net: brp
+  ports:
+    - "9080:8080"
+    - "11999:11999"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    JAVA_OPTS: -Xms128M -Xmx1G
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11999
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-vrijbericht:
+  image: ${DOCKER_REGISTRY}brp/vrijbericht:${BRP_VERSION}
+  container_name: brp-vrijbericht
+  net: brp
+  ports:
+    - "9480:8080"
+    - "13994:13994"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms64M -Xmx512M
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 13994
+  volumes_from:
+    - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-selectie-schrijver:
+  image: ${DOCKER_REGISTRY}brp/selectie-schrijver:${BRP_VERSION}
+  container_name: brp-selectie-schrijver
+  net: brp
+  ports:
+    - "9580:8080"
+    - "14094:13994"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SELECTIEROUTERINGCENTRALE_ENV_PORT: 61618
+    SELECTIEROUTERINGCENTRALE_ENV_HOSTNAME: brp-selectie-messagebroker
+    SELECTIEBESTAND_FOLDER: /opt/appserver/selectiebestand/
+    SELECTIE_RESULTAAT_FOLDER: /opt/appserver/selectieresultaat/  
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms64M -Xmx512M
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 14094
+  volumes_from:
+    - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+brp-selectie-verwerker:
+  image: ${DOCKER_REGISTRY}brp/selectie-verwerker:${BRP_VERSION}
+  container_name: brp-selectie-verwerker
+  net: brp
+  ports:
+    - "9680:8080"
+    - "14194:13994"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-protocolleringdatabase
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ROUTERINGCENTRALE_ENV_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: brp-messagebroker
+    SELECTIEROUTERINGCENTRALE_ENV_PORT: 61618
+    SELECTIEROUTERINGCENTRALE_ENV_HOSTNAME: brp-selectie-messagebroker
+    SELECTIEBESTAND_FOLDER: /opt/appserver/selectiebestand/
+    SELECTIE_RESULTAAT_FOLDER: /opt/appserver/selectieresultaat/
+    SLEUTELBOS_ENV_PRIVATEFILE: /keystores/privatestore.jks
+    SLEUTELBOS_ENV_PRIVATEKEY: serverkey
+    SLEUTELBOS_ENV_PRIVATEPASSWORD: privatestore
+    SLEUTELBOS_ENV_PUBLICFILE: /keystores/publicstore.jks
+    SLEUTELBOS_ENV_PUBLICPASSWORD: publicstore
+    SLEUTELBOS_ENV_PRIVATEKEYPASSWORD: serverkeypassword
+    KENNISGEVING_CLIENT_KEYSTORE: /usr/share/tomcat/lib/client.jks
+    KENNISGEVING_CLIENT_PASSWORD: client
+    KENNISGEVING_CLIENT_KEY_PASSWORD: clientkey
+    KENNISGEVING_AFNEMER_TRUSTSTORE: /usr/share/tomcat/lib/afnemers-trust.jks
+    KENNISGEVING_AFNEMER_TRUSTSTORE_PASSWORD: afnemers
+    JAVA_OPTS: -Xms64M -Xmx512M
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 14194
+  volumes_from:
+    - brp-sleutelbos
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+#
+# Beheer applicatie
+#
+brp-beheer:
+  image: ${DOCKER_REGISTRY}brp/beheer:${BRP_VERSION}
+  container_name: brp-beheer
+  net: brp
+  ports:
+    - "8280:8080"
+  environment:
+    constraint:nl.bzk.rol: "=extern"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    KERNDB_ENV_HOSTNAME: brp-database
+    KERNDB_ENV_PORT: 5432
+    KERNDB_ENV_DBNAME: brp
+    KERNDB_ENV_DBUSER: brp
+    KERNDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-database
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ISC_CONSOLE_HOST: isc-iscconsole
+    VRIJBERICHT_SERVICE_URL: http://brp-vrijbericht:8080/vrijbericht/VrijBerichtService
+    JAVA_OPTS: -Xms128M -Xmx1G
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11997
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+#
+# Migratie databases
+#
+isc-routeringdatabase:
+  image: ${DOCKER_REGISTRY}isc/routering-database:${MIGRATIE_VERSION}
+  container_name: isc-routeringdatabase
+  net: brp
+  ports:
+    - "5532:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=migrdb"
+
+isc-iscdatabase:
+  image: isc/isc-database:${MIGRATIE_VERSION}
+  container_name: isc-iscdatabase
+  net: brp
+  ports:
+    - "5732:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=iscdb"
+
+isc-voiscdatabase:
+  image: ${DOCKER_REGISTRY}isc/voisc-database:${MIGRATIE_VERSION}
+  container_name: isc-voiscdatabase
+  net: brp
+  ports:
+    - "5632:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=migrdb"
+
+#
+# Migratie message broker
+#
+isc-routering:
+  image: ${DOCKER_REGISTRY}isc/routering:${MIGRATIE_VERSION}
+  container_name: isc-routering
+  net: brp
+  ports:
+    - "3483:3481"
+    - "61617:61616"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    ROUTERING_DB_ENV_HOSTNAME: isc-routeringdatabase
+    ROUTERING_DB_ENV_PORT: 5432
+    ROUTERING_DB_ENV_NAME: routering
+    ROUTERING_DB_ENV_USERNAME: migratie
+    ROUTERING_DB_ENV_PASSWORD: M1gratie
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+#
+# Migratie componenten
+#
+isc-synchronisatie:
+  image: ${DOCKER_REGISTRY}isc/synchronisatie:${MIGRATIE_VERSION}
+  container_name: isc-synchronisatie
+  #command: [ "java", "-Datomikos.unique.name=sync-${HOSTNAME}", "nl.bzk.migratiebrp.synchronisatie.runtime.Main", "-modus", "SYNCHRONISATIE" ]
+  net: brp
+  ports:
+    - "3485:3481"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    ROUTERING_ENV_PORT: 61616
+    ROUTERING_ENV_HOSTNAME: isc-routering
+    BRPROUTERING_ENV_PORT: 61616
+    BRPROUTERING_ENV_HOSTNAME: brp-messagebroker
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+isc-isc:
+  image: ${DOCKER_REGISTRY}isc/isc:${MIGRATIE_VERSION}
+  container_name: isc-isc
+  net: brp
+  ports:
+    - "3484:3481"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    ISC_DB_ENV_HOSTNAME: isc-iscdatabase
+    ISC_DB_ENV_PORT: 5432
+    ISC_DB_ENV_NAME: isc
+    ISC_DB_ENV_USERNAME: migratie
+    ISC_DB_ENV_PASSWORD: M1gratie
+    ROUTERING_ENV_PORT: 61616
+    ROUTERING_ENV_HOSTNAME: isc-routering
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+isc-iscconsole:
+  image: ${DOCKER_REGISTRY}isc/isc-console:${MIGRATIE_VERSION}
+  container_name: isc-iscconsole
+  net: brp
+  ports:
+    - "8080:8080"
+    - "3885:3481"
+  volumes:
+    - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=extern"
+    ISC_DB_ENV_HOSTNAME: isc-iscdatabase
+    ISC_DB_ENV_PORT: 5432
+    ISC_DB_ENV_NAME: isc
+    ISC_DB_ENV_USERNAME: migratie
+    ISC_DB_ENV_PASSWORD: M1gratie
+    ISC_ENV_JMX_USERNAME: admin
+    ISC_ENV_JMX_PASSWORD: admin
+    ISC_ENV_JMX_HOSTNAME: isc-isc
+    ISC_ENV_JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+isc-voisc:
+  image: ${DOCKER_REGISTRY}isc/voisc:${MIGRATIE_VERSION}
+  container_name: isc-voisc
+  net: brp
+  ports:
+    - "3482:3481"
+  volumes:
+    - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    VOISC_DB_ENV_HOSTNAME: isc-voiscdatabase
+    VOISC_DB_ENV_PORT: 5432
+    VOISC_DB_ENV_NAME: voisc
+    VOISC_DB_ENV_USERNAME: migratie
+    VOISC_DB_ENV_PASSWORD: M1gratie
+    MAILBOX_ENV_HOSTNAME: migr-mailbox
+    MAILBOX_ENV_PORT: 1212
+    ROUTERING_ENV_PORT: 61616
+    ROUTERING_ENV_HOSTNAME: isc-routering
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+#
+# Migratie overig
+#
+migr-mailboxdatabase:
+  image: ${DOCKER_REGISTRY}migr/mailbox-database:${MIGRATIE_VERSION}
+  container_name: migr-mailboxdatabase
+  net: brp
+  ports:
+    - "6032:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=migrdb"
+
+migr-mailbox:
+  image: ${DOCKER_REGISTRY}migr/mailbox:${MIGRATIE_VERSION}
+  container_name: migr-mailbox
+  net: brp
+  ports:
+    - "3481:3481"
+    - "1212:1212"
+  environment:
+    MAILBOX_DB_ENV_HOSTNAME: migr-mailboxdatabase
+    MAILBOX_DB_ENV_PORT: 5432
+    MAILBOX_DB_ENV_NAME: mailbox
+    MAILBOX_DB_ENV_USERNAME: migratie
+    MAILBOX_DB_ENV_PASSWORD: M1gratie
+    constraint:nl.bzk.rol: "=extern"
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+migr-ggodatabase:
+  image: ${DOCKER_REGISTRY}migr/ggo-database:${MIGRATIE_VERSION}
+  container_name: migr-ggodatabase
+  net: brp
+  ports:
+    - "5932:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=migrdb"
+
+migr-ggoviewer:
+  image: ${DOCKER_REGISTRY}migr/ggo-viewer:${MIGRATIE_VERSION}
+  container_name: migr-ggoviewer
+  net: brp
+  ports:
+    - "8880:8080"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=extern"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GGO_DB_ENV_HOST: migr-ggodatabase
+    GGO_DB_ENV_PORT: 5432
+    GGO_DB_ENV_NAME: viewerdb
+    GGO_DB_ENV_USERNAME: viewerdb
+    GGO_DB_ENV_PASSWORD: viewerdb
+    GGOVIEWER_DEMOMODE: 'false'
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+
+#
+# Logging
+#
+logging-elasticsearch:
+  image: ${DOCKER_REGISTRY}logging/elasticsearch:${ALG_VERSION}
+  container_name: elasticsearch
+  net: brp
+  ports:
+    - "9200:9200"
+    - "9300:9300"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=migrdb"
+
+logging-kibana:
+  image: ${DOCKER_REGISTRY}logging/kibana:${ALG_VERSION}
+  container_name: kibana
+  net: brp
+  ports:
+    - "5601:5601"
+  environment:
+    constraint:nl.bzk.rol: "=extern"
+    ELASTICSEARCH_URL: http://elasticsearch:9200
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+logging-logstash:
+  image: ${DOCKER_REGISTRY}logging/logstash:${ALG_VERSION}
+  container_name: logstash
+  net: brp
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+
+
+#
+# Tools
+#
+brp-afnemervoorbeeld:
+  image: ${DOCKER_REGISTRY}brp/afnemervoorbeeld:${BRP_VERSION}
+  container_name: brp-afnemervoorbeeld
+  net: brp
+  ports:
+    - "8081:8080"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=brpdb"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+  extra_hosts:
+    brp-database: ${BRP_DATABASE_IP}
+

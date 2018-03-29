@@ -1,0 +1,75 @@
+#!/bin/bash
+echo "Content-type: text/plain; charset=UTF-8"
+echo ""
+
+if [ "${1}" != "" ];
+then
+	stage=${1};
+fi
+
+. ./env
+. ./functions
+
+next_upload;
+
+echo "Maak locatie aan ${PL_LOCATION}/${stage}";
+
+count=0;
+loc=${PL_LOCATION}/${stage};
+mkdir -p "${loc}/AI_BRP";
+mkdir -p "${loc}/AI_GBA";
+
+cp -v "${BRP_PLAATSEN_AFNEMERINDICATIE_BERICHT_LOCATION}" "${loc}"/AI_BRP/;
+cp -v "${BRP_PLAATSEN_AFNEMERINDICATIE_PROPERTIES_LOCATION}" "${loc}"/AI_BRP/;
+cp -v "${GBA_PLAATSEN_AFNEMERINDICATIE_BERICHT_LOCATION}" "${loc}"/AI_GBA/;
+cp -v "${GBA_PLAATSEN_AFNEMERINDICATIE_PROPERTIES_LOCATION}" "${loc}"/AI_GBA/;
+
+for ai in ${ais//,/ };
+do
+	if [ ${count} -eq 0 ];
+	then
+		echo "Anummer;verzendendePartij" > "${loc}"/AI_GBA/Afnemerindicaties.txt;
+	fi
+
+	values=(${ai//;/ });
+	if [ "${values[0]}" == "BRP" ];
+	then
+		echo ${ai} | cut -d';' -f2- | tr ';' '\t' >> "${loc}"/AI_BRP/Afnemerindicaties.txt;
+	elif [ "${values[0]}" == "GBA" ];
+	then
+		echo ${ai} | cut -d';' -f2- | sed 's/;$//' >> "${loc}"/AI_GBA/Afnemerindicaties.txt;
+	fi
+
+	count=$(( count + 1 ));
+done
+
+# bepaal max id voor bepalen welke berichten bij deze stage hoort
+export PGPASSWORD=${MIGR_DB_PASSWORD};
+max=$( psql -A -h ${VOISC_DB_HOST} -U ${MIGR_DB_USER} -d ${VOISC_DB_NAME} -p ${VOISC_DB_PORT} -t -S -c 'select max(id) from voisc.bericht' );
+
+./run_ai ${stage} "${loc}/AI_BRP" BRP &
+./run_ai ${stage} "${loc}/AI_GBA" GBA &
+
+wait;
+
+TIMEOUT=-1;
+num=0;
+while [ ${TIMEOUT} -ne 0 ];
+do
+	. ./check_stage_finished ${stage} ${num};
+	num=$(( num + 1 ));
+done
+
+bash ./fill_actual_brp "${stage}" "${UPLOAD_BSN_LIST_FILE}" &
+bash ./fill_actual_voisc "${stage}" "${UPLOAD_BSN_LIST_FILE}" "${max}" &
+
+wait;
+
+for i in GBA BRP;
+do
+	bash ./run_all "${stage}" "${i}" "${UPLOAD_BSN_LIST_FILE}" &
+done
+
+wait;
+
+bash ./merge_results "upload";

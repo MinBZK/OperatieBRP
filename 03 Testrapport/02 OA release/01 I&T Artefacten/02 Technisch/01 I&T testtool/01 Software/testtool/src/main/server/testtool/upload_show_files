@@ -1,0 +1,34 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+. ./env
+. ./functions
+
+sleep 1;
+
+echo "["
+count=0;
+
+for i in ${UPLOAD_LOCATION}/*; 
+do
+        if [ ! -e ${i} ];
+        then
+                break;
+        fi
+
+	if [ $count -gt 0 ];
+	then
+		echo ", ";
+	fi
+
+	echo "{"
+	echo "\"naam\" : \"`basename ${i}`\",";
+	echo "\"datum\" : \"`stat -c %Y ${i}`000\",";
+	echo "\"grootte\" : \"`stat -c %s ${i}`\"";
+
+	echo "}";
+	count=$((count + 1));
+done
+
+echo "]";

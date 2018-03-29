@@ -1,0 +1,10 @@
+#!/bin/bash
+
+for i in `docker ps -a | sed '1d' | awk '{print $1}'`; 
+do
+	docker kill $i ;
+	docker rm -v -f $i;
+done
+
+docker volume rm $(docker volume ls -f dangling=true -q)
+docker network rm brp

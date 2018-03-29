@@ -1,0 +1,86 @@
+<style>
+	.autocomplete-custom-template .item-title,
+	.autocomplete-custom-template .item-metadata {
+		display: block;
+		line-height: 2;
+	}
+	.autocomplete-custom-template li {
+		border-bottom: 1px solid #ccc;
+		height: auto;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		white-space: normal;
+	}
+	.autocomplete-custom-template li:last-child {
+		border-bottom-width: 0;
+	}
+</style>
+
+<div class="container" ng-init="init();" ng-controller="consolideerController">
+
+	<div class="row"><h1> </h1></div>
+	<div class="row"><h1> </h1></div>
+
+	<div class="panel panel-default">
+		<div class="panel-body">
+			<form name="myform">
+				<div class="row">
+					<div class="col-md-12 col-sm-12">
+				
+						<md-select ng-model="typeSelectedItem" placeholder="Type" class="md-no-underline" required>
+							<md-option value="SQL">SQL</md-option>
+							<md-option value="GBA">GBA</md-option>
+							<md-option value="BRP">BRP</md-option>
+						</md-select>
+
+						<md-checkbox ng-model="alleControles" aria-label="Alle controles">
+							Alle controles <strong>OF</strong>:
+						</md-checkbox>
+		
+						<md-autocomplete md-selected-item="controleSelectedItem"
+							md-no-cache="true"
+							ng-disabled="controleIsDisabled"
+							md-search-text="controleSearchText" 
+							md-items="item in querySearch(controleSearchText, controles)" 
+							md-item-text="item.display" md-min-length="0"
+							md-floating-label="Controle"
+							md-menu-class="autocomplete-custom-template"
+							ng-required="!alleControles">
+							<md-item-template>
+								<span md-highlight-text="controleSearchText">{{ item }}</span>
+							</md-item-template>
+						</md-autocomplete>
+
+						<md-checkbox ng-model="alleMomenten" aria-label="Alle momenten">
+							Alle momenten <strong>OF</strong>:
+						</md-checkbox>
+
+						<md-autocomplete md-selected-item="momentSelectedItem"
+							ng-disabled="momentIsDisabled"
+							md-search-text="momentSearchText" 
+							md-items="item in querySearch(momentSearchText, momenten)" 
+							md-item-text="item.display" md-min-length="0"
+							md-floating-label="Moment"
+							md-menu-class="autocomplete-custom-template"
+							ng-required="!alleMomenten">
+							<md-item-template>
+								<span md-highlight-text="momentSearchText">{{ item }}</span>
+							</md-item-template>
+						</md-autocomplete>						
+					</div>
+				</div>		
+				
+				<div class="row"><br /></div>
+				
+				<div class="row">
+					<div class="col-md-12 col-sm-12">
+						<a class="btn btn-md btn-primary has-spinner" id="selecteer" ng-click="selecteer();">
+							<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+							Selecteer
+						</a>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>

@@ -1,0 +1,23 @@
+#!/bin/bash
+echo Content-type: application/json;
+echo "";
+
+. ./env
+. ./functions
+
+count=0;
+echo "[";
+for i in $( cat ${BSN_LIST_FILE} ${UPLOAD_BSN_LIST_FILE} | awk '{print $4,$2,$3}' | sort | sed 's/ /","/g' | sed 's/^/"/' | sed 's/$/"/' );
+do
+	if [ $count -gt 0 ];
+	then
+		echo ",";
+	fi
+
+	echo "[";
+	echo $i;
+	echo "]";
+
+	count=$(( count + 1 ));
+done
+echo "]";

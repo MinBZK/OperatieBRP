@@ -1,0 +1,74 @@
+#!/bin/bash
+echo Content-type: text/plain
+
+if [ "${1}" != "" ];
+then
+        stage="${1}";
+	if [ "${2}" != "" ];
+	then
+		bsn_file="${2}";
+	fi
+fi
+
+flavour="BRP";
+
+. ./env
+. ./functions
+
+if [ "${bsn_file}" == "" ];
+then
+        bsn_file=${BSN_LIST_FILE};
+fi
+
+echo ""
+
+function getvars {
+	local file=$1;
+	. ./variables ${file} < ${TAG_VARIABLE_LOCATION};
+	timestamp=`cat ${file} | tr -d '\n' | perl -pe 's/.*?<brp:tijdstipVerzending>([^<#]*).*/\1/'`;
+	ber=`cat ${file} | tr -d '\n' | sed 's/^.*soap:Body>\(.*\)<\/soap:Body.*$/\1/' | sed 's/brp://g'`;
+}
+
+declare -A checksum;
+declare -A exists;
+
+#reset all files
+rm ${RAW_LOCATION}/*.xml 2> /dev/null
+
+list=${LEVERING_LOCATION}/*xml
+for file in ${list};
+do
+	if [ -e "${file}" ];
+	then
+		millis=$( basename ${file} .xml );
+	
+		getvars "${file}"
+		echo "anr: ${anrBrp}, afn: ${afnemerBrp}, srt: ${soortNaam}"
+		excel=$( grep ${anrBrp} ${bsn_file} | head -n 1 | awk '{print $2}' );
+		bsn=$( grep ${anrBrp} ${bsn_file} | head -n 1 | awk '{print $3}' );
+	
+		if [ "${bsn}" == "" ];
+		then
+			bsn="-";
+		fi
+	
+		if [ "${excel}" == "" ];
+		then
+			excel="-";
+		fi
+	
+		key=$(md5sum ${file} | awk '{print $1}');
+		save_to_bsn "${stage}" "${excel}" "${bsn}" "${anrBrp}" "${bsn_file}";
+
+		volgnr="$(( ++ checksum[${key}] ))%$(( ++ exists["${soortNaam}-${anrBrp}-${afnemerBrp}"] ))";
+		soortNaam=$( echo ${soortNaam} | tr ' ' '%' | tr '-' '^' );
+		bestand=${RAW_LOCATION}/BRP-${volgnr}-${soortNaam}-${anrBrp}-${afnemerBrp}.xml;
+		echo "writing file ${bestand} with ${timestamp}";
+		echo ${ber} | xmllint --format - > ${bestand};
+	
+		# set datum verzending as creation timestamp for this file
+		touch --date="${timestamp}" ${bestand};
+		rm ${file};
+	fi
+done
+

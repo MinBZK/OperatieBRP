@@ -1,0 +1,85 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+dat=`date`;
+
+. ./env
+. ./functions
+. ./files
+
+i=0;
+echo "{";
+. ./meta
+echo ",";
+
+list="${ACTUAL_FILE} ${EXPECTED_FILE}"
+echo "\"data\" : {";
+for f in ${list};
+do
+      	if [ $i -gt 0 ];
+        then
+               	echo ", ";
+       	fi
+
+	echo "\"$i\" : ";
+	if [ -e "${f}" ];
+	then 
+		if [ $i -eq 0 ];
+		then
+			timestamp_actual=`stat -c %Y ${f}`
+			timestamp_actual=`echo "${timestamp_actual}000"`
+		else
+			timestamp_expected=`stat -c %Y ${f}`
+			timestamp_expected=`echo "${timestamp_expected}000"`
+		fi
+	
+		if [ "${flavour}" == "SQL" ];
+		then
+			csv2json "${f}";
+		elif [ "${flavour}" == "BRP" -o "${flavour}" == "RESBIJ" -o "${flavour}" == "RESBEV" ];
+		then
+                	out=`xsltproc ${UTILS_DIR}/transform_json.xsl ${f}`;
+                	if [ "${out}" != "" ];
+			then
+                        	echo ${out};
+			else
+				echo "{}"; 
+                	fi
+		elif [ "${flavour}" == "GBA" ];
+		then
+			echo "{";
+			lines=`cat ${f} | tr ' ' '_'`;
+			j=0;
+			for l in ${lines};
+			do
+				if [ $j -gt 0 ];
+				then
+					echo ", ";
+				fi
+
+				line=`echo ${l} | tr -d '\n\r' | sed 's/"/\\\"/g'`;
+				echo "\"$j\" : \"${line//_/ }\"";
+				j=$(( $j + 1 ));
+		        done
+			echo "}";
+		fi
+	else
+		echo "{}"; 
+	fi
+
+	i=$(( $i + 1 ));
+done
+echo "},";
+echo "\"compare\" : {"
+stage_list_compare "${stage}" "" ${flavour} "${anr}" "${script}"
+if [ -e ${ACTUAL_FILE} -a ! -s ${ACTUAL_FILE} ];
+then
+	echo ",\"message\" : \"ACTUAL_NIET_CORRECT\"";
+fi
+echo "},";
+echo "\"timestamps\" : {";
+echo "\"actual\" : \"${timestamp_actual}\",";
+echo "\"expected\" : \"${timestamp_expected}\"";
+echo "}";
+echo "}";

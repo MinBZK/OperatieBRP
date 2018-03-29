@@ -1,0 +1,186 @@
+#!/bin/bash
+
+export LC_ALL=nl_NL.UTF-8
+export LANG=nl_NL.UTF-8
+export LANGUAGE=nl_NL.UTF-8
+
+. ./env
+. ./functions
+
+stage="$1"
+loc="$2"
+bsn_file="$3"
+
+echo "{";
+echo "\"info\" : {";
+. ./meta
+
+output_dir=${BRP_OUTPUT_LOCATION}/${stage};
+if [ -d ${output_dir} ];
+then
+	rm -r ${output_dir};
+fi
+mkdir -p "${output_dir}";
+
+for l in "${loc}"/*; 
+do
+	if [ -e "${l}" ];
+	then
+		count=`printf "%04d" '100'`;
+		name=`basename "${l}" .xml`;
+		mkdir -p ${output_dir}/${name};
+	
+		excel=`echo ${name} | sed 's/[^-]*-\(.*\)/\1/'`;
+	
+		instructies=($( grep { "${l}" | sed 's/.*\({[^}]*}\).*/\1/' | tr -d '{}' ));
+		command2="cat \"${l}\" ";
+		. ./variables "${l}" < "${TAG_VARIABLE_LOCATION}";
+	
+		for z in "${instructies[@]}";
+		do
+			instructie=(${z//;/ });
+			bestand="${BRP_TEMPLATE_LOCATION}/${instructie[0]}.xml";
+	
+			if [ -e "${bestand}" ];
+			then
+				parameters=(${instructie[1]//,/ });
+				command="cat \"${bestand}\" ";
+				for j in "${parameters[@]}";
+				do
+					eval ${j};
+	
+					if [[ "${j}" == *"bsn"* ]];
+					then
+						anr=`grep ${bsn} ${bsn_file} | awk '{print $4}' | tr -d ' _\-\r\n' `;
+ 						if [ "${anr}" != "" ];
+ 						then
+							save_to_bsn "${stage}" "${excel}" "${bsn}" "${anr}" "${bsn_file}";
+						fi
+					fi
+				done
+	
+				# check environment
+				for j in `grep { "${bestand}" | sed 's/.*\({[^}]*}\).*/\1/' | tr -d '{}'`;
+				do
+					eval var='${'${j}'}';
+					command="${command} | sed 's#{${j}}#${var}#g'"
+				done
+
+				. ./variables "${bestand}" 0 < "${ENDPOINT_VARIABLE_LOCATION}";
+				eval echo endpoint="$""${endpointPlaceholder}" > ${output_dir}/${name}/${count}_Properties.properties;
+				echo anr=${anr} >> ${output_dir}/${name}/${count}_Properties.properties;
+				count=`printf "%04d" $(( ${count##0} + 100 ))`;
+				eval $command > ${output_dir}/${name}/${count}_Bericht_${instructie[0]}.xml;
+				count=`printf "%04d" $(( ${count##0} + 100 ))`;
+	
+				sleutel="sleutel_${count}";
+				sed "s/objectsleutel/${sleutel}/" "${BRP_TEMPLATE_LOCATION}/${instructie[2]}" > ${output_dir}/${name}/${count}_${instructie[2]};
+				count=`printf "%04d" $(( ${count##0} + 100 ))`;
+	
+				command2="${command2} | sed 's#{${z}}#{${sleutel}}#'";
+			fi
+		done
+	
+		. ./variables "${l}" < "${ENDPOINT_VARIABLE_LOCATION}";
+		eval echo endpoint="$""${endpointPlaceholder}" > ${output_dir}/${name}/${count}_Properties.properties;
+		count=`printf "%04d" $(( ${count##0} + 100 ))`;
+		eval $command2 > ${output_dir}/${name}/${count}_Bericht_${name}.xml;
+	fi
+done
+
+declare -A checksum;
+declare -A exists;
+
+for l in "${output_dir}"/*; 
+do
+	if [ -e "${l}" ];
+	then
+		dir=${l};
+		basename=`basename ${l}`;
+		excel=`echo ${basename} | sed 's/[^-]*-\(.*\)/\1/'`;
+	
+		if [ ! -d "${l}/tmp" ];
+		then
+			mkdir "${l}/tmp";
+		fi
+	
+		last_response_file="";
+		for i in `ls ${dir}/* 2> /dev/null`;
+		do
+			num=`echo $i | sed 's/.*\([[:digit:]]\{4\}\).*_[^_.]*[.]\?.*/\1/'`;
+	
+			BEVRAGING_RESPONSE_FILE="${l}/tmp/${num}_bevraging-${excel}.xml"
+			BIJHOUDING_RESPONSE_FILE="${l}/tmp/${num}_bijhouding-${excel}.xml"
+			RESPONSE_TEMP_FILE="${l}/tmp/${num}_response-${excel}.xml";
+			RESPONSE_OUTPUT_FILE="${l}/tmp/${num}_response-${excel}.properties";
+			TEMP_POST_FILE="${l}/tmp/${num}_post-${excel}.xml";
+	
+			instructie=`echo $i | sed 's/.*[[:digit:]]\{4\}_\([^_.]*\)[_]\?.*[.]\?.*/\1/'`;
+			value=`echo $i | sed 's/.*[[:digit:]]\{4\}.*_\([^_.]*\)[.]\?.*/\1/'`;
+	
+			case $instructie in
+				Properties)
+					# plaats properties in env
+				 	. $i
+					;;
+				Bericht)
+					command="cat ${i} ";
+					# search en replace van variabelen in response
+					for j in `grep "\{.*\}" ${i} | sed 's/.*{\([^}]*\)}.*/\1/'`; 
+					do
+						eval var='${'${j}'}';
+						command="${command} | sed 's#{${j}}#${var//#/\#}#g'"
+					done
+
+					eval $command > ${TEMP_POST_FILE};
+					if [[ "${endpoint}" == *"bijhouding"* ]];
+					then
+						command="wget -q --post-file=${TEMP_POST_FILE} --header='Content-Type: text/xml;charset=UTF-8' ${headers[@]} --output-document=${BIJHOUDING_RESPONSE_FILE}";
+						if [ -e "${MUT_HEADER_LOCATION}" ];
+						then
+							for h in `cat "${MUT_HEADER_LOCATION}" | sed 's/^#.*//' | tr -d '\r' | tr '\n' ' '`;
+							do
+								command="${command} --header=\"${h//=/: }\"";
+							done 
+						fi
+
+						command="${command} http://${BRP_BIJHOUDING_HOST}:${BRP_BIJHOUDING_PORT}/${endpoint}" ;
+						eval ${command};
+						iconv -f ISO-8859-1 -t UTF-8 ${BIJHOUDING_RESPONSE_FILE} > ${RESPONSE_TEMP_FILE};
+						flavour="RESBIJ";
+					elif [[ "${endpoint}" == *"bevraging"* ]];
+					then
+						wget -q --post-file=${i} --header='Content-Type: text/xml;charset=UTF-8' "http://${BRP_BEVRAGING_HOST}:${BRP_BEVRAGING_PORT}/${endpoint}" --output-document=${BEVRAGING_RESPONSE_FILE}
+						iconv -f ISO-8859-1 -t UTF-8 ${BEVRAGING_RESPONSE_FILE} > ${RESPONSE_TEMP_FILE};
+						last_response_file=${RESPONSE_TEMP_FILE};
+						flavour="RESBEV";
+					fi
+
+					# opslaan van responses
+					key=$(md5sum ${RESPONSE_TEMP_FILE} | awk '{print $1}');
+
+					. ./env;
+					berichttype=$( cat ${RESPONSE_TEMP_FILE} | tr -d '\n' | sed 's/^.*soap:Body[^>]*>\(.*\)<\/soap:Body.*$/\1/' | sed 's/brp://g' | sed 's/^<\([^ ]*\) .*$/\1/' | tr '_' '^' );
+					volgnr="$(( ++ checksum[${key}] ))%$(( ++ exists["${berichttype}-${anr}"] ))";
+
+					bestand=${RAW_LOCATION}/RES-${volgnr}-${berichttype}-${anr}.xml;
+					cat ${RESPONSE_TEMP_FILE} | tr -d '\n' | sed 's/^.*soap:Body[^>]*>\(.*\)<\/soap:Body.*$/\1/' | sed 's/brp://g' > ${bestand};
+					;;
+				Response)
+					if [ -e "${last_response_file}" ];
+					then
+						xsltproc -o ${RESPONSE_OUTPUT_FILE} ${i} ${last_response_file} 
+						eval `cat ${RESPONSE_OUTPUT_FILE} | tr -d '\n' | sed 's/^[[:space:]]*//'`;
+					fi
+					;;
+				Wachttijd)
+					usleep $value;
+					;;
+			esac
+		
+		done
+	fi
+done
+
+echo "}";
+echo "}";

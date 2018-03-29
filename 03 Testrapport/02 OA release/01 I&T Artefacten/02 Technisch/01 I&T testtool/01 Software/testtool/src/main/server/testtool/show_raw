@@ -1,0 +1,40 @@
+#!/bin/bash
+
+stage="M01";
+flavour="RESBIJ"
+volgnr="1%1"
+berichttype="bhg^hgpRegistreerHuwelijkGeregistreerdPartnerschap^R"
+anr="1401014308"
+
+. ./env
+
+dat=`date`;
+
+if [ "${flavour}" == "BRP" ];
+then
+	echo Content-type: text/xml
+	echo ""
+
+	cat ${RAW_LOCATION}/BRP-${volgnr}-${berichttype}-${anr}-${afn}.xml;
+elif [ "${flavour}" == "RESBIJ" -o "${flavour}" == "RESBEV" ];
+then
+	echo Content-type: text/xml
+	echo ""
+
+	cat ${RAW_LOCATION}/RES-${volgnr}-${berichttype}-${anr}.xml;
+elif [ "${flavour}" == "GBA" ];
+then
+	echo Content-type: text/plain
+	echo ""
+
+	if [ "${stage}" == "TC" ];
+	then
+		cat ${RAW_LOCATION}/TC-${anr}.GBA
+	else
+		cat ${RAW_LOCATION}/LO3-${berichttype}_${anr}_${afn}.GBA
+	fi
+else 
+	echo Content-type: text/plain
+	echo ""
+
+fi

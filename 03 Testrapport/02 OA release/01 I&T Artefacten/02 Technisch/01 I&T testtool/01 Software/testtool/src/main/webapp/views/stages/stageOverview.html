@@ -1,0 +1,275 @@
+<style>
+	tbody tr > th:hover, tbody tr > td:hover {
+		cursor: default;
+	}
+
+	h4.panel-title > a:hover, div.list-group > a:hover {
+		font-style: italic;
+		text-decoration: none;
+		cursor: pointer;
+	}
+
+	.spinner2, #export {
+		width: auto;
+		opacity: 1;
+		color: rgba(0, 0, 0, 0.54);
+	}
+	
+	md-table-pagination .label {
+		font-size: 12px;
+		color: rgba(0, 0, 0, 0.54);
+	}
+	
+	td.md-cell.ng-binding {
+		margin: 2px 0 2px 0;
+		padding-right: 21px !important;
+		vertical-align: top;
+	}
+	
+	tr.md-row {
+		height: 31px !important;
+	}
+
+	span.text {
+		font-size: 8pt;
+	}
+	
+	div#edit {
+		color: rgba(0, 0, 0, 0.54) !important;
+		text-decoration: none;
+		border: none;
+		float: right;
+	}
+	
+	pre.comment {
+		margin: 0px;
+		padding: 0px 14px 0px;
+		border: none;
+		background-color: rgb(250, 250, 250);
+		float: left;
+		font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		cursor: pointer !important;
+
+		white-space: pre-wrap;       /* css-3 */
+		white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+		white-space: -pre-wrap;      /* Opera 4-6 */
+		white-space: -o-pre-wrap;    /* Opera 7 */
+		word-wrap: break-word;       /* Internet Explorer 5.5+ */
+	}
+
+	pre.omschrijving {
+		margin: 0px;
+		padding: 0px 14px 0px;
+		border: none;
+		background-color: rgb(250, 250, 250);
+		float: left;
+		font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+		cursor: pointer !important;
+
+		white-space: pre-wrap;       /* css-3 */
+		white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+		white-space: -pre-wrap;      /* Opera 4-6 */
+		white-space: -o-pre-wrap;    /* Opera 7 */
+		word-wrap: break-word;       /* Internet Explorer 5.5+ */
+ 	}
+
+	.editable-textarea {
+		padding: 0px 14px 0px;
+	}
+	
+	label.active {
+		margin-top: -1px;
+		border: 2px solid rgba(0, 0, 0, 0.54) !important;
+	}
+	
+	.label.label-info {
+		margin-right: 2px;
+	}
+	
+	
+	
+</style>
+
+<div class="container-fluid" ng-controller="stageOverviewController">
+	<status running="running" />
+	
+	<div class="panel-group" id="accordion" ng-hide="upload">
+		<div class="panel panel-default">
+			<div class="panel-heading">
+				<h4 class="panel-title">
+					<a href="javascript:;" id="run" class="has-spinner" data-parent="#accordion" data-toggle="collapse" data-target="#execute">
+						<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+						Uitvoeren
+					</a>
+					<span class="pull-right">
+						<span ng-repeat="value in runStatus" class="label label-info">{{ value }}</span>
+						<input name="radioButton" ng-model="canRun" type="radio" bs-switch switch-on-color="success" switch-on-text="AAN" switch-off-text="UIT" switch-off-color="danger" switch-size="mini"></input>
+					</span>
+				</h4>
+			</div>	
+			<div id="execute" class="panel-collapse collapse">
+				<div class="list-group">
+					<a id="IV_run" class="list-group-item has-spinner" ng-click="run('IV');">
+						<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+						Initi&euml;le vulling, Terugconversie en Resultaten ophalen
+						<span class="pull-right">
+							<div id="timer_IV">
+								<timer interval="1000" autostart="false">{{mminutes}}:{{sseconds}}</timer>
+							</div>
+						</span>
+					</a>
+					<a ng-repeat="(key, value) in available" id="{{ key }}_run" class="list-group-item has-spinner" ng-click="run(key);" ng-class="value">
+						<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+						{{ key }} mutaties en Resultaten ophalen
+						<span class="pull-right">
+							<div id="timer_{{ key }}">
+								<timer interval="1000" autostart="false">{{mminutes}}:{{sseconds}}</timer>
+							</div>
+						</span>
+					</a>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="row">
+		<div class="col-md-7">
+			<a class="btn btn-md btn-primary" ng-href="#/Testtool/Tools/Upload" ng-if="upload">
+				Terug naar upload
+			</a>
+			<a class="btn btn-md btn-danger" ng-click="resetPLs();" ng-if="upload">
+				Verwijder PL('en)
+			</a>
+		</div>
+		<div class="col-md-5">
+			<div class="panel panel-info">
+				<div class="panel-heading collapsed">
+					<a data-toggle="collapse" href="javascript:;" data-target="#collapse1"><i class="icon-arrow-down"></i></a>
+				</div>
+				<div class="panel-collapse collapse" id="collapse1">
+					<div class="panel-body">
+						<input type="text" class="form-control input-sm" ng-model="queryConfig.filter"></input>
+						<h4></h4>
+						<div class="btn-group" data-toggle="buttons">
+							<label class="btn btn-xs btn-primary" ng-click="toggleStadium();">
+								<input type="checkbox"><i style="color: white;" class="icon-asterisk" ></i></input>
+							</label>
+							<label class="btn btn-xs btn-primary" ng-class="queryConfig.stadiumActive['IV']?'active':''" ng-click="toggleStadium('IV');">
+								<input type="checkbox">IV</input>
+							</label>
+							<label class="btn btn-xs btn-primary" ng-class="queryConfig.stadiumActive['TC']?'active':''" ng-click="toggleStadium('TC');">
+								<input type="checkbox">TC</input>
+							</label>
+							<label ng-repeat="value in stagesAvailable" class="btn btn-xs btn-primary" ng-class="queryConfig.stadiumActive[value]?'active':''" ng-click="toggleStadium(value);">
+								<input type="checkbox">{{ value }}</input>
+							</label>
+						</div>
+						<div class="btn-group" data-toggle="buttons">
+							<label class="btn btn-xs btn-success" ng-class="queryConfig.statusActive['ok']?'active':''" ng-click="toggleStatus('ok');">
+								<input type="checkbox"><span class="badge">{{ count.ok }}</span></input>
+							</label>
+							<label class="btn btn-xs btn-warning" ng-class="queryConfig.statusActive['notchecked']?'active':''" ng-click="toggleStatus('notchecked');">
+								<input type="checkbox"><span class="badge">{{ count.notchecked }}</span></input>
+							</label>
+							<label class="btn btn-xs btn-danger" ng-class="queryConfig.statusActive['nok']?'active':''" ng-click="toggleStatus('nok');">
+								<input type="checkbox"><span class="badge">{{ count.nok }}</span></input>
+							</label>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<md-table-container>
+		<table md-table md-progress="promise" ng-init="list();">
+			<thead md-head md-order="queryConfig.order">
+				<tr md-row>
+					<th md-column style="width: 75%" ng-if="!upload">testgevalomschrijving</th>
+					<th md-column ng-if="upload"><input type="checkbox" ng-model="selectAll" ng-click="checkAll(selectAll);" /></th>
+					<th md-column md-order-by="test" style="text-align: center;">test</th>
+					<th md-column md-order-by="anr">anr</th>
+					<th md-column md-order-by="bsn">bsn</th>
+					<th md-column md-order-by="excel" style="width: 15%">excel</th>
+					<th md-column>
+						stadium
+					</th>
+					<th md-column ng-if="!upload">
+						opmerking
+					</th>
+					<th md-column>
+						<div class="pull-right">		
+							| 
+							<a ng-href="{{ export(); }}" data-toggle="tooltip" title="Exporteer naar csv"><i id="export" class="icon-download-alt"></i></a>
+							|
+							<a ng-click="refresh();" class="has-spinner" data-toggle="tooltip" title="Ververs de resultaten"><span class="spinner spinner2"><i id="refresh" class="icon-refresh"></i></span></a>
+							|
+						</div>
+					</th>
+				<tr>
+			</thead>
+			<tbody md-body>
+				<tr md-row ng-repeat="(key, n) in content | filter:queryConfig.filter | stadiumFilter:queryConfig.stadiumActive | statusFilter:queryConfig.statusActive | orderBy: queryConfig.order | limitTo: queryConfig.limit: (queryConfig.page - 1) * queryConfig.limit">
+					<td md-cell ng-init="n.showOmschrijving=true;" style="margin-right: 6px; width: 75%" ng-if="!upload">
+						<div class="row">
+							<pre class="omschrijving" ng-if="n.showOmschrijving && n.omschrijving" ng-bind-html="n.omschrijving | link:'_blank'">
+								<span class="icon-edit"></span>
+							</pre>
+							<div class="pull-right" id="edit" editable-textarea="n.omschrijving" e-rows="5" e-cols="60" onshow="n.showOmschrijving=false;" onhide="n.showOmschrijving=true;" onaftersave="saveOmschrijving(n.anr, n.omschrijving);">
+								<i class="icon-edit"></i>
+							</div>
+						</div>
+					</td>
+					<td md-cell ng-if="upload">
+						<input type="checkbox" ng-init="checkbox[n.anr]=false;" ng-model="checkbox[n.anr]" />
+					</td>
+					<td style="text-align: center;" rowspan="{{ determine_occurences(key, (content | filter:queryConfig.filter | stadiumFilter:queryConfig.stadiumActive | statusFilter:queryConfig.statusActive | orderBy: queryConfig.order | limitTo: queryConfig.limit: (queryConfig.page - 1) * queryConfig.limit)); }}" 
+						ng-if="key == 0 || (content | filter:queryConfig.filter | stadiumFilter:queryConfig.stadiumActive | statusFilter:queryConfig.statusActive | orderBy: queryConfig.order | limitTo: queryConfig.limit: (queryConfig.page - 1) * queryConfig.limit)[key-1].test != n.test" md-cell>{{ n.test }}</td>
+					<td style="padding-left: 0px;" md-cell>{{ n.anr }}</td>
+					<td md-cell>{{ n.bsn }}</td>
+					<td md-cell>{{ n.excel }}</td>
+					<td md-cell>
+						<section layout="row">
+							<div ng-repeat="(key, value) in n['results']">
+								<button ng-class="n['results'][key]['class']" class="btn btn-xs" style="margin-left: 1px;" ng-click="openType(key, '', n.anr)">
+									{{ key }}
+								</button>
+							</div>
+						</section>
+					</td>
+					<td md-cell colspan="2" ng-init="n.showComment=true;" style="width: 15%">
+						<div class="row" ng-if="!upload">
+							<pre class="comment" ng-if="n.showComment && n.comment" ng-bind-html="n.comment | link:'_blank'">
+								<span class="icon-edit"></span>
+							</pre>
+							<div class="pull-right" id="edit" editable-textarea="n.comment" e-rows="5" e-cols="60" onshow="n.showComment=false;" onhide="n.showComment=true;" onaftersave="saveComment(n.anr, n.comment);">
+								<i class="icon-edit"></i>
+							</div>
+						</div>
+					</td>
+				</tr>
+				<tr md-row ng-if="! content">
+					<td md-cell colspan="7" class="text-center">
+						<br/>
+						<div layout="row" layout-sm="column" layout-align="space-around">
+							<md-progress-circular md-mode="indeterminate"></md-progress-circular>
+						</div>
+						<br/>
+					</td>
+				</tr>
+				<tr md-row ng-if="content.length == 0">
+					<td md-cell colspan="7" class="text-center">
+						<div layout="row" layout-sm="column" layout-align="space-around">
+							Geen resultaten om weer te geven
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</md-table-container>
+
+	<md-table-pagination ng-if="content && content.length != 0" md-boundary-links md-label="{page: 'Pagina', rowsPerPage: 'Rijen per pagina:', of: 'van'}"
+		md-limit="queryConfig.limit" md-page="queryConfig.page" md-limit-options="limitOptions" md-total="{{ (content | filter:queryConfig.filter | stadiumFilter:queryConfig.stadiumActive | statusFilter:queryConfig.statusActive).length }}">
+	</md-table-pagination>
+</div>
+

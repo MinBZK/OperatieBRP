@@ -1,0 +1,66 @@
+#!/bin/bash
+echo Content-type: text/plain
+
+stage="M01";
+
+. ./env
+. ./functions
+
+echo ""
+
+> ${OUTPUT_LOCATION}/DOORZETTEN.txt;
+
+echo "start "`date`" ${MUT_LOCATION}/${stage}"/*;
+for i in "${MUT_LOCATION}/${stage}"/*;
+do
+	b=`basename "$i"`;
+	substage=`echo "$b" | sed 's/^[[:digit:]]*\.[[:space:]]\?//'`;
+
+	case $substage in 
+		AI_GBA)
+			echo AI_GBA gevonden ${i} GBA
+			bash ./run_ai "${stage}" "${i}" GBA &
+			;;
+		AI_BRP)
+			echo AI_BRP gevonden ${i} BRP
+			bash ./run_ai "${stage}" "${i}" BRP &
+			;;
+	esac;
+done
+
+wait;
+
+for i in "${MUT_LOCATION}/${stage}"/*;
+do
+	b=`basename "$i"`;
+	substage=`echo "$b" | sed 's/^[[:digit:]]*\.[[:space:]]\?//'`;
+
+	case $substage in 
+		GBA)
+			echo GBA gevonden ${stage} ${i} 
+			bash ./run_gba "${stage}" "${i}" "${BSN_LIST_FILE}" &
+			;;
+		BRP)
+			echo BRP gevonden ${stage} ${i}
+			bash ./run_brp "${stage}" "${i}/${BIJHOUDING_DIR}" "${BSN_LIST_FILE}" &
+			;;
+	esac;
+done
+
+wait;
+
+sleep 5;
+
+# lees de DOORZETTEN.txt file voor JBMP doorzetten en actie
+if [ -s ${DOORZETTEN_FILE} ];
+then
+	while read line;
+	do
+		values=(${line});
+		${SOAPUI_TEST_LOCATION}/${SOAPUI_TEST_SCRIPT} -f${TEMP_DIR} -PAnummer=${values[0]} -Pomgeving=${BRP_ISC_AP_HOST} -Pbeheerderskeuze=${values[1]} "${JBPM_DOORZETTEN_XML}";
+		echo ${SOAPUI_TEST_LOCATION}/${SOAPUI_TEST_SCRIPT} -f${TEMP_DIR} -PAnummer=${values[0]} -Pomgeving=${BRP_ISC_AP_HOST} -Pbeheerderskeuze=${values[1]} "${JBPM_DOORZETTEN_XML}";
+
+	done < ${DOORZETTEN_FILE};
+fi
+
+echo "klaar "`date`;

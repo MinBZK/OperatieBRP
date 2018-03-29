@@ -1,0 +1,73 @@
+#!/bin/bash
+
+. ./env
+ 
+raw=0
+if [ "${dir}" == "" ];
+then
+	dir=$1;
+	raw=1;
+else
+	echo Content-type: application/json
+	echo ""
+fi
+
+content=""
+function list {
+        for i in `ls | sort | grep -v _attribuut.properties | sed 's/ /%/'`;
+        do
+                local entry=`basename $i`;
+                if [ -d "${entry//%/ }" ];
+                then
+                        local attr=`cat "${entry//%/ }"/*_attribuut.properties 2> /dev/null | tr '\n' ' '`;
+                        local attr=`echo ${attr} | sed 's/\([^ =]*="\)/brp:\1/g'`;
+                        cd "${entry//%/ }";
+
+                        local count=`ls | grep -v _attribuut.properties | wc -l`;
+                        if [ $count -eq 0 ];
+                        then
+                                content="${content}<brp:${entry//[[:digit:]]*\.%/} ${attr} />"
+                                list
+                        else
+                                content="${content}<brp:${entry//[[:digit:]]*\.%/} ${attr}>"
+                                list
+                                content="${content}</brp:${entry//[[:digit:]]*\.%/}>"
+                        fi
+                else
+                        for j in `cat "${i//%/ }" | sed 's/ /~/g'`;
+                        do
+                                t=`echo ${j} | sed 's/^\([^\=]*\)=\([^\=]*\)$/\<brp:\1>\2\<\/brp:\1>/' | sed 's/~/ /g'`;
+				content="${content}${t}"
+                        done
+                fi
+        done
+        cd ..
+}
+
+j=1;
+arg=(`echo ${SOAP_LOCATION}/${dir}/*`);
+attr=`cat "${arg[0]} ${arg[1]}"/*_attribuut.properties 2> /dev/null | tr '\n' ' '`;
+dir=`basename "${arg[0]} ${arg[1]}"`;
+content='<?xml version="1.0"?>'
+content="${content}<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:brp=\"http://www.bzk.nl/brp/brp0200\"><soapenv:Header/><soapenv:Body>"
+content="${content}<brp:${dir//[[:digit:]]*\. /} ${attr//[[:space:]]*$/}>"
+
+cd "${arg[0]} ${arg[1]}"
+list
+cd ..
+
+content="${content}</brp:${dir//[[:digit:]]*\. /}>"
+content="${content}</soapenv:Body></soapenv:Envelope>"
+
+if [ ${raw} -eq 0 ];
+then
+	content=`echo ${content} | sed 's/"/\\\"/g'`;
+	printf "%s" "[\"";
+fi
+
+printf "%s" "${content}";
+
+if [ ${raw} -eq 0 ];
+then
+	printf "%s" "\"]";
+fi

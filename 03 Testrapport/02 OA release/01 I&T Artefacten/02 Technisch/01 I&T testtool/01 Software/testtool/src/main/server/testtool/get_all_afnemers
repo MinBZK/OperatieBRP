@@ -1,0 +1,35 @@
+#!/bin/bash
+echo Content-type: application/json;
+echo "";
+
+. ./env
+. ./functions
+
+query="select p.code||'|'||replace(p.naam, ' ', '#') from kern.partij p, kern.partijrol pr, autaut.toeganglevsautorisatie tl, autaut.levsautorisatie l where p.id= pr.partij AND pr.id=tl.geautoriseerde AND tl.levsautorisatie=l.id AND l.naam = 'GBA Volledig' ORDER BY p.naam";
+if [ "${type}" == "BRP" ];
+then
+	query="select p.code||'|'||replace(p.naam, ' ', '#') from kern.partij p, kern.partijrol pr, autaut.toeganglevsautorisatie tl, autaut.levsautorisatie l where p.id= pr.partij AND pr.id=tl.geautoriseerde AND tl.levsautorisatie=l.id AND l.naam = 'BRP Volledig Afnemers' ORDER BY p.naam";
+fi
+
+export PGPASSWORD=${BRP_ISC_DB_PASSWORD};
+results=$( psql -t -q -h ${BRP_ISC_DB_HOST} ${BRP_ISC_DB_NAME} -U ${BRP_ISC_DB_USER} -c "${query}" );
+
+count=0;
+echo "[";
+for i in ${results}; 
+do
+	if [ $count -gt 0 ];
+	then
+		echo ",";
+	fi
+
+	values=(${i//|/ });
+
+	echo "[\"${values[0]}\",";
+	echo "\"${values[1]//#/ }\"]";
+
+	count=$(( count + 1 ));
+
+done
+echo "]";
+

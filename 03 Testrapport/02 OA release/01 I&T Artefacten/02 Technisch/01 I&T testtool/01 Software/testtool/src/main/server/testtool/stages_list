@@ -1,0 +1,123 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+dat=`date`;
+
+. ./env
+. ./functions
+
+echo "{"
+. ./meta
+echo ",";
+echo "\"data\" : [";
+
+q=0;
+
+if [[ ("${flavour}" == "BRP" || "${flavour}" == "RESBIJ" || "${flavour}" == "RESBEV" || ("${flavour}" == "GBA" &&  "${stage}" != "TC")) && "${show_scripts}" == "" ]] ;
+then
+	if [ "${flavour}" == "BRP" ];
+	then
+		list=`ls ${TYPE_LOCATION}/*/*${anr}* 2> /dev/null | grep -e 'actual\|expected' | awk -F '/' '{print $NF}' | sed 's/\(BRP_.*\)_[^_]*.xml/\1.xml/' | sort | uniq`;
+	elif [ "${flavour}" == "RESBIJ" -o "${flavour}" == "RESBEV" ];
+	then
+		list=`ls ${TYPE_LOCATION}/*/*${anr}* 2> /dev/null | grep -e 'actual\|expected' | awk -F '/' '{print $NF}' | sed "s/\(${flavour}_.*\)_[^_]*.xml/\1.xml/" | sort | uniq`;
+	else
+		list=`ls ${TYPE_LOCATION}/*/*${anr}* 2> /dev/null | grep -e 'actual\|expected' | awk -F '/' '{print $NF}' | sed 's/.*_\([^_]*_[^_]*_[^_]*\)/\1/' | sort | uniq`;
+	fi
+
+	for file in ${list};
+	do
+		if [ $q -gt 0 ];
+		then
+			echo ", ";
+		fi
+
+		echo "{"
+
+		if [ "${flavour}" == "BRP" ];
+		then
+			volgnr=`echo ${file} | sed 's/BRP_\([^_]*\)_.*_[^_]*_[^_]*.xml/\1/'`;
+			berichttype=`echo ${file} | sed 's/BRP_[^_]*_\(.*\)_[^_]*_[^_]*.xml/\1/'`;
+			afn=`echo ${file} | sed 's/BRP_[^_]*_.*_[^_]*_\([^_]*\).xml/\1/'`;
+			echo "	\"volgnr\" : \"${volgnr}\",";
+			echo "	\"berichttype\" : \"${berichttype}\",";
+			echo "	\"afnemer\" : \"${afn}\",";
+
+	        	# compare
+	        	compare_brp "${stage}" "" "${flavour}" "${anr}" "${afn}" "${berichttype}" "" "${volgnr}";
+		elif [ "${flavour}" == "RESBIJ" -o "${flavour}" == "RESBEV" ];
+		then
+
+			volgnr=`echo ${file} | sed "s/${flavour}_\([^_]*\)_.*_[^_]*.xml/\1/"`;
+			berichttype=`echo ${file} | sed "s/${flavour}_[^_]*_\(.*\)_[^_]*.xml/\1/"`;
+			echo "	\"volgnr\" : \"${volgnr}\",";
+			echo "	\"berichttype\" : \"${berichttype}\",";
+
+	        	# compare
+	        	compare_brp "${stage}" "" "${flavour}" "${anr}" "" "${berichttype}" "" "${volgnr}";
+		else 
+			afn=`echo ${file} | sed 's/.*_\([^_]*\).GBA$/\1/'`;
+			bn=`echo ${file} | sed 's/^\([^_]*\)_[^_]*_[^_]*.GBA$/\1/'`;
+			echo "	"\"berichtnummer\"" : "\"${bn}\"",";
+			echo "	\"afnemer\" : \"${afn}\",";
+
+	        	# compare
+	        	compare_lev "${stage}" "" "${anr}" "${afn}" "${bn}";
+		fi
+
+		echo "}"
+		q=$(($q+1));
+	done
+else 
+
+	if [ "${flavour}" == "GBA" ];
+	then
+		list="${GBA_CONTROLE_LOCATION}"/*txt;
+	elif [ "${flavour}" == "BRP" ];
+	then
+		list="${BRP_CONTROLE_LOCATION}"/*xsl;
+	elif [ "${flavour}" == "RESBIJ" ];
+	then
+		list="${RESBIJ_CONTROLE_LOCATION}"/*xsl;
+	elif [ "${flavour}" == "RESBEV" ];
+	then
+		list="${RESBEV_CONTROLE_LOCATION}"/*xsl;
+	else 
+		list="${SQL_CONTROLE_LOCATION}"/*sql;
+	fi
+
+	for path in ${list};
+	do
+		script=`basename "${path}" | sed 's/.[^.]*$//'`;
+		. ./files
+
+		if [ -e ${ACTUAL_FILE} -o -e ${EXPECTED_FILE} ];
+		then
+			if [ $q -gt 0 ];
+			then
+				echo ", ";
+			fi
+
+			f=`basename "${path}"`;
+			echo "{"
+			echo '	"naam" : "'${script}'",';
+		        # compare
+			if [ "${flavour}" == "GBA" ];
+			then
+		       		compare_lev "${stage}" "" "${anr}" "${afn}" "${bn}" "${script}";
+			elif [ "${flavour}" == "BRP" -o "${flavour}" == "RESBEV" -o "${flavour}" == "RESBIJ" ];
+			then
+		        	compare_brp "${stage}" "" "${flavour}" "${anr}" "${afn}" "${berichttype}" "${script}" "${volgnr}";
+			else
+		       		stage_list_compare "${stage}" "" "${flavour}" "${anr}" "${script}";
+			fi
+		
+			echo "}"
+			q=$(($q+1));
+		fi
+	done
+fi
+
+echo "]";
+echo "}"

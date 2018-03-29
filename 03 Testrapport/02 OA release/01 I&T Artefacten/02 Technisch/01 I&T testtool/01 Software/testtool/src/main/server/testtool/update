@@ -1,0 +1,24 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+dat=`date`;
+
+. ./env
+. ./functions
+
+echo "{"
+
+i=0;
+echo "\"checkout_location\" : {";
+
+loc=${CHECKOUT_LOCATION};
+log=`svn up --non-interactive ${loc} 2>&1`;
+log=`echo ${log} | tr '\n' ','`
+
+echo "\"status\" : \"ok\", ";
+echo "\"log\" : \"${log}\"";
+echo "}";
+echo "}";
+
+sleep 2;

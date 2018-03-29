@@ -1,0 +1,23 @@
+#!/bin/bash
+
+LOG_DIR=./tmp
+mkdir -p ${LOG_DIR};
+
+for i in `docker ps -a | sed '1d' | awk '{print $1}'`; 
+do
+	pwd=`docker exec $i "pwd"`;
+    	containername=`docker ps -a | grep $i | awk '{print $NF}'`;
+	if [ "${pwd}" == "/opt/appserver" ];
+	then
+		for j in `docker exec $i ls logs | sed 's/ /#/g'`;
+		do
+			if [ ! -d ${LOG_DIR}/${containername}/ ];
+			then
+				mkdir ${LOG_DIR}/${containername}/;
+			fi
+
+			docker cp "$i:/opt/appserver/logs/${j//#/ }" ${LOG_DIR}/${containername}/;
+		done
+	fi
+done
+

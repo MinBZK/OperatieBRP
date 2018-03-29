@@ -1,0 +1,155 @@
+<style>
+	.autocomplete-custom-template .item-title,
+	.autocomplete-custom-template .item-metadata {
+		display: block;
+		line-height: 2;
+	}
+	.autocomplete-custom-template li {
+		border-bottom: 1px solid #ccc;
+		height: auto;
+		padding-top: 8px;
+		padding-bottom: 8px;
+		white-space: normal;
+	}
+	.autocomplete-custom-template li:last-child {
+		border-bottom-width: 0;
+	}
+</style>
+
+<div class="container" ng-init="init();" ng-controller="afnemerindicatiesController">
+
+	<status running="running" />
+
+	<div class="row">
+		<div class="col-md-12">
+			<div class="pull-right">
+				<a class="btn btn-md btn-primary" ng-click="openResults();" ng-if="showResults">
+					Ga naar de resultaten
+				</a>
+			</div>
+		</div>	
+	</div>
+
+	<div class="row"><h1> </h1></div>
+	<div class="row"><h1> </h1></div>
+
+	<div class="row">
+		<div class="col-md-5">
+			<div class="panel panel-default">
+				<div class="panel-body">
+				
+					<form name="myform">
+						<md-select ng-model="typeSelectedItem" placeholder="Type" class="md-no-underline">
+							<md-option value="BRP">BRP</md-option>
+							<md-option value="GBA">GBA</md-option>
+						</md-select>
+		
+						<md-autocomplete md-selected-item="anummerSelectedItem"
+							md-search-text="anummerSearchText" 
+							md-items="item in querySearch(anummerSearchText, anummers);" 
+							md-item-text="item[0]" md-min-length="0"
+							md-floating-label="A-nummer"
+							md-menu-class="autocomplete-custom-template">
+							<md-item-template>
+								<span class="item-title">
+									<i class="icon-user"></i> 
+									<span>{{ item[0] }}</span>
+								</span>
+								<span class="item-metadata">
+									<span>
+										<span>
+											<i class="icon-th"></i> 
+											<span>{{ item[1] }}</span>
+										</span>
+										<span>
+											<i class="icon-bookmark"></i> 
+											<span>{{ item[2] }}</span>
+										</span>
+									</span>
+								</span>
+							</md-item-template>
+						</md-autocomplete>
+		
+						<md-autocomplete md-selected-item="afnemerSelectedItem"
+							md-no-cache="true"
+							md-search-text="afnemerSearchText" 
+							md-items="item in querySearch(afnemerSearchText, afnemers);" 
+							md-item-text="item[0]" md-min-length="0"
+							md-floating-label="Afnemer"
+							md-menu-class="autocomplete-custom-template">
+							<md-item-template>
+								<span class="item-title">
+									<i class="icon-download-alt"></i> 
+									<span>{{ item[0] }}</span>
+								</span>
+								<span class="item-metadata">
+									<span>
+										<span>
+											<span>{{ item[1] }}</span>
+										</span>
+									</span>
+								</span>
+							</md-item-template>
+						</md-autocomplete>
+		
+		
+						<md-autocomplete md-selected-item="autorisatieSelectedItem"
+							ng-disabled="autorisatieIsDisabled"
+							md-search-text="autorisatieSearchText" 
+							md-items="item in querySearch(autorisatieSearchText, autorisaties);" 
+							md-item-text="item.display" md-min-length="0"
+							md-floating-label="Autorisatie">
+							<md-item-template>
+								<span md-highlight-text="autorisatieSearchText">{{ item }}</span>
+							</md-item-template>
+						</md-autocomplete>
+		
+						<button type="submit" class="btn btn-md btn-primary" ng-click="add(typeSelectedItem, anummerSelectedItem, afnemerSelectedItem, autorisatieSelectedItem);">Toevoegen</button>
+					</form>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-md-1"><h1> </h1></div>
+		
+		<div class="col-md-6">
+			<div ng-if="sendItems.length>0">
+				<div class="row">
+					<div class="col-md-4">
+						<h4>Te verzenden:</h4>
+					</div>
+				</div>
+				<div class="table" ng-if="flavour != 'GBA'">
+					<div class="row">
+						<div class="cell head">#</div>
+						<div class="cell head">Type</div>
+						<div class="cell head">A-nummer</div>
+						<div class="cell head">Afnemer</div>
+						<div class="cell head">Autorisatie</div>
+						<div class="cell head"></div>
+					</div>
+					<div class="row" ng-repeat="row in sendItems track by $index">
+						<div class="cell">{{ $index + 1 }}</div>
+						<div class="cell">{{ row.type }}</div>
+						<div class="cell">{{ row.anummer }}</div>
+						<div class="cell">{{ row.afnemer }}</div>
+						<div class="cell">{{ row.autorisatie }}</div>
+						<div class="cell text-center">
+							<i class="icon icon-remove" style="color: red;" ng-click="delete($index);"></i>
+						</div>
+					</div>
+				</div>
+				<div class="row">
+					<div class="col-md-9"></div>
+					<div class="col-md-2">
+						<a class="btn btn-md btn-primary has-spinner" id="execute" ng-click="execute();">
+							<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+							Verzenden
+						</a>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</div>

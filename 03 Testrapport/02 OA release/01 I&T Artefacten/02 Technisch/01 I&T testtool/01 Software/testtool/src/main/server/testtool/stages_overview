@@ -1,0 +1,46 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+dat=`date`;
+
+. ./env
+. ./functions
+
+i=0;
+
+echo "{";
+. ./meta
+echo ",";
+. ./available
+echo ",";
+
+i=0;
+echo "\"data\" : [";
+for b in `sed 's/ /#/g' ${BSN_LIST_FILE}`;
+do
+	tst=`echo $b | awk -F '#' '{print $2}' | sed 's/-.*//'`;
+	bsn=`echo $b | awk -F '#' '{print $3}'`;
+	anr=`echo $b | awk -F '#' '{print $4}'`
+	excel=`echo $b | awk -F '#' '{print $2}'`
+
+	if [ $i -gt 0 ];
+	then
+		echo ", ";
+	fi
+
+	echo "{"
+	echo '	"test":"'${tst}'",';
+	echo '	"bsn":"'${bsn}'",';
+	echo '	"anr":"'${anr}'",';
+	echo '	"excel":"'${excel}'",';
+
+	. ./comment "${anr}";
+
+	echo ',';
+	. ./results "${anr}"
+	echo "}";
+	i=$(($i+1));
+done
+echo "]";
+echo "}";

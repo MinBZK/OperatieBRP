@@ -1,0 +1,915 @@
+#!/bin/bash
+
+function stage_compare {
+	local stage=$1;
+	local substage=$2;
+	local flavour=$3;
+	local anr=$4;
+	local status='';
+
+	local total=0;
+	local errors=0;
+	local notchecked=0;
+	local correct=0;
+
+	local TYPE_LOCATION="${STAGES_LOCATION}/${stage}/${flavour}"
+	local ACTUAL_LOCATION="${TYPE_LOCATION}/actual";
+	local EXPECTED_LOCATION="${TYPE_LOCATION}/expected";
+
+	local diff=${TEMP_DIR}/stages_${anr}_diff.txt
+	diff -Bsq ${ACTUAL_LOCATION} ${EXPECTED_LOCATION} | grep ${anr} > ${diff}
+
+	local search=`echo ${anr}`;
+	local found_actual=$(( `ls ${ACTUAL_LOCATION}/*${search}* 2>/dev/null | wc -l` ))
+	local found_expected=$(( `ls ${EXPECTED_LOCATION}/*${search}* 2>/dev/null | wc -l` ))
+
+	if [ ${flavour} == "SQL" ];
+	then	
+		export total=$((`ls "${SQL_CONTROLE_LOCATION}"/*sql | wc -l`));
+	elif [ ${flavour} == "GBA" ];
+	then
+		export total=$((`ls "${GBA_CONTROLE_LOCATION}"/*txt | wc -l`));
+	elif [ ${flavour} == "BRP" ];
+	then
+		export total=$((`ls "${BRP_CONTROLE_LOCATION}"/*xsl | wc -l`));
+	fi
+
+	if [ ${found_actual} -eq 0 -a ${found_expected} -eq 0 ];
+	then
+		echo "\"totaal\" : \"${total}\", ";
+		echo "\"correct\" : \"${total}\", ";
+		echo "\"fouten\" : \"0\", ";
+		echo "\"niet gecontroleerd\" : \"0\", ";
+		status="ok";
+	else
+		correct=$(( `grep ${EXPECTED_LOCATION} ${diff} | grep "identical" | wc -l` ));
+		notchecked=$(( `grep ${ACTUAL_LOCATION} ${diff} | grep "Only in" | wc -l` ));
+		errors=$(( `grep ${EXPECTED_LOCATION} ${diff} | grep "Only in" | wc -l` ));
+		errors=$(( errors + `grep ${search} ${diff} | grep "/${stage}/${flavour}/" | grep -e "^Files" | grep "differ" | wc -l` ));
+	
+		export errors=${errors};
+	
+		echo "\"totaal\" : \"$total\", ";
+		echo "\"correct\" : \"$correct\", ";
+		echo "\"fouten\" : \"$errors\", ";
+		echo "\"niet gecontroleerd\" : \"$notchecked\", ";
+	
+		status="ok";
+		if [ ${notchecked} -gt 0 ];
+		then
+			status="notchecked";
+		else
+			if [ $errors -gt 0 ];
+			then
+				status="nok";
+			fi
+		fi
+	fi
+
+	echo "	\"status\" : \"${status}\"";
+	export ret=${status}
+}
+
+function stage_compare_cached {
+	local stage=$1;
+	local substage=$2;
+	local flavour=$3;
+	local anr=$4;
+	local status='';
+
+	local total=0;
+	local errors=0;
+	local notchecked=0;
+	local correct=0;
+
+	local TYPE_LOCATION="${STAGES_LOCATION}/${stage}/${flavour}"
+	local ACTUAL_LOCATION="${TYPE_LOCATION}/actual";
+	local EXPECTED_LOCATION="${TYPE_LOCATION}/expected";
+
+	local diff=${TEMP_DIR}/stages_${stage}_${flavour}_diff.txt
+
+	if [ -e ${diff} ];
+	then
+		if [ $(( $( date +'%s' ) - $( stat -c %Y ${diff} ) )) -gt 30 ];
+		then
+			diff -Bsq ${ACTUAL_LOCATION} ${EXPECTED_LOCATION} > ${diff}
+		fi
+	else 
+		diff -Bsq ${ACTUAL_LOCATION} ${EXPECTED_LOCATION} > ${diff}
+	fi
+
+	local search=`echo ${anr}`;
+	local found_actual=$(( `ls ${ACTUAL_LOCATION}/*${search}* 2>/dev/null | wc -l` ))
+	local found_expected=$(( `ls ${EXPECTED_LOCATION}/*${search}* 2>/dev/null | wc -l` ))
+
+	if [ ${flavour} == "SQL" ];
+	then	
+		export total=$((`ls "${SQL_CONTROLE_LOCATION}"/*sql | wc -l`));
+	elif [ ${flavour} == "GBA" ];
+	then
+		export total=$((`ls "${GBA_CONTROLE_LOCATION}"/*txt | wc -l`));
+	elif [ ${flavour} == "BRP" ];
+	then
+		export total=$((`ls "${BRP_CONTROLE_LOCATION}"/*xsl | wc -l`));
+	fi
+
+	if [ ${found_actual} -eq 0 -a ${found_expected} -eq 0 ];
+	then
+		echo "\"totaal\" : \"${total}\", ";
+		echo "\"correct\" : \"${total}\", ";
+		echo "\"fouten\" : \"0\", ";
+		echo "\"niet gecontroleerd\" : \"0\", ";
+		status="ok";
+	else
+		correct=$(( `grep ${EXPECTED_LOCATION} ${diff} | grep ${anr} | grep "identical" | wc -l` ));
+		notchecked=$(( `grep ${ACTUAL_LOCATION} ${diff} | grep ${anr} | grep "Only in" | wc -l` ));
+		errors=$(( `grep ${EXPECTED_LOCATION} ${diff} | grep ${anr} | grep "Only in" | wc -l` ));
+		errors=$(( errors + `grep ${search} ${diff} | grep ${anr} | grep "/${stage}/${flavour}/" | grep -e "^Files" | grep "differ" | wc -l` ));
+	
+		export errors=${errors};
+	
+		echo "\"totaal\" : \"$total\", ";
+		echo "\"correct\" : \"$correct\", ";
+		echo "\"fouten\" : \"$errors\", ";
+		echo "\"niet gecontroleerd\" : \"$notchecked\", ";
+	
+		status="ok";
+		if [ ${notchecked} -gt 0 ];
+		then
+			status="notchecked";
+		else
+			if [ $errors -gt 0 ];
+			then
+				status="nok";
+			fi
+		fi
+	fi
+
+	echo "	\"status\" : \"${status}\"";
+	export ret=${status}
+}
+
+function stage_list_compare {
+	local stage=$1;
+	local substage=$2;
+	local flavour=$3;
+	local anr=$4;
+	local script=$5;
+
+	local total=0;
+	local errors=0;
+	local notchecked=0;
+	local status='';
+
+	local TYPE_LOCATION="${STAGES_LOCATION}/${stage}/${flavour}"
+	local ACTUAL_LOCATION="${TYPE_LOCATION}/actual";
+	local EXPECTED_LOCATION="${TYPE_LOCATION}/expected";
+
+	diff=${TEMP_DIR}/stages_${stage}_${flavour}_diff.txt
+	if [ -e ${diff} ];
+	then
+		if [ $(( `date +%s` - `stat -c %Y ${diff}` )) -gt 5 ];
+		then
+			diff -Bsq ${ACTUAL_LOCATION} ${EXPECTED_LOCATION} > ${diff}
+		fi
+	else
+		diff -Bsq ${ACTUAL_LOCATION} ${EXPECTED_LOCATION} > ${diff}
+	fi
+
+	search="${anr}";
+
+	if [[ "$script" != "" ]];
+	then
+		if [ "${flavour}" == "GBA" -a "${stage}" != "TC" ];
+		then
+			search="${script}_[^_]*_${anr}";
+		elif [ "${flavour}" == "BRP" ];
+		then
+			search="${anr}_[^_]*_${script}";
+		else 
+			search="${script}_${anr}"
+		fi
+	fi
+
+	found_actual=$(( `ls ${ACTUAL_LOCATION}/*${search}* 2>/dev/null | wc -l` ))
+	found_expected=$(( `ls ${EXPECTED_LOCATION}/*${search}* 2>/dev/null | wc -l` ))
+
+	if [ ${found_actual} -eq 0 -a ${found_expected} -eq 0 ];
+	then
+	        echo "\"fouten\" : \"~\", ";
+	        echo "\"niet gecontroleerd\" : \"~\", ";
+	        echo "\"status\" : \"ok\"";
+	else
+		correct=$(( `grep ${search} ${diff} | grep ${EXPECTED_LOCATION} | grep "identical" | wc -l` ));
+		errors=$(( `grep -e ${search} ${diff} | grep ${EXPECTED_LOCATION} | grep "Only in" | wc -l` ));
+		notchecked=$(( `grep -e ${search} ${diff} | grep ${ACTUAL_LOCATION} | grep "Only in" | wc -l` ));
+		errors=$(( errors + `grep -e ${search} ${diff} | grep "/${stage}/${flavour}/" | grep -e "^Files" | grep "differ" | wc -l` ));
+
+		if [ "${flavour}" == "GBA" ];
+		then
+			export total=`ls "${GBA_CONTROLE_LOCATION}"/${script}*txt | wc -l`;
+		elif [ "${flavour}" == "BRP" ];
+		then
+			export total=`ls "${BRP_CONTROLE_LOCATION}"/${script}*xsl | wc -l`;
+		else
+			export total=`ls "${SQL_CONTROLE_LOCATION}"/${script}*sql | wc -l`;
+		fi
+		export errors=${errors};
+	
+		echo "\"totaal\" : \"$total\", ";
+		echo "\"correct\" : \"$correct\", ";
+	        echo "\"fouten\" : \"$errors\", ";
+	        echo "\"niet gecontroleerd\" : \"$notchecked\", ";
+	
+		if [ ${notchecked} -gt 0 ];
+		then
+	                echo "\"status\" : \"notchecked\"";
+		else
+		        if [ $errors -gt 0 ];
+			then
+	        	        echo "\"status\" : \"nok\"";
+	        	else 
+	                	echo "\"status\" : \"ok\"";
+	        	fi
+		fi
+	fi
+}
+
+# vergelijk de brp leveringen/responses (gesorteerd) 
+function compare_brp {
+	local stage=$1;
+	local substage=$2;
+	local flavour=$3;
+	local anr=$4;
+	local afnemer=$5;
+	local berichttype=$6;
+	local script=$7;
+	local volgnr=$8;
+
+	local TYPE_LOCATION="${STAGES_LOCATION}/${stage}/${flavour}"
+	local ACTUAL_LOCATION="${TYPE_LOCATION}/actual";
+	local EXPECTED_LOCATION="${TYPE_LOCATION}/expected";
+
+	local total=0;
+	local error=0;
+	local notchecked=0;
+	local status='';
+
+	if [[ "${berichttype}" == "" ]];
+	then
+		list=`ls ${TYPE_LOCATION}/*/*${anr}* 2> /dev/null | grep -v '/old/' | grep -v '/raw/' | grep -v '/tmp/' | awk -F '/' '{print $NF}' | sort | uniq`;
+	else 
+		if [[ "${script}" == "" ]];
+		then
+			# for lev list
+			list=`ls ${TYPE_LOCATION}/*/*${volgnr}*${berichttype}*${anr}*${afnemer}* 2> /dev/null | grep -v '/old/' | grep -v '/raw/' | grep -v '/tmp/' | awk -F '/' '{print $NF}' | sort | uniq`;
+		else 
+			# for script list
+			list=`ls ${TYPE_LOCATION}/*/*${volgnr}*${berichttype}*${anr}*${afnemer}*${script}* 2> /dev/null | grep -v '/old/' | grep -v '/raw/' | grep -v '/tmp/' | awk -F '/' '{print $NF}' | sort | uniq`;
+		fi
+	fi
+
+	if [ "${list}" == "" ];
+	then
+		status="ok";
+	else
+		total=0;
+		for f in ${list};
+		do
+			bas=`basename $f`;
+			if [[ -e ${ACTUAL_LOCATION}/${bas} && -e ${EXPECTED_LOCATION}/${bas} ]];
+			then
+				# sorteer eerst en daarna vergelijken
+				out=`diff -B <(sort ${EXPECTED_LOCATION}/${bas}) <(sort ${ACTUAL_LOCATION}/${bas})`
+				if [[ "${out}" != "" ]];
+				then
+					error=$(( $error + 1 ));
+				fi
+			else 
+                                if [[ -e ${ACTUAL_LOCATION}/${bas} ]];
+                                then
+                                        notchecked=$(( $notchecked + 1 ));
+                                        status="notchecked";
+                                else
+                                        error=$(( $error + 1 ));
+                                        status="nok";
+                                fi
+			fi
+
+			total=$(( $total + 1 ));
+		done
+	fi
+
+	export total=$total;
+	export errors=$error;
+
+	echo "\"totaal\" : \"$total\", ";
+	if [ $total -eq 0 ];
+	then
+        	echo "\"correct\" : \"0\", ";
+	else
+        	echo "\"correct\" : \"$(( $total - $errors - $notchecked ))\", ";
+	fi
+        echo "\"fouten\" : \"$errors\", ";
+        echo "\"niet gecontroleeerd\" : \"$notchecked\", ";
+
+	if [ "${status}" == "" ];
+	then
+	        if [ $errors -gt 0 ];
+		then
+			status="nok";
+        	else 
+			status="ok";
+        	fi
+	fi
+
+        echo "\"status\" : \"${status}\"";
+	export ret=${status}
+}
+
+function compare_lev {
+	local stage=$1;
+	local substage=$2;
+	local flavour='GBA';
+	local anr=$3;
+	local afnemer=$4;
+	local bn=$5;
+	local script=$6;
+
+	local TYPE_LOCATION="${STAGES_LOCATION}/${stage}/${flavour}"
+	local ACTUAL_LOCATION="${TYPE_LOCATION}/actual";
+	local EXPECTED_LOCATION="${TYPE_LOCATION}/expected";
+
+	local total=0;
+	local error=0;
+	local notchecked=0;
+	local status='';
+
+	if [[ "${afnemer}" == "" ]];
+	then
+		list=`ls ${TYPE_LOCATION}/*/*${script}_${anr}* 2> /dev/null | grep -v '/old/' | grep -v '/raw/' | grep -v '/tmp/' | awk -F '/' '{print $NF}' | sort | uniq`;
+	else 
+		# for lev list
+		list=`ls ${TYPE_LOCATION}/*/*${script}*${bn}*${anr}*${afnemer}* 2> /dev/null | grep -v '/old/' | grep -v '/raw/' | grep -v '/tmp/' | awk -F '/' '{print $NF}' | sort | uniq`;
+	fi
+
+	total=0;
+	if [ "${list}" == "" ];
+	then
+		status="ok";
+	else
+		for f in ${list};
+		do
+			bas=`basename $f`;
+			if [[ -e ${ACTUAL_LOCATION}/${bas} && -e ${EXPECTED_LOCATION}/${bas} ]];
+			then
+				out=`diff -B ${EXPECTED_LOCATION}/${bas} ${ACTUAL_LOCATION}/${bas}`
+				if [[ "${out}" != "" ]];
+				then
+					out=`compare_lo3 ${ACTUAL_LOCATION}/${bas} ${EXPECTED_LOCATION}/${bas}`;
+					if [[ "${out}" != "ok" ]];
+					then
+						error=$(( $error + 1 ));
+					fi
+				fi
+			else 
+				if [[ -e ${ACTUAL_LOCATION}/${bas} ]];
+				then
+					notchecked=$(( $notchecked + 1 ));
+					status="notchecked";
+				else 
+					error=$(( $error + 1 ));
+					status="nok";
+				fi
+			fi
+	
+			total=$(( $total + 1 ));
+		done
+	fi
+
+	export total=$total;
+	export errors=$error;
+
+	echo "\"totaal\" : \"$total\", ";
+	if [ $total -eq 0 ];
+	then
+        	echo "\"correct\" : \"0\", ";
+	else
+        	echo "\"correct\" : \"$(( $total - $errors - $notchecked ))\", ";
+	fi
+        echo "\"fouten\" : \"$errors\", ";
+        echo "\"niet gecontroleeerd\" : \"$notchecked\", ";
+
+	if [ "${status}" == "" ];
+	then
+	        if [ $errors -gt 0 ];
+		then
+			status="nok"
+        	else 
+			status="ok"
+        	fi
+	fi
+
+        echo "\"status\" : \"${status}\"";
+	export ret=${status}
+}
+
+function compare {
+	local anr=$1;
+	local cached=$2;
+
+	if [ "${cached}" == "" ];
+	then
+		cached="0";
+	fi
+
+	local excel=`grep ${anr} ${BSN_LIST_FILE} | awk '{print $2}' | tr -d ' _\r\n'`;
+	local bsn=`grep ${anr} ${BSN_LIST_FILE} | awk '{print $3}' | tr -d ' _\-\r\n' `;
+
+	echo "{"
+	# compare
+	j=0;
+	for stage in $( grep ${anr} ${BSN_LIST_FILE} ${OTHER_BSN_LIST_FILE} | awk '{print $1}' | awk -F ':' '{print $2}' | tr ',' '\n' );
+	do
+		if [ $j -gt 0 ];
+		then
+			echo ", ";
+		fi
+
+		echo "\"${stage}\" : {";
+
+		local k=0;
+		local overall_status="ok";
+		for flav_ in ${FLAVOURS};
+		do
+			if [ ${flav_} != "GBA" -a ${stage} == "TC" ];
+			then
+				continue;
+			fi
+	
+			if [ ${flav_} != "SQL" -a ${stage} == "IV" ];
+			then
+				continue;
+			fi
+	
+			if [ $k -gt 0 ];
+			then
+				echo ", ";
+			fi
+	
+			echo "\"${flav_}\" : {";
+			if [ "${flav_}" == "GBA" ];
+			then
+				compare_lev "${stage}" "" "${anr}";
+			elif [ "${flav_}" == "BRP" -o "${flav_}" == "RESBEV" -o "${flav_}" == "RESBIJ" ];
+                        then
+                                compare_brp "${stage}" "" "${flav_}" "${anr}" "" "" "" "";
+			else
+				if [ "${cached}" == "1" ];
+				then
+					stage_compare_cached "${stage}" "" "${flav_}" "${anr}";
+				else
+					stage_compare "${stage}" "" "${flav_}" "${anr}";
+				fi
+			fi
+
+			if [ "${ret}" == "nok" -a "${overall_status}" == "ok" ];
+			then
+				overall_status="nok";
+			fi
+	
+			if [ "${ret}" == "notchecked" ];
+			then
+				if [ "${overall_status}" == "ok" -o "${overall_status}" == "nok" ];
+				then
+					overall_status="notchecked";
+				fi
+			fi
+	
+			echo "}";
+			k=$(($k+1));
+		done
+	
+		echo ",";
+		echo "\"status\" : \"${overall_status}\"";
+		echo "}";
+	
+		j=$(($j+1));
+	done
+
+	echo "}"
+}
+
+# ophalen resultaten
+function run {
+	# vanwege performance issues wordt flavour BRP (xsl processing) door simpletransformation.jar uitgevoerd
+	local anr=$1;
+	local stage=$2;
+	local substage=$3;
+	local flavour=$4;
+
+	local j="";
+	local brp_db_host="${BRP_ISC_DB_HOST}";
+	local brp_db_name="${BRP_ISC_DB_NAME}";
+	local brp_db_user="${BRP_ISC_DB_USER}";
+	local brp_db_password="${BRP_ISC_DB_PASSWORD}";
+
+	if [ "${stage}" == "IV" ];
+	then
+	        brp_db_host="${BRP_IV_DB_HOST}";
+	        brp_db_name="${BRP_IV_DB_NAME}";
+	        brp_db_user="${BRP_IV_DB_USER}";
+	        brp_db_password="${BRP_IV_DB_PASSWORD}";
+	fi
+
+	export PGPASSWORD=${brp_db_password}
+	if [ "${flavour}" == "GBA" ];
+	then
+		g=0;
+		>${TEMP_DIR}/lo3.log;
+		for j in "${GBA_CONTROLE_LOCATION}"/*txt; 
+		do
+			script=`basename $j .txt`;
+			if [ "${stage}" ==  "TC" ];
+			then
+				. ./files
+				# foutmelding bij lege .GBA
+				if [ -s "${RAW_LOCATION}/TC-${anr}.GBA" ];
+				then
+					bash ./lo3 "${RAW_LOCATION}/TC-${anr}.GBA" "$j" "${anr}" > ${ACTUAL_FILE};
+					if [ $( stat -c %s ${ACTUAL_FILE} ) == ${EMPTY_GBA_SIZE} ];
+					then
+						rm ${ACTUAL_FILE};
+					fi
+				elif [ -e "${RAW_LOCATION}/TC-${anr}.GBA" ];
+				then
+					rm ${ACTUAL_FILE};
+				fi
+			else
+				filelist=`ls ${RAW_LOCATION}/*${anr}*.GBA 2> /dev/null`;
+
+				for k in ${filelist};
+				do
+					if [ -s "${k}" ];
+					then
+						filename=`basename ${k} .GBA`;
+						bn=`echo ${filename} | sed 's/LO3-\([^_]*\).*/\1/'`;
+						afn=`echo ${filename} | sed 's/LO3-.*_\([^_]*\)/\1/'`;
+						. ./files
+						bash ./lo3 "${k}" "$j" "${anr}" > ${ACTUAL_FILE};
+				
+						if [ $( stat -c %s ${ACTUAL_FILE} ) == ${EMPTY_GBA_SIZE} ];
+						then
+							rm ${ACTUAL_FILE};
+						fi
+					fi
+				done
+			fi
+
+		done
+
+	elif [ "${flavour}" == "SQL" ];
+	then
+		for j in "${SQL_CONTROLE_LOCATION}"/*sql; 
+		do
+			# run
+        		script=`basename "$j" .sql`;
+			. ./files
+		        query="query${anr}_${script}.sql";
+
+			sed_command="sed 's/{anr}/${anr}/'";
+			out=$( grep ${anr} ${PLACEHOLDER_LIST_FILE} | awk '{print $4}' );
+			if [ "${out}" != "" ];
+			then
+				instruction=($( echo ${out} | sed 's/\(VandaagPlus\|VandaagMinus\)\([[:digit:]]*\)/\1 \2/' ));
+				if [ "${instruction[0]}" == "VandaagPlus" ];
+				then
+					placeholder=$( date '+%Y%m%d' -d "+${instruction[1]} days" );
+				elif [ "${instruction[0]}" == "VandaagMinus" ];
+				then
+					placeholder=$( date '+%Y%m%d' -d "-${instruction[1]} days" );
+				fi
+
+				sed_command="${sed_command} | sed 's/{placeholder}/${placeholder}/g'";
+			else
+				sed_command="${sed_command} | sed 's/{placeholder}/0/g'";
+			fi
+
+		        q=`grep -v "^-- " "$j" | eval ${sed_command} | sed 's/;//g'`;
+		        echo "Copy ( $q ) To STDOUT With (FORMAT CSV, HEADER TRUE, FORCE_QUOTE *);" > ${TEMP_DIR}/${query};
+		        psql -h ${brp_db_host} ${brp_db_name} --user ${brp_db_user} < ${TEMP_DIR}/${query} > ${ACTUAL_FILE}
+		done
+	fi
+}
+
+function save_to_bsn {
+	local stage=${1};
+	local excel=${2};
+	local bsn=${3};
+	local anr=${4};
+	local bsn_file=${5}
+
+	if [ "${bsn_file}" == "" ];
+	then
+		bsn_file="${BSN_LIST_FILE}";
+	fi
+
+	if [ ! -e "${bsn_file}" ];
+	then
+		touch "${bsn_file}";
+	fi
+
+	if [ "${excel}" == "" -a "${bsn}" == "" ];
+	then
+		for i in $( grep ${anr} ${BSN_LIST_FILE} ${UPLOAD_BSN_LIST_FILE} | awk '{print $2,$3}' | sed 's/ /#/g' );
+		do
+			values=(${i//#/ });
+			if [ "${values[0]}" != "" -a "${values[0]}" != "-" ];
+			then
+				excel="${values[0]}";
+			fi
+			if [ "${values[1]}" != "" -a "${values[1]}" != "-" ];
+			then
+				bsn="${values[1]}";
+			fi
+		done
+	fi
+
+	if [ "${bsn}" == "" ];
+	then
+		bsn="-";
+	fi
+
+	if [ "${excel}" == "" ];
+	then
+		excel="-";
+	fi
+
+	if [ "${anr}" != "" ];
+	then
+		out=`grep "${anr}" ${bsn_file}`;
+		if [ "${out}" == "" ];
+		then
+			echo -e "${stage} ${excel} ${bsn} ${anr}" >> ${bsn_file};
+		else
+			out=`grep "${anr}" ${bsn_file} | grep ${stage}`
+			if [ "${out}" = "" ];
+			then
+				sed -i -e "s/\(.*\) \(.*\) \(.*\) \(${anr}\)/\1,${stage} \2 \3\ \4/" "${bsn_file}";
+			fi 
+		fi
+	else
+		echo -e "${stage} ${excel} ${bsn} -" >> ${bsn_file};
+	fi
+}
+
+function clean_bsn {
+	local search=${1};
+	local bsn_file=${2}
+	if [ "${bsn_file}" == "" ];
+	then
+		bsn_file="${BSN_LIST_FILE}";
+	fi
+
+	sed -i "s/${search},//; s/,${search}//" ${bsn_file};
+	for i in $( grep ${search} ${bsn_file} | sed 's/ /#/g' );
+	do
+		sed -i "s/${i//#/ }//;/^\s*$/d" ${bsn_file};
+	done
+}
+
+function determine_db {
+	local db="$1";
+	case "${db}" in
+	        ARCHIVERING)
+	                db_name="${BRP_ISC_ARCHIVERING_DB_NAME}"
+	                db_host="${BRP_ISC_ARCHIVERING_DB_HOST}"
+	                db_user="${BRP_ISC_ARCHIVERING_DB_USER}"
+	                db_password="${BRP_ISC_ARCHIVERING_DB_PASSWORD}"
+			db_port="${BRP_ISC_ARCHIVERING_DB_PORT}";
+	                ;;
+	        BRP)
+	                db_name="${BRP_ISC_DB_NAME}"
+	                db_host="${BRP_ISC_DB_HOST}"
+	                db_user="${BRP_ISC_DB_USER}"
+	                db_password="${BRP_ISC_DB_PASSWORD}"
+			db_port="5432";
+	                ;;
+	        VOISC)
+	                db_name="${VOISC_DB_NAME}"
+	                db_host="${VOISC_DB_HOST}"
+	                db_user="${MIGR_DB_USER}"
+	                db_password="${MIGR_DB_PASSWORD}"
+	                db_port="${VOISC_DB_PORT}";
+	                ;;
+	        GBA*)
+	                db_name="${GBAV_DB_NAME}"
+	                db_host="${GBAV_DB_HOST}"
+	                db_user="${GBAV_DB_USER}"
+	                db_password="${GBAV_DB_PASSWORD}"
+			db_port="5432";
+	                ;;
+	esac
+}
+
+function compare_lo3 {
+	# single line file
+	file1=$1;
+	file2=$2;
+
+	type=`echo ${file1} | sed 's/.*_\([^_]*\)[[:digit:]][[:digit:]]_[[:digit:]]*_[[:digit:]]*.GBA$/\1/'`;
+
+	message1=$( cat ${file1} );
+	message2=$( cat ${file2} );
+
+	sort1=`echo ${message1} | grep -o . | sort | tr -d '\n'`;
+	sort2=`echo ${message2} | grep -o . | sort | tr -d '\n'`;
+
+	if [[ "${sort1}" == "${sort2}" ]];
+	then
+		echo "ok";
+	else 
+		echo "nok";
+	fi
+}
+
+function csv2json {
+	f=$1;
+
+	echo "{";
+	declare -a csv_array;
+
+	headers_string=`cat ${f} | head -1`;
+	headers=${headers_string//,/' '};
+
+	# ,,,, -> "","","","",""
+	csv_string=`sed 's/ /_/g' ${f} | sed 's/,,/,"",/g' | sed 's/,,/,"",/g' | sed 's/,$/,""/' | sed 's/^,/"",/'`;
+	mapfile -s1 -t csv_array <<< "${csv_string}"
+
+	k=0;
+	while (( ${#csv_array[@]} > $k ));
+	do
+		temp=`echo ${csv_array[k]} | sed 's/","/" "/g'`
+		csv=(${temp});
+
+		if [ $k -gt 0 ];
+		then
+       			echo ", ";
+	 	fi
+	
+		echo "\"$k\" : {";
+		j=0;
+		for h in ${headers};
+		do
+			if [ $j -gt 0 ];
+        		then
+	         		echo ", ";
+	 		fi
+
+			echo "\"$h\" : \""`echo ${csv[$j]//_/ } | sed 's/"//g'`"\""
+			j=$(( $j + 1 ));
+		done
+		echo "}";
+
+		k=$(( $k + 1 ));
+	done
+	echo "}";
+}
+
+function translateTeletex {
+	local message=$1;
+
+	message=$( echo ${message} | perl -pe 's/È/ÁE/g' );
+	message=$( echo ${message} | perl -pe 's/Ä/ÈA/g' );
+	message=$( echo ${message} | perl -pe 's/Ë/ÈE/g' );
+	message=$( echo ${message} | perl -pe 's/Ç/ËC/g' );
+	message=$( echo ${message} | perl -pe 's/Ã/ÄA/g' );
+	message=$( echo ${message} | perl -pe 's/Î/ÃI/g' );
+	message=$( echo ${message} | perl -pe 's/Â/ÃA/g' );
+	message=$( echo ${message} | perl -pe 's/Á/ÂA/g' );
+	message=$( echo ${message} | perl -pe 's/À/ÁA/g' );
+	message=$( echo ${message} | perl -pe 's/á/Âa/g' );
+	message=$( echo ${message} | perl -pe 's/à/Áa/g' );
+	message=$( echo ${message} | perl -pe 's/â/Ãa/g' );
+	message=$( echo ${message} | perl -pe 's/ä/Èa/g' );
+	message=$( echo ${message} | perl -pe 's/ã/Äa/g' );
+	message=$( echo ${message} | perl -pe 's/Ê/ÃE/g' );
+	message=$( echo ${message} | perl -pe 's/Å/ÊA/g' );
+	message=$( echo ${message} | perl -pe 's/å/Êa/g' );
+	message=$( echo ${message} | perl -pe 's/Ï/ÈI/g' );
+	message=$( echo ${message} | perl -pe 's/ç/Ëc/g' );
+	message=$( echo ${message} | perl -pe 's/É/ÂE/g' );
+	message=$( echo ${message} | perl -pe 's/é/Âe/g' );
+	message=$( echo ${message} | perl -pe 's/è/Áe/g' );
+	message=$( echo ${message} | perl -pe 's/ê/Ãe/g' );
+	message=$( echo ${message} | perl -pe 's/ë/Èe/g' );
+	message=$( echo ${message} | perl -pe 's/Í/ÂI/g' );
+	message=$( echo ${message} | perl -pe 's/í/Âi/g' );
+	message=$( echo ${message} | perl -pe 's/Ì/ÁI/g' );
+	message=$( echo ${message} | perl -pe 's/ì/Ái/g' );
+	message=$( echo ${message} | perl -pe 's/î/Ãi/g' );
+	message=$( echo ${message} | perl -pe 's/ï/Èi/g' );
+	message=$( echo ${message} | perl -pe 's/Ñ/ÄN/g' );
+	message=$( echo ${message} | perl -pe 's/ñ/Än/g' );
+	message=$( echo ${message} | perl -pe 's/Ó/ÂO/g' );
+	message=$( echo ${message} | perl -pe 's/ó/Âo/g' );
+	message=$( echo ${message} | perl -pe 's/Ò/ÁO/g' );
+	message=$( echo ${message} | perl -pe 's/ò/Áo/g' );
+	message=$( echo ${message} | perl -pe 's/Ô/ÃO/g' );
+	message=$( echo ${message} | perl -pe 's/ô/Ão/g' );
+	message=$( echo ${message} | perl -pe 's/Ö/ÈO/g' );
+	message=$( echo ${message} | perl -pe 's/ö/Èo/g' );
+	message=$( echo ${message} | perl -pe 's/Õ/ÄO/g' );
+	message=$( echo ${message} | perl -pe 's/õ/Äo/g' );
+	message=$( echo ${message} | perl -pe 's/¦/ÏS/g' );
+	message=$( echo ${message} | perl -pe 's/¨/Ïs/g' );
+	message=$( echo ${message} | perl -pe 's/Ú/ÂU/g' );
+	message=$( echo ${message} | perl -pe 's/ú/Âu/g' );
+	message=$( echo ${message} | perl -pe 's/Ù/ÁU/g' );
+	message=$( echo ${message} | perl -pe 's/ù/Áu/g' );
+	message=$( echo ${message} | perl -pe 's/Û/ÃU/g' );
+	message=$( echo ${message} | perl -pe 's/û/Ãu/g' );
+	message=$( echo ${message} | perl -pe 's/Ü/ÈU/g' );
+	message=$( echo ${message} | perl -pe 's/ü/Èu/g' );
+	message=$( echo ${message} | perl -pe 's/Ý/ÂY/g' );
+	message=$( echo ${message} | perl -pe 's/ý/Ây/g' );
+	message=$( echo ${message} | perl -pe 's/¾/ÈY/g' );
+	message=$( echo ${message} | perl -pe 's/ÿ/Èy/g' );
+	message=$( echo ${message} | perl -pe 's/´/ÏZ/g' );
+	message=$( echo ${message} | perl -pe 's/¸/Ïz/g' );
+	message=$( echo ${message} | perl -pe 's/Æ/á/g' );
+	message=$( echo ${message} | perl -pe 's/æ/ñ/g' );
+	message=$( echo ${message} | perl -pe 's/ð/ó/g' );
+	message=$( echo ${message} | perl -pe 's/÷/¸/g' );
+	message=$( echo ${message} | perl -pe 's/×/´/g' );
+	message=$( echo ${message} | perl -pe 's/Ø/é/g' );
+	message=$( echo ${message} | perl -pe 's/ø/ù/g' );
+	message=$( echo ${message} | perl -pe 's/þ/ü/g' );
+	message=$( echo ${message} | perl -pe 's/Þ/ì/g' );
+	message=$( echo ${message} | perl -pe 's/ß/û/g' );
+	message=$( echo ${message} | perl -pe 's/¼/ê/g' );
+	message=$( echo ${message} | perl -pe 's/½/ú/g' );
+	message=$( echo ${message} | perl -pe 's/¡/¡/g' );
+	message=$( echo ${message} | perl -pe 's/¢/¢/g' );
+	message=$( echo ${message} | perl -pe 's/£/£/g' );
+	message=$( echo ${message} | perl -pe 's/¥/¥/g' );
+	message=$( echo ${message} | perl -pe 's/§/§/g' );
+	message=$( echo ${message} | perl -pe 's/°/°/g' );
+	message=$( echo ${message} | perl -pe 's/±/±/g' );
+	message=$( echo ${message} | perl -pe 's/»/»/g' );
+	message=$( echo ${message} | perl -pe 's/¿/¿/g' );
+
+	echo "${message}";
+}
+
+function next_upload {
+	ums=$( find ${PL_LOCATION} -type d -name U\* );
+	if [ "${ums}" == "" ];
+	then
+		stage="U01"
+	else
+		for i in ${ums};
+		do
+			b=$( basename ${i} );
+			count=$( ls ${i}/*/* 2> /dev/null | wc -l );
+			if [ ${count} -eq 0 ];
+			then
+				stage="${b}";
+				break;
+			fi
+		done
+	
+		if [ "${stage}" == "" ];
+		then
+			count=$(( 10#${b//U/} ));	
+			count=$(( count + 1 ));	
+			stage=U$( printf "%02d" ${count} );
+		fi
+	fi
+
+	for y in ${FLAVOURS};
+	do
+		if [ ! -d "${STAGES_LOCATION}/${stage}/${y}/expected" ];
+		then
+		        mkdir -p "${STAGES_LOCATION}/${stage}/${y}/expected";
+		fi
+	
+		if [ ! -d "${STAGES_LOCATION}/${stage}/${y}/raw" ];
+		then
+		        mkdir -p "${STAGES_LOCATION}/${stage}/${y}/raw";
+		fi
+	
+		if [ ! -d "${STAGES_LOCATION}/${stage}/${y}/actual" ];
+		then
+		        mkdir -p "${STAGES_LOCATION}/${stage}/${y}/actual";
+		fi
+	
+		if [ ! -d "${STAGES_LOCATION}/${stage}/${y}/old" ];
+		then
+		        mkdir -p "${STAGES_LOCATION}/${stage}/${y}/old";
+		fi
+	done
+
+	export stage="${stage}";
+}
+

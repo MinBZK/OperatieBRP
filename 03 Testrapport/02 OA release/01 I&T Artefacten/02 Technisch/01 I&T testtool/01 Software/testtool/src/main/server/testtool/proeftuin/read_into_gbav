@@ -1,0 +1,13 @@
+#!/bin/bash
+echo "Content-Type: text/plain"
+
+echo ""
+
+. ./env
+
+export PGPASSWORD=${GBAV_DB_PASSWORD};
+psql -w -U${GBAV_DB_USER} -h${GBAV_DB_HOST} -d${GBAV_DB_NAME} -f ${MULTIPLIER_DB_SCRIPTS}/create-dat-table.psql
+cp ${MULTIPLIER_DB_SCRIPTS}/load-dat-file-template.psql ${MULTIPLIER_DB_SCRIPTS}/load-dat-file.psql;
+cat ${MULTIPLIER_OUTPUT_DIR}/pls.dat >> ${MULTIPLIER_DB_SCRIPTS}/load-dat-file.psql;
+psql -w -U${GBAV_DB_USER} -h${GBAV_DB_HOST} -d${GBAV_DB_NAME} -f ${MULTIPLIER_DB_SCRIPTS}/load-dat-file.psql
+PGPASSWORD=${GBAV_DB_PASSWORD} psql -w -U${GBAV_DB_USER} -h${GBAV_DB_HOST} -d${GBAV_DB_NAME} < ${MULTIPLIER_DB_SCRIPTS}/run-function.psql

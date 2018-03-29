@@ -1,0 +1,20 @@
+#!/bin/bash
+
+. ./env
+
+docker network create brp
+
+docker-compose -p int -f integratie.yml up -d logging-elasticsearch
+docker-compose -p int -f integratie.yml up -d logging-logstash
+docker-compose -p int -f integratie.yml up -d migr-gbavdatabase_test
+docker-compose -p int -f integratie.yml up -d brp-database
+
+sleep 60;
+
+docker-compose -p iv -f integratie.yml up -d iv-hornetq
+
+docker-compose -p iv -f integratie.yml up -d iv-synchronisatienaarbrp
+docker-compose -p iv -f integratie.yml up -d iv-synchronisatienaarlo3
+docker-compose -p iv -f integratie.yml up -d iv-logging
+
+docker-compose -p int -f integratie.yml up -d logging-kibana

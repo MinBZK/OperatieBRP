@@ -1,0 +1,154 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+. ./env
+
+echo "{";
+
+n=0;
+k=0;
+echo "\"header\" : {";
+for i in `grep -e "^|Object\|Entiteit" ${REGEL_DIR}/${regel}.txt | sed 's/ //g'`; 
+do
+	if [ ${k} -gt 0 ];
+	then
+	 	echo ", ";
+	fi
+
+	n=0;
+	echo "\"${k}\" : [";
+	for j in `echo ${i} | sed 's/|/ /g'`; 
+	do
+		if [ "${j}" != "Object" -a "${j}" != "Entiteit" -a "${j}" != "Kenmerk" -a "${j}" != "Attribuut" ];
+		then
+	        	if [ ${n} -gt 0 ];
+	        	then
+	                	echo ", ";
+	        	fi
+	
+			echo "\"${j}\""; 
+			n=$(( n + 1 ));	
+		fi
+	done
+	echo "]";
+
+	k=$(( k + 1 ));	
+done
+echo "},";
+
+n=0;
+p=0;
+aanname=""
+omschrijving=""
+declare -a rows
+declare -a entiteit
+declare -a kenmerk
+echo "\"rows\" : {";
+for i in `cat ${REGEL_DIR}/${regel}.txt | grep -v -e "^|Object\|Entiteit" | grep -v -e "^|$" | sed 's/||/| |/g' | sed 's/||/| |/g' | sed 's/ /##/g' `; 
+do
+	arr=(${i//|/ });
+
+	if [ ${#arr[@]} == 1 ];
+	then
+		out=`echo $i | grep -e '^|R[[:digit:]]\+' | tr -d '|'`;
+		if [ "$out" != "" ];
+		then
+			omschrijving=${out//##/ };
+			continue;
+		fi
+
+		out=`echo $i | sed 's/^|Aanname:##\(.*\)$/\1/'`;
+		if [ "$out" != "" ];
+		then
+			aanname=${out//##/ };
+		fi
+
+		continue;
+	fi
+
+       	if [ ${n} -gt 0 ];
+       	then
+		entiteit[$p]="${entiteit[$p]} ,";
+		kenmerk[$p]="${kenmerk[$p]} ,";
+		echo ", ";
+
+       	else 
+		if [ ${p} -gt 0 ];
+       		then
+			echo ", ";
+		fi
+       	fi
+	
+	l=0;
+
+       	if [ ${n} -eq 0 ];
+	then
+		echo "\"${p}\" : [";
+	fi
+
+	echo "[";
+	for j in "${!arr[@]}"
+	do
+		if [ ${j} -gt 1 ];
+		then
+			if [ ${l} -gt 0 ];
+			then
+				echo ", ";
+			fi
+
+			echo "\"${arr[$j]//##/ }\"";
+			l=$(( l + 1 ));	
+		fi
+	done
+	echo "]";
+
+	entiteit[$p]="${entiteit[$p]} \"${arr[0]//##/ }\"";
+	kenmerk[$p]="${kenmerk[$p]} \"${arr[1]//##/ }\"";
+
+	n=$(( n + 1 ));
+	
+	if [ "${arr[0]}" == "##" -a "${arr[1]//##/}" == "Resultaat" ];
+	then
+		echo "]";
+		p=$(( p + 1 ));
+		n=0;
+	fi
+
+done
+echo "},";
+
+echo "\"data\" : {";
+echo "\"entiteit\" : {"; 
+n=0;
+for j in "${!entiteit[@]}"
+do
+       	if [ ${n} -gt 0 ];
+       	then
+		echo ", ";
+	fi
+
+	echo "\"${j}\" : [ ${entiteit[$j]//\\/\\\\} ]";
+
+	n=$(( n + 1 ));	
+done
+echo "},";
+
+echo "\"kenmerk\" : {"; 
+n=0;
+for j in "${!kenmerk[@]}"
+do
+       	if [ ${n} -gt 0 ];
+       	then
+		echo ", ";
+	fi
+
+	echo "\"${j}\" : [ ${kenmerk[$j]//\\/\\\\} ]";
+
+	n=$(( n + 1 ));	
+done
+echo "}";
+echo "},";
+echo "\"omschrijving\" : \"${omschrijving}\","; 
+echo "\"aanname\" : \"${aanname}\""; 
+echo "}";

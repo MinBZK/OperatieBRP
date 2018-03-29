@@ -1,0 +1,35 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+. ./env
+
+dat=`date`;
+pwd=`pwd`;
+
+list="fill_actual_voisc fill_actual_brp run_afterburner run_preconditions backup_db run_mutaties clean_actuals copy_brp_db create_initvulling refresh_brp run_initvulling run_isc run_pls run_tc start_brp start_isc start_isc_brp start_iv stop_brp stop_isc stop_isc_brp stop_iv truncate_gbav_initvul check_stage_finished run_levauts ophalen_resultaten_all run_ai run_gba run_brp" 
+
+echo "{"
+echo "\"process\" : [";
+j=0;
+for i in ${list}; 
+do 
+	if [ -x $i ]; 
+	then 
+		out=`ps x | grep $i | grep -v grep | grep -v $0`; 
+		if [ "$out" != "" ]; 
+		then 
+			if [ $j != 0 ];
+			then
+				echo ",";
+			fi
+
+			echo "\"$i\""; 
+
+			j=$(($j+1));
+		fi; 
+	fi 
+done
+echo "]";
+echo "}";
+

@@ -1,0 +1,1 @@
+Welke DB; query: welke berichten moeten opgehaald worden uit de database?

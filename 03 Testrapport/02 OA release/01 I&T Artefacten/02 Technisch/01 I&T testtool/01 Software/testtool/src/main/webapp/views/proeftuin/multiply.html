@@ -1,0 +1,72 @@
+<div class="container" ng-controller="multiplyController" ng-init="init();">
+	<div ng-if="errorMessages.length>0" class="alert alert-danger">
+		<ul>
+			<li ng-repeat="value in errorMessages">{{ value }}</li>
+		</ul>
+	</div>
+
+
+	<div class="row col-md-7">
+		<div class="panel panel-default">
+			<div class="panel-body">
+				<div class="col-md-5 col-sm-5">
+					<select class="form-control" ng-model="gemeentebestand" required>
+						<option disabled="disabled" value="">Kies het gemeentebestand ...</option>
+						<option ng-repeat="value in gemeentebestanden" value="{{ value }}">{{ value }}</option>
+					</select>
+				</div>
+				<div class="col-md-1 col-sm-1" >
+					<h4>
+						<span class="glyphicon glyphicon-remove"></span>
+					</h4>
+				</div>
+				<div class="col-md-3 col-sm-3" ng-class="{ 'has-error' : checkValue(number) }">
+					<input type="text" class="form-control input-md" ng-model="factor" placeholder="# factor" minlength="1" maxlength="3" required>
+				</div>
+				<div class="col-md-3 col-sm-3">
+					<a class="btn btn-lg btn-primary has-spinner" id="go" ng-click="execute();">
+						<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+						Uitvoeren
+					</a>	
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	
+	<div class="row">
+		<div class="col-md-12 col-sm-12">
+			<table class="table table-hover table-striped table-condensed gradienttable">
+				<thead>
+					<tr>
+						<th>bestandsnaam</th>
+						<th>datum</th>
+						<th class="text-center">grootte</th>
+						<th>
+							<a ng-click="refreshArtefacten();"><span class="pull-right glyphicon glyphicon-refresh"></span></a>
+						</th>
+					<tr>
+				</thead>
+				<tbody>
+					<tr ng-if="! artefacten || artefacten.length == 0">
+						<td colspan="4" class="text-center">Geen artefacten gevonden</td>
+					</tr>
+					<tr ng-repeat="value in artefacten">
+						<td>{{ value.naam }}</td>
+						<td>{{ value.datum | date : 'dd-MM-yyyy HH:mm:ss' }}</td>
+						<td class="text-right">{{ value.grootte }}</td>
+						<td><a class="btn btn-sm btn-success pull-right" ng-href="{{ contextPath + '/proeftuin/download?bestand=' + value.naam }}">download</a></td>
+					<tr>
+				</tbody>
+			</table>
+		</div>	
+	</div>
+	
+	
+	<div class="row">
+		<div class="col-md-12 col-sm-12">
+			<button class="pull-right btn btn-lg btn-primary" ng-click="load();">Laad in GBA-V</button>
+		</div>
+	</div>
+	
+</div>

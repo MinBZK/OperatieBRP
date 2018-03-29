@@ -1,0 +1,128 @@
+
+<div ng-controller="tidyController">
+	<div class="container-fluid">
+		<div ng-class="alert">{{ alertMessage }}</div>
+	
+		<div class="row">
+			<div class="col-sm-12 col-md-12">
+				<a class="pull-right btn btn-lg btn-primary has-spinner" id="loadAll" ng-click="loadAll();">
+					<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+					Initialiseer PL'en
+				</a>
+			</div>
+		</div>
+	
+		<h5></h5>
+		
+		<div class="row">
+			<div class="col-md-12">
+				<div class="form-group">
+				  <textarea class="form-control" rows="10" id="from" ng-model="from" wrap="soft"></textarea>
+				</div>
+				<div class="row form-group form-group-lg">
+					<div class="col-xs-6 col-md-8 col-lg-8">
+						<div>
+							<button class="btn btn-block btn-lg btn-primary" id="go" ng-click="go();"><span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span> Parse <span class="glyphicon glyphicon-arrow-down" aria-hidden="true"></span></button>
+							<button class="btn btn-block btn-lg btn-primary" id="back" ng-click="back();"><span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span> Bericht <span class="glyphicon glyphicon-arrow-up" aria-hidden="true"></span></button>
+						</div>
+						<h3></h3>
+						<div id="to"></div>		
+					</div>
+					<div class="container panel col-xs-6 col-md-4 col-lg-4 form-horizontal">
+						<h6 class="panel-header">Opties</h6>
+						<div class="panel-body col-sm-12">
+							<div class="btn-group" data-toggle="buttons">
+								<label class="btn btn-xs btn-default active"><input type="radio" name="radioType" value="bericht">Bericht zonder kop</label>
+								<label class="btn btn-xs btn-default"><input type="radio" name="radioType" value="agheader">AGxx</label>
+								<label class="btn btn-xs btn-default"><input type="radio" name="radioType" value="gv01header">GVxx</label>
+								<label class="btn btn-xs btn-default"><input type="radio" name="radioType" value="ng01header">NG01</label>
+								<label class="btn btn-xs btn-default"><input type="radio" name="radioType" value="wa11header">WA11</label>
+								<label class="btn btn-xs btn-default"><input type="radio" name="radioType" value="lg01header">LG01</label>
+								<label class="btn btn-xs btn-default"><input type="radio" name="radioType" value="csv">CSV</label>
+							</div>
+						</div>				
+						<h6 class="panel-header">Persoon</h6>
+						<div class="panel-body col-sm-12">
+							<div class="col-xs-11 col-md-11 col-lg-11">
+								<div class="form-group"><input class="form-control" type="text" ng-model="excel" name="excel" placeholder="excelnummer" /></div>
+								<div class="form-group"><input class="form-control" type="text" ng-model="anr" name="anr" placeholder="administratienummer" disabled /></div>
+								<div class="form-group"><input class="form-control" type="text" ng-model="bsn" name="bsn" placeholder="burgerservicenummer" disabled /></div>
+								<div class="form-group"><input class="form-control" type="text" ng-model="mutatie_dt" name="mutatie_dt" placeholder="mutatie datum (yyyymmdd HH:MM:ss)" /></div>
+								<div class="form-group"><input class="form-control" type="text" ng-model="originator_or_recipient" name="originator_or_recipient" placeholder="originator or recipient" /></div>
+								<div class="form-group">
+									<a class="btn btn-lg btn-primary has-spinner" id="insertPL" ng-click="insertPL()">
+										<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+										Opslaan
+									</a>
+								</div>
+							</div>
+						</div>
+						<h6 class="panel-header">Afnemersindicatie(s)</h6>
+						<div class="panel-body col-sm-12">
+							<div class="col-xs-11 col-md-11 col-lg-11">
+								<div ng-repeat="(key, value) in ai" class="well well-lg">
+									<div class="form-group"><label for="afnemer">Afnemersindicatie ( {{ value.group }} )</label><input class="form-control" type="text" ng-model="value.afnemer" name="afnemer" placeholder="afnemer" disabled /></div>
+									<div class="form-group"><label for="ingangsdatum">Ingangsdatum geldigheid</label><input class="form-control" type="text" ng-model="value.ingangsdatum" name="ingangsdatum" placeholder="ingangsdatum" disabled /></div>
+									<div class="form-group"><label for="stapel">Stapel</label><input class="form-control" type="text" ng-model="value.stapel" name="stapel" placeholder="stapel" disabled /></div>
+									<div class="form-group"><label for="volgnummer">Volgnummer</label><input class="form-control" type="text" ng-model="value.volgnummer" name="volgnummer" placeholder="volgnummer" disabled /></div>
+								</div>
+								<div class="form-group">
+									<a class="btn btn-lg btn-primary has-spinner" id="insertAI" ng-click="insertAI();">
+										<span class="spinner"><i class="icon-spin icon-refresh"></i></span>
+										Opslaan
+									</a>
+								</div>
+							</div>
+						</div>
+					</div> 
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div class="modal fade" id="notificationModal" tabindex="-1" role="dialog" aria-labelledby="nofiticationLabel">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="myModalLabel">Samenvatting</h4>
+				</div>
+				<div class="modal-body">
+					<summary>
+						<div class="row">
+							<div class="col-md-12 col-xs-12">
+								<b>Aantal berichten bij PL correct opgeslagen</b>: {{ countPLOK }}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 col-xs-12">
+								<b>Aantal berichten bij PL niet correct opgeslagen</b>: {{ countPLNotOK }}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 col-xs-12">
+								<b>Aantal afnemerindicaties bij PL correct opgeslagen</b>: {{ countAIOK }}
+							</div>
+						</div>
+						<div class="row">
+							<div class="col-md-12 col-xs-12">
+								<b>Aantal afnemerindicaties bij PL niet correct opgeslagen</b>: {{ countAINotOK }}
+							</div>
+						</div>
+	
+						<h5 ng-if="errorMessages && errorMessages.length>0">Foutlog</h5>
+						<ul>
+							<li ng-repeat="(key, value) in errorMessages track by key">{{ value }}</li>
+						</ul>
+					</summary>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Sluiten</button>
+					<button type="button" class="btn btn-primary" id="continue">Doorgaan</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	
+	<div class="hidden"><input id="headerText" type="hidden" name="headerText" value="" /></div>
+</div>

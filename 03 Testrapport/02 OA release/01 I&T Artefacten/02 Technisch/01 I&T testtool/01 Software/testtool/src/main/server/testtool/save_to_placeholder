@@ -1,0 +1,41 @@
+#!/bin/bash
+
+. ./env
+
+stage=${1};
+excel=${2};
+anr=${3};
+placeholder=${4};
+cat=${5};
+
+if [ "${excel}" == "" ];
+then
+	excel="-";
+fi
+
+if [ ! -e "${PLACEHOLDER_LIST_FILE}" ];
+then
+	touch "${PLACEHOLDER_LIST_FILE}";
+fi
+
+if [ "${placeholder}" != "" ];
+then
+	out=`grep "${excel}" ${PLACEHOLDER_LIST_FILE}`;
+	if [ "${out}" == "" ];
+	then
+		echo -e "${stage} ${excel} ${anr} ${placeholder} ${cat}" >> ${PLACEHOLDER_LIST_FILE};
+	else
+		out=`grep "${excel}" ${PLACEHOLDER_LIST_FILE} | grep ${placeholder}`
+		if [ "${out}" = "" ];
+		then
+			sed -i -e "s/\(.*\) \(.*\) \(${anr}\) \(.*\) \(.*\)/\1 \2 \3 \4,${placeholder} \5/" "${PLACEHOLDER_LIST_FILE}";
+		fi
+	fi
+else
+	# twee traps toevoeging aan placeholder bestand
+	out=`grep "${excel}" ${PLACEHOLDER_LIST_FILE} | grep dummy`
+	if [ "${out}" != "" ];
+	then
+		sed -i -e "s/\(.*\) \(${excel}\) dummy \(.*\)/\1 \2 ${anr} \3/" "${PLACEHOLDER_LIST_FILE}";
+	fi 
+fi

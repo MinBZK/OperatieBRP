@@ -1,0 +1,116 @@
+#!/bin/bash
+echo Content-type: text/plain
+
+. ./env
+
+echo ""
+
+echo "draai Excel afterburner" 
+
+log_file="${AUTORISATIES_OUTPUT_LOCATION}/output.txt";
+> ${log_file};
+
+date >> ${log_file};
+for xls_file in ${AUTORISATIES_CONTENTS_LOCATION}/*;
+do
+	echo "verwerk ${xls_file}" >> ${log_file}
+
+	name=$( basename ${xls_file} .xls );
+	csv_file="${AUTORISATIES_OUTPUT_LOCATION}/${name}.csv";
+	${XLS_TO_CSV} ${xls_file} dummy dummy > ${csv_file};
+	sed -i 's/;*$//g' ${csv_file};
+	
+	count=1;
+	response_file="";
+	while read line 
+	do
+		echo Request regel ${count} >> ${log_file}
+		if [[ "${line}" != *"={"* ]];
+		then
+			line=$( echo ${line} | sed 's/ /#/g' | sed 's/;*$//g' | sed 's/;;/;"";/g' | sed 's/;;/;"";/g' | sed 's/;$/;""/' | sed 's/^;/"";/' );
+			values=( ${line//;/ } );
+		else
+			# niks doen met de ; in directives
+			line=$( echo "${line}" | sed 's/ /#/g' );
+			values=( ${line} );
+		fi
+
+		if [ ${count} -eq 1 ];
+		then
+			header=( ${line//;/ } );
+		else
+			walk=0;
+			for i in "${values[@]}";
+			do
+				if [ "${header[${walk}]//\"/}" != "" ];
+				then
+					export ${header[${walk}]}="$( echo ${i//#/ } | sed 's/"/\"/g' | sed 's/^""$//g' )";
+					walk=$(( walk + 1 ));
+				fi
+			done
+	
+			for (( j=$walk; j < ${#header[@]}; j++ ));
+			do
+				export ${header[${j}]}="";
+			done;
+		
+			if [ -e "${AUTORISATIES_TEMPLATES_LOCATION}/${Template}.js" ];
+			then
+				. ./"${AUTORISATIES_ENDPOINT_PROPERTIES}";
+				response_file="${AUTORISATIES_RESPONSE_LOCATION}/${Template}_${count}.json";
+	
+				command="cat ${AUTORISATIES_TEMPLATES_LOCATION}/${Template}.js";
+				for i in $( grep -e {[^}]*} ${AUTORISATIES_TEMPLATES_LOCATION}/${Template}.js | sed 's/.*{\([^}]*\)}.*/\1/g' );
+				do
+					eval var='"${'${i}'}"'
+					# quotes escapen in de json
+					var=$( echo ${var} | sed 's/"/\\\\\"/g' );
+
+					if [ "${var}" == "" ];
+					then
+						command="${command} | sed '/{${i}}/d'"
+					else
+						command="${command} | sed 's/{${i}}/${var//\//\\/}/g'"
+					fi
+				done
+				# verwijder niet ingevulde waarden, verwijder laatste comma op 1-na-laatste regel
+				command="${command} | sed 's/{[^ }]*}//g' | sed 'x; $ {s/,\r\?$//;p;x}; 1d'";
+
+				echo ${command} >> ${log_file}	
+				eval ${command} > ${AUTORISATIES_REQUEST_LOCATION}/${Template}_${count}.json;
+				eval endpoint='"${'${Template}'}"';
+	
+				echo Stuur request ${AUTORISATIES_REQUEST_LOCATION}/${Template}_${count}.json naar ${endpoint} >> ${log_file}
+	
+				wget -nv --header="Authorization: Basic YWRtaW46YWRtaW4=" \
+					--header="Content-type: application/json;charset=UTF-8" \
+					--post-file=${AUTORISATIES_REQUEST_LOCATION}/${Template}_${count}.json \
+					"http://${BRP_BEHEER_HOST}:${BRP_BEHEER_PORT}/${endpoint}" \
+					-a ${log_file} \
+					--output-document=${response_file};
+	
+				if [ $? != "0" ];
+				then
+					echo "Fout in verwerking: regel=${count}, endpoint=${endpoint}";
+					cat ${AUTORISATIES_REQUEST_LOCATION}/${Template}_${count}.json;
+					exit 1;
+				fi
+			else
+				if [ -e "${response_file}" ];
+				then
+					# variabelen gedefinieerd in csv_file uit laatste response file halen
+					. ./variables ${response_file} <<< "${Template}";
+				else
+					echo "Fout in verwerking: geen response file, regel=${count}, endpoint=${endpoint}";
+					exit 1;
+				fi
+			fi
+		fi
+
+		count=$(( count + 1 ));
+	done < ${csv_file}
+done
+
+sleep 2
+
+echo "klaar";

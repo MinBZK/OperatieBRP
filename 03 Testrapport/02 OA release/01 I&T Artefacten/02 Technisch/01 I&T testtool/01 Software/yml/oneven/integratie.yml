@@ -1,0 +1,471 @@
+#
+# BRP Databases
+#
+brp-database:
+  image: ${DOCKER_REGISTRY}brp/database:${BRP_VERSION}
+  container_name: brp-database
+  net: brp
+  ports:
+    - "5432:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=brpdb"
+
+#
+# Beheer applicatie
+#
+brp-beheer:
+  image: ${DOCKER_REGISTRY}brp/beheer:${BRP_VERSION}
+  container_name: brp-beheer
+  net: brp
+  ports:
+    - "8280:8080"
+  environment:
+    constraint:nl.bzk.rol: "=extern"
+    BRPDB_ENV_HOSTNAME: brp-database
+    BRPDB_ENV_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: brp-archiveringdatabase
+    ARCHIVERINGDB_ENV_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    KERNDB_ENV_HOSTNAME: brp-database
+    KERNDB_ENV_PORT: 5432
+    KERNDB_ENV_DBNAME: brp
+    KERNDB_ENV_DBUSER: brp
+    KERNDB_ENV_DBPASS: brp
+    PROTOCOLLERINGDB_ENV_HOSTNAME: brp-database
+    PROTOCOLLERINGDB_ENV_PORT: 5432
+    PROTOCOLLERINGDB_ENV_DBNAME: brp
+    PROTOCOLLERINGDB_ENV_DBUSER: brp
+    PROTOCOLLERINGDB_ENV_DBPASS: brp
+    ISC_CONSOLE_HOST: isc-iscconsole
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 11997
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+#
+# Migratie componenten (IV)
+#
+iv-synchronisatienaarbrp:
+  image: ${DOCKER_REGISTRY}iv/synchronisatie-naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-synchronisatienaarbrp
+  net: brp
+  ports:
+    - "3485:3481"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+iv-synchronisatienaarlo3:
+  image: ${DOCKER_REGISTRY}iv/synchronisatie-naarlo3:${MIGRATIE_VERSION}
+  container_name: iv-synchronisatienaarlo3
+  net: brp
+  ports:
+    - "4485:3481"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+iv-logging:
+  image: ${DOCKER_REGISTRY}iv/logging:${MIGRATIE_VERSION}
+  container_name: iv-logging
+  net: brp
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+iv-hornetq:
+  image: ${DOCKER_REGISTRY}iv/hornetq:${MIGRATIE_VERSION}
+  container_name: iv-hornetq
+  net: brp
+  ports:
+    - "5445:5445"
+    - "3381:3481"
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 3481
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+#
+# Migratie overig (IV)
+#
+migr-gbavdatabase_test:
+  image: ${DOCKER_REGISTRY}migr/gbav-database:${MIGRATIE_VERSION}
+  container_name: migr-gbavdatabase_test
+  net: brp
+  ports:
+    - "5832:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=migrdb"
+
+migr-ggodatabase:
+  image: ${DOCKER_REGISTRY}migr/ggo-database:${MIGRATIE_VERSION}
+  container_name: migr-ggodatabase
+  net: brp
+  ports:
+    - "5932:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=migrdb"
+
+migr-ggoviewer:
+  image: ${DOCKER_REGISTRY}migr/ggo-viewer:${MIGRATIE_VERSION}
+  container_name: migr-ggoviewer
+  net: brp
+  ports:
+    - "8880:8080"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    constraint:nl.bzk.rol: "=extern"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GGO_DB_ENV_HOST: migr-ggodatabase
+    GGO_DB_ENV_PORT: 5432
+    GGO_DB_ENV_NAME: viewerdb
+    GGO_DB_ENV_USERNAME: viewerdb
+    GGO_DB_ENV_PASSWORD: viewerdb
+    GGOVIEWER_DEMOMODE: 'false'
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+iv-naarbrp-persooncreate:
+  image: ${DOCKER_REGISTRY}iv/naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-naarbrp-persooncreate
+  net: brp
+  entrypoint: ./createInitVulling.sh
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+iv-naarbrp-persoonrun:
+  image: ${DOCKER_REGISTRY}iv/naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-naarbrp-persoonrun
+  net: brp
+  entrypoint: ./runInitVulling.sh
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+iv-naarlo3-persoonterug:
+  image: ${DOCKER_REGISTRY}iv/naarlo3:${MIGRATIE_VERSION}
+  container_name: iv-naarlo3-persoonterug
+  net: brp
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+iv-naarbrp-autorisatiecreate:
+  image: ${DOCKER_REGISTRY}iv/naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-naarbrp-autorisatiecreate
+  net: brp
+  entrypoint: ./createInitVullingAut.sh
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+iv-naarbrp-autorisatierun:
+  image: ${DOCKER_REGISTRY}iv/naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-naarbrp-autorisatierun
+  net: brp
+  entrypoint: ./runInitVullingAut.sh
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+iv-naarbrp-afnemersindicatiecreate:
+  image: ${DOCKER_REGISTRY}iv/naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-naarbrp-afnemersindicatiecreate
+  net: brp
+  entrypoint: ./createInitVullingAfnInd.sh
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+iv-naarbrp-afnemersindicatierun:
+  image: ${DOCKER_REGISTRY}iv/naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-naarbrp-afnemersindicatierun
+  net: brp
+  entrypoint: ./runInitVullingAfnInd.sh
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+iv-naarbrp-protocolleringcreate:
+  image: ${DOCKER_REGISTRY}iv/naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-naarbrp-protocolleringcreate
+  net: brp
+  entrypoint: ./createInitVullingProt.sh
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: sit-dok03
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+iv-naarbrp-protocolleringrun:
+  image: ${DOCKER_REGISTRY}iv/naarbrp:${MIGRATIE_VERSION}
+  container_name: iv-naarbrp-protocolleringrun
+  net: brp
+  entrypoint: ./runInitVullingProt.sh
+  environment:
+    constraint:nl.bzk.rol: "=worker"
+    BRP_DB_ENV_HOSTNAME: brp-database
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    GBAV_DB_ENV_HOSTNAME: ${GBAV_DB_ENV_HOSTNAME}
+    GBAV_DB_ENV_PORT: ${GBAV_DB_ENV_PORT}
+    GBAV_DB_ENV_NAME: ${GBAV_DB_ENV_NAME}
+    GBAV_DB_ENV_USERNAME: ${GBAV_DB_ENV_USERNAME}
+    GBAV_DB_ENV_PASSWORD: ${GBAV_DB_ENV_PASSWORD}
+    IV_ROUTERING_ENV_HOSTNAME: iv-hornetq
+    IV_ROUTERING_ENV_PORT: 5445
+    IV_BATCH: 2
+    IV_BATCH_PROTOCOLLERING: 2
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  extra_hosts:
+    migr-gbavdatabase: ${GBAV_DATABASE_IP}
+
+
+#
+# Logging
+#
+logging-elasticsearch:
+  image: ${DOCKER_REGISTRY}logging/elasticsearch:${ALG_VERSION}
+  container_name: elasticsearch
+  net: brp
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=migrdb"
+
+logging-kibana:
+  image: ${DOCKER_REGISTRY}logging/kibana:${ALG_VERSION}
+  container_name: kibana
+  net: brp
+  ports:
+    - "5601:5601"
+  environment:
+    constraint:nl.bzk.rol: "=extern"
+    ELASTICSEARCH_URL: http://elasticsearch:9200
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+logging-logstash:
+  image: ${DOCKER_REGISTRY}logging/logstash:${ALG_VERSION}
+  container_name: logstash
+  net: brp
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+  environment:
+    constraint:nl.bzk.rol: "=worker"

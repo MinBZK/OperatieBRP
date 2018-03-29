@@ -1,0 +1,28 @@
+#!/bin/bash
+echo Content-type: text/plain
+echo "" 
+
+. ./env
+. ./functions
+
+if [ "${all}" != "" ];
+then
+	anrs=$( cat ${UPLOAD_BSN_LIST_FILE} | awk '{print $4}' | tr '\n' ',' );
+	rm -r ${PL_LOCATION}/U* ${PL_LOCATION}/AI_U*;
+	rm -r ${STAGES_LOCATION}/U* ;
+fi
+
+if [ "${anrs}" != "" ];
+then
+	values=( ${anrs//,/ } );
+	export PGPASSWORD=${BRP_ISC_DB_PASSWORD};
+	psql -h ${BRP_ISC_DB_HOST} ${BRP_ISC_DB_NAME} -U ${BRP_ISC_DB_USER} -f ${BRP_DB_SCRIPTS}/Schonen_persoon.sql ;
+	psql -h ${BRP_ISC_DB_HOST} ${BRP_ISC_DB_NAME} -U ${BRP_ISC_DB_USER} -c "SELECT wispersoon(id) FROM kern.pers WHERE anr IN ( $( echo ${values[@]} | sed 's/ /,/g' ) )";
+
+	for i in ${values[@]};
+	do
+		rm ${RESULTS_LOCATION}/${i}.json;
+		clean_bsn ${i} ${UPLOAD_BSN_LIST_FILE};
+	done
+fi
+

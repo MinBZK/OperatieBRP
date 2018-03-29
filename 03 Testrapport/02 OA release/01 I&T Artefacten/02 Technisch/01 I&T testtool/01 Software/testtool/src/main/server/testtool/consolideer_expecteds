@@ -1,0 +1,61 @@
+#!/bin/bash
+echo Content-type: application/json;
+echo ""
+
+. ./env
+. ./functions
+
+count=0;
+negeerAnummers=(${ais//,/ });
+
+if [ "${heeftExpecteds}" != "true" ];
+then
+	heeftExpecteds="false";
+fi
+
+if [ "${alleControles}" != "true" ];
+then
+	alleControles="false";
+fi
+
+if [ "${alleMomenten}" != "true" ];
+then
+	alleMomenten="false";
+else 
+	moment=$( echo "IV TC $( find output/Stages -type d -name M\* -exec basename {} \; | sort | tr '\n' ' ' )" ); 
+fi
+
+echo "{";
+echo "\"type\" : \"${type}\",";
+echo "\"alleControles\" : \"${alleControles}\",";
+echo "\"controle\" : \"${controle}\",";
+echo "\"controle_zonder_extensie\" : \"${controle%%.*}\",";
+echo "\"alleMomenten\" : \"${alleMomenten}\",";
+echo "\"moment\" : \"${moment}\",";
+echo "\"heeftExpecteds\" : \"${heeftExpecteds}\",";
+echo "\"negeerAnummers\" : \"${negeerAnummers[*]}\",";
+
+for i in ${moment};
+do
+	for j in ${STAGES_LOCATION}/${i}/${type}/actual/*${controle%%.*}*;
+	do
+		if [ -e ${j} ];
+		then
+			anr=$( echo ${j} | sed 's/.*\([[:digit:]]\{10\}\).*/\1/' );
+                	nieuwe_naam=$( echo $j | sed 's/actual/expected/' );
+
+			if [[ ! ( "${negeerAnummers[@]}" =~ "${anr}" ) ]];
+			then
+                		if [ -e "${nieuwe_naam}" -o "${heeftExpecteds}" == "false" ];
+                		then
+					cp ${j} ${nieuwe_naam};	
+					count=$(( count + 1 ));
+				fi
+			fi
+		fi
+	done
+done
+
+echo "\"count\" : ${count}";
+echo "}";
+

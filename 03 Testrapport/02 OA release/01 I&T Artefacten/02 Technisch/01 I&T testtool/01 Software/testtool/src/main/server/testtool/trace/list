@@ -1,0 +1,30 @@
+#!/bin/bash
+echo Content-type: application/json
+echo ""
+
+. ./env
+
+echo "{"
+
+n=0;
+echo "\"data\" : [";
+for i in ${REGEL_DIR}/*; 
+do
+        if [ ${n} -gt 0 ];
+        then
+                echo ", ";
+        fi
+	f=`basename ${i} .txt`;
+	
+        echo "{"
+	echo "\"regel\" : \"${f}\",";
+
+	beschrijving=`grep -e '^|R[[:digit:]]\+' $i | sed 's/^|R[[:digit:]]\+ //'`
+
+	echo "\"beschrijving\" : \"${beschrijving}\"";
+        echo "}"
+	n=$(( n + 1 ));	
+done
+
+echo "]";
+echo "}"

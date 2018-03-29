@@ -1,0 +1,41 @@
+<div>
+	<div ng-if="flavour == 'GBA'" ng-repeat="(key, value) in data[datakey] track by $index" ng-init="datakey2=key">
+			<div class="table">
+				<div class="row">
+					<div class="cell head">key</div>
+					<div class="cell head">value</div>
+				</div>
+				<div class="row" ng-repeat="(k, v) in value track by $index">
+					<div class="cell {{ other[datakey][datakey2][k] == v ? 'success' : 'error' }}"><h5>{{ ELEMENTS[k] }} <small>({{ k }})</small></h5></div>
+					<div class="cell {{ other[datakey][datakey2][k] == v ? 'success' : 'error' }}"><h5>{{ v }}</h5></div>
+				</div>
+			</div>
+	</div>
+	<div ng-if="flavour == 'BRP' || flavour == 'RESBIJ' || flavour == 'RESBEV'">
+		<div ng-repeat="header in headers">
+			<table class="table table-bordered">
+				<tr>
+					<th colspan="2">{{ header }}</th>
+				</tr>
+				<tr>
+					<th>key </th>
+					<th>value</th>
+				</tr>
+				<tr ng-repeat="(key, value) in data[datakey][header] track by $index" ng-init="datakey2=key">
+					<td class="{{ other[datakey][header][key] == value ? 'success' : 'error' }}"><strong>{{ key }} </strong></td>
+					<td class="{{ other[datakey][header][key] == value ? 'success' : 'error' }}">{{ value }}</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+	<div class="table" ng-if="flavour != 'GBA' && flavour != 'BRP' && flavour != 'RESBEV' && flavour != 'RESBIJ'">
+		<div class="row">
+			<div class="cell head">key</div>
+			<div class="cell head">value</div>
+		</div>
+		<div class="row" ng-repeat="(key, value) in data[datakey] track by $index" ng-init="datakey2=key">
+			<div class="cell {{ other[datakey][key] == value ? 'success' : 'error' }}"><strong>{{ key }}</strong></div>
+			<div class="cell {{ other[datakey][key] == value ? 'success' : 'error' }}">{{ value }}</div>
+		</div>
+	</div>
+</div>

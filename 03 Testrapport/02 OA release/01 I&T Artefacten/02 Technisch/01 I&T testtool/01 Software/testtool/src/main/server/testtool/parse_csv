@@ -1,0 +1,40 @@
+#!/bin/bash
+
+. ./env
+. ./functions
+
+IGNORE_LIST="Berichttype Omschrijving"
+
+message="";
+group_message="";
+
+while read line;
+do
+	desc=$( echo ${line} | awk -F ';' '{print $1}' );
+	if [[ ! " ${IGNORE_LIST} " =~ " ${desc} " ]];
+	then
+		rubr_message="";
+		id=$( echo ${line} | awk -F ';' '{print $2}' );
+		val=$( echo ${line} | awk -F ';' '{print $3}' );
+	
+		if [ -n "${val}" ];
+		then
+			val=$( translateTeletex "${val}" );
+			rubr_message=$( printf "%04d%03d%s" ${id} ${#val} ${val} );
+			group_message=$( echo "${group_message}${rubr_message}" );
+		else
+			group_message=$( printf "%02d%03d%s" ${group} ${#group_message} ${group_message} );
+			message=$( echo "${message}${group_message}" );
+
+			group="${id}";
+			group_message="";
+		fi
+	fi
+
+done < $1
+
+group_message=$( printf "%02d%03d%s" ${group} ${#group_message} ${group_message} );
+message=$( echo "${message}${group_message}" );
+message=$( printf "%05d%s" ${#message} ${message} );
+
+echo ${message}

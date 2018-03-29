@@ -1,0 +1,148 @@
+#!/bin/bash
+echo "Content-type: application/json; charset=UTF-8"
+echo ""
+
+if [ "${1}" != "" ];
+then
+	stage="${1}";
+	if [ "${2}" != "" ];
+	then
+		flavour="${2}";
+		if [ "${3}" != "" ];
+		then
+			bsn_file="${3}";
+		fi
+	fi
+fi
+
+. ./env
+. ./functions
+
+if [ "${bsn_file}" == "" ];
+then
+	bsn_file=${BSN_LIST_FILE};
+fi
+
+bash ./update 2> /dev/null 1> /dev/null
+
+echo "{";
+echo "\"info\": {";
+. ./meta
+echo ",";
+. ./available
+echo ",";
+echo "\"start\" : \"`date`\"";
+echo "},";
+echo "\"data\" : [";
+
+flav=${flavour};
+stag=${stage};
+
+if [ "${flav}" == "BRP" -o "${flav}" == "RESBIJ" -o "${flav}" == "RESBEV" ];
+then
+	if [ ! -d "${STAGES_FLAVOUR_LOCATION}/tmp" ];
+	then
+		mkdir ${STAGES_FLAVOUR_LOCATION}/tmp;
+	else
+		rm ${STAGES_FLAVOUR_LOCATION}/tmp/*;
+	fi
+
+	if [ "${flav}" == "BRP" ];
+	then
+		java -jar utils/simpletransform.jar ${RAW_LOCATION} ${BRP_CONTROLE_LOCATION} ${STAGES_FLAVOUR_LOCATION}/tmp;
+	elif [ "${flav}" == "RESBIJ" ];
+	then
+		java -jar utils/simpletransform.jar ${RAW_LOCATION} ${RESBIJ_CONTROLE_LOCATION} ${STAGES_FLAVOUR_LOCATION}/tmp;
+	elif [ "${flav}" == "RESBEV" ];
+	then
+		java -jar utils/simpletransform.jar ${RAW_LOCATION} ${RESBEV_CONTROLE_LOCATION} ${STAGES_FLAVOUR_LOCATION}/tmp;
+	fi
+
+	# remove all empty
+	find ${STAGES_FLAVOUR_LOCATION}/tmp -size ${EMPTY_BRP_SIZE}c -exec rm {} \; ;
+
+	for i in ${RAW_LOCATION}/*; 
+	do
+		if [ -e "${i}" ];
+		then
+			raw_file=`basename ${i} .xml`;
+
+			date_time_file=`stat -c %y ${i}`;
+			date_file=`echo ${date_time_file} | awk '{print $1}'`;
+			anr=`echo ${raw_file} | awk -F '-' '{print $4}'`;
+			afn=`echo ${raw_file} | awk -F '-' '{print $5}'`;
+			berichttype=`echo ${raw_file} | awk -F '-' '{print $3}'`;
+			volgnr=`echo ${raw_file} | awk -F '-' '{print $2}'`;
+
+			# find all generated files
+			count=0;
+			for j in ${STAGES_FLAVOUR_LOCATION}/tmp/*${volgnr}*${berichttype}*${anr}*${afn}*;
+			do
+				if [ -e "${j}" ];
+				then
+					output_file=`basename ${j} .xml`;
+					script=$(echo ${j} | sed 's/.*_\([^_]*\).xml/\1/');
+					. ./files
+
+					# script 99.Rest bevat de complete levering welke later gestript wordt van al uitgevoerde controles
+					if [[ "${script}" == "99"* ]];
+					then
+						command="xmllint --format ${j} | sed 's/ encoding=\"UTF-8\"//'";
+						for i in $( cat ${BRP_CONTROLE_LOCATION}/[^99]* | grep select= | sed 's/.*select="//' | sed 's/".*//' | sed 's/\[[^]]*\]$//' );
+						do
+							all=$( grep "\"${i}\"" ${BRP_CONTROLE_LOCATION}/[^99]* | grep 'mode="all"' );
+							# mogelijk overal komt er een getal achter
+							i=$( echo ${i} | sed 's/\//[[:digit:]]\*\//g' );
+
+							if [ "${all}" != "" ];
+							then
+								command="${command} | grep -v -e '${i//\//.}[[:digit:]]*\?\.\?[^.]*'"
+							else
+								command="${command} | grep -v -e '${i//\//.}[[:digit:]]*\?\.\?[^.]*>'"
+							fi
+						done
+						eval $command > ${ACTUAL_FILE} &
+					else
+						xmllint --format ${j} | sed 's/ encoding="UTF-8"//' > ${ACTUAL_FILE} &
+					fi
+
+					count=$(( count + 1 ));
+				fi
+
+				if [ $(( count % 80 )) -eq 0 ];
+				then
+					wait;
+				fi	
+			done
+		fi
+	done
+
+else
+	# eerst de resultaten ophalen
+	if [ "${stage}" == "TC" ];
+	then
+		rm ${RAW_LOCATION}/* 2> /dev/null;
+		export PGPASSWORD=${GBAV_DB_PASSWORD};
+		lines=`psql -A -h ${GBAV_DB_HOST} -U ${GBAV_DB_USER} -d ${GBAV_DB_NAME} -t -S -c "select inhoud_na_terugconversie,anummer from initvul.initvullingresult" | sed 's/ /#/g'`;
+		for line in ${lines};
+		do
+			ber=`echo "${line}" | awk -F '|' '{print $1}'`;
+			anr=`echo "${line}"| awk -F '|' '{print $2}'`;
+			echo "${ber}" | sed 's/#/ /g' > ${RAW_LOCATION}/TC-${anr}.GBA;
+			save_to_bsn "TC" "" "" "${anr}" "${bsn_file}";
+		done
+	fi
+
+	for b in `grep "${stage}" ${bsn_file} | sed 's/ /#/g'`;
+	do
+		anr=`echo $b | awk -F '#' '{print $4}'`;
+		run "${anr}" "${stag}" "" "${flav}";
+	done
+fi
+
+echo "]";
+echo "}";
+
+wait;
+
+sleep 5;

@@ -1,0 +1,55 @@
+#!/bin/bash
+
+. ./env
+. ./functions
+
+. ./meta > /dev/null
+
+if [ -e "${PL_LOCATION}/${stage}"/*-${excel}.csv ];
+then
+	i=0;
+
+	echo Content-type: application/json
+	echo "";
+
+	echo "[";
+	while read line
+	do
+		if [ ${i} -gt 0 ];
+		then
+			echo ",";
+		fi
+
+		echo "[";
+		line_array=( $( echo ${line//"/\\"} | sed 's/ /_/g' | sed 's/;/ /g' ) );
+	
+		k=0
+		while (( ${#line_array[@]} > $k ));
+		do
+			if [ ${k} -gt 0 ];
+			then
+				echo ",";
+			fi
+	
+			echo "\"${line_array[${k}]//_/ }\"";
+	
+			k=$(( k + 1 ));
+		done
+	
+		echo "]";
+		i=$(( i + 1 ));
+	done < ${PL_LOCATION}/${stage}/*-${excel}.csv;
+	echo "]";
+
+elif [ -e "${MUT_LOCATION}/${stage}"/*BRP/${BIJHOUDING_DIR}/*-${excel}.xml ];
+then
+	echo Content-type: text/xml
+	echo "";
+
+	cat "${MUT_LOCATION}/${stage}"/*BRP/${BIJHOUDING_DIR}/*-${excel}.xml ;
+else
+	echo Content-type: text/plain
+	echo "";
+	echo "${PL_LOCATION}/${stage}"/*-${excel}.csv 
+	echo "${MUT_LOCATION}/${stage}"/*BRP/${BIJHOUDING_DIR}/*-${excel}.xml
+fi

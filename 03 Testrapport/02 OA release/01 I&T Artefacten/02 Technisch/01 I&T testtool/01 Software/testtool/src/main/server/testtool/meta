@@ -1,0 +1,36 @@
+#!/bin/bash
+
+echo "\"meta\" : {";
+echo "\"type\" : \"${type}\",";
+excel="";
+if [ "${bsn}" != "" ];
+then
+	excel=`grep ${bsn} ${BSN_LIST_FILE} ${OTHER_BSN_LIST_FILE} | grep -v ' - ' | awk '{print $2}' | uniq | tr -d ' \r\n'`;
+	if [ "${anr}" == "" ];
+	then
+		anr=`grep ${bsn} ${BSN_LIST_FILE} ${OTHER_BSN_LIST_FILE} | grep -v ' - ' | awk '{print $4}' | uniq | tr -d ' _\-\r\n'`;
+	fi
+else 
+	if [ "${anr}" != "" ]
+	then
+		excel=`grep ${anr} ${BSN_LIST_FILE} ${OTHER_BSN_LIST_FILE} | grep -v ' - ' | awk '{print $2}' | uniq | tr -d ' \r\n'`;
+		if [ "${bsn}" == "" ];
+		then
+			bsn=`grep ${anr} ${BSN_LIST_FILE} ${OTHER_BSN_LIST_FILE} | grep -v ' - ' | awk '{print $3}' | uniq | tr -d ' _\-\r\n'`;
+		fi
+	fi
+fi
+echo "\"bsn\" : \"${bsn}\",";
+echo "\"anr\" : \"${anr}\",";
+echo "\"excel\" : \"${excel}\",";
+echo "\"berichttype\" : \"${berichttype}\",";
+echo "\"bn\" : \"${bn}\",";
+echo "\"afn\" : \"${afn}\",";
+echo "\"script\" : \"${script}\",";
+echo "\"stage\" : \"${stage}\",";
+echo "\"substage\" : \"${substage}\",";
+echo "\"flavour\" : \"${flavour}\",";
+echo "\"show_scripts\" : \"${show_scripts}\",";
+echo "\"ACTUAL_FILE\" : \"${ACTUAL_FILE}\",";
+echo "\"EXPECTED_FILE\" : \"${EXPECTED_FILE}\"";
+echo "}";
