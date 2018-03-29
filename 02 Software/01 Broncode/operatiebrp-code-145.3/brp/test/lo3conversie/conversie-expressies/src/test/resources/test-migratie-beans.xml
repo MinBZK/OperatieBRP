@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <beans profile="!memoryDS">
+	    <context:property-placeholder location="classpath:datasource.properties,file:datasource.properties" ignore-resource-not-found="true" />
+	</beans>
+
+	<beans>
+    	<import resource="main-beans.xml"/>
+    </beans>
+
+    <beans profile="memoryDS">
+        <context:property-placeholder location="classpath:inmemory.properties" />
+    </beans>
+
+    <beans>
+        <!-- Configuratie voor beide profielen -->
+        <!-- Construct Atomikos USerTransactionService, needed to specify Atomikos settings -->
+        <bean id="atomikosUserTransactionService" class="com.atomikos.icatch.config.UserTransactionServiceImp"
+              init-method="init" destroy-method="shutdownForce">
+            <constructor-arg>
+                <!-- IMPORTANT: specify all Atomikos properties here -->
+                <props>
+                    <prop key="com.atomikos.icatch.service">
+                        com.atomikos.icatch.standalone.UserTransactionServiceFactory
+                    </prop>
+                    <prop key="com.atomikos.icatch.tm_unique_name">transactionmanager_${atomikos.unique_name:local}_
+                    </prop>
+                    <prop key="com.atomikos.icatch.log_base_name">transactionlog_${atomikos.unique_name:local}_</prop>
+                </props>
+            </constructor-arg>
+        </bean>
+
+        <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+        <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init"
+              destroy-method="close" depends-on="atomikosUserTransactionService">
+            <!-- IMPORTANT: disable startup because the userTransactionService above does this -->
+            <property name="startupTransactionService" value="false"/>
+
+            <!--  when close is called, should we force transactions to terminate or not? -->
+            <property name="forceShutdown">
+                <value>true</value>
+            </property>
+        </bean>
+
+        <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+        <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp"
+              depends-on="atomikosUserTransactionService">
+            <property name="transactionTimeout">
+                <value>3600</value>
+            </property>
+        </bean>
+
+        <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+        <bean id="syncDalTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+            <property name="transactionManager">
+                <ref bean="atomikosTransactionManager"/>
+            </property>
+            <property name="userTransaction">
+                <ref bean="atomikosUserTransaction"/>
+            </property>
+        </bean>
+    </beans>
+
+    <beans profile="memoryDS">
+
+        <bean id="syncDalJpaVendorAdapter"
+            class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            <property name="showSql" value="false" />
+            <property name="generateDdl" value="false" />
+            <property name="database" value="HSQL" />
+            <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect" />
+        </bean>
+
+
+        <bean id="syncDalEntityManagerFactory"
+            class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+            <property name="persistenceUnitName" value="BrpEntities" />
+            <property name="dataSource" ref="syncDalDataSource" />
+            <property name="jpaVendorAdapter">
+                <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+            </property>
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                    <prop key="hibernate.cache.use_query_cache">false</prop>
+                    <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</prop>
+                    <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+                    <prop key="net.sf.ehcache.configurationResourceName">synchronisatie-dal-stamtabel-ehcache.xml</prop>
+                    <prop key="hibernate.generate_statistics">false</prop>
+                    <prop key="hibernate.transaction.jta.platform">
+                        nl.bzk.algemeenbrp.jta.AtomikosJtaPlatform
+                    </prop>
+                    <!--<prop key="hibernate.hbm2ddl.auto">validate</prop>-->
+                </props>
+            </property>
+        </bean>
+    </beans>
+
+    <beans profile="!memoryDS">
+
+        <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            <property name="showSql" value="false" />
+            <property name="generateDdl" value="false" />
+            <property name="database" value="POSTGRESQL" />
+            <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQLDialect" />
+        </bean>
+
+        <bean id="syncDalEntityManagerFactory"
+            class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+            <property name="persistenceUnitName" value="BrpEntities" />
+            <property name="dataSource" ref="syncDalDataSource" />
+            <property name="jpaVendorAdapter">
+                <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+            </property>
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                    <prop key="hibernate.cache.use_query_cache">false</prop>
+                    <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</prop>
+                    <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+                    <prop key="net.sf.ehcache.configurationResourceName">synchronisatie-dal-stamtabel-ehcache.xml</prop>
+                    <prop key="hibernate.generate_statistics">false</prop>
+                    <prop key="hibernate.transaction.jta.platform">
+                        nl.bzk.algemeenbrp.jta.AtomikosJtaPlatform
+                    </prop>
+                    <!--<prop key="hibernate.hbm2ddl.auto">validate</prop>-->
+                </props>
+            </property>
+        </bean>
+    </beans>
+
+    <beans>
+
+        <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+
+        <bean id="templateDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+              abstract="true">
+            <property name="driverClassName" value="${jdbc.driverClassName:org.hsqldb.jdbcDriver}"/>
+            <property name="username" value="${jdbc.username:sa}"/>
+            <property name="password" value="${jdbc.password:}"/>
+            <property name="initialSize" value="1"/>
+            <property name="maxActive" value="200"/>
+            <property name="minIdle" value="1"/>
+            <property name="maxIdle" value="5"/>
+            <property name="testOnBorrow" value="true"/>
+            <property name="testWhileIdle" value="true"/>
+            <property name="testOnReturn" value="false"/>
+            <property name="validationQuery" value="SELECT 41+1"/>
+            <property name="defaultAutoCommit" value="true"/>
+            <property name="defaultTransactionIsolation" value="2"/>
+        </bean>
+
+        <!--
+           Data sources voor de default connectie van de applicatie (slaves die read-only zijn) en voor speciale functies zoals archivering/logging en protocollering (master) database connectie.
+       -->
+        <bean id="syncDalDataSource" parent="templateDataSource">
+            <property name="url" value="${jdbc.url:jdbc:hsqldb:mem:testDb}"/>
+            <property name="username" value="${jdbc.username:sa}"/>
+            <property name="password" value="${jdbc.password:}"/>
+            <property name="defaultAutoCommit" value="true"/>
+            <property name="defaultReadOnly" value="${jdbc.readonly:false}"/>
+            <property name="defaultTransactionIsolation" value="${jdbc.transactionisolation:2}"/> <!-- default TRANSACTION_READ_COMMITTED, voor read-only: TRANSACTION_NONE = 0) -->
+        </bean>
+
+    </beans>
+</beans>

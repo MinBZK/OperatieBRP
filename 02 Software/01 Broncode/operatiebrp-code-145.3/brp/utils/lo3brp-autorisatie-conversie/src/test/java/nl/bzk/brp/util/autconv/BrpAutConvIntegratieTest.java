@@ -1,0 +1,22 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.util.autconv;
+
+import java.io.IOException;
+import nl.bzk.algemeenbrp.test.dal.data.Data;
+import org.junit.Test;
+
+@Data(resources = {"classpath:dbunit-alleen-brp-autorisatie.xml", "classpath:dbunit-cleanup.xml"})
+public class BrpAutConvIntegratieTest extends AbstractIntegratietest {
+
+    @Test
+    public void test() throws IOException {
+        assertAantalAutorisaties(1, 0);
+        getConverteerder().converteer();
+        assertAantalAutorisaties(1, 0);
+    }
+}

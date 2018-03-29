@@ -1,0 +1,400 @@
+<project name="BRP test build" default="docker" basedir=".">
+    <description></description>
+
+    <property name="dockerRegisterHost" value="fac-reg.modernodam.nl"/>
+    <property name="dockerRegisterPort" value="5000"/>
+    <property name="dockerRegister" value="${dockerRegisterHost}:${dockerRegisterPort}"/>
+
+    <property name="brpversie" value="latest"/>
+    <property name="JMX_HOST" value="localhost"/>
+
+    <property name="MUTATIELEVERING_JMX_PORT" value="1080"/>
+    <property name="VERZENDING_JMX_PORT" value="1081"/>
+    <property name="AFNEMERINDICATIES_JMX_PORT" value="1082"/>
+    <property name="BEVRAGING_JMX_PORT" value="1083"/>
+    <property name="BIJHOUDING_JMX_PORT" value="1084"/>
+    <property name="PROTOCOLLERING_JMX_PORT" value="1085"/>
+    <property name="SYNCHRONISATIE_JMX_PORT" value="1086"/>
+    <property name="BEZEMWAGEN_JMX_PORT" value="1087"/>
+    <property name="ROUTERINGCENTRALE_JMX_PORT" value="1088"/>
+
+    <!--<property name="jmx" value="CATALINA_OPTS=-Dcom.sun.management.jmxremote -Djava.rmi.server.hostname=${JMX_HOST} -Dcom.sun.management.jmxremote.port=${JMX_PORT} -Dcom.sun.management.jmxremote.rmi.port=${JMX_PORT} -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false"/>-->
+
+    <target name="docker" depends="stop"
+            description="generate the distribution">
+        <antcall target="brp-database"/>
+        <!--<antcall target="brp-database-ddl"/>-->
+        <antcall target="brp-database-testdata"/>
+        <antcall target="apps"/>
+
+    </target>
+
+    <target name="apps">
+        <antcall target="activemqdb"/>
+        <antcall target="sleutelbos"/>
+        <antcall target="routeringcentrale"/>
+        <antcall target="mutatielevering"/>
+        <antcall target="synchronisatie"/>
+        <antcall target="afnemerindicaties"/>
+        <antcall target="verzending"/>
+        <!--<antcall target="protocollering"/>-->
+        <antcall target="bevraging"/>
+        <!--<antcall target="bijhouding"/>-->
+        <antcall target="afnemervoorbeeld"/>
+    </target>
+
+    <target name="brp-database">
+        <echo message="Start BRP database"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="54321:5432"/>
+            <arg value="--name"/>
+            <arg value="brpdb"/>
+            <!--<arg value="&#45;&#45;memory"/>-->
+            <!--<arg value="256m"/>-->
+            <arg value="brp/database"/>
+        </exec>
+    </target>
+
+    <target name="brp-database-testdata">
+        <echo message="Start BRP database testdata update database"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="--name"/>
+            <arg value="brp-database-testdata"/>
+            <arg value="--link"/>
+            <arg value="brpdb:db"/>
+            <arg value="brp/database-met-testdata"/>
+        </exec>
+        <echo message="FF wachten tot testdata gevuld is..."/>
+        <exec executable="docker">
+            <arg value="wait"/>
+            <arg value="brp-database-testdata"/>
+        </exec>
+        <echo message="Testdata laden gelukt!"/>
+    </target>
+
+    <target name="activemqdb">
+        <echo message="Start ActiveMQ database"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="54322:5432"/>
+            <arg value="--name"/>
+            <arg value="activemqdb"/>
+            <arg value="brp/brp-message-broker"/>
+        </exec>
+    </target>
+
+    <target name="sleutelbos">
+        <echo message="Start Sleutelbos"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="--name"/>
+            <arg value="sleutelbos"/>
+            <arg value="brp/sleutel"/>
+        </exec>
+    </target>
+    <target name="routeringcentrale">
+
+        <echo message="Start Routeringcentrale"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="61617:61616"/>
+            <arg value="-p"/>
+            <arg value="${ROUTERINGCENTRALE_JMX_PORT}:${ROUTERINGCENTRALE_JMX_PORT}"/>
+            <arg value="--name"/>
+            <arg value="routeringcentrale"/>
+            <arg value="--link"/>
+            <arg value="brpdb:brpdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:archiveringdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:lockingdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:activemqdb"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx256m'"/>
+            <arg value="-e"/>
+            <arg value="JMX_PORT=${ROUTERINGCENTRALE_JMX_PORT}"/>
+            <arg value="brp/routeringcentrale"/>
+        </exec>
+    </target>
+    <target name="mutatielevering">
+        <echo message="Start Mutatielevering"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="${MUTATIELEVERING_JMX_PORT}:${MUTATIELEVERING_JMX_PORT}"/>
+            <arg value="--name"/>
+            <arg value="mutatielevering"/>
+            <arg value="--link"/>
+            <arg value="brpdb:brpdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:archiveringdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:lockingdb"/>
+            <arg value="--link"/>
+            <arg value="routeringcentrale:routeringcentrale"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx256m'"/>
+            <arg value="-e"/>
+            <arg value="JMX_PORT=${MUTATIELEVERING_JMX_PORT}"/>
+            <arg value="brp/mutatielevering"/>
+        </exec>
+    </target>
+    <target name="synchronisatie">
+
+        <echo message="Start Synchronisatie"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="8180:8080"/>
+            <arg value="-p"/>
+            <arg value="${SYNCHRONISATIE_JMX_PORT}:${SYNCHRONISATIE_JMX_PORT}"/>
+            <arg value="--name"/>
+            <arg value="synchronisatie"/>
+            <arg value="--link"/>
+            <arg value="brpdb:brpdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:archiveringdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:lockingdb"/>
+            <arg value="--link"/>
+            <arg value="routeringcentrale:routeringcentrale"/>
+            <arg value="--link"/>
+            <arg value="sleutelbos:sleutelbos"/>
+            <arg value="--volumes-from"/>
+            <arg value="sleutelbos"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx256m'"/>
+            <arg value="-e"/>
+            <arg value="JMX_PORT=${SYNCHRONISATIE_JMX_PORT}"/>
+            <arg value="brp/synchronisatie"/>
+        </exec>
+    </target>
+    <target name="afnemerindicaties">
+
+        <echo message="Start Afnemerindicaties"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="8280:8080"/>
+            <arg value="-p"/>
+            <arg value="${AFNEMERINDICATIES_JMX_PORT}:${AFNEMERINDICATIES_JMX_PORT}"/>
+            <arg value="--name"/>
+            <arg value="afnemerindicatie"/>
+            <arg value="--link"/>
+            <arg value="brpdb:brpdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:archiveringdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:lockingdb"/>
+            <arg value="--link"/>
+            <arg value="routeringcentrale:routeringcentrale"/>
+            <arg value="--link"/>
+            <arg value="sleutelbos"/>
+            <arg value="--volumes-from"/>
+            <arg value="sleutelbos"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx256m'"/>
+            <arg value="-e"/>
+            <arg value="JMX_PORT=${AFNEMERINDICATIES_JMX_PORT}"/>
+            <arg value="brp/onderhoud-afnemerindicaties"/>
+        </exec>
+
+    </target>
+    <target name="verzending">
+
+        <echo message="Start Verzending"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="${VERZENDING_JMX_PORT}:${VERZENDING_JMX_PORT}"/>
+            <arg value="--name"/>
+            <arg value="verzending"/>
+            <arg value="--link"/>
+            <arg value="brpdb:brpdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:archiveringdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:lockingdb"/>
+            <arg value="--link"/>
+            <arg value="routeringcentrale:routeringcentrale"/>
+            <arg value="--volumes-from"/>
+            <arg value="sleutelbos"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx512m'"/>
+            <arg value="-e"/>
+            <arg value="JMX_PORT=${VERZENDING_JMX_PORT}"/>
+            <arg value="brp/verzending"/>
+        </exec>
+
+    </target>
+    <target name="protocollering">
+        <echo message="Start Protocollering"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="--name"/>
+            <arg value="protocollering"/>
+            <arg value="--link"/>
+            <arg value="brpdb:protocolleringdb"/>
+            <arg value="--link"/>
+            <arg value="routeringcentrale:routeringcentrale"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx128m'"/>
+            <arg value="brp/protocollering"/>
+        </exec>
+
+    </target>
+    <target name="bevraging">
+        <echo message="Start Bevraging"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="8380:8080"/>
+            <arg value="-p"/>
+            <arg value="${BEVRAGING_JMX_PORT}:${BEVRAGING_JMX_PORT}"/>
+            <arg value="--name"/>
+            <arg value="bevraging"/>
+            <arg value="--link"/>
+            <arg value="brpdb:brpdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:archiveringdb"/>
+            <arg value="--link"/>
+            <arg value="sleutelbos:sleutelbos"/>
+            <arg value="--volumes-from"/>
+            <arg value="sleutelbos"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx256m'"/>
+            <arg value="-e"/>
+            <arg value="JMX_PORT=${BEVRAGING_JMX_PORT}"/>
+            <arg value="brp/bevraging"/>
+        </exec>
+    </target>
+    <target name="bijhouding">
+        <echo message="Start Bijhouding"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="8480:8080"/>
+            <arg value="-p"/>
+            <arg value="${BIJHOUDING_JMX_PORT}:${BIJHOUDING_JMX_PORT}"/>
+            <arg value="--name"/>
+            <arg value="bijhouding"/>
+            <arg value="--link"/>
+            <arg value="brpdb:brpdb"/>
+            <arg value="--link"/>
+            <arg value="brpdb:archiveringdb"/>
+            <arg value="--link"/>
+            <arg value="sleutelbos:sleutelbos"/>
+            <arg value="--volumes-from"/>
+            <arg value="sleutelbos"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx256m'"/>
+            <arg value="-e"/>
+            <arg value="JMX_PORT=${BIJHOUDING_JMX_PORT}"/>
+            <arg value="brp/bijhouding"/>
+        </exec>
+    </target>
+    <target name="afnemervoorbeeld">
+        <echo message="Start Afnemervoorbeeld"/>
+        <exec executable="docker">
+            <arg value="run"/>
+            <arg value="-d"/>
+            <arg value="-p"/>
+            <arg value="8580:8080"/>
+            <arg value="--name"/>
+            <arg value="afnemervoorbeeld"/>
+            <arg value="--link"/>
+            <arg value="brpdb:brpdb"/>
+            <arg value="-e"/>
+            <arg value="JAVA_OPTS='-Xmx256m'"/>
+            <arg value="brp/afnemervoorbeeld"/>
+        </exec>
+    </target>
+
+
+    <target name="stop">
+        <antcall target="stopContainer">
+            <param name="container" value="afnemervoorbeeld"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="protocollering"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="bijhouding"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="bevraging"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="verzending"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="afnemerindicatie"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="synchronisatie"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="mutatielevering"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="routeringcentrale"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="activemqdb"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="brpdbupdate"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="brp-database-testdata"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="brpdb"/>
+        </antcall>
+        <antcall target="stopContainer">
+            <param name="container" value="sleutelbos"/>
+        </antcall>
+
+
+    </target>
+
+
+    <target name="stopContainer">
+        <echo message="Container: ${container}"/>
+        <exec executable="docker" failonerror="false" failifexecutionfails="false">
+            <arg value="stop"/>
+            <arg value="${container}"/>
+        </exec>
+        <exec executable="docker" failonerror="false" failifexecutionfails="false">
+            <arg value="rm"/>
+            <arg value="-v"/>
+            <arg value="${container}"/>
+        </exec>
+    </target>
+
+    <target name="deleteAlleContainers">
+        <exec executable="docker" failonerror="false" failifexecutionfails="false">
+            <arg value="rm"/>
+            <arg value="$(docker ps -a -q)"/>
+        </exec>
+    </target>
+
+</project>

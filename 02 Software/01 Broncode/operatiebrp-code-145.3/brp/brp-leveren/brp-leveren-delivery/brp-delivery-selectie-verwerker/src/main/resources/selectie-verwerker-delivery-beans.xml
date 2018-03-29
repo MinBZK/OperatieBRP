@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <context:property-placeholder location="classpath*:brp-*.properties"/>
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+
+    <context:component-scan base-package="nl.bzk.brp.delivery.selectie.verwerker"/>
+
+    <import resource="classpath:selectie-service-verwerker-beans.xml"/>
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <import resource="classpath:maakbericht-service-beans.xml"/>
+    <import resource="classpath:delivery-algemeen-beans.xml"/>
+    <import resource="classpath:delivery-jms-selectie-publicatie-beans.xml"/>
+    <import resource="classpath:delivery-jms-afnemer-beans.xml"/>
+    <import resource="classpath:brp-delivery-selectie-gba.xml"/>
+
+    <import resource="classpath:alg-util-jmx-beans.xml"/>
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="selectie-verwerker"/>
+    </bean>
+
+    <jms:listener-container container-type="default" connection-factory="jmsSelectieTaakQueueConnectionFactory"
+                            destination-type="queue"
+                            concurrency="${brp.selectie.verwerker.jms.concurrency}">
+        <jms:listener
+                destination="#{T(nl.bzk.brp.domain.internbericht.selectie.SelectieTaakQueue).SELECTIE_TAAK_QUEUE.queueNaam}"
+                ref="selectieTaakQueueMessageListener"/>
+    </jms:listener-container>
+
+    <bean id="jmsSelectieTaakQueueConnectionFactory"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsSelectieTaakQueueActiveMQConnectionFactory"/>
+        <property name="sessionCacheSize" value="${brp.selectie.verwerker.jms.concurrency}"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsSelectieTaakQueueActiveMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${brp.selectie.messagebroker.jms.client.url}"/>
+        <property name="clientIDPrefix" value="selectie-selectietaakqueue"/>
+        <property name="connectionIDPrefix" value="selectie-selectietaakqueue"/>
+        <property name="nonBlockingRedelivery" value="false"/>
+    </bean>
+
+</beans>

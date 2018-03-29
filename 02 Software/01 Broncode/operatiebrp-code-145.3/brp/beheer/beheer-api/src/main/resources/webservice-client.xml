@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="classpath:beheer.properties"/>
+
+    <jaxws:client id="vrijBerichtClient"
+                  serviceClass="nl.bzk.brp.vrijbericht.vrijbericht.service.VrbStuurVrijBericht"
+                  address="${vrijbericht.service.url}">
+        <jaxws:outInterceptors>
+            <ref bean="oinHandler"/>
+        </jaxws:outInterceptors>
+    </jaxws:client>
+
+    <bean id="oinHandler" class="nl.bzk.brp.beheer.webapp.service.OinHandler"/>
+
+</beans>

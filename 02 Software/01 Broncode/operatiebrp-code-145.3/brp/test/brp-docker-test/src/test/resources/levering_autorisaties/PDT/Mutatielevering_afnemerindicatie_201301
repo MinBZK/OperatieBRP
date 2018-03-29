@@ -1,0 +1,41 @@
+Toegang Levering autorisatie
+geautoriseerde              : Gemeente Standaard
+
+Levering autorisatie
+Stelsel						: BRP
+Naam						: 201301
+Populatie Beperking			:
+
+
+DienstenBundel
+Naam						: Ad hoc
+Geautoriseerde Groepen	 	: */FMV
+Geautoriseerde attributen 	: *, !Persoon.SamengesteldeNaam.IndicatieAfgeleid, !Persoon.Naamgebruik.IndicatieAfgeleid, !Persoon.BuitenlandsPersoonsnummer.AutoriteitVanAfgifteCode, !Persoon.BuitenlandsPersoonsnummer.Nummer, !Persoon.Ouder.Ouderschap.IndicatieOuderUitWieKindIsGeboren, !GerelateerdeKind.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeOuder.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeHuwelijkspartner.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeGeregistreerdePartner.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeOuder.Ouderschap.IndicatieOuderUitWieKindIsGeboren, !Onderzoek.PartijCode, !Onderzoek.Omschrijving, !Onderzoek.StatusNaam, !AdministratieveHandeling.ToelichtingOntlening, !AdministratieveHandeling.Bijhoudingsplan, !Actie.DatumAanvangGeldigheid, !Actie.DatumEindeGeldigheid, !Actie.DatumOntlening
+Nadere populatie beperking	: WAAR
+
+Dienst
+Soort                       : Plaatsing afnemerindicatie
+
+Dienst
+Soort       				: Verwijdering afnemerindicatie
+
+Dienst
+Soort				        : Geef details persoon
+
+Dienst
+Soort				        : Zoek persoon
+
+DienstenBundel
+Naam						: Spontaan
+Geautoriseerde Groepen	 	: */FMV
+Geautoriseerde attributen 	: *, !Persoon.SamengesteldeNaam.IndicatieAfgeleid, !Persoon.Naamgebruik.IndicatieAfgeleid, !Persoon.BuitenlandsPersoonsnummer.AutoriteitVanAfgifteCode, !Persoon.BuitenlandsPersoonsnummer.Nummer, !Persoon.Ouder.Ouderschap.IndicatieOuderUitWieKindIsGeboren, !GerelateerdeKind.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeOuder.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeHuwelijkspartner.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeGeregistreerdePartner.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeOuder.Ouderschap.IndicatieOuderUitWieKindIsGeboren, !Onderzoek.PartijCode, !Onderzoek.Omschrijving, !Onderzoek.StatusNaam, !AdministratieveHandeling.ToelichtingOntlening, !AdministratieveHandeling.Bijhoudingsplan, !Actie.DatumAanvangGeldigheid, !Actie.DatumEindeGeldigheid, !Actie.DatumOntlening
+Nadere populatie beperking	: (((JAAR(Persoon.Geboorte.Datum) < JAAR(VANDAAG() - ^3/0/0)) OF (JAAR(Persoon.Geboorte.Datum) = JAAR(VANDAAG() - ^3/0/0) EN MAAND(Persoon.Geboorte.Datum) <= MAAND(VANDAAG() - ^3/0/0))) EN ((JAAR(Persoon.Geboorte.Datum) > JAAR(VANDAAG() - ^18/0/0)) OF (JAAR(Persoon.Geboorte.Datum) = JAAR(VANDAAG() - ^18/0/0) EN MAAND(Persoon.Geboorte.Datum) > MAAND(VANDAAG() - ^18/0/0)))) EN Persoon.Bijhouding.PartijCode IN {"053401", "053701", "054601", "054701", "055301", "057501", "057601", "057901", "062601", "60003801", "152501", "188401"} EN bijhouding.nadere_bijhoudingsaard = "A"
+
+Dienst
+Soort       				: Attendering
+Effect afnemer indicatie	: Plaatsing
+Attenderingscriterium		: GEWIJZIGD(oud, nieuw, [Persoon.Bijhouding.PartijCode]) OF GEWIJZIGD(ALS(oud.migratie.soort="I",oud.migratie.datum_aanvang_geldigheid,NULL), ALS(nieuw.migratie.soort="I",nieuw.migratie.datum_aanvang_geldigheid,NULL))
+
+Dienst
+Soort           			: Mutatielevering op basis van afnemerindicatie
+

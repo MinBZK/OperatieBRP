@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <context:component-scan base-package="nl.bzk.brp.archivering.delivery.dal"/>
+
+	<beans profile="!memoryDS">
+		<context:property-placeholder location="classpath:datasource.properties,classpath:alp.properties" />
+	</beans>
+	<beans profile="memoryDS">
+		<context:property-placeholder location="classpath:inmemory.properties,classpath:alp.properties" />
+	</beans>
+
+	<beans>
+		<import resource="test-database.xml" />
+        <import resource="brp-bijhouding-jms.xml"/>
+		<!-- Bijhouding -->
+		<import resource="brp-bijhouding-business-beans.xml"/>
+
+        <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+
+        <bean name="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            <property name="showSql" value="false"/>
+            <property name="generateDdl" value="false"/>
+            <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+        </bean>
+
+        <bean id="kernEntityManagerFactory"
+              class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+            <property name="persistenceUnitName" value="BijhoudingEntities"/>
+            <property name="dataSource" ref="syncDalDataSource"/>
+            <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                    <prop key="hibernate.cache.use_query_cache">false</prop>
+                    <prop key="hibernate.generate_statistics">true</prop>
+                </props>
+            </property>
+        </bean>
+
+        <bean id="hibernateLoggingPropInitializer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+            <property name="targetObject" value="#{@systemProperties}"/>
+            <property name="targetMethod" value="putAll"/>
+            <property name="arguments">
+                <props>
+                    <prop key="org.jboss.logging.provider">slf4j</prop>
+                </props>
+            </property>
+        </bean>
+
+        <bean id="entityManagerFactoryArchivering" name="nl.bzk.brp.archivering" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+            <property name="persistenceUnitName" value="nl.bzk.brp.archivering"/>
+            <property name="jtaDataSource" ref="syncDalDataSource"/>
+            <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                    <prop key="hibernate.cache.use_query_cache">false</prop>
+                    <prop key="hibernate.generate_statistics">true</prop>
+                </props>
+            </property>
+        </bean>
+
+	</beans>
+</beans>

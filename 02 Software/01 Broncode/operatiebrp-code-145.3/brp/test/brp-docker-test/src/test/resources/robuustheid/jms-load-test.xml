@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+             http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd
+       ">
+
+    <context:property-placeholder system-properties-mode="OVERRIDE" location="classpath*:brp-*.properties, classpath*:ports.properties"/>
+    <import resource="classpath:META-INF/spring/brp-broker-context.xml"/>
+
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="jms-afnemer"/>
+    </bean>
+
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <import resource="classpath:delivery-jms-afnemer-beans.xml"/>
+
+
+    <bean id="cachedConnectionFactoryBerichtenCentraleVerzending"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsConnectionFactoryVerzending"/>
+        <property name="sessionCacheSize" value="10"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsConnectionFactoryVerzending" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${brp.jms.client.url}"/>
+        <property name="clientIDPrefix" value="verzending"/>
+        <property name="connectionIDPrefix" value="verzending"/>
+        <property name="nonBlockingRedelivery" value="false"/>
+        <property name="redeliveryPolicy">
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="0" />
+            </bean>
+        </property>
+    </bean>
+
+    <jms:listener-container container-type="default" connection-factory="cachedConnectionFactoryBerichtenCentraleVerzending"
+                            acknowledge="auto" destination-type="queue"
+                            concurrency="${verzending.jms.concurrency}" transaction-manager="jmsTransactionManagerVerzending"
+    >
+        <jms:listener id="VerzendingConsumer" destination="#{T(nl.bzk.brp.domain.internbericht.verzendingmodel.SynchronisatieBerichtGegevensQueue).NAAM.queueNaam}"
+                      ref="verzendingMessageListener"/>
+
+    </jms:listener-container>
+
+    <bean id="jmsTransactionManagerVerzending"
+          class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="cachedConnectionFactoryBerichtenCentraleVerzending"/>
+        <property name="validateExistingTransaction" value="true"/>
+    </bean>
+
+    <bean id="verzendingMessageListener" class="nl.bzk.brp.dockertest.robuustheid.LoadTestMessageListener"/>
+
+
+</beans>

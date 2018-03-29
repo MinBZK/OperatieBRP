@@ -1,0 +1,23 @@
+Reproduceren I&T testcase :
+
+Aangeleverd wordt :
+- backup v database
+- igv GBA init.vulling etc : de bijbehorende .xls bestanden
+- van elk gebruikt verzoek een xml-bestand
+
+Procedure :
+- inladen databasedump ahv LaadDatabaseDumpUtil (zie comments voor gebruik, evt kunnen we hier nog step voor maken oid) of restore via pgadmin/psql
+
+Via api-test-tooling (wanneer bijv enkel laatste handeling geleverd moet worden):
+- .xls bestanden in excel-blob conversie zetten en nw blobs genereren
+- kies autorisatie, soort autorisatie is meestal af te leiden uit databasedump
+- story maken
+
+NB: om eventuele verschillen tussen gegenereerde blob uit xls en blob zoals in databasedump  opgeslagen, kan ook nog de blob uit databasedump gebruikt worden :
+COPY (SELECT encode(pershistorievollediggegevens::bytea, 'escape')
+        FROM kern.perscache as o where pers=(select id from kern.pers where bsn=....))
+TO '/..../operatiebrp-code/brp/test/brp-api-test/target/blobs/specials/specials/INTEST/1-conv-persoon.blob.json';
+
+
+Via E2E (indien enkel persoonsbeeld zoals in dump voldoende is):
+- JBehave story evt gebruikmakend van aangeleverd xml-verzoek

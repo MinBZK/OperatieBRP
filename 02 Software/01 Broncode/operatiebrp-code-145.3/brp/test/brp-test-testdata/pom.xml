@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.algemeenbrp</groupId>
+        <artifactId>alg</artifactId>
+        <version>145.3</version>
+        <relativePath>../../../algemeen/alg</relativePath>
+    </parent>
+
+    <groupId>nl.bzk.brp</groupId>
+    <artifactId>brp-test-testdata</artifactId>
+    <packaging>jar</packaging>
+    <name>BRP Test - Testdata</name>
+
+    <!--
+         | Testdata project kent 2 profiles: convert-xls, fill-db (en staan bij default aan)
+         | 		Om uit te zetten gebruik -P !<profile1>,!<profile2> (Let op tussen P en de 1e zit een spatie en tussen profiles GEEN spatie)
+         |		bv. mvn install -P !convert-xls -Ddburl=jdbc:postgresql://localhost/brp
+         |
+         |
+         | let op: dburl, dbuser en dbpassword is in de parent gedefinieerd
+         |         de locatie van de sql bestand wordt ook gerefereerd in de assembly.xml
+         -->
+    <properties>
+        <!-- Properties die overschreven worden vanuit Jenkins/command-line -->
+        <dbhost>localhost</dbhost>
+        <dbprefix>art-</dbprefix>
+        <dbusername>brp</dbusername>
+        <dbpassword>brp</dbpassword>
+        <dbdriver>org.postgresql.Driver</dbdriver>
+
+        <xlsdir>${basedir}/src/main/resources/brp-testdata</xlsdir>
+        <sqlfile>${basedir}/target/brp-testdata/art-testdata.sql</sqlfile>
+        <project.brp.sql-zip.filename>art-testdata</project.brp.sql-zip.filename>
+
+
+        <!-- DB Properties -->
+        <db.kern.driver>${dbdriver}</db.kern.driver>
+        <db.kern.url>jdbc:postgresql://${dbhost}/${dbprefix}brp</db.kern.url>
+        <db.kern.username>${dbusername}</db.kern.username>
+        <db.kern.password>${dbpassword}</db.kern.password>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+    </dependencies>
+
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.zcore.maven</groupId>
+                <artifactId>merge-maven-plugin</artifactId>
+                <version>0.0.3</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mergers>
+                        <merger>
+                            <target>target/classes/brp-testdata/art-testdata.sql</target>
+                            <sources>
+                                <source>src/main/resources/brp-testdata/truncate.sql</source>
+                                <source>src/main/resources/brp-testdata/test-tables.sql</source>
+                                <source>src/main/resources/brp-testdata/partij-als-afnemer-aanmerken.sql</source>
+                                <source>src/main/resources/brp-testdata/partij-als-bijhouder-aanmerken.sql</source>
+                                <source>src/main/resources/brp-testdata/partij-als-minister-aanmerken.sql</source>
+                                <source>src/main/resources/brp-testdata/dummy-partijen-voor-bijhouding.sql</source>
+                                <source>src/main/resources/brp-testdata/voeg-autorisaties-toe.sql</source>
+                                <source>src/main/resources/brp-testdata/update-indag.sql</source>
+                            </sources>
+                        </merger>
+                        <merger>
+                            <target>target/classes/brp-testdata/art-testdata-docker.sql</target>
+                            <sources>
+                                <source>src/main/resources/brp-testdata/truncate-docker.sql</source>
+                                <source>src/main/resources/brp-testdata/test-tables.sql</source>
+                                <source>src/main/resources/brp-testdata/partij-als-afnemer-aanmerken.sql</source>
+                                <source>src/main/resources/brp-testdata/partij-als-bijhouder-aanmerken.sql</source>
+                                <source>src/main/resources/brp-testdata/partij-als-minister-aanmerken.sql</source>
+                                <source>src/main/resources/brp-testdata/dummy-partijen-voor-bijhouding.sql</source>
+                                <source>src/main/resources/brp-testdata/voeg-autorisaties-toe.sql</source>
+                                <source>src/main/resources/brp-testdata/update-indag.sql</source>
+                            </sources>
+                        </merger>
+                    </mergers>
+                </configuration>
+            </plugin>
+            <!-- zip de sql statements -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>zip-sql</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.brp.sql-zip.filename}</finalName>
+                            <descriptors>
+                                <descriptor>${basedir}/src/assembly/brp-testdata.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <!-- artefact dat gebruikt wordt door oa brp-test-art-omgeving -->
+                    <execution>
+                        <id>zip</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>${basedir}/src/assembly/brp-testdata.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

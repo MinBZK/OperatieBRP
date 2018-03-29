@@ -1,0 +1,262 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp.relateren</groupId>
+        <artifactId>brp-relateren</artifactId>
+        <version>145.3</version>
+    </parent>
+    <artifactId>brp-relateren-service</artifactId>
+    <packaging>war</packaging>
+    <name>BRP Relateren - Service</name>
+
+    <dependencies>
+        <!-- Relateren -->
+        <dependency>
+            <groupId>nl.bzk.brp.relateren</groupId>
+            <artifactId>brp-relateren-business</artifactId>
+        </dependency>
+        <!-- BRP modules -->
+        <dependency>
+            <groupId>nl.bzk.algemeenbrp</groupId>
+            <artifactId>alg-util-common</artifactId>
+        </dependency>
+
+        <!-- Java EE-->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.activemq</groupId>
+            <artifactId>activemq-client</artifactId>
+        </dependency>
+
+        <!-- OWASP validation filter -->
+        <dependency>
+            <groupId>com.matthewcasperson</groupId>
+            <artifactId>parameter_validation_filter</artifactId>
+        </dependency>
+
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jms</artifactId>
+        </dependency>
+
+        <!-- Test -->
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty-plus</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mortbay.jetty</groupId>
+            <artifactId>jetty-naming</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context-support</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+    </dependencies>
+    <build>
+
+        <!-- Name of the generated WAR file -->
+        <finalName>relatering</finalName>
+
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
+        <testResources>
+            <testResource>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/test/resources</directory>
+                <excludes>
+                    <exclude>**/*.jks</exclude>
+                </excludes>
+            </testResource>
+            <testResource>
+                <filtering>false</filtering>
+                <directory>${basedir}/src/test/resources</directory>
+                <includes>
+                    <include>**/*.jks</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <targetPath>../META-INF</targetPath>
+                <directory>${basedir}/src/main/webapp/META-INF</directory>
+            </testResource>
+            <testResource>
+                <targetPath>../WEB-INF</targetPath>
+                <directory>${basedir}/src/main/webapp/WEB-INF</directory>
+            </testResource>
+            <testResource>
+                <targetPath>../WEB-INF</targetPath>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/test/webapp/WEB-INF</directory>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <revisionOnScmFailure>onbekend</revisionOnScmFailure>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>reserve-portnumbers</id>
+                        <goals>
+                            <goal>reserve-network-port</goal>
+                        </goals>
+                        <phase>generate-test-resources</phase>
+                        <configuration>
+                            <portNames>
+                                <portName>maven.jetty.port</portName>
+                                <portName>maven.jetty.stopport</portName>
+                            </portNames>
+                            <minPortNumber>8682</minPortNumber>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>versienummer</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>add-resource</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>add-resource</goal>
+                        </goals>
+                        <configuration>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/xsd</directory>
+                                    <targetPath>xsd</targetPath>
+                                </resource>
+                                <resource>
+                                    <directory>${project.build.directory}/wsdl</directory>
+                                    <targetPath>wsdl</targetPath>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                            <includes>
+                                <include>*.*</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                    <archive>
+                        <manifestEntries>
+                            <groupId>${project.groupId}</groupId>
+                            <version>${project.version}</version>
+                            <project-name>${project.name}</project-name>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <build>${built.on}</build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>8.1.14.v20131031</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/relateren</contextPath>
+                    </webApp>
+                    <connectors>
+                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                            <port>9855</port>
+                        </connector>
+                    </connectors>
+                    <webAppConfig>
+                        <extraClasspath>${basedir}/target/test-classes</extraClasspath>
+                    </webAppConfig>
+                    <jvmArgs>-Xms512m -Xmx1024m -XX:PermSize=256m</jvmArgs>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>log4j.configuration</name>
+                            <value>log4j.xml</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>jms.relateerservice.listener.broker.url</name>
+                            <value>tcp://localhost:61616</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>jms.relateerservice.concurrent</name>
+                            <value>1</value>
+                        </systemProperty>
+                        <systemProperty>
+                            <name>jms.relateerservice.queue</name>
+                            <value>Relateren</value>
+                        </systemProperty>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

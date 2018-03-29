@@ -1,0 +1,389 @@
+<brp:bhg_nmgRegistreerNaamGeslacht xmlns:brp="http://www.bzk.nl/brp/brp0200">
+   <brp:stuurgegevens brp:communicatieID="${stuurgegevens.communicatieID}">
+      <brp:zendendePartij>${stuurgegevens.zendendePartij}</brp:zendendePartij>
+      <brp:zendendeSysteem>${stuurgegevens.zendendeSysteem}</brp:zendendeSysteem>
+      <brp:referentienummer>${stuurgegevens.referentienummer}</brp:referentienummer>
+      <brp:tijdstipVerzending>${stuurgegevens.tijdstipVerzending}</brp:tijdstipVerzending>
+   </brp:stuurgegevens>
+   <brp:parameters brp:communicatieID="${parameters.communicatieID}">
+      <brp:verwerkingswijze>${parameters.verwerkingswijze}</brp:verwerkingswijze>
+      <!--Optional:-->
+      <brp:bezienVanuitPersoon>${parameters.bezienVanuitPersoon}</brp:bezienVanuitPersoon>
+   </brp:parameters>
+   <!--You have a CHOICE of the next 5 items at this level-->
+   <brp:wijzigingGeslachtsnaam brp:communicatieID="${wijzigingGeslachtsnaam.communicatieID}" brp:objecttype="AdministratieveHandeling">
+      <brp:partijCode>${wijzigingGeslachtsnaam.partijCode}</brp:partijCode>
+      <!--Optional:-->
+      <brp:toelichtingOntlening>${wijzigingGeslachtsnaam.toelichtingOntlening}</brp:toelichtingOntlening>
+      <!--Optional:-->
+      <brp:gedeblokkeerdeMeldingen>
+         <!--1 or more repetitions:-->
+         [#list wijzigingGeslachtsnaam.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+         <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+            <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+         </brp:gedeblokkeerdeMelding>
+         [/#list]
+      </brp:gedeblokkeerdeMeldingen>
+      <!--Optional:-->
+      <brp:bronnen>
+         <!--1 or more repetitions:-->
+         [#list wijzigingGeslachtsnaam.bronnen as bron]
+         <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="AdministratieveHandelingBron">
+            <!--Optional:-->
+            <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+               <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+               <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+               <!--Optional:-->
+               <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+               <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+            </brp:document>
+            <!--Optional:-->
+            <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+            <!--Optional:-->
+            <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+         </brp:bron>
+         [/#list]
+      </brp:bronnen>
+      <brp:acties>
+         [#assign registratieNaamGeslacht = wijzigingGeslachtsnaam.acties.registratieNaamGeslacht]
+         <brp:registratieNaamGeslacht brp:communicatieID="${registratieNaamGeslacht.communicatieID}" brp:objecttype="Actie">
+            <brp:datumAanvangGeldigheid>${registratieNaamGeslacht.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+            <!--Optional:-->
+            <brp:bronnen>
+               <!--1 or more repetitions:-->
+               [#list registratieNaamGeslacht.bronnen as bron]
+               <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+               [/#list]
+            </brp:bronnen>
+            <brp:persoon brp:communicatieID="${registratieNaamGeslacht.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieNaamGeslacht.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+               <!--Optional:-->
+               <brp:samengesteldeNaam brp:communicatieID="${registratieNaamGeslacht.persoon.samengesteldeNaam.communicatieID}">
+                  <brp:indicatieNamenreeks>${registratieNaamGeslacht.persoon.samengesteldeNaam.indicatieNamenreeks}</brp:indicatieNamenreeks>
+               </brp:samengesteldeNaam>
+               <!--Optional:-->
+               <brp:geslachtsaanduiding brp:communicatieID="${registratieNaamGeslacht.persoon.geslachtsaanduiding.communicatieID}">
+                  <brp:code>${registratieNaamGeslacht.persoon.geslachtsaanduiding.code}</brp:code>
+               </brp:geslachtsaanduiding>
+               <!--Optional:-->
+               <brp:voornamen>
+                  <!--1 or more repetitions:-->
+                  [#list registratieNaamGeslacht.persoon.voornamen as voornaam]
+                  <brp:voornaam brp:communicatieID="${voornaam.communicatieID}" brp:objecttype="PersoonVoornaam">
+                     <brp:volgnummer>${voornaam.volgnummer}</brp:volgnummer>
+                     <brp:naam>${voornaam.naam}</brp:naam>
+                  </brp:voornaam>
+                  [/#list]
+               </brp:voornamen>
+               <!--Optional:-->
+               <brp:geslachtsnaamcomponenten>
+                  [#list registratieNaamGeslacht.persoon.geslachtsnaamcomponenten as geslachtsnaamcomponent]
+                  <brp:geslachtsnaamcomponent brp:communicatieID="${geslachtsnaamcomponent.communicatieID}" brp:objecttype="PersoonGeslachtsnaamcomponent">
+                     <!--Optional:-->
+                     <brp:predicaatCode>${geslachtsnaamcomponent.predicaatCode}</brp:predicaatCode>
+                     <!--Optional:-->
+                     <brp:adellijkeTitelCode>${geslachtsnaamcomponent.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                     <!--Optional:-->
+                     <brp:voorvoegsel>${geslachtsnaamcomponent.voorvoegsel}</brp:voorvoegsel>
+                     <!--Optional:-->
+                     <brp:scheidingsteken>${geslachtsnaamcomponent.scheidingsteken}</brp:scheidingsteken>
+                     <brp:stam>${geslachtsnaamcomponent.stam}</brp:stam>
+                  </brp:geslachtsnaamcomponent>
+                  [/#list]
+               </brp:geslachtsnaamcomponenten>
+            </brp:persoon>
+         </brp:registratieNaamGeslacht>
+         <!--Optional:-->
+         [#assign registratieVoornaam = wijzigingGeslachtsnaam.acties.registratieVoornaam]
+         <brp:registratieVoornaam brp:communicatieID="${registratieVoornaam.communicatieID}" brp:objecttype="Actie">
+            <brp:datumAanvangGeldigheid>${registratieVoornaam.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+            <!--Optional:-->
+            <brp:bronnen>
+               <!--1 or more repetitions:-->
+               [#list registratieVoornaam.bronnen as bron]
+               <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+               [/#list]
+            </brp:bronnen>
+            <brp:persoon brp:communicatieID="${registratieVoornaam.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieVoornaam.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+               <brp:voornamen>
+                  <!--1 or more repetitions:-->
+                  [#list registratieVoornaam.persoon.voornamen as voornaam]
+                  <brp:voornaam brp:communicatieID="${voornaam.communicatieID}" brp:objecttype="PersoonVoornaam">
+                     <brp:volgnummer>${voornaam.volgnummer}</brp:volgnummer>
+                     <brp:naam>${voornaam.naam}</brp:naam>
+                  </brp:voornaam>
+                  [/#list]
+               </brp:voornamen>
+            </brp:persoon>
+         </brp:registratieVoornaam>
+         <!--Optional:-->
+         [#assign registratieGeslachtsaanduiding = wijzigingGeslachtsnaam.acties.registratieGeslachtsaanduiding]
+         <brp:registratieGeslachtsaanduiding brp:communicatieID="${registratieGeslachtsaanduiding.communicatieID}" brp:objecttype="Actie">
+            <brp:datumAanvangGeldigheid>${registratieGeslachtsaanduiding.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+            <!--Optional:-->
+            <brp:bronnen>
+               <!--1 or more repetitions:-->
+               [#list registratieGeslachtsaanduiding.bronnen as bron]
+               <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+               [/#list]
+            </brp:bronnen>
+            <brp:persoon brp:communicatieID="${registratieGeslachtsaanduiding.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieGeslachtsaanduiding.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+               <brp:geslachtsaanduiding brp:communicatieID="${registratieGeslachtsaanduiding.persoon.geslachtsaanduiding.communicatieID}">
+                  <brp:code>${registratieGeslachtsaanduiding.persoon.geslachtsaanduiding.code}</brp:code>
+               </brp:geslachtsaanduiding>
+            </brp:persoon>
+         </brp:registratieGeslachtsaanduiding>
+      </brp:acties>
+   </brp:wijzigingGeslachtsnaam>
+   <brp:wijzigingVoornaam brp:communicatieID="${wijzigingVoornaam.communicatieID}" brp:objecttype="AdministratieveHandeling">
+      <brp:partijCode>${wijzigingVoornaam.partijCode}</brp:partijCode>
+      <!--Optional:-->
+      <brp:toelichtingOntlening>${wijzigingVoornaam.toelichtingOntlening}</brp:toelichtingOntlening>
+      <!--Optional:-->
+      <brp:gedeblokkeerdeMeldingen>
+         <!--1 or more repetitions:-->
+         [#list wijzigingVoornaam.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+         <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+            <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+         </brp:gedeblokkeerdeMelding>
+         [/#list]
+      </brp:gedeblokkeerdeMeldingen>
+      <!--Optional:-->
+      <brp:bronnen>
+         <!--1 or more repetitions:-->
+         [#list wijzigingVoornaam.bronnen as bron]
+         <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="AdministratieveHandelingBron">
+            <!--Optional:-->
+            <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+               <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+               <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+               <!--Optional:-->
+               <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+               <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+            </brp:document>
+            <!--Optional:-->
+            <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+            <!--Optional:-->
+            <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+         </brp:bron>
+         [/#list]
+      </brp:bronnen>
+      <brp:acties>
+         [#assign registratieVoornaam = wijzigingVoornaam.acties.registratieVoornaam]
+         <brp:registratieVoornaam brp:communicatieID="${registratieVoornaam.communicatieID}" brp:objecttype="Actie">
+            <brp:datumAanvangGeldigheid>${registratieVoornaam.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+            <!--Optional:-->
+            <brp:bronnen>
+               <!--1 or more repetitions:-->
+               [#list registratieVoornaam.bronnen as bron]
+               <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+               [/#list]
+            </brp:bronnen>
+            <brp:persoon brp:communicatieID="${registratieVoornaam.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieVoornaam.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+               <brp:voornamen>
+                  <!--1 or more repetitions:-->
+                  [#list registratieVoornaam.persoon.voornamen as voornaam]
+                  <brp:voornaam brp:communicatieID="${voornaam.communicatieID}" brp:objecttype="PersoonVoornaam">
+                     <brp:volgnummer>${voornaam.volgnummer}</brp:volgnummer>
+                     <brp:naam>${voornaam.naam}</brp:naam>
+                  </brp:voornaam>
+                  [/#list]
+               </brp:voornamen>
+            </brp:persoon>
+         </brp:registratieVoornaam>
+      </brp:acties>
+   </brp:wijzigingVoornaam>
+   <brp:wijzigingGeslachtsaanduiding brp:communicatieID="${wijzigingGeslachtsaanduiding.communicatieID}" brp:objecttype="AdministratieveHandeling">
+      <brp:partijCode>${wijzigingGeslachtsaanduiding.partijCode}</brp:partijCode>
+      <!--Optional:-->
+      <brp:toelichtingOntlening>${wijzigingGeslachtsaanduiding.toelichtingOntlening}</brp:toelichtingOntlening>
+      <!--Optional:-->
+      <brp:gedeblokkeerdeMeldingen>
+         <!--1 or more repetitions:-->
+         [#list wijzigingGeslachtsaanduiding.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+         <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+            <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+         </brp:gedeblokkeerdeMelding>
+         [/#list]
+      </brp:gedeblokkeerdeMeldingen>
+      <!--Optional:-->
+      <brp:bronnen>
+         <!--1 or more repetitions:-->
+         [#list wijzigingGeslachtsaanduiding.bronnen as bron]
+         <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="AdministratieveHandelingBron">
+            <!--Optional:-->
+            <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+               <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+               <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+               <!--Optional:-->
+               <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+               <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+            </brp:document>
+            <!--Optional:-->
+            <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+            <!--Optional:-->
+            <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+         </brp:bron>
+         [/#list]
+      </brp:bronnen>
+      <brp:acties>
+         [#assign registratieNaamGeslacht = wijzigingGeslachtsaanduiding.acties.registratieNaamGeslacht]
+         <brp:registratieNaamGeslacht brp:communicatieID="${registratieNaamGeslacht.communicatieID}" brp:objecttype="Actie">
+            <brp:datumAanvangGeldigheid>${registratieNaamGeslacht.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+            <!--Optional:-->
+            <brp:bronnen>
+               <!--1 or more repetitions:-->
+               [#list registratieNaamGeslacht.bronnen as bron]
+               <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+               [/#list]
+            </brp:bronnen>
+            <brp:persoon brp:communicatieID="${registratieNaamGeslacht.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieNaamGeslacht.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+               <brp:geslachtsaanduiding brp:communicatieID="${registratieNaamGeslacht.persoon.geslachtsaanduiding.communicatieID}">
+                  <brp:code>${registratieNaamGeslacht.persoon.geslachtsaanduiding.code}</brp:code>
+               </brp:geslachtsaanduiding>
+               <!--Optional:-->
+               <brp:voornamen>
+                  <!--1 or more repetitions:-->
+                  [#list registratieNaamGeslacht.persoon.voornamen as voornaam]
+                  <brp:voornaam brp:communicatieID="${voornaam.communicatieID}" brp:objecttype="PersoonVoornaam">
+                     <brp:volgnummer>${voornaam.volgnummer}</brp:volgnummer>
+                     <brp:naam>${voornaam.naam}</brp:naam>
+                  </brp:voornaam>
+                  [/#list]
+               </brp:voornamen>
+            </brp:persoon>
+         </brp:registratieNaamGeslacht>
+      </brp:acties>
+   </brp:wijzigingGeslachtsaanduiding>
+   <brp:wijzigingNaamgebruik brp:communicatieID="${wijzigingNaamgebruik.communicatieID}" brp:objecttype="AdministratieveHandeling">
+      <brp:partijCode>${wijzigingNaamgebruik.partijCode}</brp:partijCode>
+      <!--Optional:-->
+      <brp:toelichtingOntlening>${wijzigingNaamgebruik.toelichtingOntlening}</brp:toelichtingOntlening>
+      <!--Optional:-->
+      <brp:gedeblokkeerdeMeldingen>
+         <!--1 or more repetitions:-->
+         [#list wijzigingNaamgebruik.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+         <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+            <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+         </brp:gedeblokkeerdeMelding>
+         [/#list]
+      </brp:gedeblokkeerdeMeldingen>
+      <!--Optional:-->
+      <brp:bronnen>
+         <!--1 or more repetitions:-->
+         [#list wijzigingNaamgebruik.bronnen as bron]
+         <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="AdministratieveHandelingBron">
+            <!--Optional:-->
+            <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+               <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+               <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+               <!--Optional:-->
+               <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+               <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+            </brp:document>
+            <!--Optional:-->
+            <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+            <!--Optional:-->
+            <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+         </brp:bron>
+         [/#list]
+      </brp:bronnen>
+      <brp:acties>
+         [#assign registratieNaamgebruik = wijzigingNaamgebruik.acties.registratieNaamgebruik]
+         <brp:registratieNaamgebruik brp:communicatieID="${registratieNaamgebruik.communicatieID}" brp:objecttype="Actie">
+            <brp:datumAanvangGeldigheid>${registratieNaamgebruik.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+            <!--Optional:-->
+            <brp:bronnen>
+               <!--1 or more repetitions:-->
+               [#list registratieNaamgebruik.bronnen as bron]
+               <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+               [/#list]
+            </brp:bronnen>
+            <brp:persoon brp:communicatieID="${registratieNaamgebruik.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieNaamgebruik.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+               <brp:naamgebruik brp:communicatieID="${registratieNaamgebruik.persoon.naamgebruik.communicatieID}">
+                  <!--Optional:-->
+                  <brp:code>${registratieNaamgebruik.persoon.naamgebruik.code}</brp:code>
+                  <brp:indicatieAfgeleid>${registratieNaamgebruik.persoon.naamgebruik.indicatieAfgeleid}</brp:indicatieAfgeleid>
+                  <!--Optional:-->
+                  <brp:predicaatCode>${registratieNaamgebruik.persoon.naamgebruik.predicaatCode}</brp:predicaatCode>
+                  <!--Optional:-->
+                  <brp:voornamen>${registratieNaamgebruik.persoon.naamgebruik.voornamen}</brp:voornamen>
+                  <!--Optional:-->
+                  <brp:adellijkeTitelCode>${registratieNaamgebruik.persoon.naamgebruik.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                  <!--Optional:-->
+                  <brp:voorvoegsel>${registratieNaamgebruik.persoon.naamgebruik.voorvoegsel}</brp:voorvoegsel>
+                  <!--Optional:-->
+                  <brp:scheidingsteken>${registratieNaamgebruik.persoon.naamgebruik.scheidingsteken}</brp:scheidingsteken>
+                  <!--Optional:-->
+                  <brp:geslachtsnaamstam>${registratieNaamgebruik.persoon.naamgebruik.geslachtsnaamstam}</brp:geslachtsnaamstam>
+               </brp:naamgebruik>
+            </brp:persoon>
+         </brp:registratieNaamgebruik>
+      </brp:acties>
+   </brp:wijzigingNaamgebruik>
+   <brp:correctieNaamgebruik brp:communicatieID="${correctieNaamgebruik.communicatieID}" brp:objecttype="AdministratieveHandeling">
+      <brp:partijCode>${correctieNaamgebruik.partijCode}</brp:partijCode>
+      <!--Optional:-->
+      <brp:toelichtingOntlening>${correctieNaamgebruik.toelichtingOntlening}</brp:toelichtingOntlening>
+      <!--Optional:-->
+      <brp:gedeblokkeerdeMeldingen>
+         <!--1 or more repetitions:-->
+         [#list correctieNaamgebruik.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+         <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+            <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+         </brp:gedeblokkeerdeMelding>
+         [/#list]
+      </brp:gedeblokkeerdeMeldingen>
+      <!--Optional:-->
+      <brp:bronnen>
+         <!--1 or more repetitions:-->
+         [#list correctieNaamgebruik.bronnen as bron]
+         <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="AdministratieveHandelingBron">
+            <!--Optional:-->
+            <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+               <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+               <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+               <!--Optional:-->
+               <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+               <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+            </brp:document>
+            <!--Optional:-->
+            <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+            <!--Optional:-->
+            <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+         </brp:bron>
+         [/#list]
+      </brp:bronnen>
+      <brp:acties>
+         [#assign registratieNaamgebruik = correctieNaamgebruik.acties.registratieNaamgebruik]
+         <brp:registratieNaamgebruik brp:communicatieID="${registratieNaamgebruik.communicatieID}" brp:objecttype="Actie">
+            <brp:datumAanvangGeldigheid>${registratieNaamgebruik.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+            <!--Optional:-->
+            <brp:bronnen>
+               <!--1 or more repetitions:-->
+               [#list registratieNaamgebruik.bronnen as bron]
+               <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+               [/#list]
+            </brp:bronnen>
+            <brp:persoon brp:communicatieID="${registratieNaamgebruik.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieNaamgebruik.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+               <brp:naamgebruik brp:communicatieID="${registratieNaamgebruik.persoon.naamgebruik.communicatieID}">
+                  <!--Optional:-->
+                  <brp:code>${registratieNaamgebruik.persoon.naamgebruik.code}</brp:code>
+                  <brp:indicatieAfgeleid>${registratieNaamgebruik.persoon.naamgebruik.indicatieAfgeleid}</brp:indicatieAfgeleid>
+                  <!--Optional:-->
+                  <brp:predicaatCode>${registratieNaamgebruik.persoon.naamgebruik.predicaatCode}</brp:predicaatCode>
+                  <!--Optional:-->
+                  <brp:voornamen>${registratieNaamgebruik.persoon.naamgebruik.voornamen}</brp:voornamen>
+                  <!--Optional:-->
+                  <brp:adellijkeTitelCode>${registratieNaamgebruik.persoon.naamgebruik.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                  <!--Optional:-->
+                  <brp:voorvoegsel>${registratieNaamgebruik.persoon.naamgebruik.voorvoegsel}</brp:voorvoegsel>
+                  <!--Optional:-->
+                  <brp:scheidingsteken>${registratieNaamgebruik.persoon.naamgebruik.scheidingsteken}</brp:scheidingsteken>
+                  <!--Optional:-->
+                  <brp:geslachtsnaamstam>${registratieNaamgebruik.persoon.naamgebruik.geslachtsnaamstam}</brp:geslachtsnaamstam>
+               </brp:naamgebruik>
+            </brp:persoon>
+         </brp:registratieNaamgebruik>
+      </brp:acties>
+   </brp:correctieNaamgebruik>
+</brp:bhg_nmgRegistreerNaamGeslacht>

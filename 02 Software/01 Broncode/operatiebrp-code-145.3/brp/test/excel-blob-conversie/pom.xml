@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.algemeenbrp</groupId>
+        <artifactId>alg</artifactId>
+        <version>145.3</version>
+        <relativePath>../../../algemeen/alg</relativePath>
+    </parent>
+
+    <artifactId>excel-blob-conversie</artifactId>
+    <packaging>jar</packaging>
+
+    <name>ExcelNaarBlob Conversie</name>
+    <description>Converteert Excel (Persoonslijst) bestanden naar BLOBs</description>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-domain-algemeen</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-test-persoon-database</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <version>2.4.9</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>brp-database</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.algemeenbrp</groupId>
+            <artifactId>alg-test-dal</artifactId>
+            <version>${project.version}</version>
+            <scope>compile</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-algemeen</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-delivery-dataaccess</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.algemeenbrp</groupId>
+            <artifactId>alg-util-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-util-excel</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>com.sun.xml.bind</groupId>
+                    <artifactId>jaxb-impl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-conversie-regels</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-synchronisatie-dal</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.sun.xml.bind</groupId>
+                    <artifactId>jaxb-impl</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+    </dependencies>
+
+
+    <profiles>
+        <profile>
+            <id>conversie-oranje</id>
+
+            <properties>
+                <assembly.finalName>blob-oranje-${env.BUILD_NUMBER}</assembly.finalName>
+            </properties>
+
+            <build>
+
+                <plugins>
+                    <plugin>
+                        <!--properties voor test uitpakken-->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-migratie-test-personen</id>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <phase>prepare-package</phase>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <!-- dit bevat de excel testgevallen van team Oranje -->
+                                            <groupId>nl.bzk.migratiebrp</groupId>
+                                            <artifactId>migr-test-persoon-database</artifactId>
+                                            <version>${project.version}</version>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}/excel-oranje</outputDirectory>
+                                            <includes>**/*.xls</includes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>nl.bzk.brp.blobconversie.Excel2BlobConverter</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>excelInputDir</key>
+                                    <value>${project.build.directory}/excel-oranje</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>blobOutputDir</key>
+                                    <value>${project.build.directory}/blobs</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <descriptor>src/main/assembly/blob-oranje-assembly.xml</descriptor>
+                            <finalName>${assembly.finalName}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                                <phase>package</phase> <!-- bind to the packaging phase -->
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>install-file</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>install-file</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${project.build.directory}/${assembly.finalName}.jar</file>
+                                    <repositoryId>${project.distributionManagement.repository.id}</repositoryId>
+                                    <url>${project.distributionManagement.repository.url}</url>
+                                    <generatePom>false</generatePom>
+                                    <groupId>nl.bzk.brp.excel2blob</groupId>
+                                    <artifactId>blob-oranje</artifactId>
+                                    <classifier>blob-oranje</classifier>
+                                    <version>${env.BUILD_NUMBER}</version>
+                                    <packaging>jar</packaging>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>deploy-file</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy-file</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${project.build.directory}/${assembly.finalName}.jar</file>
+                                    <repositoryId>${project.distributionManagement.repository.id}</repositoryId>
+                                    <url>${project.distributionManagement.repository.url}</url>
+                                    <generatePom>false</generatePom>
+                                    <groupId>nl.bzk.brp.excel2blob</groupId>
+                                    <artifactId>blob-oranje</artifactId>
+                                    <classifier>blob-oranje</classifier>
+                                    <version>${env.BUILD_NUMBER}</version>
+                                    <packaging>jar</packaging>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>conversie-specials</id>
+            <properties>
+                <assembly.finalName>blob-specials-${env.BUILD_NUMBER}</assembly.finalName>
+            </properties>
+            <build>
+
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <mainClass>nl.bzk.brp.blobconversie.Excel2BlobConverter</mainClass>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>excelInputDir</key>
+                                    <value>${project.basedir}/src/main/resources/specials</value>
+                                </systemProperty>
+                                <systemProperty>
+                                    <key>blobOutputDir</key>
+                                    <value>${project.build.directory}/blobs</value>
+                                </systemProperty>
+                            </systemProperties>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.6</version>
+                        <configuration>
+                            <descriptor>src/main/assembly/blob-specials-assembly.xml</descriptor>
+                            <finalName>${assembly.finalName}</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id> <!-- this is used for inheritance merges -->
+                                <phase>package</phase> <!-- bind to the packaging phase -->
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>install-file</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>install-file</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${project.build.directory}/${assembly.finalName}.jar</file>
+                                    <repositoryId>${project.distributionManagement.repository.id}</repositoryId>
+                                    <url>${project.distributionManagement.repository.url}</url>
+                                    <generatePom>false</generatePom>
+                                    <groupId>nl.bzk.brp.excel2blob</groupId>
+                                    <artifactId>blob-specials</artifactId>
+                                    <classifier>blob-specials</classifier>
+                                    <version>${env.BUILD_NUMBER}</version>
+                                    <packaging>jar</packaging>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>deploy-file</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy-file</goal>
+                                </goals>
+                                <configuration>
+                                    <file>${project.build.directory}/${assembly.finalName}.jar</file>
+                                    <repositoryId>${project.distributionManagement.repository.id}</repositoryId>
+                                    <url>${project.distributionManagement.repository.url}</url>
+                                    <generatePom>false</generatePom>
+                                    <groupId>nl.bzk.brp.excel2blob</groupId>
+                                    <artifactId>blob-specials</artifactId>
+                                    <classifier>blob-specials</classifier>
+                                    <version>${env.BUILD_NUMBER}</version>
+                                    <packaging>jar</packaging>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

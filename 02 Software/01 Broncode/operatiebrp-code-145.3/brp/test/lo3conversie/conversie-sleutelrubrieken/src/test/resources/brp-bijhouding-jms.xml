@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
+                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <bean id="amqConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <constructor-arg index="0" value="${routering.activemq.url:vm://localhost?broker.persistent=false}"/>
+    </bean>
+
+    <bean id="brpQueueConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <constructor-arg ref="amqConnectionFactory" />
+    </bean>
+
+	<!-- JMS XA ConnectionFactory -->
+  	<!-- amq:xaConnectionFactory id="activeMqXaConnectionFactory" brokerURL="${routering.activemq.url:vm://localhost?broker.persistent=false}">
+        <amq:redeliveryPolicy>
+            <amq:redeliveryPolicy maximumRedeliveries="0" />
+        </amq:redeliveryPolicy>
+    </amq:xaConnectionFactory -->
+
+    <!-- Atomikos JTA-enabled ConnectionFactory, configured with the vendor's XA factory. -->
+    <!-- bean name="brpQueueConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean" init-method="init" destroy-method="close">
+        <property name="uniqueResourceName">
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName" >
+                <property name="baseName" value="brpQueues" />
+            </bean>
+        </property>
+        <property name="xaConnectionFactory" ref="activeMqXaConnectionFactory" />
+        <property name="minPoolSize" value="${brp.queue.minpool:1}" />
+        <property name="maxPoolSize" value="${brp.queue.maxpool:20}" />
+    </bean -->
+
+</beans>

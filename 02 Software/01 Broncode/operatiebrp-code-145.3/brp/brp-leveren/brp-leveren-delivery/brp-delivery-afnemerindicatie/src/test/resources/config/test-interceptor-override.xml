@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd">
+
+    <bean id="entityManagerFactoryMaster" name="nl.bzk.brp.master" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          primary="true">
+        <property name="persistenceUnitName" value="nl.bzk.brp.master"/>
+        <property name="dataSource" ref="masterDataSource"/>
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+            <property name="jpaProperties">
+                <map>
+                    <entry key="hibernate.cache.use_second_level_cache" value="false"/>
+                    <entry key="hibernate.cache.use_query_cache" value="false"/>
+                    <entry key="hibernate.temp.use_jdbc_metadata_defaults" value="false"/>
+                    <entry key="hibernate.ejb.entitymanager_factory_name" value="nl.bzk.brp.master"/>
+                    <entry key="hibernate.ejb.interceptor" value-ref="loadInterceptor"/>
+                </map>
+        </property>
+    </bean>
+
+
+    <bean id="loadInterceptor" class="nl.bzk.brp.delivery.afnemerindicatie.OptimisticLockingTestInterceptor"/>
+
+</beans>

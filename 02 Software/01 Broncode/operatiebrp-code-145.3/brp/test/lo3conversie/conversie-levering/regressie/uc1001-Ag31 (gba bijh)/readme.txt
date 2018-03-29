@@ -1,0 +1,1 @@
+Het testen van het maken van een bericht voor foutherstel is te bereiken door een bijhouding te doen die leidt tot een administratieve handeling van de categorie GBA Bijhouding Overig/Correctie.

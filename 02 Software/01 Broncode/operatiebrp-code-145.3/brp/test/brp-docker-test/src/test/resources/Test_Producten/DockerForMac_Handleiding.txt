@@ -1,0 +1,41 @@
+Deze handleiding beschrijft in beknopte stappen hoe de e2e testen voor levering
+lokaal uitgevoerd kunnen worden.
+
+0. Installeer docker for mac op je machine
+
+1. Kopieer het bestand "operatiebrp-code/brp/test/brp-docker-test/src/main/userproperties/brpe2e.properties"
+naar je "user/home" directorie van je mac.
+
+
+
+2. In het bestand vind je de volgende properties:
+
+DOCKER_REGISTRY=fac-nexus3.modernodam.nl:5001 <-- bepaald de locatie van waar de images gedownload moeten worden
+APP_VERSION=817 <-- bepaald welke versie van de images gedownload moeten worden
+preferunstable=false <-- niet aanpassen voor lokale testrun
+PARALLEL_START=false <-- niet aanpassen voor lokale testrun
+DOCKER_IP=172.17.0.1 <-- Hier geef je het ip-adres op van je machine (zoals deze naar buiten toe bekent is dus geen 127.0.0.1 gebruiken)
+
+NB: Op het moment dat je ip gewijzigd is moet je dit dus ook in de properties aanpassen
+
+brp.e2e.error.log.aantalregels=50
+
+
+#lijst met componenten welke afgesloten wordt bij stop
+#brp.e2e.shutdown.BRPDB=true
+#brp.e2e.shutdown.SELECTIEBLOB_DATABASE=true
+#brp.e2e.shutdown.ARCHIVERINGDB=true
+#brp.e2e.shutdown.PROTOCOLLERINGDB=true
+
+
+3. Als de properties op de juiste lokatie staan en de juiste waarde bevatten dient "ZetOmgevingLokaalNeerUtil.java" uitgevoerd te worden
+Dit zorgt ervoor dat de images gedownload worden
+
+NB: om de images te kunnen downloaden moet je inloggen op de host waar de images staan (fac-nexus3.modernodam.nl:5001), dit doe je vanuit de terminal met de opdracht:
+
+docker login fac-nexus3.modernodam.nl:5001
+
+je wordt vervolgens gevraagd om je username en password in te geven, vul hier je modernodam account gegevens in.
+
+4. Als de images zijn gedownload en de dockerhost op je machine draait ben je klaar om een test uit te voeren.
+Hiervoor hoeft enkel een test, zoals bijv "AfnemerindicatieEndToEndIT.java" uitgevoerd te worden.

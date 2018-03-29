@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <context:property-placeholder/>
+
+    <!-- This creates an embedded ActiveMQ Broker -->
+    <amq:broker id="brpRouteringCentrale"
+                brokerId="brpRouteringCentraleBroker"
+                brokerName="brpRouteringCentrale"
+
+                advisorySupport="false"
+                useJmx="true"
+                useShutdownHook="false"
+                enableStatistics="true"
+                dedicatedTaskRunner="false"
+
+                persistent="true"
+                dataDirectory="target/brp-activemq-data"
+
+                schedulerSupport="true"
+                schedulerDirectory="target/brp-activemq-scheduler">
+
+        <amq:destinations>
+            <amq:queue physicalName="NotificatieBerichten"/>
+            <amq:queue physicalName="GbaToevalligeGebeurtenissen"/>
+            <amq:queue physicalName="GbaToevalligeGebeurtenissenAntwoorden"/>
+        </amq:destinations>
+
+        <!-- How can this broker be reached -->
+        <amq:transportConnectors>
+            <amq:transportConnector uri="tcp://localhost:${test.messagebroker.port}"/>
+        </amq:transportConnectors>
+
+        <!-- How do we persistently store messages -->
+        <amq:persistenceAdapter>
+            <!-- KahaDB per destination; each queue/topic has it's own store -->
+            <amq:mKahaDB directory="target/brp-activemq-kahadb">
+                <amq:filteredPersistenceAdapters>
+                    <amq:filteredKahaDB perDestination="true">
+                        <amq:persistenceAdapter>
+                            <amq:kahaDB preallocationStrategy="zeros" journalMaxFileLength="4 mb"/>
+                        </amq:persistenceAdapter>
+                    </amq:filteredKahaDB>
+                </amq:filteredPersistenceAdapters>
+            </amq:mKahaDB>
+        </amq:persistenceAdapter>
+
+        <amq:destinationPolicy>
+            <amq:policyMap>
+                <amq:policyEntries>
+                    <amq:policyEntry queue=">" producerFlowControl="true" memoryLimit="1mb">
+                        <amq:deadLetterStrategy>
+                            <amq:individualDeadLetterStrategy queuePrefix="DLQ." useQueueForQueueMessages="true"/>
+                        </amq:deadLetterStrategy>
+                    </amq:policyEntry>
+                </amq:policyEntries>
+            </amq:policyMap>
+        </amq:destinationPolicy>
+
+        <amq:systemUsage>
+            <amq:systemUsage>
+                <amq:memoryUsage>
+                    <!-- MemoryUsage is the maximum amount of memory the broker will use -->
+                    <!--70 is default-->
+                    <amq:memoryUsage percentOfJvmHeap="70"/>
+                </amq:memoryUsage>
+                <amq:storeUsage>
+                    <!-- Store usage controls the maximum size of the AMQMessage Store-->
+                    <!-- 100 GB is default -->
+                    <amq:storeUsage limit="${berichtencentrale.store.usage:2 gb}"/>
+                </amq:storeUsage>
+                <amq:tempUsage>
+                    <!--TempUsage is the maximum size of the store used for non-persistent messages
+                    that may optionally overflow from memory awaiting dispatch -->
+                    <!-- Aangezien alles persistent is volstaat 2 GB -->
+                    <amq:tempUsage limit="${berichtencentrale.temp.usage:2 gb}"/>
+                </amq:tempUsage>
+            </amq:systemUsage>
+        </amq:systemUsage>
+
+        <amq:plugins>
+            <amq:redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
+                <amq:redeliveryPolicyMap>
+                    <amq:redeliveryPolicyMap>
+                        <amq:defaultEntry>
+                            <amq:redeliveryPolicy maximumRedeliveries="5" initialRedeliveryDelay="1000" redeliveryDelay="1000"/>
+                        </amq:defaultEntry>
+                    </amq:redeliveryPolicyMap>
+                </amq:redeliveryPolicyMap>
+            </amq:redeliveryPlugin>
+
+            <amq:simpleAuthenticationPlugin anonymousAccessAllowed="true">
+                <amq:users>
+                    <amq:authenticationUser username="admin" password="admin" groups="admins"/>
+                </amq:users>
+            </amq:simpleAuthenticationPlugin>
+
+            <amq:authorizationPlugin>
+                <amq:map>
+                    <amq:authorizationMap>
+                        <amq:authorizationEntries>
+                            <!-- Defaults -->
+                            <amq:authorizationEntry queue=">" read="admins" write="admins" admin="admins"/>
+                            <amq:authorizationEntry topic=">" read="admins" write="admins" admin="admins"/>
+                            <amq:authorizationEntry topic="ActiveMQ.Advisory.>" read="anonymous" write="anonymous" admin="anonymous"/>
+                            <amq:authorizationEntry queue="NotificatieBerichten" read="anonymous" write="anonymous" admin="admins"/>
+                            <amq:authorizationEntry queue="GbaToevalligeGebeurtenissen" read="anonymous" write="anonymous" admin="admins"/>
+                            <amq:authorizationEntry queue="GbaToevalligeGebeurtenissenAntwoorden" read="anonymous" write="anonymous" admin="admins"/>
+                        </amq:authorizationEntries>
+                    </amq:authorizationMap>
+                </amq:map>
+            </amq:authorizationPlugin>
+        </amq:plugins>
+    </amq:broker>
+</beans>

@@ -1,0 +1,60 @@
+Administratieve Handelingen Publicatie Component
+
+Context:
+Mutatielevering component moet horizontaal schaalbaar administratieve handelingen kunnen verwerken. Administratieve handelingen moeten
+worden verwerkt in volgorde zoals bijgehouden. Oudste eerst. En handelingen moeten op volgorde worden afgeleverd aan afnemers als deze
+handeling dezelfde bijgehouden persoon heeeft. Doel is om de oplossing te laten werken zonder locking op personen. En de oplossing moet schaalbaar zijn
+zodat er meerdere jms listeners kunnen worden gebruikt.
+
+Oplossing:
+Er is voor gekozen om een polling mechanisme te implementeren dat er voor verantwoordelijk is om handelingen op administratieve
+handelingen queue te zetten waar ze worden opgepakt door mutatielevering component(en). Polling component zelf mag maar eenmaal worden gedeployed.
+
+De huidige implementatie gebruikt geen XA transactie.
+
+Een administratieve handeling kent 2 indicatoren om bij te houden of een administratieve handeling geleverd is.
+-tslev tijdstip van levering (het zetten op de verzending queue)
+-statuslev (null, in levering, geslaagd, fout)
+
+De component voert scheduled met een configureerbare fixedDelay de volgende stappen worden uitgevoerd in 1 iteratie.
+
+Stappen publicatie:
+1.Start database transactie
+2.Haal x (configureerbaar max aantal) aantal admininstratieve handelingen met bijgehouden personen op met oudste tsreg
++ haal handelingen met bijgehouden personen op met status in levering. Administratieve
+handelingen van soort GBA initiele vulling worden niet geleverd en worden uitgesloten in ophalen.
+3.Bepaal aantal handelingen in levering. Als groter dan brp.levering.admhndpublicatie.maxinlevering stop processing
+4.Filter administratieve handelingen met bijgehouden personen die al in levering staan.
+5.Zet alle overgehouden administratieve handeling op status in levering waar status is gelijk aan null
+6.Start jms transactie
+7.Publiceer alle handelingen op de administratieve handelingemn queue
+8.Commit jms transctie
+9.Commit database transactie
+
+Stappen Mutatielevering:
+1.Start database transactie
+2.Verwerk handeling
+3.
+    Goed pad: Zet status van administratieve handeling op status geleverd en zet tslev op nu waar ts lev is null of statuslev in levering en zet
+    administratieve handelingen op verzend queue indien update count van zet status gelijk is aan 1
+3.
+    Fout pad bekende fout: Zet status van administratieve handeling op status fout waar ts lev is null of statuslev in levering
+
+
+Configuratie opties:
+Scheduling interval in ms:
+brp.levering.admhndpublicatie.delay:5000
+
+Maximaal aantal handelingen die opgehaald worden uit database
+brp.levering.admhndpublicatie.limit=5000
+
+Maximaal aantal handelingen dat tegelijkertijd status in levering mag hebben.
+brp.levering.admhndpublicatie.maxinlevering=1000
+
+Robuustheid scenario's
+
+1. Bericht wordt is klaar met verwerking voordat database commit heeft plaatsgevonden. Mutatielevering levering stap wordt uitgevoerd
+en stap 6 van publicatie stap zal status niet overschrijven
+2. Stap 9 van publicatie stap faalt. Handelingen zijn wel op queue geplaatst. Dit gaat mogelijk fout. Scheduler pakt nieuwe handelingen op uit database
+die nog niet verwerkt zijn maar wel in levering. Nieuwe handelingen worden op queue geplaatst. 1 van deze handelingen zal op verwerkt worden gezet en
+geleverd. Is de volgorde van personen nu nog gegarandeerd? Ja?

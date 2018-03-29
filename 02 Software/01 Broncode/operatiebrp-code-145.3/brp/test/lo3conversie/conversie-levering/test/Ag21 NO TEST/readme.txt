@@ -1,0 +1,3 @@
+Het testen van het maken van een bericht voor het conditioneel leveren obv sleutelrubrieken is te bereiken door een dienst.txt bestand toe te voegen met de inhoud ATTENDERING. Dit is de naam van de catalogus optie die gebruikt wordt om de relevante dienst te bepalen.
+
+Let op: in de autorisatie tabel regel moet element 95.43 (Conditionele verstrekking) de waarde "1" bevatten en moet element 95.42 (Sleutelrubriek) gevuld zijn

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %msg%n"/>
+        </Console>
+
+        <RollingFile name="Systeem" fileName="${sys:catalina.base}/logs/brp-systeem.log"
+                     filePattern="${sys:catalina.base}/logs/brp-systeem-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT"/>
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="1 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+        <RollingFile name="Functioneel" fileName="${sys:catalina.base}/logs/brp-functioneel.log"
+                     filePattern="${sys:catalina.base}/logs/brp-functioneel-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="1 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+        <RollingFile name="MDC" fileName="${sys:catalina.base}/logs/brp-mdc.log"
+                     filePattern="${sys:catalina.base}/logs/brp-mdc-%d{MM-dd-yyyy}.log.gz">
+            <BrpJsonLayout/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="2 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <Root level="INFO">
+            <AppenderRef ref="Systeem"/>
+            <AppenderRef ref="Functioneel"/>
+            <AppenderRef ref="MDC"/>
+        </Root>
+
+        <logger name="nl.bzk.brp" level="DEBUG"/>
+        <logger name="nl.moderniseringgba.brp" level="DEBUG"/>
+
+        <logger name="org.hibernate" level="WARN"/>
+        <logger name="org.jboss" level="WARN"/>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.eclipse" level="FATAL"/>
+        <logger name="org.apache.activemq.store.jdbc" level="ERROR"/>
+        <logger name="com.atomikos" level="ERROR"/>
+
+    </Loggers>
+</Configuration>

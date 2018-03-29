@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans
+            http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/jdbc
+            http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+            http://www.springframework.org/schema/context
+            http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="classpath*:brp-alles-inmemory.properties"/>
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="database" value="HSQL"/>
+        <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+    </bean>
+
+    <bean id="embeddedDatabaseServer" class="org.hsqldb.server.Server" init-method="start" destroy-method="stop">
+        <property name="port" value="${test.database.port}"/>
+        <property name="properties">
+            <bean class="org.hsqldb.persist.HsqlProperties">
+                <constructor-arg>
+                    <props>
+                        <prop key="server.database.0">mem:${jdbc.master.database.name:brp}</prop>
+                        <prop key="server.dbname.0">${jdbc.master.database.name:brp}</prop>
+                    </props>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="initializeBrpDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedDatabaseServer">
+        <property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
+        <property name="url" value="jdbc:hsqldb:hsql://${jdbc.master.database.host:localhost}:${test.database.port}/${jdbc.master.database.name:brp}"/>
+        <property name="username" value="${jdbc.master.username:sa}"/>
+        <property name="password" value="${jdbc.master.password:}"/>
+    </bean>
+
+    <jdbc:initialize-database data-source="initializeBrpDataSource">
+        <jdbc:script location="classpath:bmr/HSQLDB/HSQLDB.sql" encoding="UTF-8"/>
+    </jdbc:initialize-database>
+    <jdbc:initialize-database ignore-failures="ALL" data-source="initializeBrpDataSource">
+        <jdbc:script location="classpath:bmr/HSQLDB/PENDING_BMR_CHANGES.sql" encoding="UTF-8"/>
+    </jdbc:initialize-database>
+
+    <import resource="classpath:test-dal-beans.xml"/>
+    <alias name="initializeBrpDataSource" alias="syncDalDataSource"/>
+    <alias name="initializeBrpDataSource" alias="masterDataSource"/>
+    <!--<alias name="initializeBrpDataSource" alias="masterDatasource"/>-->
+</beans>

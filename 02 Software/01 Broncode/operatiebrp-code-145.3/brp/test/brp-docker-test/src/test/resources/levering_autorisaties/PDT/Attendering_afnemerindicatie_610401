@@ -1,0 +1,21 @@
+Toegang Levering autorisatie
+geautoriseerde              : Gemeente Standaard
+
+Levering autorisatie
+Stelsel						: BRP
+Naam						: 610401
+Populatie Beperking			:
+
+DienstenBundel
+Naam						: Spontaan
+Geautoriseerde Groepen	 	: */FMV
+Geautoriseerde attributen 	: *, !Persoon.SamengesteldeNaam.IndicatieAfgeleid, !Persoon.Naamgebruik.IndicatieAfgeleid, !Persoon.BuitenlandsPersoonsnummer.AutoriteitVanAfgifteCode, !Persoon.BuitenlandsPersoonsnummer.Nummer, !Persoon.Ouder.Ouderschap.IndicatieOuderUitWieKindIsGeboren, !GerelateerdeKind.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeOuder.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeHuwelijkspartner.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeGeregistreerdePartner.Persoon.SamengesteldeNaam.IndicatieAfgeleid, !GerelateerdeOuder.Ouderschap.IndicatieOuderUitWieKindIsGeboren, !Onderzoek.PartijCode, !Onderzoek.Omschrijving, !Onderzoek.StatusNaam, !AdministratieveHandeling.ToelichtingOntlening, !AdministratieveHandeling.Bijhoudingsplan, !Actie.DatumAanvangGeldigheid, !Actie.DatumEindeGeldigheid, !Actie.DatumOntlening
+Nadere populatie beperking	: JAAR(Persoon.Geboorte.Datum) > JAAR(VANDAAG() - ^19/0/0) EN Persoon.Bijhouding.PartijCode EIN {"048401", "051301", "053401", "053701", "054601", "054701", "055301", "056901", "057501", "057601", "057901", "062601", "062701", "063801", "152501", "188401", "189201", "190101", "193101"} EN bijhouding.nadere_bijhoudingsaard = "A"
+
+Dienst
+Soort       				: Attendering
+Effect afnemer indicatie	: Plaatsing
+Attenderingscriterium		: GEWIJZIGD(oud, nieuw, [Persoon.Geboorte.Datum]) OF GEWIJZIGD(oud, nieuw, [adressen], [datum_aanvang_geldigheid]) OF GEWIJZIGD(ALS(oud.migratie.soort="I",oud.migratie.datum_aanvang_geldigheid,NULL), ALS(nieuw.migratie.soort="I",nieuw.migratie.datum_aanvang_geldigheid,NULL))
+
+Dienst
+Soort           			: Mutatielevering op basis van afnemerindicatie

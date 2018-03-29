@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.leveren</groupId>
+            <artifactId>brp-service-algemeen</artifactId>
+        </dependency>
+    </dependencies>
+    <parent>
+        <groupId>nl.bzk.brp.leveren</groupId>
+        <artifactId>brp-leveren</artifactId>
+        <version>145.3</version>
+    </parent>
+    <artifactId>brp-leveren-delivery</artifactId>
+    <packaging>pom</packaging>
+    <name>BRP Leveren Delivery</name>
+
+    <description>
+        Dit project bevat alle deliverygerelateerde modules voor BRP leveren, zoals web, JMS en DAO implementaties.
+        De buitenste schil in de onion architecture.
+    </description>
+
+    <modules>
+        <module>brp-delivery-ah-publicatie</module>
+        <module>brp-delivery-algemeen</module>
+        <module>brp-delivery-jms-afnemer</module>
+        <module>brp-delivery-mutatielevering</module>
+        <module>brp-delivery-bevraging</module>
+        <module>brp-delivery-bevraging-gba</module>
+        <module>brp-delivery-bevraging-gba-ws</module>
+        <module>brp-delivery-afnemerindicatie</module>
+        <module>brp-delivery-afnemerindicatie-gba</module>
+        <module>brp-delivery-archivering-gba</module>
+        <module>brp-delivery-dataaccess</module>
+        <module>brp-delivery-verzending</module>
+        <module>brp-delivery-synchronisatie</module>
+        <module>brp-delivery-afnemervoorbeeld</module>
+        <module>brp-delivery-integratietest</module>
+        <module>brp-delivery-security</module>
+        <module>brp-delivery-vrijbericht</module>
+        <module>brp-delivery-vrijbericht-gba</module>
+        <module>brp-delivery-vrijbericht-publicatie</module>
+        <module>brp-delivery-stuf</module>
+        <module>brp-delivery-selectie-fileaccess</module>
+        <module>brp-delivery-selectie</module>
+        <module>brp-delivery-selectie-gba</module>
+        <module>brp-delivery-selectie-verwerker</module>
+        <module>brp-delivery-selectie-publicatie</module>
+        <module>brp-delivery-selectie-schrijver-gba</module>
+        <module>brp-delivery-selectie-schrijver</module>
+        <module>brp-delivery-selectie-message-broker</module>
+        <module>brp-delivery-selectie-dataaccess</module>
+        <module>brp-delivery-selectie-afnemerindicatie</module>
+        <module>brp-delivery-selectie-protocollering</module>
+    </modules>
+
+    <properties>
+        <!-- profile voor JDBC connecties etc., in maven filter properties bestand (zie /project/build/filters) -->
+        <build.profile.id>default</build.profile.id>
+        <maven.changelog.file />
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>gbatestprofiel</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName />
+                <maven.jdbc.xa.driverClassName />
+                <maven.jdbc.url />
+                <maven.jdbc.username>brp</maven.jdbc.username>
+                <maven.jdbc.password>brp</maven.jdbc.password>
+
+                <maven.jdbc.master.driverClassName>${maven.jdbc.driverClassName}</maven.jdbc.master.driverClassName>
+                <maven.jdbc.master.url>${maven.jdbc.url}</maven.jdbc.master.url>
+                <maven.jdbc.master.username>${maven.jdbc.username}</maven.jdbc.master.username>
+                <maven.jdbc.master.password>${maven.jdbc.password}</maven.jdbc.master.password>
+
+                <maven.jdbc.archivering.driverClassName>${maven.jdbc.xa.driverClassName}</maven.jdbc.archivering.driverClassName>
+                <maven.jdbc.archivering.url>${maven.jdbc.url}</maven.jdbc.archivering.url>
+                <maven.jdbc.archivering.username>${maven.jdbc.username}</maven.jdbc.archivering.username>
+                <maven.jdbc.archivering.password>${maven.jdbc.password}</maven.jdbc.archivering.password>
+
+                <maven.jdbc.protocollering.driverClassName>${maven.jdbc.xa.driverClassName}</maven.jdbc.protocollering.driverClassName>
+                <maven.jdbc.protocollering.url>${maven.jdbc.url}</maven.jdbc.protocollering.url>
+                <maven.jdbc.protocollering.username>${maven.jdbc.username}</maven.jdbc.protocollering.username>
+                <maven.jdbc.protocollering.password>${maven.jdbc.password}</maven.jdbc.protocollering.password>
+
+                <maven.berichtcentrale.broker.url>vm://localhost</maven.berichtcentrale.broker.url>
+                <maven.brp.jms.broker.url>vm://localhost</maven.brp.jms.broker.url>
+                <maven.berichtcentrale.data.directory>${project.build.directory}/activemq-data</maven.berichtcentrale.data.directory>
+                <maven.berichtcentrale.kahadb.directory>${project.build.directory}/activemq-kahadb</maven.berichtcentrale.kahadb.directory>
+
+                <maven.bijhouding.security.public.keystore.wachtwoord>publicstore</maven.bijhouding.security.public.keystore.wachtwoord>
+                <maven.bijhouding.security.public.keystore>keystores/server/publicstore.jks</maven.bijhouding.security.public.keystore>
+                <maven.bijhouding.security.private.keystore>keystores/server/privatestore.jks</maven.bijhouding.security.private.keystore>
+                <maven.bijhouding.security.private.keystore.wachtwoord>privatestore</maven.bijhouding.security.private.keystore.wachtwoord>
+                <maven.bijhouding.security.privatekey.alias>serverkey</maven.bijhouding.security.privatekey.alias>
+                <maven.bijhouding.security.privatekey.wachtwoord>serverkeypassword</maven.bijhouding.security.privatekey.wachtwoord>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>nl.bzk.brp.properties</groupId>
+                    <artifactId>brp-test-properties</artifactId>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <!--properties voor test uitpakken-->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>unpack-test-properties</id>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <phase>generate-test-resources</phase>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>nl.bzk.brp.properties</groupId>
+                                            <artifactId>brp-test-properties</artifactId>
+                                            <version>${project.version}</version>
+                                            <overWrite>true</overWrite>
+                                            <outputDirectory>
+                                                ${project.build.directory}/test-resources/template
+                                            </outputDirectory>
+                                            <includes>config/brp-alles-inmemory.properties</includes>
+                                        </artifactItem>
+                                    </artifactItems>
+
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <!--properties voor test uitpakken filteren zodat ze gevuld worden-->
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>filter-test-properties</id>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <phase>process-test-resources</phase>
+                                <configuration>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}/test-resources/template/config</directory>
+                                            <filtering>true</filtering>
+                                            <includes>
+                                                <include>*.properties</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                    <overwrite>true</overwrite>
+                                    <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+
+    <context:property-placeholder location="classpath*:brp-*.properties"
+                                  ignore-resource-not-found="true"/>
+
+    <context:component-scan base-package="nl.bzk.brp.delivery.stuf"/>
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+
+    <import resource="classpath:stuf-service-beans.xml"/>
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:security-beans.xml"/>
+    <import resource="classpath:delivery-algemeen-beans.xml"/>
+    <import resource="classpath:archivering-service-algemeen-context.xml"/>
+    <import resource="classpath:archivering-delivery-dal-non-jta-context.xml"/>
+    <import resource="classpath:brp-stuf-ws-jta.xml"/>
+
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="stuf"/>
+    </bean>
+    <import resource="classpath:alg-util-jmx-beans.xml"/>
+
+    <bean id="wss4jOutInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="action" value="Timestamp Signature"/>
+                <entry key="user" value="${security.privatekey.alias}"/>
+                <entry key="signaturePropRefId" value="signatureProperties"/>
+                <entry key="signatureProperties">
+                    <props>
+                        <prop key="org.apache.ws.security.crypto.provider">org.apache.ws.security.components.crypto.Merlin</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.type">jks</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.password">${security.keystore.private.password}</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.alias">${security.privatekey.alias}</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.file">${security.keystore.private.file}</prop>
+                    </props>
+                </entry>
+                <entry key="signatureKeyIdentifier" value="DirectReference"/>
+                <!--<entry key="signatureParts" value="{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp;{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body"/>-->
+                <entry key="signatureParts" value="{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body;{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp"/>
+                <entry key="passwordCallbackRef">
+                    <bean class="nl.bzk.brp.delivery.algemeen.ServerPasswordCallback">
+                        <property name="password" value="${security.privatekey.password}"/>
+                    </bean>
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="stufService" class="nl.bzk.brp.delivery.stuf.StufWebService" />
+    <jaxws:endpoint id="stufWebService" implementor="#stufService"
+                    address="/stvStufbgVertaling" xmlns:s="http://www.bzk.nl/brp/stuf/service"
+                    serviceName="s:StufbgVertalingService" endpointName="s:stvStufbgVertaling">
+
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false" />
+            <entry key="faultStackTraceEnabled" value="false" />
+            <entry key="exceptionMessageCauseEnabled" value="false" />
+        </jaxws:properties>
+
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor" />
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor" />
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+</beans>

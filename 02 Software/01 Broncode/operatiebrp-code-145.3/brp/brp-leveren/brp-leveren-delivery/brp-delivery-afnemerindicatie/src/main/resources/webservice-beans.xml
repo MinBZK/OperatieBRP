@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+
+                http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <context:property-placeholder
+            location="classpath*:brp-*.properties" ignore-resource-not-found="true"/>
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+
+    <context:annotation-config/>
+    <context:spring-configured/>
+
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="onderhoud-afnemerindicaties"/>
+    </bean>
+
+
+    <import resource="classpath:maakbericht-service-beans.xml"/>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <import resource="classpath:afnemerindicatie-beans.xml"/>
+    <import resource="classpath:security-beans.xml"/>
+    <import resource="classpath:delivery-algemeen-beans.xml"/>
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:delivery-jms-afnemer-beans.xml"/>
+    <import resource="classpath:archivering-service-algemeen-context.xml"/>
+    <import resource="classpath:archivering-delivery-dal-non-jta-context.xml"/>
+
+    <bean id="afnemerindicatiesWebServiceImpl"
+          class="nl.bzk.brp.delivery.afnemerindicatie.OnderhoudAfnemerindicatiesWebServiceImpl"/>
+
+    <jaxws:endpoint id="afnemerindicatiesWebService" implementor="#afnemerindicatiesWebServiceImpl"
+                    address="/lvgAfnemerindicaties" xmlns:s="http://www.bzk.nl/brp/levering/afnemerindicaties/service"
+                    serviceName="s:AfnemerindicatiesService" endpointName="s:lvgAfnemerindicaties">
+
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="false"/>
+            <entry key="exceptionMessageCauseEnabled" value="false"/>
+        </jaxws:properties>
+
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <bean id="wss4jOutInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="action" value="Timestamp Signature"/>
+                <entry key="user" value="${security.privatekey.alias}"/>
+                <entry key="signaturePropRefId" value="signatureProperties"/>
+                <entry key="signatureProperties">
+                    <props>
+                        <prop key="org.apache.ws.security.crypto.provider">
+                            org.apache.ws.security.components.crypto.Merlin
+                        </prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.type">jks</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.password">
+                            ${security.keystore.private.password}
+                        </prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.alias">${security.privatekey.alias}
+                        </prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.file">${security.keystore.private.file}</prop>
+                    </props>
+                </entry>
+                <entry key="signatureKeyIdentifier" value="DirectReference"/>
+                <!--<entry key="signatureParts" value="{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp;{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body"/>-->
+                <entry key="signatureParts"
+                       value="{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body;{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp"/>
+                <entry key="passwordCallbackRef">
+                    <bean class="nl.bzk.brp.delivery.algemeen.ServerPasswordCallback">
+                        <property name="password" value="${security.privatekey.password}"/>
+                    </bean>
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
+</beans>

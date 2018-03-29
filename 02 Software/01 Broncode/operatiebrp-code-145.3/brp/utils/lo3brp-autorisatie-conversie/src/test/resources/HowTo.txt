@@ -1,0 +1,64 @@
+1)maak database brpjunit
+	in directory: \operatiebrp-code\brp\brp-delivery\brp-delivery-dataaccess>
+	verander de maven.jdbc.url property naar jdbc:postgresql://localhost/brpjunit
+
+2)mvn install -Pdataaccess-postgres	 (in directory brp-delivery-dataaccess)
+    database wordt aangemaakt (let op je moet wel brpjunit al aangemaakt hebben, tabellen worden gemaaakt en gevuld dmv mvn command...)
+    na het runnen van de liquibase scripts kan je de test afbreken anders wordt de data gemuteerd.
+
+3)maak een database aan met de naam brp_x en importeer de backup van de pds zie Jira: ROOD-1471
+Voeg de extension unaccent toe dmv, CREATE EXTENSION unaccent
+
+4)Maak een backup van brpjunit via pgadmin
+    Importeer deze in brp_x exclusief autaut
+
+In de dump van bmr-53 zat de perafnemerindicatie en hisafnemerindicatie niet die apart zonder data toevoegen vanuit de brp_junit dump anders werkt de conversie niet.
+
+5)Update de partijen die niet voorkomen in de kern.partij tabel.
+UPDATE autaut.toeganglevsautorisatie
+SET geautoriseerde = 346
+where autaut.toeganglevsautorisatie.geautoriseerde
+NOT IN (select id from kern.partijrol)
+
+6)Draai de Fix_database_sequence.sql (haal de hist tabellen uit de sql als deze niet in de database dump zitten van de autaut..)
+maak een backup van je database zodat je dit niet elke keer hoeft te herhalen voor dezelfde bmr versie.
+check of in autaut persafnemerindicatie zit en his_persafnemerindicatie anders loopt de conversie niet.
+
+7)Maak jar van tool (util/lo3brp-autorisatie-conversie), mvn clean package -Psoftware-package -DskipTests
+Tool staat in target directory
+pas de brp-test.properties in de target directory aan met: jdbc.master.url=jdbc:postgresql://localhost/brp_x
+
+8)Draai daar de starttool.sh of voor windows starttool.bat
+    De conversie tool begint met converteren.
+
+9)Controle conversie
+    Beschrijving in jira: ROOD-1328 of nieuwe dump van autaut van pdt. Let op BMR versie moet wel overeenkomen met de gemaakte database van junit.
+
+    a)check of alle leveringsautorisaties omgezet zijn van stelsel 1 naar stelsel 2 aantallen moeten gelijk zijn. (ong 9305 autorisaties)
+      SELECT stelsel,
+                              	sum(case when stelsel = 1 then 1 else 0 end) as gba,
+                              	sum(case when stelsel = 2 then 1 else 0 end) as brp
+                              	from autaut.levsautorisatie
+                              	GROUP BY stelsel
+
+    b) handige queries voor analyse.
+    select * from autaut.dienstbundel where naam like '%Ad hocBRP2' or id = 2
+
+    select * from autaut.dienstbundello3rubriek
+    JOIN conv.convlo3rubriek on(autaut.dienstbundello3rubriek.rubr=conv.convlo3rubriek.id)
+    where dienstbundel =2
+
+    select autaut.dienstbundelgroep.id, autaut.dienstbundelgroep.dienstbundel, autaut.dienstbundelgroep.groep, autaut.dienstbundelgroep.indformelehistorie, autaut.dienstbundelgroep.indmaterielehistorie, autaut.dienstbundelgroep.indverantwoording,
+    autaut.dienstbundelgroepattr.attr,
+    kern.element.id, kern.element.naam, kern.element.srt from autaut.dienstbundelgroep
+    JOIN autaut.dienstbundelgroepattr on (autaut.dienstbundelgroep.id = autaut.dienstbundelgroepattr.dienstbundelgroep)
+    JOIN kern.element on (kern.element.id = autaut.dienstbundelgroepattr.attr)
+    where dienstbundel = 32233
+
+Unit test draaien
+-------------------
+- draai eerst mvn install -Pdataaccess-postgres om de database goed te zetten
+- verander de url in de pom naar localhost/brpjunit
+
+
+

@@ -1,0 +1,239 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.algemeenbrp</groupId>
+        <artifactId>alg</artifactId>
+        <version>145.3</version>
+        <relativePath>../../../../algemeen/alg</relativePath>
+    </parent>
+
+    <artifactId>brp-art-testcases-nieuwestijl</artifactId>
+    <name>BRP Test - Test cases Nieuwe stijl</name>
+    <packaging>jar</packaging>
+
+    <properties>
+        <omgeving>localhost</omgeving>
+        <!-- Externe afhankelijkheden -->
+        <hibernate.version>4.3.7.Final</hibernate.version>
+        <allure.version>1.4.9</allure.version>
+        <groovy.version>2.4.4</groovy.version>
+        <jbehave.version>4.1.1</jbehave.version>
+
+        <language-level>1.8</language-level>
+
+        <skipTestsFunqmachine>${skipTests}</skipTestsFunqmachine>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>nl.bzk.brp</groupId>
+                <artifactId>brp-test-funqmachine</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>brp-test-funqmachine</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.mchange</groupId>
+                    <artifactId>c3p0</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.codehaus.groovy</groupId>
+            <artifactId>groovy-all</artifactId>
+            <version>${groovy.version}</version>
+        </dependency>
+
+        <!-- JBehave reporting -->
+        <dependency>
+            <groupId>org.jbehave.site</groupId>
+            <artifactId>jbehave-site-resources</artifactId>
+            <version>3.3.1</version>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.jbehave</groupId>
+            <artifactId>jbehave-core</artifactId>
+            <version>${jbehave.version}</version>
+            <classifier>resources</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <!-- dit bevat de excel testgevallen van team Oranje -->
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-test-persoon-database</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>brp-test-testdata</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- LET OP: src/main/resources zijn voor maven testresources!! -->
+        <testResources>
+            <testResource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jbehave</groupId>
+                <artifactId>jbehave-maven-plugin</artifactId>
+                <version>${jbehave.version}</version>
+                <executions>
+                    <execution>
+                        <id>unpack-view-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-view-resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                    <systemProperties>
+                        <omgeving>${omgeving}</omgeving>
+                    </systemProperties>
+                    <includes>
+                        <include>**/jenkins/*.java</include>
+                    </includes>
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <disableXmlReport>true</disableXmlReport>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>pre-integration-test</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>blobjar</id>
+            <!--
+                profiel om de output blobs van de bijhouding in een jar te plaatsen
+                en te uploaden naar nexus
+            -->
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>make-assembly</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <descriptors>
+                                        <descriptor>src/main/assembly/blob-bijhouding-assembly.xml</descriptor>
+                                    </descriptors>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-install-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>install-file</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>install-file</goal>
+                                </goals>
+                                <configuration>
+                                    <file>
+                                        ${project.build.directory}/${project.build.finalName}-blob-bijhouding-assembly.jar
+                                    </file>
+                                    <repositoryId>
+                                        ${project.distributionManagement.repository.id}
+                                    </repositoryId>
+                                    <url>${project.distributionManagement.repository.url}
+                                    </url>
+                                    <generatePom>false</generatePom>
+                                    <groupId>nl.bzk.brp.excel2blob</groupId>
+                                    <artifactId>blob-bijhouding-${env.AdministratieveHandeling}
+                                    </artifactId>
+                                    <version>${env.BUILD_NUMBER}</version>
+                                    <packaging>jar</packaging>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-deploy-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>deploy-file</id>
+                                <phase>deploy</phase>
+                                <goals>
+                                    <goal>deploy-file</goal>
+                                </goals>
+                                <configuration>
+                                    <file>
+                                        ${project.build.directory}/${project.build.finalName}-blob-bijhouding-assembly.jar
+                                    </file>
+                                    <repositoryId>
+                                        ${project.distributionManagement.repository.id}
+                                    </repositoryId>
+                                    <url>${project.distributionManagement.repository.url}
+                                    </url>
+                                    <generatePom>false</generatePom>
+                                    <groupId>nl.bzk.brp.excel2blob</groupId>
+                                    <artifactId>blob-bijhouding-${env.AdministratieveHandeling}
+                                    </artifactId>
+                                    <version>${env.BUILD_NUMBER}</version>
+                                    <packaging>jar</packaging>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

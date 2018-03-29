@@ -1,0 +1,18 @@
+    <div id="{{kolom.id}}" ng-if="(!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly)">
+        <div class="extratop">{{geselecteerdeOptie}}</div>
+    </div>
+    <div ng-if="!((!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly))">
+        <ui-select id="{{kolom.id}}"
+                   name="{{kolom.id}}"
+                   ng-model="waarde[kolom.display]"
+                   thema="bootstrap"
+                   ng-required="{{kolom.required}}">
+            <ui-select-match id="{{kolom.id}}_match" allow-clear>{{$select.selected.omschrijving}}</ui-select-match>
+            <ui-select-choices repeat="item.id as item in items | orderBy: 'omschrijving' | filter: $select.search">
+                <div ng-bind-html="item.omschrijving | highlight: $select.search"></div>
+            </ui-select-choices>
+        </ui-select>
+        <div ng-show="editForm.$submitted || editForm[kolom.id].$touched">
+            <span ng-show="editForm[kolom.id].$error.required">Dit veld is verplicht</span>
+        </div>
+    </div>

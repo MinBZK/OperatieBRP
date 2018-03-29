@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    ">
+
+    <bean id="mbeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
+        <property name="locateExistingServerIfPossible" value="true"/>
+    </bean>
+
+    <!-- this bean must not be lazily initialized if the exporting is to happen -->
+    <bean class="org.springframework.jmx.export.MBeanExporter" id="exporter" lazy-init="false">
+        <property name="assembler" ref="assembler" />
+        <property name="server" ref="mbeanServer" />
+        <property name="namingStrategy" ref="namingStrategy" />
+        <property name="autodetect" value="true" />
+    </bean>
+
+    <bean class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource" id="jmxAttributeSource"/>
+
+    <!-- will create management interface using annotation metadata -->
+    <bean class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler" id="assembler">
+        <property name="attributeSource" ref="jmxAttributeSource"/>
+    </bean>
+
+    <!-- will pick up the ObjectName from the annotation -->
+    <bean class="org.springframework.jmx.export.naming.MetadataNamingStrategy" id="namingStrategy">
+        <property name="attributeSource" ref="jmxAttributeSource"/>
+    </bean>
+
+</beans>

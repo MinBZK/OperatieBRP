@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+    ">
+
+    <context:property-placeholder location="classpath:brp-test.properties" />
+
+    <!--<import resource="classpath:datasource-beans.xml" />-->
+    <import resource="classpath:brp-verzending-context.xml" />
+    <import resource="classpath:broker.xml" />
+
+    <bean id="dataSourceMasterLockTest" parent="templateDataSource">
+        <property name="url" value="${jdbc.master.url}"/>
+        <property name="username" value="${jdbc.master.username}"/>
+        <property name="password" value="${jdbc.master.password}"/>
+    </bean>
+
+    <!-- Uitgaande berichten queue, nodig voor integratietests-->
+    <bean id="afnemersJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cachedConnectionFactoryAfnemers"/>
+    </bean>
+
+    <bean id="jmsConnectionFactoryAfnemers" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${jms.broker.afnemers.url}"/>
+        <property name="redeliveryPolicy">
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="0" />
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="cachedConnectionFactoryAfnemers"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsConnectionFactoryAfnemers"/>
+        <!-- ivm 1500 afnemers de sessionCacheSize voor nu op 10 gezet (default = 1), is een waarde waarmee we nog
+        moeten spelen -->
+        <property name="sessionCacheSize" value="10"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsTransactionManagerAfnemers" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="cachedConnectionFactoryAfnemers"/>
+    </bean>
+</beans>

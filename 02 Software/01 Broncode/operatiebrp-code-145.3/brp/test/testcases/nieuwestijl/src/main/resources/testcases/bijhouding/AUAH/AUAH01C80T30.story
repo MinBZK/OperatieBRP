@@ -1,0 +1,48 @@
+Meta:
+@status                 Klaar
+@regels                 R2270
+@usecase                BY.1.AA
+@sleutelwoorden         Logging
+
+Narrative: R2270 De transporteur is een geldige partij
+
+Scenario: 1. DB init
+          preconditie
+
+Given de database is aangepast met: update kern.partij set dateinde = to_number((to_char(now(), 'YYYYMMDD')), '99999999') where code = '507014'
+And de database is aangepast met: update kern.his_partij set dateinde = to_number((to_char(now(), 'YYYYMMDD')), '99999999') where his_partij.id = (select his_partij.partij from kern.his_partij where partij = 27013)
+
+Given maak bijhouding caches leeg
+
+Scenario: 2. De transporteur is geen geldige partij(datum op dateinde)
+          LT: AUAH01C80T30
+Given alle personen zijn verwijderd
+Given enkel initiele vulling uit bestand /LO3PL-AUAH/AUAH01C80T30-sandy.xls
+Given enkel initiele vulling uit bestand /LO3PL-AUAH/AUAH01C80T30-danny.xls
+
+When voer een bijhouding uit AUAH01C80T30.xml met ondertekenaar 'Gemeente BRP 3', en transporteur 'Gemeente BRP handmatig fiat 1'
+
+Then komt de tekst 'Autorisatie faalt voor regel: R2106' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2115' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2246' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2247' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2248' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2268' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2269' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2270' voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2271' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2299' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2250' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2251' NIET voor in de logging
+Then komt de tekst 'Autorisatie faalt voor regel: R2252' NIET voor in de logging
+
+Then heeft het antwoordbericht verwerking Foutief
+And is het antwoordbericht gelijk aan /testcases/bijhouding/AUAH/expected/AUAH01C80T30.xml voor expressie //brp:bhg_hgpRegistreerHuwelijkGeregistreerdPartnerschap_R
+
+Then is in de database de persoon met bsn 211401377 niet als PARTNER betrokken bij een HUWELIJK
+Then is in de database de persoon met bsn 196393073 niet als PARTNER betrokken bij een HUWELIJK
+
+Scenario: 3. DB reset
+          postconditie
+Given de database is aangepast met: update kern.partij set dateinde = null where code = '507014'
+And de database is aangepast met: update kern.his_partij set dateinde = null where his_partij.id = (select his_partij.partij from kern.his_partij where partij = 27013)

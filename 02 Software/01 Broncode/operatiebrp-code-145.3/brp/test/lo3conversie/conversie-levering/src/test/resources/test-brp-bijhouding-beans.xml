@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <beans profile="!memoryDS">
+        <context:property-placeholder location="classpath:datasource.properties,classpath:alp.properties"/>
+    </beans>
+    <beans profile="memoryDS">
+        <context:property-placeholder location="classpath:inmemory.properties,classpath:alp.properties"/>
+    </beans>
+
+    <beans>
+        <!-- Bijhouding -->
+        <import resource="classpath:archivering-delivery-dal-jta-context.xml"/>
+        <import resource="classpath:brp-bijhouding-business-beans.xml"/>
+        <import resource="classpath:brp-bijhouding-jms.xml"/>
+
+        <beans profile="memoryDS">
+            <import resource="test-database.xml"/>
+
+            <bean id="bijhoudingDalJpaVendorAdapter"
+                  class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="false"/>
+                <property name="generateDdl" value="false"/>
+                <property name="database" value="HSQL"/>
+                <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+            </bean>
+
+            <bean name="archiveringDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+                <property name="uniqueResourceName">
+                    <!--
+                     | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+                     | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+                      -->
+                    <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                        <property name="baseName" value="archiveringDatabase"/>
+                    </bean>
+                </property>
+                <property name="xaDataSourceClassName" value="org.hsqldb.jdbc.pool.JDBCXADataSource"/>
+                <property name="xaProperties">
+                    <bean class="nl.bzk.algemeenbrp.jta.database.XAPropertiesAdapter">
+                        <property name="driver" value="org.hsqldb.jdbc.pool.JDBCXADataSource"/>
+                        <property name="url" value="jdbc:hsqldb:mem:testDb"/>
+                        <property name="user" value="sa"/>
+                        <property name="password" value=""/>
+                    </bean>
+                </property>
+                <property name="maxPoolSize" value="${brp.archivering.pool.max:2}"/>
+                <property name="minPoolSize" value="${brp.archivering.pool.min:1}"/>
+            </bean>
+
+            <bean name="brpBijhoudingDataSource,masterDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+                <property name="uniqueResourceName">
+                    <!--
+                     | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+                     | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+                      -->
+                    <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                        <property name="baseName" value="brpBijhoudingDatabase"/>
+                    </bean>
+                </property>
+                <property name="xaDataSourceClassName" value="org.hsqldb.jdbc.pool.JDBCXADataSource"/>
+                <property name="xaProperties">
+                    <bean class="nl.bzk.algemeenbrp.jta.database.XAPropertiesAdapter">
+                        <property name="driver" value="org.hsqldb.jdbc.pool.JDBCXADataSource"/>
+                        <property name="url" value="jdbc:hsqldb:mem:testDb"/>
+                        <property name="user" value="sa"/>
+                        <property name="password" value=""/>
+                    </bean>
+                </property>
+                <property name="maxPoolSize" value="${brp.bevraging.database.maxpool:20}"/>
+                <property name="minPoolSize" value="${brp.bevraging.database.minpool:1}"/>
+            </bean>
+        </beans>
+
+        <!--<beans profile="!memoryDS">-->
+        <!--<bean name="syncDalDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">-->
+        <!--<property name="driverClassName" value="${jdbc.driverClassName}"/>-->
+        <!--<property name="url" value="${jdbc.url}"/>-->
+        <!--<property name="username" value="${jdbc.username}"/>-->
+        <!--<property name="password" value="${jdbc.password}"/>-->
+        <!--</bean>-->
+
+        <!--<bean id="bijhoudingDalJpaVendorAdapter"-->
+        <!--class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">-->
+        <!--<property name="showSql" value="false"/>-->
+        <!--<property name="generateDdl" value="false"/>-->
+        <!--<property name="database" value="POSTGRESQL"/>-->
+        <!--<property name="databasePlatform" value="org.hibernate.dialect.PostgreSQL9Dialect"/>-->
+        <!--</bean>-->
+        <!--</beans>-->
+
+        <beans>
+            <bean id="bijhoudingEntityManagerFactory"
+                  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean" depends-on="brpBijhoudingTransactionManager">
+                <property name="persistenceUnitName" value="BijhoudingEntities"/>
+                <property name="jtaDataSource" ref="brpBijhoudingDataSource"/>
+                <property name="jpaVendorAdapter" ref="bijhoudingDalJpaVendorAdapter"/>
+                <property name="jpaProperties">
+                    <props>
+                        <prop key="hibernate.transaction.jta.platform">nl.bzk.algemeenbrp.jta.AtomikosJtaPlatform</prop>
+                        <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                        <prop key="hibernate.cache.use_query_cache">false</prop>
+                        <prop key="hibernate.generate_statistics">true</prop>
+                        <prop key="hibernate.connection.release_mode">after_transaction</prop>
+                        <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                    </props>
+                </property>
+            </bean>
+
+            <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
+                <property name="startupTransactionService" value="false"/>
+                <property name="forceShutdown" value="true"/>
+            </bean>
+
+            <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp"/>
+
+            <!-- Spring TM -->
+            <bean name="brpBijhoudingTransactionManager,masterTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+                <property name="transactionManager" ref="atomikosTransactionManager"/>
+                <property name="userTransaction" ref="atomikosUserTransaction"/>
+                <property name="transactionManagerName" value="bijhoudingTM"/>
+            </bean>
+        </beans>
+    </beans>
+</beans>

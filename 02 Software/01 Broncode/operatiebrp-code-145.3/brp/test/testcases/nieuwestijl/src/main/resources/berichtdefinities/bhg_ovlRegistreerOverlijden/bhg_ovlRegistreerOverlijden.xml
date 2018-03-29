@@ -1,0 +1,131 @@
+<brp:bhg_ovlRegistreerOverlijden xmlns:brp="http://www.bzk.nl/brp/brp0200">
+    <brp:stuurgegevens brp:communicatieID="${stuurgegevens.communicatieID}">
+        <brp:zendendePartij>${stuurgegevens.zendendePartij}</brp:zendendePartij>
+        <brp:zendendeSysteem>${stuurgegevens.zendendeSysteem}</brp:zendendeSysteem>
+        <brp:referentienummer>${stuurgegevens.referentienummer}</brp:referentienummer>
+        <brp:tijdstipVerzending>${stuurgegevens.tijdstipVerzending}</brp:tijdstipVerzending>
+    </brp:stuurgegevens>
+    <brp:parameters brp:communicatieID="${parameters.communicatieID}">
+        <brp:verwerkingswijze>${parameters.verwerkingswijze}</brp:verwerkingswijze>
+    </brp:parameters>
+    <!--You have a CHOICE of the next 2 items at this level-->
+    <brp:overlijdenInNederland brp:communicatieID="${overlijdenInNederland.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${overlijdenInNederland.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${overlijdenInNederland.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list overlijdenInNederland.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+                <!--Optional:-->
+                <brp:elementNaam>${gedeblokkeerdeMelding.elementNaam}</brp:elementNaam>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list overlijdenInNederland.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="AdministratieveHandelingBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieOverlijden = overlijdenInNederland.acties.registratieOverlijden]
+            <brp:registratieOverlijden brp:communicatieID="${registratieOverlijden.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieOverlijden.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieOverlijden.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${registratieOverlijden.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieOverlijden.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:overlijden brp:communicatieID="${registratieOverlijden.persoon.overlijden.communicatieID}">
+                        <brp:datum>${registratieOverlijden.persoon.overlijden.datum}</brp:datum>
+                        <!--Optional:-->
+                        <brp:gemeenteCode>${registratieOverlijden.persoon.overlijden.gemeenteCode}</brp:gemeenteCode>
+                        <!--Optional:-->
+                        <brp:woonplaatsnaam>${registratieOverlijden.persoon.overlijden.woonplaatsnaam}</brp:woonplaatsnaam>
+                    </brp:overlijden>
+                </brp:persoon>
+            </brp:registratieOverlijden>
+        </brp:acties>
+    </brp:overlijdenInNederland>
+    <brp:overlijdenInBuitenland brp:communicatieID="${overlijdenInBuitenland.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${overlijdenInBuitenland.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${overlijdenInBuitenland.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list overlijdenInBuitenland.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+                <!--Optional:-->
+                <brp:elementNaam>${gedeblokkeerdeMelding.elementNaam}</brp:elementNaam>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list overlijdenInBuitenland.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="AdministratieveHandelingBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieOverlijden = overlijdenInBuitenland.acties.registratieOverlijden]
+            <brp:registratieOverlijden brp:communicatieID="${registratieOverlijden.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieOverlijden.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieOverlijden.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${registratieOverlijden.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieOverlijden.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:overlijden brp:communicatieID="${registratieOverlijden.persoon.overlijden.communicatieID}">
+                        <brp:datum>${registratieOverlijden.persoon.overlijden.datum}</brp:datum>
+                        <!--Optional:-->
+                        <brp:buitenlandsePlaats>${registratieOverlijden.persoon.overlijden.buitenlandsePlaats}</brp:buitenlandsePlaats>
+                        <!--Optional:-->
+                        <brp:buitenlandseRegio>${registratieOverlijden.persoon.overlijden.buitenlandseRegio}</brp:buitenlandseRegio>
+                        <!--Optional:-->
+                        <brp:omschrijvingLocatie>${registratieOverlijden.persoon.overlijden.omschrijvingLocatie}</brp:omschrijvingLocatie>
+                        <brp:landGebiedCode>${registratieOverlijden.persoon.overlijden.landGebiedCode}</brp:landGebiedCode>
+                    </brp:overlijden>
+                </brp:persoon>
+            </brp:registratieOverlijden>
+        </brp:acties>
+    </brp:overlijdenInBuitenland>
+</brp:bhg_ovlRegistreerOverlijden>

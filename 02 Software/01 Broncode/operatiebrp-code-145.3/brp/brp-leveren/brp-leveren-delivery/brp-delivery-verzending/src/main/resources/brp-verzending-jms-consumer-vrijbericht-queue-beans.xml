@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+             http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd">
+
+    <jms:listener-container container-type="default" connection-factory="jmsVrijBerichtQueueConnectionFactory"
+                            acknowledge="transacted" destination-type="queue"
+                            concurrency="${verzending.jms.concurrency}" transaction-manager="jmsVrijBerichtQueueTransactionManager">
+        <jms:listener
+                destination="#{T(nl.bzk.brp.domain.internbericht.vrijbericht.VrijBerichtGegevensQueue).NAAM.queueNaam}"
+                ref="jmsVrijBerichtQueueMessageListener"/>
+    </jms:listener-container>
+
+
+    <bean id="jmsVrijBerichtQueueTransactionManager"
+          class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="jmsVrijBerichtQueueConnectionFactory"/>
+        <property name="validateExistingTransaction" value="true"/>
+    </bean>
+
+    <bean id="jmsVrijBerichtQueueConnectionFactory"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsVrijBerichtQueueActiveMQConnectionFactory"/>
+        <property name="sessionCacheSize" value="10"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsVrijBerichtQueueActiveMQConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${brp.jms.client.url}"/>
+        <property name="clientIDPrefix" value="verzending-vrijberichtqueue"/>
+        <property name="connectionIDPrefix" value="verzending-vrijberichtqueue"/>
+        <property name="nonBlockingRedelivery" value="false"/>
+        <property name="redeliveryPolicy">
+            <bean class="org.apache.activemq.RedeliveryPolicy">
+                <property name="maximumRedeliveries" value="0" />
+            </bean>
+        </property>
+    </bean>
+
+
+    <bean id="jmsVrijBerichtQueueMessageListener" class="nl.bzk.brp.delivery.verzending.VrijBerichtQueueMessageListener"/>
+
+</beans>

@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--<beans profile="!memoryDS">-->
+    <!--<context:property-placeholder location="classpath:datasource.properties,classpath:alp.properties"/>-->
+    <!--</beans>-->
+    <!--<beans profile="memoryDS">-->
+    <!--<context:property-placeholder location="classpath:inmemory.properties,classpath:alp.properties"/>-->
+    <!--</beans>-->
+
+    <beans>
+        <bean name="masterDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+            <property name="uniqueResourceName">
+                <!--
+                 | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+                 | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+                  -->
+                <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                    <property name="baseName" value="brpLeveringDatabase"/>
+                </bean>
+            </property>
+            <property name="xaDataSourceClassName" value="org.hsqldb.jdbc.pool.JDBCXADataSource"/>
+            <property name="xaProperties">
+                <bean class="nl.bzk.algemeenbrp.jta.database.XAPropertiesAdapter">
+                    <property name="driver" value="org.hsqldb.jdbc.pool.JDBCXADataSource"/>
+                    <property name="url" value="jdbc:hsqldb:mem:testDb"/>
+                    <property name="user" value="sa"/>
+                    <property name="password" value=""/>
+                </bean>
+            </property>
+            <property name="maxPoolSize" value="${brp.bevraging.database.maxpool:20}"/>
+            <property name="minPoolSize" value="${brp.bevraging.database.minpool:1}"/>
+        </bean>
+
+        <bean id="hibernateLoggingPropInitializer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+            <property name="targetObject" value="#{@systemProperties}"/>
+            <property name="targetMethod" value="putAll"/>
+            <property name="arguments">
+                <props>
+                    <prop key="org.jboss.logging.provider">slf4j</prop>
+                </props>
+            </property>
+        </bean>
+
+        <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            <property name="database" value="HSQL"/>
+            <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+        </bean>
+
+        <bean id="entityManagerFactoryMaster" name="nl.bzk.brp.master" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+              depends-on="hibernateLoggingPropInitializer, masterTransactionManager">
+            <property name="persistenceUnitName" value="nl.bzk.brp.master"/>
+            <property name="jtaDataSource" ref="masterDataSource"/>
+            <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.transaction.jta.platform">nl.bzk.algemeenbrp.jta.AtomikosJtaPlatform</prop>
+                    <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                    <prop key="hibernate.cache.use_query_cache">false</prop>
+                    <prop key="hibernate.generate_statistics">false</prop>
+                    <prop key="hibernate.connection.release_mode">after_transaction</prop>
+                    <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                    <prop key="hibernate.ejb.entitymanager_factory_name">nl.bzk.brp.master</prop>
+                </props>
+            </property>
+        </bean>
+
+        <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
+            <property name="startupTransactionService" value="false"/>
+            <property name="forceShutdown" value="true"/>
+        </bean>
+
+        <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp"/>
+
+        <!-- Spring TM -->
+        <bean name="masterTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+            <property name="transactionManager" ref="atomikosTransactionManager"/>
+            <property name="userTransaction" ref="atomikosUserTransaction"/>
+            <property name="transactionManagerName" value="leveringTM"/>
+        </bean>
+
+        <context:component-scan base-package="nl.bzk.brp.delivery.dataaccess.bevraging"/>
+        <context:component-scan base-package="nl.bzk.brp.delivery.dataaccess.levering"/>
+
+        <bean name="jmxdomein" class="java.lang.String">
+            <constructor-arg value="test"/>
+        </bean>
+
+        <!-- Levering -->
+        <import resource="classpath:levering-kern-algemeen.xml"/>
+        <import resource="classpath:gba-algemeen-beans.xml"/>
+        <import resource="classpath:lo3-conversie-beans.xml"/>
+    </beans>
+</beans>

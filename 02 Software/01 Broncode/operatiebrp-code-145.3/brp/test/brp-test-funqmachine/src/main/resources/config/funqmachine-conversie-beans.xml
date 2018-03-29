@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+    <alias name="lezenSchrijvenDataSource" alias="syncDalDataSource"/>
+
+    <context:annotation-config/>
+    <!--<context:component-scan base-package="nl.bzk.brp.testrunner.component.services.gbasync"/>-->
+
+    <import resource="classpath:conversie-beans.xml"/>
+    <import resource="classpath:synchronisatie-dal.xml"/>
+
+    <bean class="nl.bzk.brp.funqmachine.processors.conversie.ConversieDataVullerImpl"/>
+
+    <!-- Configuratie voor beide profielen -->
+    <!-- Construct Atomikos UserTransactionService, needed to specify Atomikos settings -->
+    <bean id="atomikosUserTransactionService" class="com.atomikos.icatch.config.UserTransactionServiceImp"
+          init-method="init" destroy-method="shutdownForce">
+        <constructor-arg>
+            <!-- IMPORTANT: specify all Atomikos properties here -->
+            <props>
+                <prop key="com.atomikos.icatch.service">com.atomikos.icatch.standalone.UserTransactionServiceFactory</prop>
+                <prop key="com.atomikos.icatch.tm_unique_name">transactionmanager_${atomikos_unique_name}_conv</prop>
+                <prop key="com.atomikos.icatch.log_base_name">transactionlog_${atomikos_unique_name}_conv</prop>
+                <prop key="com.atomikos.icatch.log_base_dir">target/atomikosconversie</prop>
+                <prop key="com.atomikos.icatch.output_dir">target/</prop>
+            </props>
+        </constructor-arg>
+    </bean>
+
+    <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init"
+          destroy-method="close" depends-on="atomikosUserTransactionService">
+        <!-- IMPORTANT: disable startup because the userTransactionService above does this -->
+        <property name="startupTransactionService" value="false"/>
+
+        <!--  when close is called, should we force transactions to terminate or not? -->
+        <property name="forceShutdown" value="true"/>
+    </bean>
+
+    <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp"
+          depends-on="atomikosUserTransactionService">
+        <property name="transactionTimeout" value="3600"/>
+    </bean>
+
+    <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+    <bean id="syncDalTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager" ref="atomikosTransactionManager"/>
+        <property name="userTransaction" ref="atomikosUserTransaction"/>
+    </bean>
+
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <property name="database" value="POSTGRESQL"/>
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQL9Dialect"/>
+    </bean>
+
+    <bean name="syncDalJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <property name="databasePlatform" value="${database.dialect:org.hibernate.dialect.PostgreSQL82Dialect}"/>
+    </bean>
+
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+
+</beans>

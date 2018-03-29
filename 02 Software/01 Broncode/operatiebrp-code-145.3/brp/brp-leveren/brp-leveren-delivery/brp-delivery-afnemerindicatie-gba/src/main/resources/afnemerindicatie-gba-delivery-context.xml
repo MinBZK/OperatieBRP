@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:property-placeholder ignore-resource-not-found="false"
+                                  location="classpath*:brp-*.properties"/>
+
+    <tx:annotation-driven/>
+
+    <import resource="classpath:alg-util-common-logging.xml"/>
+    <!--
+    <import resource="classpath:delivery-algemeen-beans.xml"/>
+    -->
+    <context:component-scan base-package="nl.bzk.brp.delivery.algemeen">
+        <context:exclude-filter type="regex" expression="nl\.bzk\.brp\.delivery\.algemeen\.MaakPersoonBerichtServiceImpl" />
+    </context:component-scan>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <!--
+    <import resource="classpath:afnemerindicatie-beans.xml"/>
+    -->
+    <context:component-scan base-package="nl.bzk.brp.service.afnemerindicatie">
+        <context:exclude-filter type="regex" expression="nl\.bzk\.brp\.service\.afnemerindicatie\.OnderhoudAfnemerindicatiePersoonBerichtFactoryImpl" />
+    </context:component-scan>
+    <import resource="classpath:archivering-service-algemeen-context.xml"/>
+    <import resource="classpath:archivering-delivery-dal-jta-context.xml"/>
+
+    <import resource="classpath:delivery-jms-afnemer-beans.xml"/>
+    <import resource="classpath:maakbericht-service-beans.xml"/>
+    <import resource="classpath:lo3-conversie-beans.xml"/>
+    <import resource="classpath:gba-service-beans.xml"/>
+
+    <import resource="afnemerindicatie-gba-delivery-datasource.xml"/>
+    <import resource="afnemerindicatie-gba-delivery-em.xml"/>
+    <import resource="afnemerindicatie-gba-delivery-jms.xml"/>
+    <import resource="afnemerindicatie-gba-delivery-jta.xml"/>
+
+    <context:annotation-config/>
+    <context:component-scan base-package="nl.bzk.brp.delivery.dataaccess.levering"/>
+    <context:component-scan base-package="nl.bzk.brp.delivery.afnemerindicatie.gba"/>
+    <context:component-scan base-package="nl.bzk.brp.delivery.afnemerindicatie.gba.berichten"/>
+
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="afnemerindicatie-gba"/>
+    </bean>
+</beans>

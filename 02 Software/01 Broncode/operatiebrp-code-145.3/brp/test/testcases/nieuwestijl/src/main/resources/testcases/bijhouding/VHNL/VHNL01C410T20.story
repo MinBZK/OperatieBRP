@@ -1,0 +1,28 @@
+Meta:
+@status                 Klaar
+@usecase                UCS-BY.HG
+
+
+Narrative: Waarschuwing indien de gerelateerde gegevens van een persoon wijzigen en deze persoon voorkomt als een pseudo-persoon op de persoonslijst van een ander.
+
+Scenario:   1. DB init scenario om uitgangssituatie te zetten
+            preconditie
+
+Given alle personen zijn verwijderd
+
+Scenario: 2. Wijziging geslachtsnaam van persoon bij voltrekking huwelijk waarbij persoon al als pseudo persoon in DB staat, alleen Anr komt overeen
+          LT: VHNL01C410T20
+
+Given enkel initiele vulling uit bestand /LO3PL/VHNL01C410T20-001.xls
+Given enkel initiele vulling uit bestand /LO3PL/VHNL01C410T20-002.xls
+Given enkel initiele vulling uit bestand /LO3PL/VHNL01C410T20-003.xls
+
+When voer een bijhouding uit VHNL01C410T20.xml namens partij 'Gemeente BRP 1'
+
+Then heeft het antwoordbericht verwerking Geslaagd
+Then is het antwoordbericht gelijk aan /testcases/bijhouding/VHNL/expected/VHNL01C410T20.xml voor expressie //brp:bhg_hgpRegistreerHuwelijkGeregistreerdPartnerschap_R
+
+
+Then is in de database de persoon met bsn 551694889 wel als PARTNER betrokken bij een HUWELIJK
+Then is in de database de persoon met bsn 326006217 wel als PARTNER betrokken bij een HUWELIJK
+

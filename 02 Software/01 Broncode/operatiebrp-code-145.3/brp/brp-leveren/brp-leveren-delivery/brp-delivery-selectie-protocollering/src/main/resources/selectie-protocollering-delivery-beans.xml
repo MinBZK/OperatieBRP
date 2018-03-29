@@ -1,0 +1,34 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <context:component-scan base-package="nl.bzk.brp.service.selectie.protocollering"/>
+    <context:component-scan base-package="nl.bzk.brp.service.selectie.algemeen"/>
+
+    <context:property-placeholder location="classpath*:brp-*.properties"/>
+
+    <task:annotation-driven/>
+
+    <bean name="jobScheduler" class="nl.bzk.brp.delivery.selectie.protocollering.SelectieProtocolleringScheduler"
+          lazy-init="false"/>
+
+    <bean name="jmxSupportSelectieJob" class="nl.bzk.brp.delivery.selectie.protocollering.SelectieProtocolleringJMXAgent"
+          lazy-init="false"/>
+
+    <import resource="classpath:delivery-dataaccess-beans.xml"/>
+    <import resource="classpath:delivery-algemeen-beans.xml"/>
+    <import resource="classpath:levering-kern-algemeen.xml"/>
+    <import resource="classpath:protocollering-service-algemeen-context.xml"/>
+    <import resource="classpath:protocollering-delivery-dal-non-jta-context.xml"/>
+    <import resource="classpath:selectie-fileaccess-delivery-beans.xml"/>
+
+    <import resource="classpath:alg-util-jmx-beans.xml" />
+    <bean name="jmxdomein" class="java.lang.String">
+        <constructor-arg value="selectie-protocollering"/>
+    </bean>
+
+</beans>

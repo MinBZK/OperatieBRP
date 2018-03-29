@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %X - %msg%n"/>
+        </Console>
+        <RollingFile name="Systeem" fileName="target/logs/brp-systeem.log"
+                     filePattern="target/logs/brp-systeem-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %X - %msg%n"/>
+            <TimeBasedTriggeringPolicy />
+        </RollingFile>
+        <BrpLoggingAppender name="BrpLoggingAppender">
+
+        </BrpLoggingAppender>
+    </Appenders>
+
+    <Loggers>
+
+        <Root level="ERROR">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Systeem"/>
+
+        </Root>
+
+        <logger name="nl.bzk.brp.dockertest" level="INFO"/>
+        <logger name="org.springframework.jdbc.core.JdbcTemplate" level="INFO"/>
+
+        <logger name="org.springframework" level="INFO"/>
+        <logger name="org.hibernate" level="ERROR"/>
+        <logger name="com.atomikos" level="ERROR"/>
+        <logger name="org.jbehave" level="INFO"/>
+
+    </Loggers>
+</Configuration>

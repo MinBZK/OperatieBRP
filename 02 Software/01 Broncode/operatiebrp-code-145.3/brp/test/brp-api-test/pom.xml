@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.algemeenbrp</groupId>
+        <artifactId>alg</artifactId>
+        <version>145.3</version>
+        <relativePath>../../../algemeen/alg</relativePath>
+    </parent>
+
+    <groupId>nl.bzk.brp</groupId>
+    <artifactId>brp-api-test</artifactId>
+    <packaging>jar</packaging>
+
+    <name>BRP API TEST</name>
+
+
+    <properties>
+        <jbehave.version>4.1</jbehave.version>
+    </properties>
+
+    <!--
+        <properties>
+            <language-level>1.7</language-level>
+            <embeddables>**/RelaterenStories.java</embeddables>
+            <meta.filter></meta.filter>
+            <threads>1</threads>
+            <ignore.failure.in.stories>true</ignore.failure.in.stories>
+            <ignore.failure.in.view>true</ignore.failure.in.view>
+        </properties>
+    -->
+
+    <dependencies>
+
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>brp-api-testtool</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.properties</groupId>
+            <artifactId>brp-test-properties</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>nl.bzk.brp.excel2blob</groupId>
+            <artifactId>blob-oranje</artifactId>
+            <version>${blob.oranje.version}</version>
+            <classifier>blob-oranje</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.excel2blob</groupId>
+            <artifactId>blob-specials</artifactId>
+            <version>${blob.specials.version}</version>
+            <classifier>blob-specials</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.excel2blob</groupId>
+            <artifactId>blob-bijhouding-BIJHOUDING</artifactId>
+            <version>${blob.bijhouding.bijhouding.version}</version>
+        </dependency>
+
+
+    </dependencies>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>**/*IT*.java</exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jbehave</groupId>
+                <artifactId>jbehave-maven-plugin</artifactId>
+                <version>${jbehave.version}</version>
+                <executions>
+                    <execution>
+                        <id>unpack-view-resources</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>unpack-view-resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>log4j-plugin-processor</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <proc>only</proc>
+                            <annotationProcessors>
+                                <annotationProcessor>org.apache.logging.log4j.core.config.plugins.processor.PluginProcessor</annotationProcessor>
+                            </annotationProcessors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

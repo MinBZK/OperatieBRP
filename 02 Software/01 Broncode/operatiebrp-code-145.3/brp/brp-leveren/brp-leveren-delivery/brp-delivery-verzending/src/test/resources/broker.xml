@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://activemq.apache.org/schema/core"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+    ">
+
+    <broker id="afnemerBrokerBroker" brokerName="afnemerBrokerBroker"
+        useShutdownHook="false" useJmx="true" persistent="false"
+        xmlns="http://activemq.apache.org/schema/core" schedulerSupport="true">
+
+        <transportConnectors>
+            <transportConnector name="tcp" uri="${jms.broker.afnemers.url}" />
+        </transportConnectors>
+
+        <!-- Test queues -->
+        <destinations>
+            <queue physicalName="testAfnemer1" />
+            <queue physicalName="testAfnemer2" />
+            <queue physicalName="testAfnemer3" />
+        </destinations>
+
+        <managementContext>
+            <managementContext connectorPort="10999" />
+        </managementContext>
+    </broker>
+
+    <connectionFactory id="testConnectionFactory" brokerURL="${jms.broker.afnemers.url}"/>
+
+    <queue id="AHQueue" physicalName="#{T(nl.bzk.brp.admhndpublicatie.AdmhndPublicatieQueue).ADMHND_PUBLICATIE_QUEUE.queueNaam}"/>
+
+    <beans:bean id="senderJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <beans:property name="connectionFactory" ref="testConnectionFactory"/>
+        <beans:property name="defaultDestination" ref="AHQueue"/>
+    </beans:bean>
+
+</beans:beans>
