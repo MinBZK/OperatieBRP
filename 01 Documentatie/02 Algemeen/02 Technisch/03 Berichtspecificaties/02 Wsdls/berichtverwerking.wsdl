@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="brpBerichtVerwerker"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:brp="http://www.bzk.nl/brp/brp0200"
+                  xmlns:tns="http://www.bzk.nl/brp/levering/berichtverwerking/service"
+                  targetNamespace="http://www.bzk.nl/brp/levering/berichtverwerking/service">
+
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://www.bzk.nl/brp/brp0200">
+            <xsd:include schemaLocation="../xsd/BRP0200/brp0200_lvgSynchronisatie_Berichten.xsd"/>
+            <xsd:include schemaLocation="../xsd/BRP0200/brp0200_bhgSysteemhandeling_Berichten.xsd"/>
+            <xsd:include schemaLocation="../xsd/BRP0200/brp0200_vrbVrijBericht_Berichten.xsd"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <!-- Synchronisatie bericht (volledigbericht of mutatiebericht) over een persoon -->
+    <wsdl:message name="lvg_synVerwerkPersoon">
+        <wsdl:part element="brp:lvg_synVerwerkPersoon" name="verwerkPersoon"/>
+    </wsdl:message>
+
+    <!-- Notificatiebericht -->
+    <wsdl:message name="bhg_sysVerwerkBijhoudingsplan">
+        <wsdl:part element="brp:bhg_sysVerwerkBijhoudingsplan" name="verwerkBijhoudingsplan"/>
+    </wsdl:message>
+
+    <!-- Vrij Bericht -->
+    <wsdl:message name="vrb_vrbVerwerkVrijBericht">
+        <wsdl:part element="brp:vrb_vrbVerwerkVrijBericht" name="verwerkVrijBericht"/>
+    </wsdl:message>
+
+    <wsdl:portType name="lvgSynchronisatieVerwerking">
+        <!-- VolledigBericht of mutatiebericht verwerken -->
+        <wsdl:operation name="verwerkPersoon">
+            <wsdl:input message="tns:lvg_synVerwerkPersoon"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:portType name="bhgBijhoudingsplanVerwerking">
+        <wsdl:operation name="verwerkBijhoudingsplan">
+            <wsdl:input message="tns:bhg_sysVerwerkBijhoudingsplan"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:portType name="vrbVrijBerichtVerwerking">
+        <wsdl:operation name="verwerkVrijBericht">
+            <wsdl:input message="tns:vrb_vrbVerwerkVrijBericht"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="SynchronisatieBinding" type="tns:lvgSynchronisatieVerwerking">
+        <soap:binding style="document"
+                      transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="verwerkPersoon">
+            <soap:operation soapAction="verwerkSynchronisatiePersoon"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:binding name="BijhoudingsplanVerwerkingBinding" type="tns:bhgBijhoudingsplanVerwerking">
+        <soap:binding style="document"
+                      transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="verwerkBijhoudingsplan">
+            <soap:operation soapAction="verwerkBijhoudingsplan"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:binding name="VrijBerichtVerwerkingBinding" type="tns:vrbVrijBerichtVerwerking">
+        <soap:binding style="document"
+                      transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="verwerkVrijBericht">
+            <soap:operation soapAction="verwerkVrijBericht"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="BrpBerichtVerwerkingService">
+        <wsdl:port binding="tns:SynchronisatieBinding" name="lvgSynchronisatieVerwerking">
+            <soap:address location="http://localhost:8080/brp-kennisgeving-ontvanger/BrpBerichtVerwerkingService"/>
+        </wsdl:port>
+        <wsdl:port binding="tns:BijhoudingsplanVerwerkingBinding" name="bhgBijhoudingsplanVerwerking">
+            <soap:address location="http://localhost:8080/brp-kennisgeving-ontvanger/BrpBerichtVerwerkingService"/>
+        </wsdl:port>
+        <wsdl:port binding="tns:VrijBerichtVerwerkingBinding" name="vrbVrijBerichtVerwerking">
+            <soap:address location="http://localhost:8080/brp-kennisgeving-ontvanger/BrpBerichtVerwerkingService"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>
+

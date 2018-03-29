@@ -1,0 +1,31 @@
+BMR versie 59, 17 juli 2017
+===========================
+LET OP: deze BMR release is nog niet geimplementeerd in de programmacode. De programmacode werkt met BMR versie 58. BMR versie 58 is opgeleverd als onderdeel van de programmacode onder 'database-code'.
+
+In deze release zijn opgenomen:
+* Release notes.txt
+Een tekstuele beschrijving van de in deze release doorgevoerde wijzigingen.
+
+* Database wijzigingen.txt
+De specifieke wijzigingen die doorgevoerd zijn in de database. Dit is dus het concrete resultaat van de acties die benoemd zijn in de releasenotes.
+
+* SQL\Postgres
+Met de inhoud van deze folder kunnen de databases van de BRP worden gegenereerd en gevuld. De BRP_* scripts maken 3 databases. Deze 3 databases kunnen binnen in 1 'fysieke' database bestaan. Voer om de 3 databases te maken de 3 hoofdscripts uit (BRP_Kern.sql, BRP_Ber.sql en BRP_Lev.sql). Voer vervolgens op iedere 'fysieke' database het BRP_Alg.sql script uit.
+
+Naast de BRP database is er een een database voor de ActiveMQ persistency. Deze database wordt gemaakt met het ActiveMQ.sql script.
+
+Voorbeeld aanroep (vanuit de SQL directory):
+export PGOPTIONS='-c client_min_messages=WARNING'
+psql --no-psqlrc -h brp-db03.modernodam.nl -U postgres --dbname="<databasenaam>" --file=BRP_init_database.sql --log-file=BRP_init_database_log.log --output=BRP_init_database_output.log
+psql --no-psqlrc -h brp-db03.modernodam.nl -U postgres --dbname="<databasename>" --file=BRP_Kern.sql --log-file=BRP_Kern_log.log --output=BRP_Kern_output.log
+psql --no-psqlrc -h brp-db03.modernodam.nl -U postgres --dbname="<databasename>" --file=BRP_Ber.sql --log-file=BRP_Ber_log.log --output=BRP_Ber_output.log
+psql --no-psqlrc -h brp-db03.modernodam.nl -U postgres --dbname="<databasename>" --file=BRP_Lev.sql --log-file=BRP_Lev_log.log --output=BRP_Lev_output.log
+psql --no-psqlrc -h brp-db03.modernodam.nl -U postgres --dbname="<databasename>" --file=BRP_Alg.sql --log-file=BRP_Alg_log.log --output=BRP_Alg_output.log
+psql --no-psqlrc -h brp-db03.modernodam.nl -U postgres --dbname="<databasename>" --file=ActiveMQ.sql --log-file=ActiveMQ_log.log --output=ActiveMQ_output.log
+
+Zie de 'How To - Installatie database scripts' voor meer informatie.
+
+* SQL\HSQLDB
+Een HSQLDB compatible script (vrijwel) alle elementen bevat van de Postgres scripts. Dit script is getest met het volgende commando:
+
+java -Dfile.encoding=UTF-8 -jar lib\sqltool.jar mem HQLDB.sql

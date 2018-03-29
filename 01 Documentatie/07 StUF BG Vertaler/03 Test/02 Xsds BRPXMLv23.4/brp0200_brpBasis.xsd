@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 09-08-2016 -->
+<!-- ... -->
+<!-- Openstaand punt: -->
+<!-- 1) Per bijhoudingsmodule complexType 'Bijgehouden personen' als opgenomen in BijhoudingBasis vervangen door deze versie in BrpBasis -->
+<!-- ... -->
+<!-- Wijzigingen: -->
+<!-- 1) Wijziging complexType 'Meldingen'; XML-attribuut 'referentieID' is verplicht -->
+<!-- 2) Wijziging naam complexType 'BijgehoudenPersoon_Brp' naar 'Objecttye_BijgehoudenPersoon_Brp'; xsd-verbetering -->
+<!-- 3) Wijziging gebruik XML-attribuut 'referentieID' bij 'BijgehoudenPersonen; is nu prohibited -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020003">
+	<include schemaLocation="brp0200_brpObjecttypen.xsd"/>
+	<!-- ... -->
+	<!-- Berichtelementen BRP die voor meerdere koppelvlakken een rol spelen. -->
+	<!-- ... -->
+	<!-- Stuurgegevens berichten - Synchroon verzoek -->
+	<complexType name="Stuurgegevens_SynchroonVerzoek">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtStuurgegevens">
+				<sequence>
+					<element name="zendendePartij" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="zendendeSysteem" type="brp:SysteemNaam" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="referentienummer" type="brp:Referentienummer" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="tijdstipVerzending" type="brp:DatumTijd" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Stuurgegevens berichten - Synchroon response -->
+	<complexType name="Stuurgegevens_SynchroonResultaat">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtStuurgegevens">
+				<sequence>
+					<element name="zendendePartij" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="zendendeSysteem" type="brp:SysteemNaam" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="referentienummer" type="brp:Referentienummer" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="crossReferentienummer" type="brp:Referentienummer" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="tijdstipVerzending" type="brp:DatumTijd" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="prohibited"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Stuurgegevens berichten - Asynchroon -->
+	<complexType name="Stuurgegevens_AsynchroonResultaat">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtStuurgegevens">
+				<sequence>
+					<element name="zendendePartij" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="zendendeSysteem" type="brp:SysteemNaam" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="ontvangendePartij" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="ontvangendeSysteem" type="brp:SysteemNaam" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="referentienummer" type="brp:Referentienummer" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="tijdstipVerzending" type="brp:DatumTijd" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="prohibited"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Berichtmeldingen; in gebruik bij administratieve handelingen en diensten -->
+	<complexType name="Container_BerichtMeldingen_Brp">
+		<complexContent>
+			<restriction base="brp:Container_BerichtMeldingen">
+				<sequence>
+					<choice>
+						<element name="melding" type="brp:Objecttype_Melding_Brp" nillable="false" minOccurs="1" maxOccurs="unbounded"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Melding_Brp">
+		<complexContent>
+			<restriction base="brp:Objecttype_Melding">
+				<sequence>
+					<element name="regelCode" type="brp:RegelCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="soortNaam" type="brp:SoortMeldingNaam" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="melding" type="brp:Meldingtekst" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Melding"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited" />
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="prohibited"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Bijgehouden personen; in gebruik bij administratieve handelingen en dienst plaatsing/verwijdering afnemerindicatie -->
+	<complexType name="Container_AdministratieveHandelingBijgehoudenPersonen_Brp">
+		<complexContent>
+			<restriction base="brp:Container_AdministratieveHandelingBijgehoudenPersonen">
+				<sequence>
+					<choice>
+						<element name="persoon" type="brp:Objecttype_BijgehoudenPersoon_Brp" nillable="false" minOccurs="1" maxOccurs="unbounded"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_BijgehoudenPersoon_Brp">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="identificatienummers" type="brp:Groep_PersoonIdentificatienummers_BijgehoudenPersoon_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited" />
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="prohibited"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonIdentificatienummers_BijgehoudenPersoon_Brp">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonIdentificatienummers">
+				<sequence>
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited" />
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="prohibited"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

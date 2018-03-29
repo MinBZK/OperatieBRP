@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 22-11-2016 -->
+<!-- ... -->
+<!-- Wijzigingen: -->
+<!-- 1) OT AdministratieveHandeling: -->
+<!--     - element 'Code' vervallen -->
+<!--     - naamswijziging elementen 'naam' en 'categorie' in resp. 'soortNaam' en 'categorieNaam' -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020007">
+	<include schemaLocation="brp0200_lvgSynchronisatie_Basis.xsd"/>
+	<element name="lvg_synVerwerkPersoon" type="brp:Synchronisatie_VerwerkPersoon"/>
+	<element name="lvg_synVerwerkStamgegeven" type="brp:Synchronisatie_VerwerkStamgegeven"/>
+	<element name="lvg_synGeefSynchronisatiePersoon" type="brp:Synchronisatie_GeefSynchronisatiePersoon_Verzoek"/>
+	<element name="lvg_synGeefSynchronisatiePersoon_R" type="brp:Synchronisatie_GeefSynchronisatiePersoon_Resultaat"/>
+	<element name="lvg_synGeefSynchronisatieStamgegeven" type="brp:Synchronisatie_GeefSynchronisatieStamgegeven_Verzoek"/>
+	<element name="lvg_synGeefSynchronisatieStamgegeven_R" type="brp:Synchronisatie_GeefSynchronisatieStamgegeven_Resultaat"/>
+	<!-- ... -->
+	<!-- SynchronisatieResultaat: Mutatie- of Volledigbericht Persoon -->
+	<complexType name="Synchronisatie_VerwerkPersoon">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_AsynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Synchronisatie" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="synchronisatie" type="brp:Objecttype_AdministratieveHandeling_Synchronisatie" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_AdministratieveHandeling_Synchronisatie">
+		<complexContent>
+			<restriction base="brp:Objecttype_AdministratieveHandeling">
+				<sequence>
+					<element name="soortNaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="categorieNaam" type="brp:CategorieAdministratieveHandelingNaam" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipRegistratie" type="brp:DatumTijd" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bijgehoudenPersonen" type="brp:Container_AdministratieveHandelingBijgehoudenPersonen_Synchronisatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="optional"/>
+				<attribute ref="brp:objectSleutel" use="optional"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="optional"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_AdministratieveHandelingBijgehoudenPersonen_Synchronisatie">
+		<complexContent>
+			<restriction base="brp:Container_AdministratieveHandelingBijgehoudenPersonen">
+				<sequence>
+					<choice>
+						<element name="persoon" type="brp:Objecttype_PersoonDetails_Levering" nillable="false" minOccurs="1" maxOccurs="unbounded"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- SynchronisatieResultaat: Mutatiebericht Stamgegeven -->
+	<complexType name="Synchronisatie_VerwerkStamgegeven">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_AsynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Synchronisatie" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="stamgegevens" type="brp:Container_BerichtStamgegevens_Levering" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Verzoekbericht: Synchronisatie persoon -->
+	<complexType name="Synchronisatie_GeefSynchronisatiePersoon_Verzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_SynchronisatieLeveringsautorisatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="identificatiecriteria" type="brp:Groep_BerichtIdentificatiecriteria_SynchronisatieBurgerservicenummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Resultaatbericht: Synchronisatie persoon -->
+	<complexType name="Synchronisatie_GeefSynchronisatiePersoon_Resultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_BevragingSynchronisatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gesynchroniseerdePersonen" type="brp:Container_BerichtGesynchroniseerdePersonen_Synchronisatie" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Verzoekbericht: ynchronisatie stamgegeven -->
+	<complexType name="Synchronisatie_GeefSynchronisatieStamgegeven_Verzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_SynchronisatieStamgegeven" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Resultaatbericht: Synchronisatie stamgegeven -->
+	<complexType name="Synchronisatie_GeefSynchronisatieStamgegeven_Resultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_BevragingSynchronisatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="stamgegevens" type="brp:Container_BerichtStamgegevens_Levering" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

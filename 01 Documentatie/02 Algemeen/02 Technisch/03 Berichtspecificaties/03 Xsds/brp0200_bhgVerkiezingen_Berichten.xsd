@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 07-04-2017 -->
+<!-- -->
+<!-- Wijzigingen: -->
+<!-- 1) Naamgevingsconventies complexTypes doorgevoerd -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020004">
+	<include schemaLocation="brp0200_bhgVerkiezingen_Basis.xsd"/>
+	<!-- ... -->
+	<element name="bhg_vkzRegistreerKiesrecht" type="brp:Bijhouding_RegistreerKiesrecht_Vrkzng"/>
+	<element name="bhg_vkzRegistreerKiesrecht_R" type="brp:BijhoudingResultaat_RegistreerKiesrecht_Vrkzng"/>
+	<element name="bhg_vkzCorrigeerKiesrecht" type="brp:Bijhouding_CorrigeerKiesrecht_Vrkzng"/>
+	<element name="bhg_vkzCorrigeerKiesrecht_R" type="brp:BijhoudingResultaat_CorrigeerKiesrecht_Vrkzng"/>
+	<!-- -->
+	<!-- Bijhouidngsbericht RegistreerReisdocument -->
+	<complexType name="Bijhouding_RegistreerKiesrecht_Vrkzng">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="wijzigingUitsluitingKiesrecht" type="brp:Handeling_WijzigingUitsluitingKiesrecht_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="wijzigingDeelnameEUVerkiezingen" type="brp:Handeling_WijzigingDeelnameEUVerkiezingen_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling Wijziging uitsluiting kiesrecht -->
+	<complexType name="Handeling_WijzigingUitsluitingKiesrecht_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_WijzigingUitsluitingKiesrecht">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_WijzigingUitsluitingKiesrecht_Vrkzng" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Bijhoudingresultaatbericht Registreer Kiesrecht -->
+	<complexType name="BijhoudingResultaat_RegistreerKiesrecht_Vrkzng">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="wijzigingUitsluitingKiesrecht" type="brp:Handeling_WijzigingUitsluitingKiesrecht_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="wijzigingDeelnameEUVerkiezingen" type="brp:Handeling_WijzigingDeelnameEUVerkiezingen_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>	
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling Wijziging deelname EU verkiezingen -->
+	<complexType name="Handeling_WijzigingDeelnameEUVerkiezingen_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_WijzigingDeelnameEUVerkiezingen">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_WijzigingDeelnameEUVerkiezingen_Vrkzng" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Bijhoudingsbericht Corrigeer kiesrecht -->
+	<complexType name="Bijhouding_CorrigeerKiesrecht_Vrkzng">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="correctieKiesrecht" type="brp:Handeling_CorrectieKiesrecht_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling Correctie kiesrecht -->
+	<complexType name="Handeling_CorrectieKiesrecht_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_CorrectieKiesrecht">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnenDocument_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_CorrectieKiesrecht_Vrkzng" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Bijhoudingsresultaatbericht Corrigeer Kiesrecht -->
+	<complexType name="BijhoudingResultaat_CorrigeerKiesrecht_Vrkzng">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat_Brp" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Brp" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="correctieKiesrecht" type="brp:Handeling_CorrectieKiesrecht_BijhoudingResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>	
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

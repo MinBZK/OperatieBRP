@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="synchronisatie"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:brp="http://www.bzk.nl/brp/brp0200"
+                  xmlns:tns="http://www.bzk.nl/brp/levering/synchronisatie/service"
+                  targetNamespace="http://www.bzk.nl/brp/levering/synchronisatie/service">
+
+    <wsdl:types>
+        <xsd:schema>
+            <xsd:import schemaLocation="../xsd/BRP0200/brp0200_lvgSynchronisatie_Berichten.xsd"
+                        namespace="http://www.bzk.nl/brp/brp0200"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <!-- Synchronisatie Persoon -->
+    <wsdl:message name="GeefSynchronisatiePersoonVerzoek">
+        <wsdl:part element="brp:lvg_synGeefSynchronisatiePersoon" name="geefSynchronisatiePersoonVerzoek"/>
+    </wsdl:message>
+
+    <wsdl:message name="GeefSynchronisatiePersoonResultaat">
+        <wsdl:part element="brp:lvg_synGeefSynchronisatiePersoon_R"
+                   name="geefSynchronisatiePersoonResultaat"/>
+    </wsdl:message>
+
+    <!-- Synchronisatie Stamgegeven -->
+    <wsdl:message name="GeefSynchronisatieStamgegevenVerzoek">
+        <wsdl:part element="brp:lvg_synGeefSynchronisatieStamgegeven" name="geefSynchronisatieStamgegevenVerzoek"/>
+    </wsdl:message>
+
+    <wsdl:message name="GeefSynchronisatieStamgegevenResultaat">
+        <wsdl:part element="brp:lvg_synGeefSynchronisatieStamgegeven_R" name="geefSynchronisatieStamgegevenResultaat"/>
+    </wsdl:message>
+
+
+    <wsdl:portType name="lvgSynchronisatie">
+        <!-- Synchronisatie Persoon -->
+        <wsdl:operation name="geefSynchronisatiePersoon">
+            <wsdl:input message="tns:GeefSynchronisatiePersoonVerzoek"/>
+            <wsdl:output message="tns:GeefSynchronisatiePersoonResultaat"/>
+        </wsdl:operation>
+
+        <!-- Synchronisatie Stamgegeven -->
+        <wsdl:operation name="geefSynchronisatieStamgegeven">
+            <wsdl:input message="tns:GeefSynchronisatieStamgegevenVerzoek"/>
+            <wsdl:output message="tns:GeefSynchronisatieStamgegevenResultaat"/>
+        </wsdl:operation>
+
+    </wsdl:portType>
+
+    <wsdl:binding name="SynchronisatieBinding" type="tns:lvgSynchronisatie">
+        <soap:binding style="document"
+                      transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="geefSynchronisatiePersoon">
+            <soap:operation soapAction="geefSynchronisatiePersoon"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="geefSynchronisatieStamgegeven">
+            <soap:operation soapAction="geefSynchronisatieStamgegeven"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+
+    <wsdl:service name="SynchronisatieService">
+        <wsdl:port binding="tns:SynchronisatieBinding" name="lvgSynchronisatie">
+            <soap:address location="http://localhost:8080/synchronisatie/SynchronisatieService"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
