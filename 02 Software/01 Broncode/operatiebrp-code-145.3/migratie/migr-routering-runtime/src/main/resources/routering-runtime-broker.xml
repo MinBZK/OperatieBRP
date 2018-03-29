@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- This creates an embedded ActiveMQ Broker -->
+    <amq:broker id="routeringCentrale"
+                brokerId="routeringCentraleBroker"
+                brokerName="routeringCentrale"
+
+                advisorySupport="false"
+                useJmx="true"
+                useShutdownHook="false"
+                enableStatistics="true"
+                dedicatedTaskRunner="false"
+
+                persistent="true"
+                dataDirectory="${routering.activemq.data.directory:data/activemq-data}"
+
+                schedulerSupport="true"
+                schedulerDirectory="${routering.activemq.scheduler.directory:data/activemq-scheduler}">
+
+        <amq:destinations>
+            <amq:queue physicalName="${routering.queue.sync.verzoek:sync.verzoek}" />
+            <amq:queue physicalName="${routering.queue.sync.verzoek:sync.verzoek}.dlq" />
+            <amq:queue physicalName="${routering.queue.sync.antwoord:sync.antwoord}" />
+            <amq:queue physicalName="${routering.queue.sync.antwoord:sync.antwoord}.dlq" />
+            <amq:queue physicalName="${routering.queue.voisc.ontvangst:voisc.ontvangst}" />
+            <amq:queue physicalName="${routering.queue.voisc.ontvangst:voisc.ontvangst}.dlq" />
+            <amq:queue physicalName="${routering.queue.voisc.verzenden:voisc.verzenden}" />
+            <amq:queue physicalName="${routering.queue.voisc.verzenden:voisc.verzenden}.dlq" />
+            <amq:queue physicalName="${routering.queue.levering:levering}" />
+            <amq:queue physicalName="${routering.queue.levering:levering}.dlq" />
+            <amq:queue physicalName="${routering.queue.archivering:archivering}" />
+            <amq:queue physicalName="${routering.queue.archivering:archivering}.dlq" />
+            <amq:queue physicalName="${routering.queue.notificatie:notificatie}" />
+            <amq:queue physicalName="${routering.queue.notificatie:notificatie}.dlq" />
+
+            <!-- TODO: De register queues en topics non-persistent maken -->
+            <amq:queue physicalName="${routering.queue.gemeente.verzoek:gemeente.verzoek}" />
+            <amq:queue physicalName="${routering.queue.gemeente.verzoek:gemeente.verzoek}.dlq" />
+            <amq:topic physicalName="${routering.topic.gemeente.register:gemeente.register}" />
+
+            <amq:queue physicalName="${routering.queue.partij.verzoek:partij.verzoek}" />
+            <amq:queue physicalName="${routering.queue.partij.verzoek:partij.verzoek}.dlq" />
+            <amq:topic physicalName="${routering.topic.partij.register:partij.register}" />
+
+            <amq:queue physicalName="${routering.queue.autorisatie.verzoek:autorisatie.verzoek}" />
+            <amq:queue physicalName="${routering.queue.autorisatie.verzoek:autorisatie.verzoek}.dlq" />
+            <amq:topic physicalName="${routering.topic.autorisatie.register:autorisatie.register}" />
+        </amq:destinations>
+
+        <!-- How can this broker be reached -->
+        <amq:transportConnectors>
+            <amq:transportConnector uri="${routering.activemq.url:nio://localhost:61616}"/>
+        </amq:transportConnectors>
+
+        <!-- We don't have any other brokers to connect to -->
+        <amq:networkConnectors>
+        </amq:networkConnectors>
+
+        <!-- How do we persistently store messages -->
+        <amq:persistenceAdapter>
+            <!-- KahaDB per destination; each queue/topic has it's own store -->
+            <amq:mKahaDB directory="${routering.activemq.kahadb.directory:data/activemq-kahadb}">
+                <amq:filteredPersistenceAdapters>
+                    <amq:filteredKahaDB perDestination="true">
+                        <amq:persistenceAdapter>
+                            <amq:kahaDB preallocationStrategy="zeros" journalMaxFileLength="4 mb" />
+                        </amq:persistenceAdapter>
+                    </amq:filteredKahaDB>
+                </amq:filteredPersistenceAdapters>
+            </amq:mKahaDB>
+        </amq:persistenceAdapter>
+
+        <amq:destinationPolicy>
+            <amq:policyMap>
+                <amq:policyEntries>
+                    <amq:policyEntry queue=">" producerFlowControl="true" maxPageSize="50" maxBrowsePageSize="50" maxExpirePageSize="50" >
+                        <amq:deadLetterStrategy>
+                            <amq:individualDeadLetterStrategy queuePrefix="" queueSuffix=".dlq" useQueueForQueueMessages="true" />
+                        </amq:deadLetterStrategy>
+                    </amq:policyEntry>
+                </amq:policyEntries>
+            </amq:policyMap>
+        </amq:destinationPolicy>
+
+        <amq:managementContext>
+            <amq:managementContext createMBeanServer="false" createConnector="false"  />
+        </amq:managementContext>
+
+        <amq:systemUsage>
+            <amq:systemUsage sendFailIfNoSpaceAfterTimeout="3000">
+                <amq:memoryUsage>
+                    <amq:memoryUsage limit="${routering.activemq.memory.usage:0}"/>
+                </amq:memoryUsage>
+                <amq:storeUsage>
+                    <amq:storeUsage limit="${routering.activemq.store.usage:0}"/>
+                </amq:storeUsage>
+                <amq:tempUsage>
+                    <amq:tempUsage limit="${routering.activemq.temp.usage:0}"/>
+                </amq:tempUsage>
+            </amq:systemUsage>
+        </amq:systemUsage>
+
+        <amq:plugins>
+            <amq:redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
+                <amq:redeliveryPolicyMap>
+                    <amq:redeliveryPolicyMap>
+                        <amq:defaultEntry>
+                            <bean id="redeliveryPolicy" class="org.apache.activemq.RedeliveryPolicy">
+                                <property name="maximumRedeliveries" value="${routering.activemq.redelivery.maximum:5}" />
+                                <!--
+                                <property name="initialRedeliveryDelay" value="${routering.activemq.redelivery.initial.delay:300000}" />
+                                <property name="redeliveryDelay" value="${routering.activemq.redelivery.delay:3600000}" />
+                                -->
+                                <property name="initialRedeliveryDelay" value="${routering.activemq.redelivery.initial.delay:1000}" />
+                                <property name="redeliveryDelay" value="${routering.activemq.redelivery.delay:1000}" />
+                            </bean>
+                        </amq:defaultEntry>
+                    </amq:redeliveryPolicyMap>
+                </amq:redeliveryPolicyMap>
+            </amq:redeliveryPlugin>
+
+            <amq:simpleAuthenticationPlugin anonymousAccessAllowed="true">
+                <amq:users>
+                    <amq:authenticationUser username="admin" password="admin" groups="admins"/>
+                </amq:users>
+            </amq:simpleAuthenticationPlugin>
+
+            <amq:authorizationPlugin>
+                <amq:map>
+                    <amq:authorizationMap>
+                        <amq:authorizationEntries>
+                            <!-- Defaults -->
+                            <amq:authorizationEntry queue=">" read="admins" write="admins" admin="admins" />
+                            <amq:authorizationEntry topic=">" read="admins" write="admins" admin="admins" />
+                            <amq:authorizationEntry topic="ActiveMQ.Advisory.>" read="anonymous" write="anonymous" admin="anonymous"/>
+
+                            <!-- Migratie queues -->
+                            <amq:authorizationEntry queue="${routering.queue.sync.verzoek:sync.verzoek}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.sync.verzoek:sync.verzoek}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.sync.antwoord:sync.antwoord}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.sync.antwoord:sync.antwoord}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.voisc.ontvangst:voisc.ontvangst}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.voisc.ontvangst:voisc.ontvangst}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.voisc.verzenden:voisc.verzenden}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.voisc.verzenden:voisc.verzenden}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.levering:levering}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.levering:levering}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.archivering:archivering}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.archivering:archivering}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.notificatie:notificatie}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.notificatie:notificatie}.dlq" read="anonymous" write="anonymous" admin="admins" />
+
+                            <amq:authorizationEntry queue="${routering.queue.gemeente.verzoek:gemeente.verzoek}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.gemeente.verzoek:gemeente.verzoek}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry topic="${routering.topic.gemeente.register:gemeente.register}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.partij.verzoek:partij.verzoek}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.partij.verzoek:partij.verzoek}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry topic="${routering.topic.partij.register:partij.register}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.autorisatie.verzoek:autorisatie.verzoek}" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry queue="${routering.queue.autorisatie.verzoek:autorisatie.verzoek}.dlq" read="anonymous" write="anonymous" admin="admins" />
+                            <amq:authorizationEntry topic="${routering.topic.autorisatie.register:autorisatie.register}" read="anonymous" write="anonymous" admin="admins" />
+                        </amq:authorizationEntries>
+                    </amq:authorizationMap>
+                </amq:map>
+            </amq:authorizationPlugin>
+        </amq:plugins>
+    </amq:broker>
+
+</beans>

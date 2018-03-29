@@ -1,0 +1,1 @@
+Geen optionele categorieen bij akte 2 A.

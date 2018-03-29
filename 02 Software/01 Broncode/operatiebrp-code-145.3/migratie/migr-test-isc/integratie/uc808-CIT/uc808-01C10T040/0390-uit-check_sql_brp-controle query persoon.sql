@@ -1,0 +1,1 @@
+select coalesce(max(versienr),0) as max_versie from kern.his_persinschr where versienr = '4';

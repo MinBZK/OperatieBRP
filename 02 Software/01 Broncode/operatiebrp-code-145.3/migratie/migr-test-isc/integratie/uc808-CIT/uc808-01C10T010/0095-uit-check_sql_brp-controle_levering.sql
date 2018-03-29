@@ -1,0 +1,1 @@
+SELECT 1 from kern.admhnd where statuslev <> 4;

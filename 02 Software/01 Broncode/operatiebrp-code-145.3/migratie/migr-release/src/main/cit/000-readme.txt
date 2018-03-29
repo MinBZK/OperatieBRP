@@ -1,0 +1,1 @@
+Deze bestanden bevatten de stappen door voor de CIT zijn doorlopen om de omgeving te installeren.

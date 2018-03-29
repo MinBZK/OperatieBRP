@@ -1,0 +1,5 @@
+delete from mig_verzender where instantiecode in (990082);
+delete from mig_verzender where instantiecode in (989);
+
+insert into mig_verzender(instantiecode, verzendende_instantiecode) values(990082, 3000200);
+insert into mig_verzender(instantiecode, verzendende_instantiecode) values(989, 3000230);

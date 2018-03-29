@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mockito="http://www.mockito.org/spring/mockito"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.mockito.org/spring/mockito mockito.xsd">
+
+    <import resource="proef-sync-test-datasource.xml" />
+
+    <context:property-placeholder location="proef-sync-test.properties" />
+    <context:annotation-config />
+
+    <!-- Service Beans -->
+
+    <bean name="vulVoiscQueueMetLg01BerichtenService" class="nl.bzk.migratiebrp.tools.proefsynchronisatie.impl.VulVoiscQueueMetLg01BerichtenServiceImpl" />
+    <bean name="converteerLg01EnLa01BerichtenNaarLg01BerichtenService" class="nl.bzk.migratiebrp.tools.proefsynchronisatie.impl.ConverteerLg01EnLa01BerichtenNaarLg01BerichtenServiceImpl" />
+    <bean name="initialisatieService" class="nl.bzk.migratiebrp.tools.proefsynchronisatie.impl.InitialisatieServiceImpl"/>
+    <bean name="plaatsLg01BerichtenOpVoiscQueueService" class="nl.bzk.migratiebrp.tools.proefsynchronisatie.impl.PlaatsLg01BerichtenOpVoiscQueueServiceImpl" />
+    <bean name="selectieService" class="nl.bzk.migratiebrp.tools.proefsynchronisatie.impl.SelectieServiceImpl"/>
+    <bean name="persoonRepository" class="nl.bzk.migratiebrp.tools.proefsynchronisatie.repository.jdbc.JdbcGbavRepository" />
+
+    <!-- JMS -->
+
+    <bean name="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="jmsConnectionFactory" />
+    </bean>
+
+    <bean id="jmsConnectionFactory" class="com.mockrunner.mock.jms.MockQueueConnectionFactory" >
+        <constructor-arg index="0" ref="destinationManager" />
+        <constructor-arg index="1" ref="configurationManager" />
+    </bean>
+
+    <bean id="destinationManager" class="com.mockrunner.jms.DestinationManager"/>
+    <bean id="configurationManager" class="com.mockrunner.jms.ConfigurationManager"/>
+
+    <!-- Queues -->
+
+    <bean id="voiscOntvangstQueue" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/voisc.ontvangst" />
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="dataSource" />
+    </bean>
+</beans>

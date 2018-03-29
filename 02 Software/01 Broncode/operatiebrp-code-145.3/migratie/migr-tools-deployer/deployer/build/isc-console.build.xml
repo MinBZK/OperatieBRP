@@ -1,0 +1,246 @@
+<project name="ISC Console" basedir="." default="fail">
+
+    <!--
+     | Algemene properties
+     |
+     | server.host
+     | server.username
+     | server.password
+     |
+     | File properties
+
+     | application.bin.source
+     | application.bin.file
+     | application.jmx.source
+     | application.jxm.file
+     | application.console.source
+     | application.console.file
+     |
+     | JMX properties
+     |
+     | application.jmx.port
+     |
+     | ISC properties
+     |
+     | isc.database.host
+     | isc.database.name
+     | isc.database.username
+     | isc.database.password
+     |
+     | jmx.connectie.host
+     | jmx.connectie.port
+     | jmx.connectie.username
+     | jmx.connectie.password
+     |
+    -->
+
+    <property name="application.directory" value="console" />
+    <property name="isc.database.port" value="5432" />
+
+    <target name="checkProperties">
+        <fail unless="server.host" message="server.host property is verplicht." />
+        <fail unless="server.username" message="server.username property is verplicht." />
+        <fail unless="server.password" message="server.password property is verplicht." />
+    </target>
+
+    <target name="checkInstallProperties" depends="checkProperties">
+        <!-- Check file settings -->
+        <fail unless="application.bin.source" message="application.bin.source property is verplicht bij het installeren." />
+        <fail unless="application.bin.file" message="application.bin.file property is verplicht bij het installeren." />
+        <fail unless="application.jmx.source" message="application.jmx.source property is verplicht bij het installeren." />
+        <fail unless="application.jmx.file" message="application.jmx.file property is verplicht bij het installeren." />
+        <fail unless="application.console.source" message="application.gbacentrale.war.source property is verplicht bij het installeren." />
+        <fail unless="application.console.file" message="application.gbacentrale.war.file property is verplicht bij het installeren." />
+
+        <fail unless="application.jmx.port" message="application.jmx.port property is verplicht bij het installeren." />
+
+        <fail unless="isc.database.host" message="brp.database.host property is verplicht." />
+        <fail unless="isc.database.name" message="brp.database.name property is verplicht." />
+        <fail unless="isc.database.username" message="brp.database.username property is verplicht." />
+        <fail unless="isc.database.password" message="brp.database.password property is verplicht." />
+
+        <fail unless="jmx.connectie.host" message="jmx.connectie.host property is verplicht." />
+        <fail unless="jmx.connectie.port" message="jmx.connectie.port property is verplicht." />
+        <fail unless="jmx.connectie.username" message="jmx.connectie.username property is verplicht." />
+        <fail unless="jmx.connectie.password" message="jmx.connectie.password property is verplicht." />
+    </target>
+
+    <target name="install" depends="checkInstallProperties,createLocalConfigurationFile">
+        <echo message="Installing ${ant.project.name} ...." />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+
+        <echo message="Copying ${application.bin.file}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true" failonerror="true">
+            <fileset dir="${application.bin.source}">
+                <include name="${application.bin.file}" />
+            </fileset>
+        </scp>
+
+        <echo message="Unpacking ${application.bin.file}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; mkdir ${application.directory}; cd ${application.directory}; unzip -o /tmp/${application.directory}/${application.bin.file} -d .;" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~/${application.directory}; cd apache-tomcat-*; mv * ..; cd ..; rm -rf apache-tomcat-*; chmod u+x bin/*.sh" />
+
+                 <echo message="Copying ${application.jmx.file}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/webapps" trust="true" failonerror="false">
+            <fileset dir="${application.jmx.source}">
+                <include name="${application.jmx.file}" />
+            </fileset>
+        </scp>
+
+        <echo message="Copying configuration files" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf" trust="true" failonerror="true">
+            <fileset dir="tmp">
+                <include name="context.xml" />
+            </fileset>
+        </scp>
+
+        <echo message="Copying ${application.console.file}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/webapps" trust="true" failonerror="false">
+            <fileset dir="${application.console.source}">
+                <include name="${application.console.file}" />
+            </fileset>
+        </scp>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~/${application.directory}/webapps; mv ${application.console.file} jbpm-console.war" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/lib" trust="true" failonerror="true">
+            <fileset dir="tmp">
+                <include name="jmx.properties" />
+                <include name="console.properties" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/lib" trust="true" failonerror="true">
+            <fileset dir="deps/algemeen">
+                <include name="log4j2.xml" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf" trust="true" failonerror="true">
+            <fileset dir="deps/isc/console">
+                <include name="tomcat-users.xml" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/bin" trust="true" failonerror="true">
+            <fileset dir="deps/isc/console">
+                <include name="catalina.sh" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/lib" trust="true" failonerror="true">
+            <fileset dir="deps/isc/console">
+                <include name="config.properties" />
+            </fileset>
+        </scp>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~/${application.directory}/bin; chmod u+x catalina.sh" />
+
+        <echo message="Succesfully installed ${ant.project.name}" />
+    </target>
+
+    <target name="createLocalConfigurationFile" depends="checkProperties">
+    <echo message="Creating configuration ${ant.project.name}" />
+        <delete dir="tmp" />
+        <mkdir dir="tmp" />
+
+        <echo file="tmp/jmx.properties"  append="false" force="true"><![CDATA[
+jmx.port=${application.jmx.port}
+]]></echo>
+
+        <echo file="tmp/console.properties" append="false" force="true"><![CDATA[
+isc.database.host=${isc.database.host}
+isc.database.port=${isc.database.port}
+isc.database.name=${isc.database.name}
+isc.database.username=${isc.database.username}
+isc.database.password=${isc.database.password}
+
+isc.jmx.service.host=${jmx.connectie.host}
+isc.jmx.service.port=${jmx.connectie.port}
+isc.jmx.service.username=${jmx.connectie.username}
+isc.jmx.service.password=${jmx.connectie.password}
+]]></echo>
+
+        <echo file="tmp/context.xml" append="false" force="true"><![CDATA[<?xml version='1.0' encoding='utf-8'?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- The contents of this file will be loaded for each web application -->
+<Context>
+
+    <!-- Default set of monitored resources -->
+    <WatchedResource>WEB-INF/web.xml</WatchedResource>
+
+    <!-- Uncomment this to disable session persistence across Tomcat restarts -->
+    <!--
+    <Manager pathname="" />
+    -->
+
+    <Resource name="jdbc/JbpmDataSource"
+              auth="Container"
+              type="javax.sql.DataSource"
+              username="migratie"
+              password="M1gratie"
+              driverClassName="org.postgresql.Driver"
+              url="jdbc:postgresql://${isc.database.host}:${isc.database.port}/${isc.database.name}"
+              maxActive="8"
+              maxIdle="4" />
+
+    <!-- Uncomment this to enable Comet connection tacking (provides events
+         on session expiration as well as webapp lifecycle) -->
+    <!--
+    <Valve className="org.apache.catalina.valves.CometConnectionManagerValve" />
+    -->
+
+</Context>
+]]></echo>
+
+
+        </target>
+
+
+    <target name="deinstall" depends="checkProperties">
+        <echo message="Removing ${ant.project.name}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; rm -Rf ${application.directory}" />
+    </target>
+
+    <target name="start" depends="checkProperties">
+        <echo message="Starting ${ant.project.name}" />
+
+        <echo message="Server host: ${server.host}" />
+
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; cd ${application.directory}; cd bin; ./startup.sh" />
+
+        <echo message="Succesfully started ${ant.project.name}" />
+    </target>
+
+    <target name="stop" depends="checkProperties">
+        <echo message="Stopping ${ant.project.name} (and sleeping 15s)" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" failonerror="false"
+                 command="cd ~; cd ${application.directory}; cd bin; ./shutdown.sh" />
+        <echo message="Killing tomcat (catalina) processes to force shutdown"/>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                         command=" if [[ $( ps aux | grep catalin[a] -c) != 0 ]]; then echo &quot;still running&quot;; pkill -f catalin[a]; else echo &quot;already stopped&quot;; fi" />
+    </target>
+
+    <target name="clean" depends="checkProperties">
+    </target>
+
+    <target name="fail">
+        <fail message="Call with valid task" />
+    </target>
+
+</project>

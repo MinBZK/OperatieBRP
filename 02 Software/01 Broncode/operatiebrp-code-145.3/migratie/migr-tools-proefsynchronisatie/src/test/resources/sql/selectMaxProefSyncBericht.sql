@@ -1,0 +1,1 @@
+SELECT max(id) FROM proefSynchronisatieBericht; 

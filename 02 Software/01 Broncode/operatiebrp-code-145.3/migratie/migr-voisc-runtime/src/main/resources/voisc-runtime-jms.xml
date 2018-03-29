@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- JMS XA ConnectionFactory -->
+    <amq:xaConnectionFactory id="activeMqXaConnectionFactory"
+                             brokerURL="${routering.activemq.url:tcp://localhost:61616}">
+        <amq:redeliveryPolicy>
+            <amq:redeliveryPolicy maximumRedeliveries="0" />
+        </amq:redeliveryPolicy>
+    </amq:xaConnectionFactory>
+
+    <bean name="partijConnectionFactory" class="nl.bzk.migratiebrp.register.client.util.RefBeanFactory">
+        <property name="bean" ref="activeMqXaConnectionFactory"/>
+    </bean>
+
+    <!-- Atomikos JTA-enabled ConnectionFactory, configured with the vendor's XA factory. -->
+    <bean name="voiscJmsConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean" init-method="init"
+          destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="voiscQueues"/>
+            </bean>
+        </property>
+        <property name="xaConnectionFactory" ref="activeMqXaConnectionFactory"/>
+        <property name="minPoolSize" value="${voisc.queue.minpool:1}"/>
+        <property name="maxPoolSize" value="${voisc.queue.maxpool:20}"/>
+    </bean>
+
+    <!-- Destinations -->
+
+    <amq:queue id="voiscOntvangstQueue" physicalName="${routering.queue.voisc.ontvangst:voisc.ontvangst}"/>
+    <amq:queue id="voiscVerzendenQueue" physicalName="${routering.queue.voisc.verzenden:voisc.verzenden}"/>
+
+    <amq:queue id="archiveringQueue" physicalName="${routering.queue.archivering:archivering}"/>
+
+    <amq:topic id="partijRegisterTopic" physicalName="${routering.topic.partij.register:partij.register}"/>
+    <amq:queue id="partijVerzoekQueue" physicalName="${routering.queue.partij.register:partij.verzoek}"/>
+
+</beans>

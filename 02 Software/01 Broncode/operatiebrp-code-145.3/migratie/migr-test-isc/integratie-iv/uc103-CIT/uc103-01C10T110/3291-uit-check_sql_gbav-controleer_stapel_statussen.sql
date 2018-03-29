@@ -1,0 +1,1 @@
+select conversie_resultaat, conversie_melding, count(*) as aantal from initvul.initvullingresult_afnind_stapel group by conversie_resultaat, conversie_melding order by conversie_resultaat ASC;

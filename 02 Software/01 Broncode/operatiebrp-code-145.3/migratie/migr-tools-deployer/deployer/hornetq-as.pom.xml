@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.bzk.migratiebrp.isc.deploy</groupId>
+    <artifactId>migr-isc-deploy-hornetq</artifactId>
+    <name>Migr - ISC - Deploy - HornetQ</name>
+    <packaging>pom</packaging>
+	<parent>
+		<groupId>nl.bzk.migratiebrp.isc.deploy</groupId>
+		<artifactId>migr-isc-deploy-properties</artifactId>
+		<version>1.0</version>
+		<relativePath>./deploy-properties.pom.xml</relativePath>
+	</parent>
+
+	<properties>
+		<!-- Ant plugin config -->
+		<ant.build.file>hornetq-as.build.xml</ant.build.file>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>install</id>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-single</id>
+						<configuration>
+							<skip>true</skip>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copy-hornetq</id>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/hornetq</outputDirectory>
+							<artifactItems>
+								<artifactItem>
+									<groupId>nl.bzk.brp</groupId>
+									<artifactId>distributie-zip-iv-hornetq</artifactId>
+									<version>${migratie.version}</version>
+									<type>zip</type>
+									<destFileName>hornetq.zip</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>system-properties-single</id>
+						<configuration>
+							<properties>
+									<property>
+										<name>application.source</name>
+										<value>../target/hornetq</value>
+									</property>
+									<property>
+										<name>application.file</name>
+										<value>hornetq.zip</value>
+									</property>
+							</properties>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

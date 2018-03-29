@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+    ">
+
+    <context:annotation-config />
+    <context:property-placeholder />
+
+    <!-- Schedule -->
+
+    <bean name="opschonerScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" destroy-method="destroy">
+        <property name="autoStartup" value="${isc.opschoner.autostart:true}" />
+    	<property name="quartzProperties">
+    		<props>
+    			<!-- MAIN -->
+    			<prop key="org.quartz.scheduler.instanceName">OpschonerScheduler</prop>
+    			<prop key="org.quartz.scheduler.skipUpdateCheck">true</prop>
+    			<!-- THREADS -->
+    			<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
+    			<prop key="org.quartz.threadPool.threadCount">1</prop>
+    			<prop key="org.quartz.threadPool.threadPriority">5</prop>
+    			<!-- RMI -->
+    			<prop key="org.quartz.scheduler.rmi.export">false</prop>
+    			<prop key="org.quartz.scheduler.rmi.proxy">false</prop>
+    		</props>
+    	</property>
+        <property name="triggers">
+            <list>
+                <bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                    <property name="cronExpression" value="${opschoner.cron.expression:0 0/20 * * * ?}" />
+                    <property name="jobDetail" >
+                        <bean name="jobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                            <property name="jobClass" value="nl.bzk.migratiebrp.isc.opschoner.job.OpschoonJob" />
+                            <property name="jobDataAsMap">
+                                <map>
+                                    <entry key="wachtPeriodeInUren" value="${opschoner.wachtPeriodeInUren:723}" />
+                                    <entry key="opschonerService" value-ref="opschonerService" />
+                                </map>
+                            </property>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+	<!-- JMX -->
+
+	<bean name="opschonenJmx" class="nl.bzk.migratiebrp.isc.opschoner.OpschonerJMXImpl" />
+
+	<!-- OPSCHONEN -->
+
+    <bean name="extractieDao" class="nl.bzk.migratiebrp.isc.opschoner.dao.impl.ExtractieDaoImpl" />
+    <bean name="jbpmDao" class="nl.bzk.migratiebrp.isc.opschoner.dao.impl.JbpmDaoImpl" />
+    <bean name="migDao" class="nl.bzk.migratiebrp.isc.opschoner.dao.impl.MigDaoImpl" />
+    <bean name="runtimeDao" class="nl.bzk.migratiebrp.isc.opschoner.dao.impl.RuntimeDaoImpl" />
+
+    <bean name="opschonerService" class="nl.bzk.migratiebrp.isc.opschoner.service.impl.OpschonerServiceImpl" />
+    <bean name="runtimeService" class="nl.bzk.migratiebrp.isc.opschoner.service.impl.RuntimeServiceImpl" />
+    <bean name="procesService" class="nl.bzk.migratiebrp.isc.opschoner.service.impl.ProcesServiceImpl" />
+
+    <bean id="opschonerJdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="opschonerDataSource" />
+    </bean>
+
+</beans>

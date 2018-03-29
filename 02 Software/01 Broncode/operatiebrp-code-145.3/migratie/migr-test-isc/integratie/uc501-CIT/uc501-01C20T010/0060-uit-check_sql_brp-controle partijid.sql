@@ -1,0 +1,1 @@
+select id from kern.partij where code = '999971';

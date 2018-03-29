@@ -1,0 +1,1 @@
+select anr, bsn, versienr from kern.pers where anr = '2508651809' and versienr='5';

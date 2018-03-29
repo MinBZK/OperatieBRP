@@ -1,0 +1,1 @@
+Meerdere personen met hetzelfde A-nr gevonden in BRP is niet mogelijk.

@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" >
+
+<!-- the DOCTYPE means we are required to use html for a root element -->
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:c="http://java.sun.com/jstl/core"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:tf="http://jbpm.org/jsf/tf"
+      xmlns:jbpm="http://jbpm.org/jsf"
+      xmlns:mig="http://www.bzk.nl/migratiebrp">
+  <ui:component>
+    <style>
+        .popup {
+            overflow:scroll;
+        }
+        .ui-dialog {
+            background:white;
+            border:1px solid black;
+            padding:3px;
+        }
+         .ui-dialog-titlebar {
+            padding: 3px;
+            background-color: #900;
+            color: #FF9;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .dataform {
+             width:100%;
+            margin-left:16px;
+        }
+
+        table.dataform tbody td.bericht {
+            background-color: #bbbbbb;
+        }
+        table.dataform tbody td.categorie-changed {
+            background-color:rgb(214, 178, 178);
+        }
+        table.dataform tbody td.element-changed {
+            background-color:rgb(224, 115, 115);
+            font-weight:bold;
+        }
+
+        a.foldToggle {
+            text-decoration: none;
+            margin-right:8px;
+        }
+        a.foldToggle span {
+            display: none;
+        }
+        a.foldToggle.folded {
+            display:inline-block;
+            background-color:white;
+            background-image:url(../images/icons.png);
+            background-position:left -37px;
+            background-repeat:no-repeat;
+            height:11px;
+            width:11px;
+        }
+        a.foldToggle.unfolded {
+            display:inline-block;
+            background-color:white;
+            background-image:url(../images/icons.png);
+            background-repeat:no-repeat;
+            height:11px;
+            width:11px;
+        }
+        tr.folded {
+            display:none;
+        }
+
+        tr.empty-element {
+            display:none;
+        }
+    </style>
+    <jbpm:dataform>
+      <f:facet name="header">
+          <f:subview>
+              <div>Proces:
+              <a onclick="javascript:$('#processPlaat').dialog('open');"><h:outputText value="#{processDefinitionBean.rootProcessDefinition.name}" /></a></div>
+              <div id="processPlaat" class="popup" title="#{processDefinitionBean.rootProcessDefinition.name}" >
+                  <img src="pi/#{processDefinitionBean.rootProcessDefinition.id}.jpg" style="width:800px;height600px;" />
+              </div>
+            <div><h:outputText value="Stap: #{meldingen[var['functioneleStap']]}"/></div>
+          </f:subview>
+      </f:facet>
+
+      <!-- TASKFORM ROWS -->
+    <jbpm:datacell>
+      <f:facet name="header">
+        <h:outputText value="Fout: "/>
+      </f:facet>
+      <h:inputTextarea value="#{meldingen[var['foutmelding']]}" readonly="true" rows="1" cols="50"   />
+    </jbpm:datacell>
+
+    <jbpm:datacell>
+      <f:facet name="header">
+        <h:outputText value="Persoonslijsten"/>
+      </f:facet>
+        <div class="persoonslijstoverzichtcontainer" style="height:450px;overflow:scroll;">
+            <table class="persoonslijstoverzicht dataform">
+                <thead>
+                    <tr class="identificatie">
+                        <th>&nbsp;</th>
+                        <c:forEach varStatus="identificatieStatus" var="identificatie" items="#{var['persoonslijstOverzicht'].identificaties}" begin="0" step="1">
+                            <th>
+                                  <h:outputText value="#{identificatie}"/> <h:outputText value=" (bericht)" rendered="#{identificatieStatus.index == 0}" />
+                            </th>
+                        </c:forEach>
+                    </tr>
+                </thead>
+                <tbody>
+                    <c:forEach var="categorie" varStatus="categorieStatus" items="#{var['persoonslijstOverzicht'].categorieen}" begin="0" step="1">
+                        <tr class="categorie #{categorie.historie ? 'historie' : 'actueel'} cat-#{categorieStatus.index}">
+                            <th colspan="#{var['persoonslijstOverzicht'].aantalPersoonslijsten+1}">
+                                <a class="foldToggle #{categorie.historie ? 'folded' : 'unfolded'}" onclick="javascript:toggleFold('cat-#{categorieStatus.index}')"><span>fold/unfold &nbsp;</span></a>
+                                <h:outputText value="#{categorie.titel}"/>
+                            </th>
+                        </tr>
+                        <c:forEach var="element" varStatus="elementStatus" items="#{categorie.elementen}" begin="0" step="1">
+                            <tr class="element cat-#{categorieStatus.index} #{categorie.historie ? 'folded' : 'unfolded'} BLA #{element.emptyIndicator ? 'empty-element' : 'filled-element'}">
+                                <th>
+                                    <h:outputText value="#{element.titel}"/>
+                                </th>
+                                <c:forEach var="waarde" varStatus="waardeStatus" items="#{element.waarden}" begin="0" step="1">
+                                    <td class="#{waardeStatus.index == 0 ? 'bericht' : 'kandidaat'} #{element.changedIndicators[waardeStatus.index] ? 'element-changed' : ''} #{categorie.changedIndicators[waardeStatus.index] ? 'categorie-changed' : ''} ">
+                                        <h:outputText value="#{waarde}"/>
+                                    </td>
+                                </c:forEach>
+                            </tr>
+                        </c:forEach>
+                    </c:forEach>
+                </tbody>
+            </table>
+        </div>
+    </jbpm:datacell>
+
+    <jbpm:datacell>
+      <f:facet name="header">
+        <h:outputText value="Foutafhandeling: "/>
+      </f:facet>
+      <h:selectOneRadio value="#{var['restart']}" layout="pageDirection" required="true" requiredMessage="U dient te kiezen hoe het proces wordt vervolgd.">
+        <f:selectItems value="#{var['foutafhandelingPaden'].selectItems}" />
+      </h:selectOneRadio>
+    </jbpm:datacell>
+
+      <jbpm:datacell>
+        <!-- TASKFORM BUTTONS -->
+      <!--
+      <tf:saveButton value="Save"/>
+      <tf:cancelButton value="Cancel"/>
+      -->
+      <tf:transitionButton transition="ok" value="Ok"/>
+      </jbpm:datacell>
+
+    </jbpm:dataform>
+
+
+  <script type="text/javascript">// <![CDATA[
+      var toggleFold = function( categorie ) {
+        var $toggle = $("tr.categorie."+categorie+" th a.foldToggle");
+        if( $toggle.hasClass("unfolded") ) {
+            $("tr.element."+categorie).removeClass("unfolded").addClass("folded");
+            $toggle.removeClass("unfolded").addClass("folded");
+        } else {
+            $("tr.element."+categorie).removeClass("folded").addClass("unfolded");
+            $toggle.removeClass("folded").addClass("unfolded");
+        }
+    };
+
+      $(document).ready(function() {
+            $(".popup").dialog({ autoOpen: false, modal:true, width:800, height:600 });
+      });
+    // ]]></script>
+  </ui:component>
+
+
+</html>

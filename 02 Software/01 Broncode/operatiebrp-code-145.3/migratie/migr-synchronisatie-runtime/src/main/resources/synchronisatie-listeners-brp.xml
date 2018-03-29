@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!--  JMS Container and handler voor inkomende afnemersindicatie antwoorden van BRP -->
+
+    <bean id="jmsContainerAfnemersindicaties" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${afnemersindicaties.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager"/>
+        <property name="connectionFactory" ref="brpQueueConnectionFactory"/>
+
+        <property name="destination" ref="gbaAfnemerindicatiesAntwoord"/>
+        <property name="messageListener" ref="afnemerindicatiesMessageHandler"/>
+    </bean>
+
+    <bean name="afnemerindicatiesMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.AfnemerindicatiesMessageHandler"/>
+
+    <!--  JMS Container and handler voor inkomende toevallige gebeurtenis antwoorden van BRP -->
+
+    <bean id="jmsContainerToevalligeGebeurtenissen" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${toevalliggebeurtenissen.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager"/>
+        <property name="connectionFactory" ref="brpQueueConnectionFactory"/>
+
+        <property name="destination" ref="gbaToevalligeGebeurtenissenAntwoord"/>
+        <property name="messageListener" ref="toevalligeGebeurtenisMessageHandler"/>
+    </bean>
+
+    <bean name="toevalligeGebeurtenisMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.ToevalligeGebeurtenisMessageHandler"/>
+
+    <!--  JMS Container and handler voor inkomende leveringen van BRP -->
+
+    <bean id="jmsContainerLeveringen" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${leveringen.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager"/>
+        <property name="connectionFactory" ref="brpQueueConnectionFactory"/>
+
+        <property name="destination" ref="gbaLeveringen"/>
+        <property name="messageListener" ref="leveringenMessageHandler"/>
+    </bean>
+
+    <bean name="leveringenMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.LeveringenMessageHandler"/>
+
+    <!--  JMS Container and handler voor inkomende AdHoc Zoeken antwoorden -->
+
+    <bean id="jmsContainerZoekPersoon" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${adhoczoeken.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager"/>
+        <property name="connectionFactory" ref="brpQueueConnectionFactory"/>
+
+        <property name="destination" ref="gbaPersoonsAntwoord"/>
+        <property name="messageListener" ref="persoonsvraagAntwoordMessageListener"/>
+    </bean>
+
+    <bean name="persoonsvraagAntwoordMessageListener"
+          class="nl.bzk.migratiebrp.synchronisatie.runtime.service.adhoczoeken.PersoonsvraagAntwoordMessageListener"/>
+
+    <bean id="jmsContainerZoekPersonenOpAdres" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${adhoczoeken.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager"/>
+        <property name="connectionFactory" ref="brpQueueConnectionFactory"/>
+
+        <property name="destination" ref="gbaAdresAntwoord"/>
+        <property name="messageListener" ref="adresvraagAntwoordMessageListener"/>
+    </bean>
+
+    <bean name="adresvraagAntwoordMessageListener"
+          class="nl.bzk.migratiebrp.synchronisatie.runtime.service.adhoczoeken.AdresvraagAntwoordMessageListener"/>
+
+    <bean id="jmsContainerVrijBericht" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${vrijbericht.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager"/>
+        <property name="connectionFactory" ref="brpQueueConnectionFactory"/>
+
+        <property name="destination" ref="gbaVrijeBerichtenAntwoorden"/>
+        <property name="messageListener" ref="vrijBerichtAntwoordMessageListener"/>
+    </bean>
+
+    <bean name="vrijBerichtAntwoordMessageListener"
+          class="nl.bzk.migratiebrp.synchronisatie.runtime.service.vrijbericht.VrijBerichtAntwoordMessageListener"/>
+
+    <bean id="jmsContainerNotificaties" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${notificatie.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager"/>
+        <property name="connectionFactory" ref="brpQueueConnectionFactory"/>
+
+        <property name="destination" ref="gbaNotificaties"/>
+        <property name="messageListener" ref="notificatieMessageListener"/>
+    </bean>
+
+    <bean name="notificatieMessageListener"
+          class="nl.bzk.migratiebrp.synchronisatie.runtime.notificatie.NotificatieMessageHandler"/>
+</beans>

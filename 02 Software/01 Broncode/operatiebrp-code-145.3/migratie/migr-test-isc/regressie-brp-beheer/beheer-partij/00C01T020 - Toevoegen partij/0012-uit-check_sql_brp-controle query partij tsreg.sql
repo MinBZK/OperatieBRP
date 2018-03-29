@@ -1,0 +1,1 @@
+SELECT COUNT(*) FROM kern.his_partij WHERE extract(EPOCH FROM localtimestamp-tsreg)/3600 < 1 AND naam = 'Test Toevoegen Partij';

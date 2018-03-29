@@ -1,0 +1,157 @@
+<project name="Database" basedir="." default="fail">
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+	
+	<!--
+	 | Algemene properties
+	 |
+	 | server.host
+	 | server.username
+	 | server.password
+	 |
+	 | database.name
+	 | database.username
+	 | database.password
+	 |
+	 | File properties
+	 |
+	 | application.install.source
+	 | application.install.file
+	 | application.deinstall.source
+	 | application.deinstall.file
+	 | application.clean.source
+	 | application.clean.file
+	 |
+	-->
+	
+	<property name="application.directory" value="database" />
+	
+	<target name="checkProperties">
+		<fail unless="server.db" message="server.db property is verplicht." />
+		<fail unless="server.db.username" message="server.db.username property is verplicht." />
+		<fail unless="server.db.password" message="server.db.password property is verplicht." />
+
+		<fail unless="database.name" message="database.name property is verplicht." />
+		<fail unless="database.username" message="database.username property is verplicht." />
+		<fail unless="database.password" message="database.password property is verplicht." />
+	</target>
+
+	<target name="checkInstallProperties" depends="checkProperties">
+		<antcall target="checkFileProperties">
+			<param name="file.source" value="${application.install.source}"/>
+			<param name="file.source.name" value="application.install.source" />
+			<param name="file.file" value="${application.install.file}"/>
+			<param name="file.file.name" value="application.install.file" />
+		</antcall>
+	</target>
+
+	<target name="checkDeinstallProperties" depends="checkProperties">
+		<antcall target="checkFileProperties">
+			<param name="file.source" value="${application.deinstall.source}"/>
+			<param name="file.source.name" value="application.deinstall.source" />
+			<param name="file.file" value="${application.deinstall.file}"/>
+			<param name="file.file.name" value="application.deinstall.file" />
+		</antcall>
+	</target>
+	
+	<target name="checkCleanProperties" depends="checkProperties">
+		<antcall target="checkFileProperties">
+			<param name="file.source" value="${application.clean.source}"/>
+			<param name="file.source.name" value="application.clean.source" />
+			<param name="file.file" value="${application.clean.file}"/>
+			<param name="file.file.name" value="application.clean.file" />
+		</antcall>
+	</target>
+	
+	<target name="checkFileProperties">
+		<!-- Check file settings -->
+		<fail unless="${file.source.name}" message="${file.source.name} property is verplicht." />
+		<fail unless="${file.file.name}" message="${file.file.name} property is verplicht." />
+	
+		<!-- Check file(s) exist -->
+		<fail message="${file.source}/${file.file} bestaat niet (of leidt niet tot bestanden).">
+			<condition>
+				<not>
+					<resourcecount count="1" when="ge" >
+						<fileset dir="${file.source}" includes="${file.file}" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+	</target>
+	
+    <target name="install" depends="checkInstallProperties">
+		<echo message="Installing ${ant.project.name} ..." />
+		<antcall target="execute">
+			<param name="file.source" value="${application.install.source}"/>
+			<param name="file.file" value="${application.install.file}"/>
+		</antcall>
+	</target>
+
+    <target name="deinstall" depends="checkDeinstallProperties">
+		<echo message="Removing ${ant.project.name}  ..." />
+		<antcall target="execute">
+			<param name="file.source" value="${application.deinstall.source}"/>
+			<param name="file.file" value="${application.deinstall.file}"/>
+		</antcall>
+    </target>
+	
+    <target name="clean" depends="checkCleanProperties">
+		<echo message="Cleaning ${ant.project.name}  ..." />
+		<antcall target="execute">
+			<param name="file.source" value="${application.clean.source}"/>
+			<param name="file.file" value="${application.clean.file}"/>
+		</antcall>
+    </target>
+	
+	<target name="execute" depends="createLocalConfigurationFiles" >
+		<echo message="Setup temporary directory" />
+		<sshexec host="${server.db}" username="${server.db.username}" password="${server.db.password}" trust="true"
+				 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+
+		<echo message="Copy ${file}" />
+		<scp todir="${server.db.username}:${server.db.password}@${server.db}:/tmp/${application.directory}" trust="true">
+			<fileset dir="${file.source}"  includes="${file.file}" />
+		</scp>	
+		<scp todir="${server.db.username}:${server.db.password}@${server.db}:/tmp/${application.directory}" trust="true">
+			<fileset dir="tmp">
+				<include name="execute.sh" />
+			</fileset>
+		</scp>
+		
+		<echo message="Executing sql files" />
+		<sshexec host="${server.db}" username="${server.db.username}" password="${server.db.password}" trust="true"
+				 command="cd /tmp; cd ${application.directory}; chmod u+x execute.sh; ./execute.sh" />
+	</target>
+
+	<target name="createLocalConfigurationFiles" depends="checkProperties">
+		<echo message="Creating configuration files for ${ant.project.name} ..." />
+		<delete dir="tmp" />
+		<mkdir dir="tmp" />
+		
+		<echo file="tmp/execute.sh" append="false">export PGPASSWORD=${database.password}
+</echo>
+
+		<contrib:for list="${file.file}" param="list.file" xmlns:contrib="antlib:net.sf.antcontrib">
+			<!-- <for> makes use of ant's macrodef task, so the @{} notation is used for parameter substition. -->
+			<sequential>
+				<echo file="tmp/execute.sh" append="true">
+for file in @{list.file}
+do
+ # Execute via psql
+ psql -U ${database.username} -d ${database.name} -f $file
+done
+</echo>
+			</sequential>
+		</contrib:for>
+
+		<echo file="tmp/execute.sh" append="true">
+export -n PGPASSWORD
+</echo>
+	</target>
+	
+	
+	<target name="fail">
+		<fail message="Call with valid task" />
+	</target>
+	
+</project>

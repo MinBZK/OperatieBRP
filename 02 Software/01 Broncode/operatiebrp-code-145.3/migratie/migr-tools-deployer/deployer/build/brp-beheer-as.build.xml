@@ -1,0 +1,685 @@
+<project name="BRP Beheer" basedir="." default="fail">
+
+    <!--
+     | Algemene properties
+     |
+     | server.host
+     | server.username
+     | server.password
+     |
+     | File properties
+     |
+     | application.bin.source
+     | application.bin.file
+     | application.jmx.source
+     | application.jxm.file
+     | application.gbacentrale.war.source
+     | application.gbacentrale.war.file
+     | application.bijhouding.war.source
+     | application.bijhouding.war.file
+     | application.bevraging.war.source
+     | application.bevraging.war.file
+     | application.ahnotificatiebezemwagen.war.source
+     | application.ahnotificatiebezemwagen.war.file
+     | application.ahnotificatieverwerker.war.source
+     | application.ahnotificatieverwerker.war.file
+     | application.kennisgevingverstuurder.war.source
+     | application.kennisgevingverstuurder.war.file
+     | application.afnemer.war.source
+     | application.afnemer.war.file
+     | application.beheer.war.source
+     | application.beheer.war.file
+     |
+     | JMX properties
+     |
+     | application.jmx.port
+     |
+     | BRP properties
+     |
+     | brp.port
+     | brp.rmi.registry.port
+     | brp.jmx.service.port
+     | brp.ajp.port
+     |
+     | brp.database.host
+     | brp.database.name
+     | brp.database.username
+     | brp.database.password
+     |
+     | brp.messagebroker.host
+     | brp.messagebroker.port
+     |
+     | isc.console.host
+     | isc.console.port
+     |
+    -->
+
+    <property name="application.directory" value="brp-beheer" />
+    <property name="brp.beheer.port" value="8280" />
+    <property name="brp.beheer.ajp.port" value="8010" />
+    <property name="brp.rmi.registry.port" value="1299" />
+    <property name="brp.jmx.service.port" value="10201" />
+
+    <target name="checkProperties">
+        <fail unless="server.host" message="server.host property is verplicht." />
+        <fail unless="server.username" message="server.username property is verplicht." />
+        <fail unless="server.password" message="server.password property is verplicht." />
+    </target>
+
+    <target name="checkInstallProperties" depends="checkProperties">
+        <!-- Check file settings -->
+        <fail unless="application.bin.source" message="application.bin.source property is verplicht bij het installeren." />
+        <fail unless="application.bin.file" message="application.bin.file property is verplicht bij het installeren." />
+        <fail unless="application.jmx.source" message="application.jmx.source property is verplicht bij het installeren." />
+        <fail unless="application.jmx.file" message="application.jmx.file property is verplicht bij het installeren." />
+        <fail unless="application.beheer.war.source" message="application.beheer.war.source property is verplicht bij het installeren." />
+        <fail unless="application.beheer.war.file" message="application.beheer.war.file property is verplicht bij het installeren." />
+
+        <fail unless="application.jmx.port" message="application.jmx.port property is verplicht bij het installeren." />
+
+        <fail unless="brp.beheer.port" message="brp.beheer.port property is verplicht." />
+        <fail unless="brp.rmi.registry.port" message="brp.rmi.registry.port property is verplicht." />
+        <fail unless="brp.jmx.service.port" message="brp.jmx.service.port property is verplicht." />
+        <fail unless="brp.database.host" message="brp.database.host property is verplicht." />
+        <fail unless="brp.database.name" message="brp.database.name property is verplicht." />
+        <fail unless="brp.database.username" message="brp.database.username property is verplicht." />
+        <fail unless="brp.database.password" message="brp.database.password property is verplicht." />
+        <fail unless="brp.beheer.ajp.port" message="brp.beheer.ajp.port property is verplicht."/>
+
+        <fail unless="brp.messagebroker.host" message="brp.messagebroker.host property is verplicht." />
+        <fail unless="brp.messagebroker.port" message="brp.messagebroker.port property is verplicht." />
+        <fail unless="isc.console.host" message="isc.console.host property is verplicht." />
+        <fail unless="isc.console.port" message="isc.console.port property is verplicht." />
+    </target>
+
+    <target name="install" depends="checkInstallProperties,createLocalConfigurationFile">
+        <echo message="Installing ${ant.project.name} ...." />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+
+        <echo message="Copying ${application.bin.file}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true" failonerror="true">
+            <fileset dir="${application.bin.source}">
+                <include name="${application.bin.file}" />
+            </fileset>
+        </scp>
+
+        <echo message="Unpacking ${application.bin.file}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; mkdir ${application.directory}; cd ${application.directory}; unzip -o /tmp/${application.directory}/${application.bin.file} -d .;" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~/${application.directory}; cd apache-tomcat-*; mv * ..; cd ..; rm -rf apache-tomcat-*; chmod u+x bin/*.sh" />
+
+        <echo message="Copying ${application.jmx.file}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/webapps" trust="true" failonerror="false">
+            <fileset dir="${application.jmx.source}">
+                <include name="${application.jmx.file}" />
+            </fileset>
+        </scp>
+
+        <echo message="Copying configuration files" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf" trust="true" failonerror="true">
+            <fileset dir="tmp">
+                <include name="server.xml" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/webapps" trust="true" failonerror="false">
+            <fileset dir="${application.bin.source}">
+                <include name="jvm-beheer.war" />
+            </fileset>
+        </scp>
+
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/lib" trust="true" failonerror="true">
+            <fileset dir="tmp">
+                <include name="jmx.properties" />
+                <include name="brp-alles.properties" />
+                <include name="beheer.properties" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/lib" trust="true" failonerror="true">
+            <fileset dir="deps/brp">
+                <include name="bzm_client_publickeys.jks" />
+                <include name="bzm_server_privatekey.jks" />
+                <include name="log4j.xml" />
+                <include name="log4j2.xml" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/lib" trust="true" failonerror="true">
+            <fileset dir="deps/tomcat">
+                <include name="catalina-jmx-remote.jar" />
+                <include name="postgresql-9.2-1004-jdbc41.jar" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/bin" trust="true" failonerror="true">
+            <fileset dir="deps/brp">
+                <include name="catalina.sh" />
+            </fileset>
+        </scp>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~/${application.directory}/bin; chmod u+x catalina.sh" />
+
+        <antcall target="update" />
+
+        <echo message="Succesfully installed ${ant.project.name}" />
+    </target>
+
+    <target name="update" depends="checkInstallProperties">
+        <echo message="Updating ${ant.project.name} ..." />
+
+        <antcall target="internalUpdate" />
+
+        <echo message="Succesfully updated ${ant.project.name}" />
+    </target>
+
+    <target name="internalUpdate" depends="internalUpdateBeheer">
+    </target>
+
+    <target name="internalUpdateBeheer" unless="brp-as.skip.update.beheer">
+        <echo message="Copying ${application.beheer.war.file}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/webapps" trust="true" failonerror="true">
+            <fileset dir="${application.beheer.war.source}">
+                <include name="${application.beheer.war.file}" />
+            </fileset>
+        </scp>
+    </target>
+
+    <target name="createLocalConfigurationFile" depends="checkProperties">
+    <echo message="Creating configuration ${ant.project.name}" />
+        <delete dir="tmp" />
+        <mkdir dir="tmp" />
+
+        <echo file="tmp/jmx.properties"  append="false" force="true"><![CDATA[
+jmx.port=${application.jmx.port}
+]]></echo>
+
+        <echo file="tmp/brp-alles.properties" append="false" force="true"><![CDATA[
+
+#################################################################
+# DATASOURCES
+#################################################################
+
+# datasource algemeen
+
+brp.database.timeout.seconden=10
+brp.locking.timeout.seconden=10
+
+#Voor bevraging servers kan de readonly property op true worden gezet
+jdbc.readonly=false
+
+# datasource naar de master database om locks te kunnen plaatsen en wijzigingen te kunnen doorvoeren
+jdbc.master.driverClassName=org.postgresql.Driver
+jdbc.master.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+jdbc.master.username=${brp.database.username}
+jdbc.master.password=${brp.database.password}
+jdbc.master.pool.initialSize=1
+jdbc.master.pool.maxActive=20
+jdbc.master.pool.minIdle=1
+jdbc.master.pool.maxIdle=5
+
+# shorthand notatie
+
+jdbc.driverClassName=org.postgresql.Driver
+jdbc.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+jdbc.username=${brp.database.username}
+jdbc.password=${brp.database.password}
+jdbc.db.host=${brp.database.host}
+jdbc.db.port=5432
+jdbc.db.name=${brp.database.name}
+jdbc.transactionisolation=2
+
+# datasource voor bijhouding
+brp.bijhouding.database.host=${brp.database.host}
+brp.bijhouding.database.port=5432
+brp.bijhouding.database.name=${brp.database.name}
+brp.bijhouding.database.username=${brp.database.username}
+brp.bijhouding.database.password=${brp.database.password}
+
+# datasource voor protocolleren
+
+jdbc.protocollering.driverClassName=org.postgresql.Driver
+jdbc.protocollering.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+jdbc.protocollering.username=${brp.database.username}
+jdbc.protocollering.password=${brp.database.password}
+jdbc.protocollering.pool.initialSize=1
+jdbc.protocollering.pool.maxActive=20
+jdbc.protocollering.pool.minIdle=1
+jdbc.protocollering.pool.maxIdle=5
+
+# datasource voor archivering
+
+jdbc.archivering.driverClassName=org.postgresql.Driver
+jdbc.archivering.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+jdbc.archivering.username=${brp.database.username}
+jdbc.archivering.password=${brp.database.password}
+jdbc.archivering.pool.initialSize=1
+jdbc.archivering.pool.maxActive=20
+jdbc.archivering.pool.minIdle=1
+jdbc.archivering.pool.maxIdle=5
+
+# Connectie naar de database voor de JMS Broker (ActiveMQ)
+jdbc.activemq.driverClassName=org.postgresql.Driver
+jdbc.activemq.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+jdbc.activemq.username=${brp.database.username}
+jdbc.activemq.password=${brp.database.password}
+
+#################################################################
+# JMS
+#################################################################
+
+# De url waarop de broker beschikbaar is.
+# Voor de host zijn een aantal mogelijkheden:
+#
+# Localhost; ActiveMQ accepteert alleen connecties via de
+# loopback interface,# dus van de lokale machine.
+#
+# Fullyqualified name van de host, bijvoorbeeld app01.modernodam.nl;
+#   activeMQ accepteert connecties van buitenaf.
+#
+# 0.0.0.0; ActiveMQ accepteert connecties op alle interfaces,
+# dus zowel van# buitenaf als vanaf de lokale machine.
+#
+brp.jms.broker.url=tcp://${brp.messagebroker.host}:${brp.messagebroker.port}
+brp.jms.client.url=tcp://${brp.messagebroker.host}:${brp.messagebroker.port}
+
+brp.queue.minpool=1
+brp.queue.maxpool=20
+
+# Data opslag
+
+# Voor het redelivery mechanisme van ActiveMQ is een
+# data directory nodig waar tijdelijk berichten worden
+# neergezet die opnieuw verzonden moeten worden.
+# Deze directory heeft toegangsrechten nodig, zodat de gebruiker
+# waarmee tomcat op het systeem draait in deze directory kan
+# lezen en schrijven.
+berichtencentrale.data.directory=../data/activemq-data
+berichtencentrale.kahadb.directory=../data/activemq-kahadb
+berichtencentrale.scheduler.directory=../data/activemq-data/scheduler
+
+# Vrije geheugen voor activemq broker. Zodra deze verzadigd is, wordt er naar
+# de temporary storage geschreven.
+berichtencentrale.memory.usage=512mb
+
+# Deze instelling wordt gebruikt als persistent messages niet in de database
+# worden opgeslagen, maar op het lokale filesysteem (kahaDB). Momenteel wordt
+# er nog een jdbcPersistenceAdapter gebruikt, dus wordt deze instelling genegeerd.
+berichtencentrale.store.usage=1024mb
+
+# Zodra memory verzadigd is, zal naar de temp locatie weggeschreven worden.
+# Dit loopt op bij grote hoeveelheden non-persistent messages (topics). De temp
+# storage wordt voor de zekerheid vrij ruim gezet in productieachtige omgevingen, omdat
+# er niet gerecoverd wordt als de tempstorage verzadigd raakt.
+# http://tmielke.blogspot.nl/2011/02/observations-on-activemqs-temp-storage.html
+# http://akuntamukkala.blogspot.nl/2014/01/understanding-memory-usage-in-activemq.html
+berichtencentrale.temp.usage=1024mb
+
+protocollering.jms.queue=ProtocolleringQueue
+protocollering.jms.concurrency=10
+
+# Queue voor mutatielevering waarop te verwerken administratieve handelingen worden geplaatst door bijvoorbeeld Bijhouding.
+jms.broker.ah.queue=${bijhouding.gba.admhnd.publicatie.queue.name}
+
+verzending.jms.concurrency=10
+verzending.jms.afnemer.queue=VerzendingAfnemerQueue
+verzending.jms.bijh.notificatie.queue=BijhoudingNotificatieQueue
+
+#################################################################
+# Cache settings
+#################################################################
+brp.cache.ververs.tijdinterval.sec=0
+
+#################################################################
+# JMS (GBA)
+#################################################################
+
+# GBA queues, die gebruikt worden voor het plaatsen/verwijderen van afnemerindicaties.
+afnemerindicaties.migratie.queue.name=${afnemerindicaties.migratie.queue.name}
+afnemerindicaties.migratie.antwoord.queue.name=${afnemerindicaties.migratie.antwoord.queue.name}
+
+# GBA queue, waarop archivering verzoeken vanuit migratie worden geplaatst.
+archief.migratie.queue.name=${archief.migratie.queue.name}
+
+# GBA queue, waarop bijhoudingen vanuit migratie op worden genotificeerd.
+bijhouding.gba.admhnd.publicatie.queue.name=${bijhouding.gba.admhnd.publicatie.queue.name}
+
+# GBA queue, waarop de module Verzending LO3 berichten plaatst.
+jms.broker.lo3.leveringen.queue=GbaLeveringen
+
+# GBA queues, die gebruikt worden voor het verwerken van toevallige gebeurtenissen.
+toevalligegebeurtenis.migratie.queue.name=${toevalligegebeurtenis.migratie.queue.name}
+toevalligegebeurtenis.migratie.antwoord.queue.name=${toevalligegebeurtenis.migratie.antwoord.queue.name}
+
+
+#################################################################
+# SECURITY / KEYSTORES
+#################################################################
+
+security.keystore.private.password=M1gratie
+security.keystore.private.file=bzm_server_privatekey.jks
+
+security.privatekey.alias=1
+security.privatekey.password=M1gratie
+
+#################################################################
+# BRP SOFTWARE
+#################################################################
+
+#################################################################
+# BRP MODULE MUTATIELEVERING
+#################################################################
+
+# Definieert het aantal parallele threads in het mutatielevering
+# process. Zet deze waarde op niet (veel) meer dan het fysiek
+# aantal CPUs van de node. Als er meerdere modules op dezelfde
+# node actief zijn wees dan nog behoudender.
+mutatielevering.concurrent.listeners=10
+
+#################################################################
+# BRP MODULE VERZENDING
+#################################################################
+
+# Redelivery
+# Selectie van queues (zie http://activemq.apache.org/wildcards.html)
+jms.broker.redelivery.queue=>
+# Wachttijd voor hersturing na eerste poging
+jms.broker.redelivery.initial.delay=$60
+# Wachttijd voor hersturing
+jms.broker.redelivery.delay=60
+# Aantal pogingen van hersturen
+jms.broker.redelivery.max.redeliveries=10
+
+# SSL
+
+security.keystore.type=JKS
+security.keystore.bestand=bzm_server_privatekey.jks
+security.keystore.wachtwoord=M1gratie
+security.keystore.keywachtwoord=M1gratie
+
+security.truststore.type=JKS
+security.truststore.bestand=bzm_client_publickeys.jks
+security.truststore.wachtwoord=hallo123
+
+security.disable.cn.check=true
+
+#################################################################
+# BRP MODULE AFNEMER VOORBEELD
+#################################################################
+
+brp.afnemervoorbeeld.ispersistent=false
+
+#################################################################
+# BRP MODULE CACHE
+#################################################################
+
+brp.cache.ververs.tijdinterval.sec=0
+
+#################################################################
+# BRP MODULE BEVRAGING
+#################################################################
+
+brp.bevraging.zoekpersoon.max.conc.request=10
+brp.bevraging.zoekpersoon.max.costs.queryplan=250
+
+#################################################################
+# BRP MODULE RELATEREN
+#################################################################
+jms.relateerservice.listener.broker.url=${brp.jms.broker.url}
+jms.relateerservice.concurrent=5
+jms.relateerservice.queue=Relateren
+
+#################################################################
+# HIBERNATE
+#################################################################
+
+hibernate.use.second.level.cache=false
+hibernate.use.query.cache=false
+hibernate.generate.statistics=false
+
+#################################################################
+# GBA LEVERING ROUTE
+#################################################################
+
+isc.levering.queue=levering
+isc.provider.url=${brp.jms.broker.url}
+]]></echo>
+
+        <echo file="tmp/server.xml" append="false" force="true"><![CDATA[<?xml version='1.0' encoding='utf-8'?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Note:  A "Server" is not itself a "Container", so you may not
+     define subcomponents such as "Valves" at this level.
+     Documentation at /docs/config/server.html
+ -->
+<Server port="8107" shutdown="SHUTDOWN">
+  <!-- Security listener. Documentation at /docs/config/listeners.html
+  <Listener className="org.apache.catalina.security.SecurityListener" />
+  -->
+  <!--APR library loader. Documentation at /docs/apr.html -->
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+  <!--Initialize Jasper prior to webapps are loaded. Documentation at /docs/jasper-howto.html -->
+  <Listener className="org.apache.catalina.core.JasperListener" />
+  <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.JmxRemoteLifecycleListener"
+          rmiRegistryPortPlatform="${brp.rmi.registry.port}" rmiServerPortPlatform="${brp.jmx.service.port}" />
+
+  <!-- Global JNDI resources
+       Documentation at /docs/jndi-resources-howto.html
+  -->
+  <GlobalNamingResources>
+    <!-- Editable user database that can also be used by
+         UserDatabaseRealm to authenticate users
+    -->
+    <Resource name="UserDatabase" auth="Container"
+              type="org.apache.catalina.UserDatabase"
+              description="User database that can be updated and saved"
+              factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+              pathname="conf/tomcat-users.xml" />
+  </GlobalNamingResources>
+
+  <!-- A "Service" is a collection of one or more "Connectors" that share
+       a single "Container" Note:  A "Service" is not itself a "Container",
+       so you may not define subcomponents such as "Valves" at this level.
+       Documentation at /docs/config/service.html
+   -->
+  <Service name="Catalina">
+
+    <!--The connectors can use a shared executor, you can define one or more named thread pools-->
+    <!--
+    <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+        maxThreads="150" minSpareThreads="4"/>
+    -->
+
+
+    <!-- A "Connector" represents an endpoint by which requests are received
+         and responses are returned. Documentation at :
+         Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
+         Java AJP  Connector: /docs/config/ajp.html
+         APR (HTTP/AJP) Connector: /docs/apr.html
+         Define a non-SSL HTTP/1.1 Connector on port 8080
+    -->
+    <Connector port="${brp.beheer.port}" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443"
+               URIEncoding="UTF-8"/>
+    <!-- A "Connector" using the shared thread pool-->
+    <!--
+    <Connector executor="tomcatThreadPool"
+               port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443" />
+    -->
+    <!-- Define a SSL HTTP/1.1 Connector on port 8443
+         This connector uses the JSSE configuration, when using APR, the
+         connector should be using the OpenSSL style configuration
+         described in the APR documentation -->
+    <!--
+    <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
+               maxThreads="150" scheme="https" secure="true"
+               clientAuth="false" sslProtocol="TLS" />
+    -->
+
+    <!-- Define an AJP 1.3 Connector on port ${brp.ajp.port} -->
+    <Connector port="${brp.beheer.ajp.port}" protocol="AJP/1.3" redirectPort="8443" />
+
+
+    <!-- An Engine represents the entry point (within Catalina) that processes
+         every request.  The Engine implementation for Tomcat stand alone
+         analyzes the HTTP headers included with the request, and passes them
+         on to the appropriate Host (virtual host).
+         Documentation at /docs/config/engine.html -->
+
+    <!-- You should set jvmRoute to support load-balancing via AJP ie :
+    <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
+    -->
+    <Engine name="Catalina" defaultHost="localhost">
+
+      <!--For clustering, please take a look at documentation at:
+          /docs/cluster-howto.html  (simple how to)
+          /docs/config/cluster.html (reference documentation) -->
+      <!--
+      <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
+      -->
+
+      <!-- Use the LockOutRealm to prevent attempts to guess user passwords
+           via a brute-force attack -->
+      <Realm className="org.apache.catalina.realm.LockOutRealm">
+        <!-- This Realm uses the UserDatabase configured in the global JNDI
+             resources under the key "UserDatabase".  Any edits
+             that are performed against this UserDatabase are immediately
+             available for use by the Realm.  -->
+        <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+               resourceName="UserDatabase"/>
+      </Realm>
+
+      <Host name="localhost"  appBase="webapps"
+            unpackWARs="true" autoDeploy="true">
+
+        <!-- SingleSignOn valve, share authentication between web applications
+             Documentation at: /docs/config/valve.html -->
+        <!--
+        <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+        -->
+
+        <!-- Access log processes all example.
+             Documentation at: /docs/config/valve.html
+             Note: The pattern used is equivalent to using pattern="common" -->
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+               prefix="localhost_access_log." suffix=".txt"
+               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+
+      </Host>
+    </Engine>
+  </Service>
+</Server>
+]]></echo>
+
+        <echo file="tmp/beheer.properties" append="false" force="true"><![CDATA[
+database.driver=org.postgresql.Driver
+
+# DATABASE (MASTER; SCHRIJVEN)
+database.master.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+database.master.username=${brp.database.username}
+database.master.password=${brp.database.password}
+
+# DATABASE (KERN; READONLY)
+database.kern.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+database.kern.username=${brp.database.username}
+database.kern.password=${brp.database.password}
+
+# DATABASE (ARCHIVERING; READONLY)
+database.archivering.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+database.archivering.username=${brp.database.username}
+database.archivering.password=${brp.database.password}
+
+# DATABASE (PROTOCOLLERING; READONLY)
+database.protocollering.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+database.protocollering.username=${brp.database.username}
+database.protocollering.password=${brp.database.password}
+
+# POOLING
+jdbc.pool.initialSize=10
+jdbc.pool.maxActive=3
+
+# HIBERNATE
+hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+hibernate.show_sql=false
+hibernate.use_sql_comments=true
+hibernate.format_sql=true
+javax.persistence.validation.mode=NONE
+
+# TRANSACTIE
+transaction.timeout=300
+
+# AUTORISATIE
+useInMemoryAuthentication=true
+
+# ISC-CONSOLE
+isc.url=http://${isc.console.host}:${isc.console.port}/jbpm-console/
+isc.processenOpAh=app/processinstances.jsf?root=true&fr=true&fs=true&fe=true&ah=
+
+# VRIJ BERICHT
+vrijbericht.service.url=http://${isc.console.host}:8887/vrijbericht/VrijBerichtService/vrbStuurVrijBericht?wsdl
+]]></echo>
+
+
+        </target>
+
+
+    <target name="deinstall" depends="checkProperties">
+        <echo message="Removing ${ant.project.name}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; rm -Rf ${application.directory}" />
+    </target>
+
+    <target name="start" depends="checkProperties">
+        <echo message="Starting ${ant.project.name}" />
+
+        <echo message="Server host: ${server.host}" />
+        <echo message="Registry port: ${brp.rmi.registry.port}" />
+
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; cd ${application.directory}; cd bin; ./startup.sh" />
+
+        <java classname="nl.bzk.migratiebrp.tools.controle.waiter.BeheerInitializationWaiter" failonerror="true" >
+            <sysproperty key="jmx.service.url" value="service:jmx:simple://${server.host}:${application.jmx.port}"/>
+            <sysproperty key="jmx.service.username" value="admin"/>
+            <sysproperty key="jmx.service.password" value="admin"/>
+        </java>
+
+        <echo message="Succesfully started ${ant.project.name}" />
+    </target>
+
+    <target name="stop" depends="checkProperties">
+        <echo message="Stopping ${ant.project.name} (and sleeping 15s)" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" failonerror="false"
+                 command="cd ~; cd ${application.directory}; cd bin; ./shutdown.sh" />
+        <echo message="Killing tomcat (catalina) processes to force shutdown"/>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                         command=" if [[ $( ps aux | grep catalin[a] -c) != 0 ]]; then echo &quot;still running&quot;; pkill -f catalin[a]; else echo &quot;already stopped&quot;; fi" />
+    </target>
+
+    <target name="clean" depends="checkProperties">
+    </target>
+
+    <target name="fail">
+        <fail message="Call with valid task" />
+    </target>
+
+</project>

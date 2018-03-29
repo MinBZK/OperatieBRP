@@ -1,0 +1,1 @@
+SELECT naam FROM autaut.his_dienstbundel WHERE extract(EPOCH FROM localtimestamp-tsreg)/3600 < 1 ORDER BY id;

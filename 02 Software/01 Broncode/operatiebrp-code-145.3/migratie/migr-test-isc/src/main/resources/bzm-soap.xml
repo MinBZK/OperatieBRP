@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                             http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- Signature properties -->
+    <bean id="signaturePropertiesOut" class="java.util.Properties">
+        <constructor-arg>
+            <props>
+                <prop key="org.apache.ws.security.crypto.provider">org.apache.ws.security.components.crypto.Merlin</prop>
+                <prop key="org.apache.ws.security.crypto.merlin.keystore.type">${migratie.bzm.security.keystore.type}</prop>
+                <prop key="org.apache.ws.security.crypto.merlin.keystore.file">${migratie.bzm.security.keystore.private.file}</prop>
+                <prop key="org.apache.ws.security.crypto.merlin.keystore.password">${migratie.bzm.security.keystore.private.password}</prop>
+            </props>
+        </constructor-arg>
+    </bean>
+    <bean id="signaturePropertiesIn" class="java.util.Properties">
+        <constructor-arg>
+            <props>
+                <prop key="org.apache.ws.security.crypto.provider">org.apache.ws.security.components.crypto.Merlin</prop>
+                <prop key="org.apache.ws.security.crypto.merlin.keystore.type">${migratie.bzm.security.keystore.type}</prop>
+                <prop key="org.apache.ws.security.crypto.merlin.keystore.file">${migratie.bzm.security.keystore.public.file}</prop>
+                <prop key="org.apache.ws.security.crypto.merlin.keystore.password">${migratie.bzm.security.keystore.public.password}</prop>
+            </props>
+        </constructor-arg>
+    </bean>
+    <bean id="securityProperties" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.impl.security.SecurityProperties">
+        <constructor-arg>
+            <ref bean="signaturePropertiesOut"/>
+        </constructor-arg>
+        <constructor-arg>
+            <ref bean="signaturePropertiesIn"/>
+        </constructor-arg>
+    </bean>
+
+    <!-- CXF config -->
+    <!-- <import resource="classpath:cxf-config.xml"/> -->
+</beans>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                             http://www.springframework.org/schema/beans/spring-beans.xsd
+                             http://www.springframework.org/schema/context
+                             http://www.springframework.org/schema/context/spring-context.xsd
+                             http://www.springframework.org/schema/mvc
+                             http://www.springframework.org/schema/mvc/spring-mvc.xsd
+                             http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+                             http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+                             http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <!-- context:annotation-config / -->
+    <context:component-scan base-package="nl.bzk.migratiebrp.ggo.viewer"/>
+    <!-- mvc:annotation-driven / -->
+
+    <import resource="classpath:conversie-beans.xml" />
+    <import resource="classpath:synchronisatie-beans-test.xml" />
+    <import resource="classpath:excel-adapter-beans.xml" />
+
+    <!-- Configure from which .properties file Spring gets its information -->
+    <context:property-placeholder location="classpath:ggo-viewer.properties" order="0" />
+
+    <!-- Mock de DB (dat is het eigenlijke doel van dit hele bestand) -->
+    <bean id="dbService" class="nl.bzk.migratiebrp.ggo.viewer.service.DbService" factory-bean="mockFactory" factory-method="createDbService" />
+
+    <!-- Mock de BCM Service ook, omdat deze op Jenkins niet enabled / geconfigureerd is, maar misschien op de developer PC weer wel -->
+    <bean id="bcmService" class="nl.bzk.migratiebrp.ggo.viewer.service.BcmService" factory-bean="mockFactory" factory-method="createBcmService" />
+
+    <!-- Mock nog meer dependencies -->
+    <bean id="brpDalService" class="nl.bzk.migratiebrp.synchronisatie.dal.service.BrpDalService" factory-bean="mockFactory" factory-method="createBrpDalService" />
+
+    <bean id="mockFactory" class="nl.bzk.migratiebrp.ggo.viewer.MockFactory" />
+
+    <!-- This component will check the PL data according to the GBA business rules. -->
+    <bean id="checker" class="nl.gba.gbav.impl.checker.Checker"/>
+<!-- 
+    <bean id="conversietabelFactory" class="nl.bzk.migratiebrp.conversie.regels.tabel.ConversietabelFactoryImpl" />
+ -->
+ <!-- 
+    <bean id="stamtabelServiceImpl" class="nl.bzk.migratiebrp.ggo.viewer.service.impl.MockStamtabelService" />
+    <bean id="brpStamtabelServiceImpl" class="nl.bzk.migratiebrp.ggo.viewer.service.impl.MockBrpStamtabelService" />
+    <bean id="lo3StamtabelServiceImpl" class="nl.bzk.migratiebrp.ggo.viewer.service.impl.MockLo3StamtabelService" />
+ -->
+    <!-- Definitie van DataSource specifiek voor test -->
+    <jdbc:embedded-database id="inMemoryDatabase">
+        <jdbc:script location="classpath:bmr/HSQLDB/HSQLDB.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:bmr/HSQLDB/PENDING_BMR_CHANGES.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:sql/hsqldb/createProtocollering.sql" encoding="UTF-8"/>
+        <jdbc:script location="classpath:sql/hsqldb/insertProtocollering.sql" encoding="UTF-8"/>
+    </jdbc:embedded-database>
+
+    <bean id="viewerJpaVendorAdapter"
+        class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+        <property name="database" value="HSQL" />
+        <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect" />
+    </bean>
+
+    <bean id="viewerEntityManagerFactory"
+        class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="ViewerEntities" />
+        <property name="dataSource" ref="inMemoryDatabase" />
+        <property name="jpaVendorAdapter" ref="viewerJpaVendorAdapter" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="viewerTransactionManager"/>
+
+    <jpa:repositories base-package="nl.bzk.migratiebrp.ggo.viewer.repository"/>
+
+    <bean id="viewerJpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+    <bean id="viewerTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="viewerEntityManagerFactory"/>
+        <property name="jpaDialect" ref="viewerJpaDialect"/>
+    </bean>
+
+</beans>

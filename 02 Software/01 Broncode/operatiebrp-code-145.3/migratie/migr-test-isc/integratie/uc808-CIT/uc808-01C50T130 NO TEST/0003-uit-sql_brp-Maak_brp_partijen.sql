@@ -1,0 +1,1 @@
+UPDATE Kern.partij set datovergangnaarbrp = 20000101 where code='199902';

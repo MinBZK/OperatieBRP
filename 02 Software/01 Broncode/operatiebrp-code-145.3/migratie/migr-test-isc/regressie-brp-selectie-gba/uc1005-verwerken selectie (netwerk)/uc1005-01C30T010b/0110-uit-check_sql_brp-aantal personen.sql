@@ -1,0 +1,1 @@
+select count(*) as aantal from kern.pers where srt = 1;

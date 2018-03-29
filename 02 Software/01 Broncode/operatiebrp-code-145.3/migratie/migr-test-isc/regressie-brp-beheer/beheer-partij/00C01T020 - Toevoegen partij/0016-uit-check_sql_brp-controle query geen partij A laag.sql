@@ -1,0 +1,2 @@
+SELECT id, code, naam, datingang, dateinde, oin, srt, indverstrbeperkingmogelijk, indag, indautofiat, datovergangnaarbrp, indagbijhouding
+	FROM kern.partij WHERE naam = 'Test Toevoegen Partij' ORDER BY id;

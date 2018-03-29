@@ -1,0 +1,1 @@
+select pers_id, toeganglevsautorisatie_count, conversie_resultaat from initvul.initvullingresult_protocollering;

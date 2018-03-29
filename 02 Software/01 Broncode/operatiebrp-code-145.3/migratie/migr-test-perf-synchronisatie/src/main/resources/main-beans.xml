@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+    <!-- the cache -->
+    <bean id="ehCacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+          p:config-location="cit-ehcache.xml" p:shared="true"/>
+
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="ehCacheManager"/>
+    </bean>
+
+    <bean id="voiscMBeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
+        <property name="locateExistingServerIfPossible" value="true"/>
+    </bean>
+
+    <bean id="ehCacheMBeanRegistration" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="staticMethod" value="net.sf.ehcache.management.ManagementService.registerMBeans"/>
+        <property name="arguments">
+            <list>
+                <ref bean="ehCacheManager"/>
+                <ref bean="voiscMBeanServer"/>
+                <value>true</value>
+                <value>true</value>
+                <value>true</value>
+                <value>true</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Test environment -->
+
+    <bean name="testEnvironment" class="nl.bzk.migratiebrp.test.perf.synchronisatie.environment.TestEnvironment"/>
+
+    <!-- Mailbox Beans -->
+
+    <bean id="mailboxServerProxy" class="nl.bzk.migratiebrp.voisc.mailbox.client.impl.MailboxServerProxyImpl" scope="prototype"/>
+
+    <bean id="mailboxServerConnection" class="nl.bzk.migratiebrp.voisc.mailbox.client.impl.SslConnectionFactory">
+        <property name="hostname" value="${mailbox.server:localhost}"/>
+        <property name="portNumber" value="${mailbox.port:1212}"/>
+        <property name="keyPassword" value="${ssl.key.password:changeit}"/>
+        <property name="keystorePassword" value="${ssl.keystore.password:changeit}"/>
+        <property name="truststorePassword" value="${ssl.truststore.password:changeit}"/>
+    </bean>
+
+    <bean id="mailboxRepository" class="nl.bzk.migratiebrp.voisc.database.repository.MailboxRepositoryImpl"/>
+
+
+    <bean id="voiscEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="VoiscEntities"/>
+        <property name="dataSource" ref="voiscDataSource"/>
+        <property name="jpaVendorAdapter" ref="voiscJpaVendorAdapter"/>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.transaction.manager_lookup_class">
+                    com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup
+                </prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init"
+          destroy-method="close">
+        <!--  when close is called, should we force transactions to terminate or not? -->
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+
+    <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout">
+            <value>300</value>
+        </property>
+    </bean>
+
+    <bean name="voiscJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <property name="databasePlatform" value="${voisc.database.dialect:org.hibernate.dialect.PostgreSQLDialect}"/>
+    </bean>
+
+
+    <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+    <bean id="voiscTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager"/>
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction"/>
+        </property>
+    </bean>
+
+    <bean id="voiscDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init"
+          destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="voiscDatabase"/>
+            </bean>
+        </property>
+        <property name="xaDataSourceClassName" value="${voisc.database.driver:org.postgresql.xa.PGXADataSource}"/>
+        <property name="xaProperties">
+            <props>
+                <prop key="ServerName">${voisc.database.host:localhost}</prop>
+                <prop key="PortNumber">${voisc.database.port:5432}</prop>
+                <prop key="DatabaseName">${voisc.database.name:voisc}</prop>
+                <prop key="User">${voisc.database.username:migratie}</prop>
+                <prop key="Password">${voisc.database.password:M1gratie}</prop>
+            </props>
+        </property>
+        <property name="maxPoolSize" value="${voisc.database.maxpool:20}"/>
+        <property name="minPoolSize" value="${voisc.database.minpool:1}"/>
+        <property name="testQuery" value="select now()"/>
+    </bean>
+
+    <!-- ISC DB -->
+
+    <bean id="iscDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${brp.jdbc.driverClassName:org.postgresql.Driver}"/>
+        <property name="url" value="${isc.jdbc.url:jdbc:postgresql://localhost:5432/soa}"/>
+        <property name="username" value="${isc.jdbc.username:migratie}"/>
+        <property name="password" value="${isc.jdbc.password:M1gratie}"/>
+    </bean>
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+        <property name="dataSource" ref="iscDataSource"/>
+    </bean>
+
+    <!-- JMX -->
+
+    <bean id="mailboxJmxConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+        <property name="serviceUrl"
+                  value="${mailbox.jmx.service.url:service:jmx:rmi://localhost:1699/jndi/rmi://localhost:1599/jmxrmi}"/>
+    </bean>
+
+</beans>

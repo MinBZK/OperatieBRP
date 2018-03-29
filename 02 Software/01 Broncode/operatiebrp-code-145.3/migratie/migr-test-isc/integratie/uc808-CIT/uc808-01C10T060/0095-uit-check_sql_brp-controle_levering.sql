@@ -1,0 +1,1 @@
+SELECT 'x' as indicatieAanwezig from kern.admhnd where statuslev <> 4;

@@ -1,0 +1,1 @@
+select data from ber.ber where richting = 1 and ontvangendepartij = $$partijid$$;

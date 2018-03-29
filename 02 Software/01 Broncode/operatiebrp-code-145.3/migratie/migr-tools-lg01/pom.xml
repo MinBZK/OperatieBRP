@@ -1,0 +1,116 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.migratiebrp</groupId>
+        <artifactId>migr</artifactId>
+        <version>145.3</version>
+        <relativePath>../migr</relativePath>
+    </parent>
+
+    <artifactId>migr-tools-lg01</artifactId>
+    <name>Migr - Test - Excel naar LG01 conversie</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-util-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-conversie-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-conversie-model</artifactId>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-bericht-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-util-excel</artifactId>
+        </dependency>
+
+        <!--  Common IO  -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+
+        <!-- junit -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <finalName>migr-tools-lg01</finalName>
+                    <appendAssemblyId>false</appendAssemblyId>
+                    <descriptors>
+                        <descriptor>src/main/assembly/assembly.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>default-tests</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/ConverteerXlsNaarLg01Test.java</exclude>
+                                <exclude>**/ParameterizedTest.java</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>conversie</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <test>ConverteerXlsNaarLg01Test</test>
+                            <excludes>
+                                <exclude>**/*</exclude>
+                            </excludes>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>
+

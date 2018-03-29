@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="routeringJmxConnectorCredentials" class="nl.bzk.algemeenbrp.util.jmx.client.CredentialsFactory">
+        <property name="username" value="${routering.jmx.service.username:admin}"/>
+        <property name="password" value="${routering.jmx.service.password:admin}"/>
+    </bean>
+
+    <bean id="routeringJmxConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+        <property name="environment">
+            <map>
+                <entry key="jmx.remote.credentials" value-ref="routeringJmxConnectorCredentials"/>
+                <entry key="jmx.remote.requesttimeout" value="60" />
+            </map>
+        </property>
+        <property name="serviceUrl"
+                  value="service:jmx:simple://${routering.jmx.service.host:localhost}:${routering.jmx.service.port:3481}"/>
+    </bean>
+</beans>

@@ -1,0 +1,1 @@
+update mig_bericht set ms_sequence_number = null where ms_sequence_number = 1;

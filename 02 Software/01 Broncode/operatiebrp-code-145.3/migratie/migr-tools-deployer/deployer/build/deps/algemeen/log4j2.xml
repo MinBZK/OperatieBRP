@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info" shutdownHook="disable">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %msg%n" />
+		</Console>
+
+		<RollingRandomAccessFile name="Systeem"
+								 fileName="./logs/systeem.log"
+								 filePattern="./logs/systeem-%d{yyyy-MM-dd}-%i.log.gz">
+			<MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT" />
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="7" compressionLevel="9" />
+		</RollingRandomAccessFile>
+
+		<RollingRandomAccessFile name="Functioneel"
+							     fileName="./logs/functioneel.log"
+							     filePattern="./logs/functioneel-%d{yyyy-MM-dd}-%i.log.gz">
+			<MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT"	onMismatch="DENY" />
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30"
+				compressionLevel="9" />
+		</RollingRandomAccessFile>
+	</Appenders>
+
+	<Loggers>
+		<Root level="INFO">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="Systeem" />
+			<AppenderRef ref="Functioneel" />
+		</Root>
+		<Logger name="com.atomikos" level="ERROR" />
+		<Logger name="org.springframework" level="WARN" />
+	</Loggers>
+
+</Configuration>

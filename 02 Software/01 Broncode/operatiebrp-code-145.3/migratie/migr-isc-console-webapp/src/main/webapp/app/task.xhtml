@@ -1,0 +1,534 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+>
+
+    <ui:composition template="t_loggedin.xhtml">
+        <ui:define name="actions">
+            <ga:responseActions>
+                <ga:parameter name="id" target="#{id}" required="true"/>
+                <j4j:loadTask id="#{id}" target="#{task}"/>
+                <ga:parameter name="view" target="#{viewMode}" default="form"/>
+                <gd:reverse source="#{task.comments}" target="#{comments}"/>
+                <gd:sort if="#{! empty task.availableTransitions}" source="#{task.availableTransitions}" target="#{transitions}"
+                entryVar="e" argument="#{e.name == null ? '' : e.name}"/>
+
+		        <ga:parameter unless="#{viewMode != 'berichten'}" name="page" target="#{page}">
+                    <f:convertNumber integerOnly="true"/>
+                </ga:parameter>
+                <mig:pager unless="#{viewMode != 'berichten'}" target="#{berichtenList_pager}" page="#{page}" pageSize="25" />
+                <mig:berichtenFilter  unless="#{viewMode != 'berichten'}" target="#{berichtenList_filter}" />
+                <mig:listBerichtenForProcessInstance unless="#{viewMode != 'berichten'}" target="#{berichtenList}" processInstance="#{task.processInstance}" pager="#{berichtenList_pager}" filter="#{berichtenList_filter}"/>
+		        <mig:listTransitionsForProcessInstance unless="#{viewMode != 'log'}" target="#{logList}" processInstance="#{task.processInstance}"/>
+
+
+                <j4j:getVariableMap target="#{taskVariableMap}" value="#{task}"/>
+                <j4j:getTaskFormInfo process="#{task.processInstance.processDefinition}" target="#{taskForms}"/>
+                <gd:sort if="#{! empty task.pooledActors}" source="#{task.pooledActors}" target="#{taskActors}" entryVar="e"
+                argument="#{e.actorId}"/>
+                <gd:filter if="#{! empty taskActors and ! empty task.actorId}" entryVar="e" source="#{taskActors}"
+                target="#{taskActors}" test="#{e.actorId != task.actorId}"/>
+            </ga:responseActions>
+            <ga:keepAlive value="#{taskVariableMap}"/>
+        </ui:define>
+
+        <ui:define name="menu">
+            <gs:div style="padding:0;margin:0">
+                <ga:attribute name="rendered" value="#{task != null}"/>
+                <table class="leftmenu">
+                    <tbody>
+                        <tr class="leftmenuheader">
+                            <th colspan="2">#{msgs['task.summary']}</th>
+                        </tr>
+						<ga:checkRole roles="#{access.role.process.details}">
+                        <tr class="leftmenu">
+                            <th>#{msgs['processdefinition.summary']}</th>
+                            <td>
+                                <h:outputLink value="procdef.jsf">
+                                    <f:param name="id" value="#{task.processInstance.processDefinition.id}"/>
+                                    <h:outputText
+                                    value="#{task.processInstance.processDefinition.name} v#{task.processInstance.processDefinition.version}"/>
+                                </h:outputLink>
+                            </td>
+                        </tr>
+						 <tr class="leftmenu">
+                            <th>#{msgs['processinstance.summary']}</th>
+                            <td>
+                                <h:outputLink value="procins.jsf">
+                                    <f:param name="id" value="#{task.processInstance.id}"/>
+                                    <b><h:outputText value=" ID #{task.processInstance.id}"/></b>
+                                </h:outputLink>
+                            </td>
+                        </tr>
+						<gs:tr styleClass="leftmenu">
+                            <th>#{msgs['token.summary']}</th>
+                            <td>
+                                <h:outputLink value="token.jsf" rendered="#{task.token != null}">
+                                    <f:param name="id" value="#{task.token.id}"/>
+                                    <gs:b>
+                                        <h:outputText value="ID #{task.token.id}"/>
+                                    </gs:b>
+                                    <h:outputText value=" &quot;#{task.token.name}&quot;" rendered="#{! empty task.token.name}"/>
+                                </h:outputLink>
+                            </td>
+                        </gs:tr>
+                        </ga:checkRole>
+                        <tr class="leftmenu">
+                            <th>#{msgs['task.summary']}</th>
+                            <td>
+                                <h:outputText value="ID #{id}"/>
+                            	<ui:remove><!--
+                                <h:outputLink value="task.jsf" style="font-weight:bold">
+                                    <f:param name="id" value="#{id}"/>
+                                    <h:outputText value="ID #{id}"/>
+                                </h:outputLink>
+                                --></ui:remove>
+                            </td>
+                        </tr>
+                        <gs:tr styleClass="leftmenu">
+                            <th>#{msgs['task.heading.name']}</th>
+                            <td>
+                                <h:outputText value="#{task.name}" rendered="#{! empty task.name}"/>
+                            </td>
+                        </gs:tr>
+                        <ga:checkRole roles="#{access.role.task.actor}">
+                            <gs:tr styleClass="leftmenu">
+                                <th>#{msgs['task.heading.assigned.to']}</th>
+                                <td>
+                                    <h:outputText value="#{task.actorId}" rendered="#{! empty task.actorId}"/>
+                                </td>
+                            </gs:tr>
+                            <gs:tr styleClass="leftmenu">
+                                <th>#{msgs['task.heading.pooled.actors']}</th>
+                                <td>
+                                   <ga:responseActions>
+                                       <gd:sort source="#{task.pooledActors}" target="#{taskActors}" entryVar="e" argument="#{e.actorId}"/>
+                                   </ga:responseActions>
+                                       <gd:repeat>
+                                           <ga:attribute name="value" value="#{taskActors}"/>
+                                           <ga:attribute name="var" value="actor"/>
+                                           <ga:attribute name="rendered" value="#{! empty task.pooledActors}"/>
+                                           <h:outputText value="#{task.actorId != null ? actor.actorId : ''}"/>
+                                           <br/>
+                                       </gd:repeat>
+                                </td>
+                            </gs:tr>
+                        </ga:checkRole>
+                        <tr class="leftmenu">
+                            <th>#{msgs['task.heading.status']}</th>
+                            <td>
+                                <h:outputText value="#{msgs['status.ended']}" styleClass="statusEnded">
+                                    <ga:attribute name="rendered" value="#{task.end != null}"/>
+                                </h:outputText>
+                                <h:outputText value=" #{msgs['status.ended.suspended']}" style="font-style:italic">
+                                    <ga:attribute name="rendered" value="#{task.end != null and task.suspended}"/>
+                                </h:outputText>
+                                <h:outputText value="#{msgs['status.notstarted']}" styleClass="statusNotstarted">
+                                    <ga:attribute name="rendered" value="#{task.end == null and task.start == null}"/>
+                                </h:outputText>
+                                <h:outputText value=" #{msgs['status.notstarted.suspended']}" style="font-style:italic">
+                                    <ga:attribute name="rendered" value="#{task.start == null and task.suspended}"/>
+                                </h:outputText>
+                                <h:outputText>
+                                    <ga:attribute name="rendered" value="#{task.end == null and task.start != null}"/>
+                                    <ga:attribute name="value" value="#{task.suspended ? msgs['status.suspended'] : msgs['status.running']}"/>
+                                    <ga:attribute name="styleClass" value="#{task.suspended ? 'statusSuspended' : 'statusRunning'}"/>
+                                </h:outputText>
+                            </td>
+                        </tr>
+                        <gs:tr styleClass="leftmenu">
+                            <th>#{msgs['task.heading.create']}</th>
+                            <td>
+                                <h:outputText value="#{task.create}" rendered="#{task.create != null}">
+                                    <f:convertDateTime type="both" timeZone="Europe/Amsterdam"/>
+                                </h:outputText>
+                            </td>
+                        </gs:tr>
+                        <gs:tr styleClass="leftmenu">
+                            <th>#{msgs['task.heading.start']}</th>
+                            <td>
+                                <h:outputText value="#{task.start}" rendered="#{task.start != null}">
+                                    <f:convertDateTime type="both" timeZone="Europe/Amsterdam"/>
+                                </h:outputText>
+                            </td>
+                        </gs:tr>
+                        <gs:tr styleClass="leftmenu">
+                            <th>#{msgs['task.heading.end']}</th>
+                            <td>
+                                <h:outputText value="#{task.end}" rendered="#{task.end != null}">
+                                    <f:convertDateTime type="both" timeZone="Europe/Amsterdam"/>
+                                </h:outputText>
+                            </td>
+                        </gs:tr>
+                        <tr class="leftmenuheader">
+                            <th colspan="2" class="nf">#{msgs['menu.views']}</th>
+                        </tr>
+                        <tr class="leftmenu">
+                            <td colspan="2">
+                                <ul>
+                                    <gs:li>
+                                        <h:outputLink style="#{viewMode == 'form' ? 'font-weight:bold' : ''}">
+                                            <f:param name="id" value="#{id}"/>
+                                            <f:param name="view" value="form"/>
+                                            <gs:b writeTag="#{viewMode == 'form'}">
+                                                 <h:outputText value="#{msgs['task.heading.form']}"/>
+                                            </gs:b>
+                                        </h:outputLink>
+                                    </gs:li>
+                                    <gs:li>
+                                        <h:outputLink style="#{viewMode == 'berichten' ? 'font-weight:bold' : ''}">
+                                            <f:param name="id" value="#{id}"/>
+                                            <f:param name="view" value="berichten"/>
+                                            <gs:b writeTag="#{viewMode == 'berichten'}">
+                                                 <h:outputText value="#{msgs['bericht.heading']}"/>
+                                            </gs:b>
+                                        </h:outputLink>
+                                    </gs:li>
+                                    <gs:li>
+                                        <h:outputLink style="#{viewMode == 'log' ? 'font-weight:bold' : ''}">
+                                            <f:param name="id" value="#{id}"/>
+                                            <f:param name="view" value="log"/>
+                                            <gs:b writeTag="#{viewMode == 'log'}">
+                                                 <h:outputText value="#{msgs['log.heading']}"/>
+                                            </gs:b>
+                                        </h:outputLink>
+                                    </gs:li>
+                                    <li>
+                                        <h:outputLink style="#{viewMode == 'comments' ? 'font-weight:bold' : ''}">
+                                            <f:param name="id" value="#{id}"/>
+                                            <f:param name="view" value="comments"/>
+                                            <gs:b writeTag="#{viewMode == 'comments'}">
+                                                 <h:outputText value="#{msgs['comment.heading']}"/>
+                                            </gs:b>
+                                        </h:outputLink>
+                                    </li>
+									<ga:checkRole roles="#{access.role.process.details}">
+                                    <li>
+                                        <h:outputLink>
+                                            <f:param name="id" value="#{id}"/>
+                                            <f:param name="view" value="vars"/>
+                                            <gs:b writeTag="#{viewMode == 'vars'}">
+                                                 <h:outputText value="#{msgs['variable.heading']}"/>
+                                            </gs:b>
+                                        </h:outputLink>
+                                    </li>
+                                    <gs:li>
+                                        <ga:attribute name="rendered" value="#{! empty transitions and task.end == null}"/>
+                                        <h:outputLink>
+                                            <f:param name="id" value="#{id}"/>
+                                            <f:param name="view" value="tran"/>
+                                            <gs:b writeTag="#{viewMode == 'tran'}">
+                                                <h:outputText value="#{msgs['transition.heading']}"/>
+                                            </gs:b>
+                                        </h:outputLink>
+                                    </gs:li>
+                                    </ga:checkRole>
+                                </ul>
+                            </td>
+                        </tr>
+                        <gs:tr styleClass="leftmenuheader">
+                            <ga:attribute name="rendered" value="#{task.end == null}"/>
+                            <th colspan="2" class="nf">#{msgs['menu.actions']}</th>
+                        </gs:tr>
+                        <gs:tr styleClass="leftmenu">
+                            <ga:attribute name="rendered" value="#{task.end == null}"/>
+                            <td colspan="2">
+                                <ul>
+									<ga:checkRole roles="#{access.role.execution.suspend.task}">
+                                    <li>
+                                        <h:form>
+											<h:outputText value="#{msgs['task.action.suspend.beforelink']} ">
+                                                <ga:attribute name="rendered" value="#{! task.suspended}"/>
+											</h:outputText>
+                                            <h:commandLink value="#{msgs['task.action.suspend.link']}">
+                                                <ga:attribute name="rendered" value="#{! task.suspended}"/>
+                                                <f:param name="id" value="#{id}"/>
+                                                <ga:parameter name="id" target="#{id}">
+                                                    <f:convertNumber integerOnly="true"/>
+                                                </ga:parameter>
+                                                <j4j:loadTask id="#{id}" target="#{xtask}"/>
+                                                <j4j:suspend value="#{xtask}"/>
+                                                <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                                <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                            </h:commandLink>
+											<h:outputText value=" #{msgs['task.action.suspend.afterlink']} ">
+                                                <ga:attribute name="rendered" value="#{! task.suspended}"/>
+											</h:outputText>
+
+											<h:outputText value="#{msgs['task.action.resume.beforelink']} ">
+                                                <ga:attribute name="rendered" value="#{task.suspended}"/>
+											</h:outputText>
+                                            <h:commandLink value="#{msgs['task.action.resume.link']}">
+                                                <ga:attribute name="rendered" value="#{task.suspended}"/>
+                                                <f:param name="id" value="#{id}"/>
+                                                <ga:parameter name="id" target="#{id}">
+                                                    <f:convertNumber integerOnly="true"/>
+                                                </ga:parameter>
+                                                <j4j:loadTask id="#{id}" target="#{xtask}"/>
+                                                <j4j:resume value="#{xtask}"/>
+                                                <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                                <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                            </h:commandLink>
+											<h:outputText value=" #{msgs['task.action.resume.afterlink']} ">
+                                                <ga:attribute name="rendered" value="#{task.suspended}"/>
+											</h:outputText>
+                                        </h:form>
+                                    </li>
+									</ga:checkRole>
+                                    <gs:li>
+                                        <ga:attribute name="rendered" value="#{task.start == null &amp;&amp; !task.suspended}"/>
+                                        <h:form>
+											<h:outputText value="#{msgs['task.action.start.beforelink']} "/>
+                                            <h:commandLink>
+                                                <h:outputText value="#{msgs['task.action.start.link']}"/>
+                                                <f:param name="id" value="#{id}"/>
+                                                <ga:parameter name="id" target="#{id}">
+                                                    <f:convertNumber integerOnly="true"/>
+                                                </ga:parameter>
+                                                <j4j:loadTask id="#{id}" target="#{xtask}"/>
+                                                <mig:startTaak task="#{id}" actorId="#{request.remoteUser}" />
+                                                <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                                <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                            </h:commandLink>
+											<h:outputText value=" #{msgs['task.action.start.afterlink']} "/>
+                                        </h:form>
+                                    </gs:li>
+                                    <ga:checkRole roles="#{access.role.task.actor}">
+                                    <gs:li>
+                                        <ga:attribute name="rendered" value="#{task.actorId != null}"/>
+                                        <h:form>
+                                           <h:commandLink>
+                                               <ga:attribute name="value" value="#{task.actorId != null ? msgs['task.unassign'] : ''}"/>
+                                               <f:param name="id" value="#{id}"/>
+                                                <ga:parameter name="id" target="#{id}">
+                                                    <f:convertNumber integerOnly="true"/>
+                                                </ga:parameter>
+                                                <j4j:loadTask id="#{id}" target="#{xtask}"/>
+                                                <mig:unassignTask task="#{xtask}"/>
+                                               <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                               <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                           </h:commandLink>
+                                        </h:form>
+                                    </gs:li>
+                                    </ga:checkRole>
+									<!-- ga:checkRole roles="#{access.role.task.assign}">
+                                    <gs:li>
+                                        <ga:attribute name="rendered" value="#{task.end == null}"/>
+                                        <h:outputText>
+                                            <ga:attribute name="value" value="#{task.actorId == null ? 'Assign' : 'Reassign'} this task to:"/>
+                                        </h:outputText>
+                                        <ul>
+                                            <gd:repeat value="#{taskActors}" var="actor" rendered="#{! empty taskActors}">
+                                                <li>
+                                                    <h:form>
+                                                        <h:commandLink>
+                                                            <ga:attribute name="value" value="#{actor.actorId}"/>
+                                                            <f:param name="actorId" value="#{actor.actorId}"/>
+                                                            <ga:parameter name="id" target="#{id}"/>
+                                                            <ga:parameter name="actorId" target="#{xactorId}"/>
+                                                            <j4j:loadTask id="#{id}" target="#{xtask}"/>
+                                                            <j4j:assignTask task="#{xtask}" actorId="#{xactorId}"/>
+                                                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                                        </h:commandLink>
+                                                    </h:form>
+                                                </li>
+                                            </gd:repeat>
+                                            <li>
+                                                <h:form>
+                                                    <h:inputText value="#{actorId}" required="true" requiredMessage="No actor name specified"/>
+                                                    <h:commandButton value="Save" style="margin-left:5px">
+                                                        <ga:parameter name="id" target="#{id}"/>
+                                                        <j4j:loadTask id="#{id}" target="#{xtask}"/>
+                                                        <j4j:assignTask task="#{xtask}" actorId="#{actorId}"/>
+                                                        <n:nav outcome="default" redirect="true" storeMessages="true"/>
+                                                    </h:commandButton>
+                                                </h:form>
+                                            </li>
+                                        </ul>
+                                    </gs:li>
+									</ga:checkRole-->
+
+                                </ul>
+                            </td>
+                        </gs:tr>
+                    </tbody>
+                </table>
+            </gs:div>
+        </ui:define>
+
+        <ui:define name="body">
+            <h:outputText>
+                <ga:attribute name="rendered" value="#{task != null}"/>
+                <h:outputText>
+                    <ga:attribute name="rendered" value="#{viewMode == 'comments'}"/>
+                    <ui:decorate template="t_comments.xhtml">
+                        <ui:define name="loadTarget">
+                            <ga:parameter name="id" target="#{id}" required="true">
+                                <f:validateLongRange minimum="0"/>
+                                <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+                            </ga:parameter>
+                            <j4j:loadTask id="#{id}" target="#{task}"/>
+                            <f:setPropertyActionListener value="#{task}" target="#{target}"/>
+                        </ui:define>
+                    </ui:decorate>
+                </h:outputText>
+                <h:outputText>
+                    <ga:attribute name="rendered" value="#{viewMode == 'tran' and ! empty transitions and task.end == null}"/>
+                    <table class="results">
+                        <thead>
+                            <tr>
+                                <th colspan="4">#{msgs['transition.heading']}</th>
+                            </tr>
+                            <tr>
+                                <td style="width:40px">
+                                    #{msgs['transition.heading.id']}
+                                </td>
+                                <td style="width:100px">
+                                    #{msgs['transition.heading.name']}
+                                </td>
+                                <td style="width:160px">
+                                   #{msgs['transition.heading.node']}
+                                </td>
+                                <td style="width:90px">
+                                    #{msgs['menu.actions']}
+                                </td>
+                            </tr>
+                        </thead>
+                        <h:outputText>
+                            <tbody class="results">
+                                <gd:repeat value="#{transitions}" var="transition" idVar="rid">
+                                    <gs:tr styleClass="#{rid % 2 == 0 ? 'odd' : 'even'}">
+                                        <td>
+                                            <h:outputText value="#{transition.id}"/>
+                                        </td>
+                                        <td>
+                                            <h:outputText value="#{transition.name}" rendered="#{! empty transition.name}"/>
+                                            <gs:i rendered="#{empty transition.name}">
+                                                <h:outputText value="(unnamed)"/>
+                                            </gs:i>
+                                        </td>
+                                        <td>
+                                            <h:outputText value="#{transition.to.name}"/>
+                                        </td>
+                                        <td>
+											<ga:checkRole roles="#{access.role.execution.signal}">
+                                            <h:form>
+                                                <h:commandLink onclick="return confirm('#{msgs['confirm.task.end']}')" >
+                                                    <h:outputText value="#{msgs['action.end']}"/>
+                                                    <ga:attribute name="rendered" value="#{! task.suspended}"/>
+                                                    <f:param name="id" value="#{id}"/>
+                                                    <ga:parameter name="id" target="#{id}">
+                                                        <f:convertNumber integerOnly="true"/>
+                                                    </ga:parameter>
+                                                    <j4j:loadTask id="#{id}" target="#{task}"/>
+                                                    <j4j:completeTask task="#{task}" transition="#{transition.name}"/>
+                                                    <n:nav outcome="success" url="procins.jsf?id=#{task.processInstance.id}"
+                                                    storeMessages="true"/>
+                                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                                </h:commandLink>
+                                            </h:form>
+											</ga:checkRole>
+                                        </td>
+                                    </gs:tr>
+                                </gd:repeat>
+                            </tbody>
+                        </h:outputText>
+                    </table>
+                </h:outputText>
+                <h:outputText>
+                    <ga:attribute name="rendered" value="#{viewMode == 'form'}"/>
+                    <h:outputText value="#{msgs['task.suspended']}">
+                        <ga:attribute name="rendered"  value="#{task.suspended}"/>
+                    </h:outputText>
+                    <h:outputText value="#{msgs['task.notstarted']}" >
+                    	<ga:attribute name="rendered"  value="#{task.start == null &amp;&amp; !task.suspended}"/>
+                    </h:outputText>
+                    <h:outputText value="#{msgs['task.ended']}" >
+                    	<ga:attribute name="rendered"  value="#{task.start != null &amp;&amp; !task.suspended &amp;&amp; task.end != null}"/>
+                    </h:outputText>
+                    <h:outputText value="#{msgs['task.notyours']}" >
+                    	<ga:attribute name="rendered"  value="#{task.start != null &amp;&amp; !task.suspended &amp;&amp; task.end == null &amp;&amp; task.actorId ne request.remoteUser}"/>
+                    </h:outputText>
+
+                    <h:form>
+                    	<ga:attribute name="rendered"  value="#{task.start != null &amp;&amp; !task.suspended &amp;&amp; task.end == null &amp;&amp; task.actorId eq request.remoteUser}"/>
+
+                        <j4j:taskForm transitionTarget="#{transition}" buttonTarget="#{button}">
+                            <ga:parameter name="id" target="#{id}" required="true">
+                                <f:validateLongRange minimum="0"/>
+                                <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+                            </ga:parameter>
+
+                            <mig:verwerkTaak  id="#{id}" transition="#{transition}" comment="#{comment}"  variableMap="#{taskVariableMap}" unless="#{button != 'transition'}" navigate="false" />
+                            <mig:reportSelectedChoice variableMap="#{taskVariableMap}" unless="#{button != 'transition'}" />
+
+                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="save" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="cancel" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="transition" storeMessages="true" url="tasks.jsf" />
+
+                            <j4j:includeProcessFile file="#{taskForms[task.name]}" process="#{task.processInstance.processDefinition}">
+                                <ui:param name="var" value="#{taskVariableMap}"/>
+                                <ui:param name="comment" value="#{comment}"/>
+                                <ui:param name="taskName" value="#{task.name}"/>
+                            </j4j:includeProcessFile>
+                        </j4j:taskForm>
+                    </h:form>
+                </h:outputText>
+                <h:outputText>
+                    <ga:attribute name="rendered" value="#{viewMode == 'vars'}"/>
+                    <ui:decorate template="t_vars.xhtml">
+                        <ui:param name="vars" value="#{taskVariableMap}"/>
+                        <ui:define name="loadEntity">
+                            <ga:parameter name="id" target="#{id}" required="true">
+                                <f:validateLongRange minimum="0"/>
+                                <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+                            </ga:parameter>
+                            <j4j:loadTask id="#{id}" target="#{xtask}"/>
+                            <f:setPropertyActionListener value="#{xtask.token}" target="#{entity}"/>
+                        </ui:define>
+                        <ui:define name="params">
+                            <f:param name="id" value="#{id}"/>
+                            <f:param name="view" value="vars"/>
+                        </ui:define>
+                    </ui:decorate>
+                </h:outputText>
+
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'berichten'}"/>
+            <ui:decorate template="t_berichten.xhtml">
+                <ui:param name="berichten" value="#{berichtenList}"/>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="berichten"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'log'}"/>
+            <ui:decorate template="t_transitionlog.xhtml">
+                <ui:param name="logs" value="#{logList}"/>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="log"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+
+            </h:outputText>
+        </ui:define>
+    </ui:composition>
+
+</html>

@@ -1,0 +1,1 @@
+select coalesce(min(id), -1) from proefSynchronisatieBericht where verwerkt is null or verwerkt = false;

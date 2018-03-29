@@ -1,0 +1,1 @@
+select conversie_resultaat, count(*) as aantal from initvul.initvullingresult where berichttype = 'Lg01' or berichttype = 'La01' group by conversie_resultaat;

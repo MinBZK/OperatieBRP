@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="destinationManager" class="com.mockrunner.jms.DestinationManager"/>
+    <bean id="configurationManager" class="com.mockrunner.jms.ConfigurationManager"/>
+
+    <!-- Wrap the XA ConnectionFactory to make it aware of the JTA Transaction manager -->
+    <bean id="queueConnectionFactory" class="com.mockrunner.mock.jms.MockQueueConnectionFactory">
+        <constructor-arg index="0" ref="destinationManager"/>
+        <constructor-arg index="1" ref="configurationManager"/>
+    </bean>
+    <bean id="queueInbound" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/sync.request"/>
+    </bean>
+    <bean id="queueOutbound" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/sync.response"/>
+    </bean>
+    <bean id="gemeenteVerzoekQueue" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/gemeente.verzoek"/>
+    </bean>
+    <bean id="partijVerzoekQueue" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/partij.verzoek"/>
+    </bean>
+    <bean id="afnemerVerzoekQueue" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/afnemer.verzoek"/>
+    </bean>
+    <bean id="autorisatieVerzoekQueue" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/autorisatie.verzoek"/>
+    </bean>
+
+    <bean id="brpQueueConnectionFactory" class="com.mockrunner.mock.jms.MockQueueConnectionFactory">
+        <constructor-arg index="0" ref="destinationManager"/>
+        <constructor-arg index="1" ref="configurationManager"/>
+    </bean>
+    <bean id="queueArchiveringVerzoek" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="archivering"/>
+    </bean>
+    <bean id="gbaAfnemerindicaties" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="gbaAfnemerindicaties"/>
+    </bean>
+    <bean id="gbaAfnemerindicatiesAntwoord" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="gbaAfnemerindicatiesAntwoord"/>
+    </bean>
+    <bean id="gbaLeveringen" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="gbaLeveringen"/>
+    </bean>
+    <bean id="gbaToevalligeGebeurtenissen" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="gbaToevalligeGebeurtenissen"/>
+    </bean>
+    <bean id="gbaToevalligeGebeurtenissenAntwoord" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="gbaToevalligeGebeurtenissenAntwoord"/>
+    </bean>
+    <bean id="gbaAdhocPersoonsvraagVerzoek" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="GbaAdhocPersoonsvraagVerzoek"/>
+    </bean>
+    <bean id="gbaAdhocPersoonsvraagAntwoord" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="GbaAdhocPersoonsvraagAntwoord"/>
+    </bean>
+    <bean id="gbaAdhocAdresvraagVerzoek" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="GbaAdhocAdresvraagVerzoek"/>
+    </bean>
+    <bean id="gbaAdhocAdresvraagAntwoord" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="GbaAdhocAdresvraagAntwoord"/>
+    </bean>
+    <bean id="gbaPersoonsVraag" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="gbaPersoonsVraag"/>
+    </bean>
+    <bean id="gbaVrijeBerichten" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="GbaVrijeBerichten"/>
+    </bean>
+    <bean id="gbaVrijeBerichtenAntwoorden" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="GbaVrijeBerichtenAntwoorden"/>
+    </bean>
+    <bean id="gbaNotificaties" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="GbaNotificaties" />
+    </bean>
+    <bean id="queueSyncVerzoek" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="iv.request"/>
+    </bean>
+    <bean id="queueSyncAntwoord" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="iv.response"/>
+    </bean>
+</beans>

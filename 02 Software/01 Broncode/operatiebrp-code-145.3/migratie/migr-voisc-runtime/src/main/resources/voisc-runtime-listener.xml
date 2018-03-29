@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="voiscBerichtListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="false"/>
+        <property name="sessionTransacted" value="true"/>
+
+        <property name="connectionFactory" ref="voiscJmsConnectionFactory"/>
+        <property name="transactionManager" ref="voiscTransactionManager"/>
+        <property name="destination" ref="voiscVerzendenQueue"/>
+
+        <property name="messageListener">
+            <bean class="nl.bzk.migratiebrp.voisc.runtime.listener.IscBerichtListener"/>
+        </property>
+    </bean>
+
+    <bean name="voiscJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="voiscJmsConnectionFactory"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="receiveTimeout" value="${voisc.queue.receivetimeout:30000}"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<process-definition  xmlns=""  name="timertransaction">
+
+    <start-state name="START">
+        <transition to="async node">
+				<expression>
+                    System.out.println("Transition from START to ASYNC");
+				</expression>
+        </transition>
+    </start-state>
+
+	<node name="async node" async="true">
+		<transition to="timer node">
+            <script>
+                <expression>
+                    dueDate = nl.bzk.migratiebrp.isc.jbpm.common.TimerUtil.getDueDate(new org.jbpm.calendar.Duration("4 seconds"), null);
+                    System.out.println("Transition from ASYNC to TIMER node");
+                </expression>
+                <variable name='timeout' access='read,write' />
+                <variable name='dueDate' access='write' />
+            </script>
+		</transition>
+	</node>
+
+    <node name="timer node">
+   		<action class="nl.bzk.migratiebrp.isc.jbpm.common.actionhandler.WaitActionHandler" config-type="bean"></action>
+		<timer name="testtimer" transition="timer" duedate="#{dueDate}">
+        </timer>
+		<timer name="ongeldigetimer" transition="ongeldigetimer" duedate="#{ditgeefteenexecutionerror}">
+        </timer>
+
+		<transition to="END">
+			<script>
+				<expression>
+                    System.out.println("Transition from TIMER to END");
+				</expression>
+			</script>
+		</transition>
+		<transition to="END" name="timer">
+			<script>
+				<expression>
+                    System.out.println("Transition from TIMER to END due to timer");
+				</expression>
+			</script>
+		</transition>
+	</node>
+
+	<end-state name="END"></end-state>
+
+<!--
+    <exception-handler>
+        <action name="exception-handler" class="nl.bzk.migratiebrp.isc.jbpm.common.ExceptionLogger"/>
+    </exception-handler>
+ -->
+</process-definition>

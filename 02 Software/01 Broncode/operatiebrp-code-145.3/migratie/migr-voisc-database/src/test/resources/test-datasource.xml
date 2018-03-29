@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<context:property-placeholder />
+
+ 	<bean id="embeddedDatabaseServer" class="org.hsqldb.server.Server" init-method="start" destroy-method="stop" >
+ 		<property name="port" value="${test.database.port}" />
+ 		<property name="properties">
+ 			<bean class="org.hsqldb.persist.HsqlProperties">
+ 				<constructor-arg>
+		 			<props>
+		 				<prop key="hsqldb.reconfig_logging">false</prop>
+		 				<prop key="server.database.0">mem:voisc</prop>
+		 				<prop key="server.dbname.0">voisc</prop>
+		 			</props>
+ 				</constructor-arg>
+ 			</bean>
+ 		</property>
+ 	</bean>
+
+    <bean id="voiscDataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean" depends-on="embeddedDatabaseServer">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName" >
+            	<property name="baseName" value="voiscDatabase" />
+            </bean>
+        </property>
+        <property name="url" value="jdbc:hsqldb:hsql://localhost:${test.database.port}/voisc"/>
+        <property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
+        <property name="user" value="sa"/>
+        <property name="password" value="" />
+        <property name="maxPoolSize" value="20" />
+        <property name="minPoolSize" value="1"/>
+    </bean>
+
+    <jdbc:initialize-database ignore-failures="ALL" data-source="voiscDataSource">
+        <jdbc:script location="classpath:sql/voisc-drop.sql"  />
+        <jdbc:script location="classpath:sql/postgres.sql"  />
+    </jdbc:initialize-database>
+
+    <jdbc:initialize-database data-source="voiscDataSource">
+        <jdbc:script location="classpath:sql/voisc-create.sql"  />
+        <jdbc:script location="classpath:sql/voisc-data.sql" />
+    </jdbc:initialize-database>
+
+</beans>

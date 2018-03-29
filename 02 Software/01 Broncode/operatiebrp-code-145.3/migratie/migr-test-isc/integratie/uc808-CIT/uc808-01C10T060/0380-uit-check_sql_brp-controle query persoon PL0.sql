@@ -1,0 +1,1 @@
+select bsn from kern.pers where versienr = '2';

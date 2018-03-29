@@ -1,0 +1,1 @@
+select id, anr, bsn, versienr, lockversie from kern.pers where anr = '8409813281' or anr = '9262053650';

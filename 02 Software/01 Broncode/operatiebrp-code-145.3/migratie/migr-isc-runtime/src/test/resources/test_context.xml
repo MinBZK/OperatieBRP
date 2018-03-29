@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+	<!-- Autowire testcases using annotations -->
+	<context:annotation-config />
+    <context:property-placeholder />
+
+  	<!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
+  	<amq:connectionFactory id="connectionFactory" brokerURL="tcp://localhost:${test.routering.port}">
+		<amq:redeliveryPolicy>
+			<amq:redeliveryPolicy maximumRedeliveries="0" />
+		</amq:redeliveryPolicy>
+	</amq:connectionFactory>
+
+	<bean id="iscJmxConnectorCredentials" class="nl.bzk.algemeenbrp.util.jmx.client.CredentialsFactory">
+		<property name="username" value="admin" />
+		<property name="password" value="admin" />
+	</bean>
+
+    <bean id="iscJmxConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+		<property name="environment">
+			<map>
+				<entry key="jmx.remote.credentials" value-ref="iscJmxConnectorCredentials" />
+			</map>
+    	</property>
+    	<property name="connectOnStartup" value="false" />
+        <property name="serviceUrl" value="service:jmx:simple://localhost:${test.jmx.port}"/>
+    </bean>
+
+	<bean id="iscCommandClient" class="nl.bzk.migratiebrp.isc.jbpm.command.client.CommandClientImpl">
+		<property name="serverConnection" ref="iscJmxConnector" />
+	</bean>
+
+</beans>

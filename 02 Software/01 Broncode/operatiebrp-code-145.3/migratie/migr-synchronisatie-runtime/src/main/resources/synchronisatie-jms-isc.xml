@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <amq:xaConnectionFactory id="syncXaConnectionFactory" brokerURL="${sync.queue.url:tcp://localhost:61616}">
+        <amq:redeliveryPolicy>
+            <amq:redeliveryPolicy maximumRedeliveries="0"/>
+        </amq:redeliveryPolicy>
+    </amq:xaConnectionFactory>
+
+    <!-- Atomikos JTA-enabled ConnectionFactory, configured with the vendor's XA factory. -->
+    <bean name="queueConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean" init-method="init" destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="syncQueues"/>
+            </bean>
+        </property>
+        <property name="xaConnectionFactory" ref="syncXaConnectionFactory"/>
+        <property name="minPoolSize" value="${sync.queue.minpool:1}"/>
+        <property name="maxPoolSize" value="${sync.queue.maxpool:20}"/>
+    </bean>
+
+    <!-- Destinations -->
+
+    <amq:queue id="queueSyncVerzoek" physicalName="${sync.queue.verzoek:sync.verzoek}"/>
+    <amq:queue id="queueSyncAntwoord" physicalName="${sync.queue.antwoord:sync.antwoord}"/>
+
+    <amq:queue id="queueArchiveringVerzoek" physicalName="${sync.queue.archivering:archivering}"/>
+
+    <amq:queue id="queueLevering" physicalName="${sync.queue.levering:levering}"/>
+    <amq:queue id="queueNotificatie" physicalName="${sync.queue.notificatie:notificatie}"/>
+
+    <amq:queue id="partijVerzoekQueue" physicalName="${sync.queue.partij:partij.verzoek}"/>
+    <amq:topic id="partijRegisterTopic" physicalName="${sync.topic.partij:partij.register}"/>
+    <amq:queue id="autorisatieVerzoekQueue" physicalName="${sync.queue.autorisatie:autorisatie.verzoek}"/>
+    <amq:topic id="autorisatieRegisterTopic" physicalName="${sync.topic.autorisatie:autorisatie.register}"/>
+
+    <!-- template voor isc -->
+    <bean name="queueJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="queueConnectionFactory"/>
+        <property name="receiveTimeout" value="30000"/>
+        <property name="sessionTransacted" value="true"/>
+    </bean>
+</beans>

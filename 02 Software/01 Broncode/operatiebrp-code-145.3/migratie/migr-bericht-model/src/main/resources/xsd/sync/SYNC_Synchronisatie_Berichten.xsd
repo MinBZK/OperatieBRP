@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+        targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        version="000101">
+
+    <include schemaLocation="SYNC_Objecttypen.xsd"/>
+
+    <!--
+    | Berichten die te maken hebben met het synchroniseren (lezen/schrijven) van persoonslijsten.
+    +-->
+
+    <element name="leesUitBrpVerzoek" type="sync:LeesUitBrpVerzoekType"/>
+    <element name="leesUitBrpAntwoord" type="sync:LeesUitBrpAntwoordType"/>
+    <element name="synchroniseerNaarBrpVerzoek" type="sync:SynchroniseerNaarBrpVerzoekType"/>
+    <element name="synchroniseerNaarBrpAntwoord" type="sync:SynchroniseerNaarBrpAntwoordType"/>
+
+    <!-- Lees uit BRP -->
+
+    <complexType name="LeesUitBrpVerzoekType">
+        <sequence>
+            <choice>
+                <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1" nillable="false"/>
+                <element name="technischeSleutel" type="sync:TechnischeSleutelType" minOccurs="1" maxOccurs="1"
+                         nillable="false"/>
+            </choice>
+            <element name="antwoordFormaat" type="sync:AntwoordFormaatType" minOccurs="1" maxOccurs="1"
+                     nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="LeesUitBrpAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Ok">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de persoonlijst succesvol is gelezen.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Fout">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de persoonslijst niet gelezen kon worden.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="melding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1"/>
+            <choice>
+                <element name="lo3Pl" type="sync:Lo3PlType" minOccurs="0" maxOccurs="1" nillable="false"/>
+                <element name="lo3PlXml" type="sync:Lo3PlXmlType" minOccurs="0" maxOccurs="1" nillable="false"/>
+                <element name="brpPl" type="sync:BrpPlType" minOccurs="0" maxOccurs="1" nillable="false"/>
+            </choice>
+        </sequence>
+    </complexType>
+
+    <!-- Synchroniseer naar BRP -->
+
+    <complexType name="SynchroniseerNaarBrpVerzoekType">
+        <sequence>
+            <element name="verzendendeGemeente" type="sync:OntvangendePartijType" minOccurs="0" maxOccurs="1"
+                     nillable="false"/>
+            <element name="lo3PersoonslijstAlsTeletexString" type="sync:Lo3PlType" minOccurs="1" maxOccurs="1"
+                     nillable="false"/>
+            <element name="typeBericht" type="sync:TypeSynchronisatieBericht" minOccurs="1" maxOccurs="1"
+                     nillable="false"/>
+            <element name="beheerderKeuze" minOccurs="0" maxOccurs="1">
+                <complexType>
+                    <sequence>
+                        <element name="keuze" type="sync:BeheerdersKeuzeType" minOccurs="1" maxOccurs="1"
+                                 nillable="false"/>
+                        <element name="teVervangenPersoonId" type="sync:PersoonIdType" minOccurs="0" maxOccurs="1"
+                                 nillable="false"/>
+                        <element name="kandidaat" minOccurs="0" maxOccurs="unbounded">
+                            <complexType>
+                                <sequence>
+                                    <element name="persoonId" type="sync:PersoonIdType" minOccurs="1" maxOccurs="1"
+                                             nillable="false"/>
+                                    <element name="versie" type="sync:VersieNrType" minOccurs="1" maxOccurs="1"
+                                             nillable="false"/>
+                                </sequence>
+                            </complexType>
+                        </element>
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="SynchroniseerNaarBrpAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Fout">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de persoonslijst niet opgeslagen kon worden in de BRP
+                                    database (bv: teletex string niet te parsen).
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Toegevoegd">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan de persoonslijst succesvol is opgeslagen in de BRP database,
+                                    als nieuwe persoonslijst.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Vervangen">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan de persoonslijst succesvol is opgeslagen in de BRP database,
+                                    als vervanging/bijwerking van een bestaande persoonslijst.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Onduidelijk">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de persoonslijst niet opgeslagen kan worden in de BRP
+                                    database omdat er onduidelijkheden
+                                    zijn (ofwel in het a-nummer ofwel in de recentheid).
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Genegeerd">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de persoonslijst niet is opgeslagen in de BRP database
+                                    en bewust is genegeerd (omdat er
+                                    al een recentere versie van de persoonslijst aanwezig is).
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Afgekeurd">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de persoonslijst inhoudelijk niet voldoet aan de eisen
+                                    die daaraan gesteld worden (baseline 1).
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="VorigeHandelingenNietGeleverd">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat niet alle administratieve handelingen, die de persoonslijst
+                                    raken, zijn geleverd.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="kandidaat" minOccurs="0" maxOccurs="unbounded">
+                <complexType>
+                    <sequence>
+                        <element name="persoonId" type="sync:PersoonIdType" minOccurs="1" maxOccurs="1"
+                                 nillable="false"/>
+                        <element name="versie" type="sync:VersieNrType" minOccurs="1" maxOccurs="1" nillable="false"/>
+                        <element name="lo3PersoonslijstAlsTeletexString" type="sync:Lo3PlType" minOccurs="1"
+                                 maxOccurs="1" nillable="false"/>
+                    </sequence>
+                </complexType>
+            </element>
+
+            <element name="administratieveHandelingId" type="sync:AdministratieveHandelingIdType" minOccurs="0"
+                     maxOccurs="unbounded"/>
+            <element name="melding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1"/>
+            <element name="logging" type="sync:LogRegelType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+
+
+</schema>

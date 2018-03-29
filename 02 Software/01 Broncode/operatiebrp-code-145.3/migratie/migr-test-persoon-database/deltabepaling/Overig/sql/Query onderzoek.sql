@@ -1,0 +1,1 @@
+select pers,partij,dataanv,dateinde,oms,status,indag from kern.onderzoek

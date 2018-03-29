@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+
+
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <context:property-placeholder
+        location="classpath:datasource.properties,file:datasource.properties"
+        ignore-resource-not-found="true" />
+
+    <import resource="main-beans.xml"/>
+    <import resource="classpath:/test-dal-beans.xml"/>
+
+    <beans>
+        <!-- Configuratie voor beide profielen -->
+        <!-- Construct Atomikos USerTransactionService, needed to specify Atomikos settings -->
+        <bean id="atomikosUserTransactionService" class="com.atomikos.icatch.config.UserTransactionServiceImp"
+              init-method="init" destroy-method="shutdownForce">
+            <constructor-arg>
+                <!-- IMPORTANT: specify all Atomikos properties here -->
+                <props>
+                    <prop key="com.atomikos.icatch.service">
+                        com.atomikos.icatch.standalone.UserTransactionServiceFactory
+                    </prop>
+                    <prop key="com.atomikos.icatch.tm_unique_name">transactionmanager_${atomikos.unique_name:local}_
+                    </prop>
+                    <prop key="com.atomikos.icatch.log_base_name">transactionlog_${atomikos.unique_name:local}_</prop>
+                </props>
+            </constructor-arg>
+        </bean>
+
+        <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+        <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init"
+              destroy-method="close" depends-on="atomikosUserTransactionService">
+            <!-- IMPORTANT: disable startup because the userTransactionService above does this -->
+            <property name="startupTransactionService" value="false"/>
+
+            <!--  when close is called, should we force transactions to terminate or not? -->
+            <property name="forceShutdown">
+                <value>true</value>
+            </property>
+        </bean>
+
+        <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+        <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp"
+              depends-on="atomikosUserTransactionService">
+            <property name="transactionTimeout">
+                <value>3600</value>
+            </property>
+        </bean>
+
+        <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+        <bean id="syncDalTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+            <property name="transactionManager">
+                <ref bean="atomikosTransactionManager"/>
+            </property>
+            <property name="userTransaction">
+                <ref bean="atomikosUserTransaction"/>
+            </property>
+        </bean>
+    </beans>
+
+    <beans profile="memoryDS">
+        <!-- In memory profile -->
+        <jdbc:embedded-database id="syncDalDataSource">
+            <jdbc:script location="classpath:bmr/HSQLDB/HSQLDB.sql" encoding="UTF-8"/>
+            <jdbc:script location="classpath:bmr/HSQLDB/PENDING_BMR_CHANGES.sql" encoding="UTF-8"/>
+        </jdbc:embedded-database>
+
+        <bean id="syncDalJpaVendorAdapter"
+            class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            <property name="showSql" value="false" />
+            <property name="generateDdl" value="false" />
+            <property name="database" value="HSQL" />
+            <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect" />
+        </bean>
+
+
+        <bean id="syncDalEntityManagerFactory"
+            class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+            <property name="persistenceUnitName" value="BrpEntities" />
+            <property name="dataSource" ref="syncDalDataSource" />
+            <property name="jpaVendorAdapter">
+                <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+            </property>
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                    <prop key="hibernate.cache.use_query_cache">false</prop>
+                    <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</prop>
+                    <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+                    <prop key="net.sf.ehcache.configurationResourceName">synchronisatie-dal-stamtabel-ehcache.xml</prop>
+                    <prop key="hibernate.generate_statistics">false</prop>
+                    <prop key="hibernate.transaction.jta.platform">
+                        nl.bzk.algemeenbrp.jta.AtomikosJtaPlatform
+                    </prop>
+                    <!--<prop key="hibernate.hbm2ddl.auto">validate</prop>-->
+                </props>
+            </property>
+        </bean>
+    </beans>
+
+    <beans profile="!memoryDS">
+        <bean id="syncDalDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+            <property name="driverClass" value="${jdbc.driverClassName:org.postgresql.Driver}"/>
+            <property name="jdbcUrl" value="${jdbc.url:jdbc:postgresql://localhost/BRP/Kern}"/>
+            <property name="user" value="${jdbc.username:postgres}"/>
+            <property name="password" value="${jdbc.password:postgres}"/>
+            <property name="minPoolSize" value="1"/>
+            <property name="maxPoolSize" value="200"/>
+            <property name="maxIdleTime" value="3600"/>
+            <property name="testConnectionOnCheckin" value="true"/>
+            <property name="idleConnectionTestPeriod" value="30"/>
+            <property name="preferredTestQuery" value="SELECT 41+1"/>
+        </bean>
+
+        <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQLDialect"/>
+        </bean>
+
+        <bean id="syncDalEntityManagerFactory"
+            class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+            <property name="persistenceUnitName" value="BrpEntities" />
+            <property name="dataSource" ref="syncDalDataSource" />
+            <property name="jpaVendorAdapter">
+                <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+            </property>
+            <property name="jpaProperties">
+                <props>
+                    <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                    <prop key="hibernate.cache.use_query_cache">false</prop>
+                    <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</prop>
+                    <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+                    <prop key="net.sf.ehcache.configurationResourceName">synchronisatie-dal-stamtabel-ehcache.xml</prop>
+                    <prop key="hibernate.generate_statistics">false</prop>
+                    <prop key="hibernate.transaction.jta.platform">
+                        nl.bzk.algemeenbrp.jta.AtomikosJtaPlatform
+                    </prop>
+                    <!--<prop key="hibernate.hbm2ddl.auto">validate</prop>-->
+                </props>
+            </property>
+        </bean>
+    </beans>
+
+</beans>

@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+        targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        version="000101">
+
+    <include schemaLocation="SYNC_Objecttypen.xsd"/>
+
+    <!--
+    | Berichten die te maken hebben met het zoeken van personen.
+    +-->
+
+    <element name="adHocZoekPersoonVerzoek" type="sync:AdHocZoekPersoonVerzoekType"/>
+    <element name="adHocZoekPersoonAntwoord" type="sync:AdHocZoekPersoonAntwoordType"/>
+    <element name="adHocZoekPersonenOpAdresVerzoek"
+             type="sync:AdHocZoekPersonenOpAdresVerzoekType"/>
+    <element name="adHocZoekPersonenOpAdresAntwoord"
+             type="sync:AdHocZoekPersonenOpAdresAntwoordType"/>
+
+    <element name="zoekPersoonOpActueleGegevensVerzoek"
+             type="sync:ZoekPersoonOpActueleGegevensVerzoekType"/>
+    <element name="zoekPersoonOpHistorischeGegevensVerzoek"
+             type="sync:ZoekPersoonOpHistorischeGegevensVerzoekType"/>
+    <element name="zoekPersoonAntwoord" type="sync:ZoekPersoonAntwoordType"/>
+
+    <complexType name="AdHocZoekPersoonVerzoekType">
+        <sequence>
+            <element name="partijCode" type="sync:PartijcodeType" minOccurs="1" maxOccurs="1"/>
+            <element name="persoonIdentificerendeGegevens"
+                     type="sync:PersoonIdentificerendeGegevensType" minOccurs="1" maxOccurs="1"/>
+            <element name="gevraagdeRubrieken" type="sync:RubriekLijstType" minOccurs="1"
+                     maxOccurs="1"/>
+            <element name="soortDienst" type="sync:SoortDienstType" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="AdHocZoekPersoonAntwoordType">
+        <sequence>
+            <choice>
+                <sequence>
+                    <element name="inhoud" type="sync:Lo3PlType" minOccurs="1" maxOccurs="1"
+                             nillable="false"/>
+                </sequence>
+                <sequence>
+                    <element name="foutreden" type="sync:AdHocZoekAntwoordFoutReden" minOccurs="1"
+                             maxOccurs="1"/>
+                </sequence>
+            </choice>
+        </sequence>
+    </complexType>
+
+    <complexType name="AdHocZoekPersonenOpAdresVerzoekType">
+        <sequence>
+            <element name="partijCode" type="sync:PartijcodeType" minOccurs="1" maxOccurs="1"/>
+            <element name="identificerendeGegevens" type="sync:IdentificerendeGegevensType"
+                     minOccurs="1" maxOccurs="1"/>
+            <element name="gevraagdeRubrieken" type="sync:RubriekLijstType" minOccurs="1"
+                     maxOccurs="1"/>
+            <element name="adresfunctie" type="sync:AdresFunctieType" minOccurs="1" maxOccurs="1"/>
+            <element name="identificatie" type="sync:IdentificatieType" minOccurs="1"
+                     maxOccurs="1"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="AdHocZoekPersonenOpAdresAntwoordType">
+        <sequence>
+            <choice>
+                <sequence>
+                    <element name="inhoud" type="sync:Lo3PlType" minOccurs="1" maxOccurs="1"
+                             nillable="false"/>
+                </sequence>
+                <sequence>
+                    <element name="foutreden" type="sync:AdHocZoekAntwoordFoutReden" minOccurs="1"
+                             maxOccurs="1"/>
+                </sequence>
+            </choice>
+        </sequence>
+    </complexType>
+
+    <complexType name="ZoekPersoonOpActueleGegevensVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="0" maxOccurs="1"/>
+            <element name="burgerservicenummer" type="sync:BsnType" minOccurs="0" maxOccurs="1"/>
+            <element name="geslachtsnaam" type="sync:GeslachtsnaamType" minOccurs="0"
+                     maxOccurs="1"/>
+            <element name="postcode" type="sync:PostcodeType" minOccurs="0" maxOccurs="1"/>
+            <element name="aanvullendeZoekcriteria" type="sync:AanvullendeZoekPersoonCriteriaType"
+                     minOccurs="0" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ZoekPersoonOpHistorischeGegevensVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="0" maxOccurs="1"/>
+            <element name="burgerservicenummer" type="sync:BsnType" minOccurs="0" maxOccurs="1"/>
+            <element name="geslachtsnaam" type="sync:GeslachtsnaamType" minOccurs="0"
+                     maxOccurs="1"/>
+            <element name="aanvullendeZoekcriteria" type="sync:AanvullendeZoekPersoonCriteriaType"
+                     minOccurs="0" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+
+    <!-- ZoekPersoonAntwoord  (SYNC -> ISC) -->
+
+    <complexType name="ZoekPersoonAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Ok">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de zoekvraag succesvol is
+                                    uitgevoerd. Indien er persoonslijsten zijn gevonden
+                                    dan zijn deze opgenomen in het element 'gevondenPersonen'.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="resultaat" type="sync:ZoekPersoonResultaatType" minOccurs="1"
+                     maxOccurs="1"/>
+            <element name="uniekGevondenPersoon" minOccurs="0" maxOccurs="1">
+                <complexType>
+                    <sequence>
+                        <element name="persoonId" type="sync:PersoonIdType" minOccurs="1"
+                                 maxOccurs="1"/>
+                        <element name="actueelANummer" type="sync:ANummerType" minOccurs="1"
+                                 maxOccurs="1"/>
+                        <element name="bijhoudingsgemeente" type="sync:GemeentecodeType"
+                                 minOccurs="1" maxOccurs="1"/>
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+    </complexType>
+</schema>

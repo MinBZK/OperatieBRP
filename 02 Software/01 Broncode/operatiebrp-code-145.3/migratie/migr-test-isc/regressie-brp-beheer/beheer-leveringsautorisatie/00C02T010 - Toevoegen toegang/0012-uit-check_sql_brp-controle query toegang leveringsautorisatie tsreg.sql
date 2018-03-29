@@ -1,0 +1,1 @@
+SELECT toeganglevsautorisatie FROM autaut.his_toeganglevsautorisatie WHERE extract(EPOCH FROM localtimestamp-tsreg)/3600 < 1 ORDER BY id;

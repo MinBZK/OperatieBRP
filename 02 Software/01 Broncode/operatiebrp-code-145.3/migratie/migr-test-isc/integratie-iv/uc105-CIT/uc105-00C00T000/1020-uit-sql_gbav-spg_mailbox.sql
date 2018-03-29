@@ -1,0 +1,7 @@
+INSERT INTO spg_mailbox VALUES (10, '3000250');
+INSERT INTO spg_mailbox VALUES (999, '999');
+INSERT INTO spg_mailbox VALUES (1, '3000200');
+INSERT INTO spg_mailbox VALUES (2, '3000210');
+INSERT INTO spg_mailbox VALUES (3, '3000220');
+INSERT INTO spg_mailbox VALUES (4, '3000230');
+INSERT INTO spg_mailbox VALUES (5, '3000270');

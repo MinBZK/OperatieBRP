@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+    <ui:composition template="../app/t_loggedin.xhtml">
+        <ui:define name="actions">
+            <ga:responseActions>
+                <j4j:listProcesses target="#{proclist}"/>
+                <ga:parameter name="page" target="#{page}" default="1">
+                    <f:convertNumber integerOnly="true"/>
+                </ga:parameter>
+                <ga:parameter name="name" target="#{name}" default="">
+                    <f:converter converterId="gravel.StringWildcardFilter"/>
+                </ga:parameter>
+                <ga:parameter name="version" target="#{version}" default="">
+                    <f:converter converterId="gravel.RangeListFilter"/>
+                </ga:parameter>
+                <gd:filter source="#{proclist}" target="#{proclist}" entryVar="entry" filter="#{name}" 
+                filterArgument="#{entry.name}"/>
+                <gd:filter source="#{proclist}" target="#{proclist}" entryVar="entry" filter="#{version}" 
+                filterArgument="#{entry.version}"/>
+                <!-- calculate action column size -->
+                <f:setPropertyActionListener value="1" target="#{actionColspan}"/>
+                <ga:checkRole roles="#{access.role.process.delete}">
+                    <f:setPropertyActionListener value="#{actionColspan + 1}" target="#{actionColspan}"/>
+                </ga:checkRole>
+                <ga:checkRole roles="#{access.role.process.start}">
+                    <f:setPropertyActionListener value="#{actionColspan + 1}" target="#{actionColspan}"/>
+                </ga:checkRole>
+                <gd:pager target="#{pager}" value="#{proclist}" page="#{page}"/>
+            </ga:responseActions>
+        </ui:define>
+
+        <ui:define name="menu">
+            <table class="leftmenu">
+                <tbody>
+                    <tr class="leftmenuheader">
+                        <th colspan="#{actionColspan}">
+                            <h:outputText value="#{msgs['menu.actions']}"/>
+                        </th>
+                    </tr>
+                    <tr class="leftmenu">
+                        <td colspan="#{actionColspan}">
+							<ga:checkRole roles="#{access.role.process.deploy}">
+                            <h:form>
+                                <gs:ul>
+                                        <gs:li>
+                                            <h:outputText value="#{msgs['processdefinition.action.deploy.beforelink']} "/>
+                                            <h:outputLink value="deployproc.jsf">
+                                                <h:outputText value="#{msgs['processdefinition.action.deploy.link']}"/>
+                                            </h:outputLink>
+                                            <h:outputText value=" #{msgs['processdefinition.action.deploy.afterlink']}"/>
+                                        </gs:li>
+                                </gs:ul>
+                            </h:form>
+							</ga:checkRole>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </ui:define>
+
+        <ui:define name="body">
+			<div class="fillerDiv" style="width:800px">&nbsp;</div>
+            <gs:div>
+                <ga:attribute name="rendered" value="#{proclist != null}"/>
+                <table class="results">
+                    <thead>
+                        <tr>
+                            <gs:th>
+                                <ga:attribute name="colspan" value="#{actionColspan + 3}" type="int"/>
+                                <ui:decorate template="t_pager.xhtml">
+                                    <ui:define name="pager_params">
+                                        <f:param name="name" value="#{name}"/>
+                                        <f:param name="version" value="#{version}"/>
+                                    </ui:define>
+                                </ui:decorate>
+                                <h:outputText value="#{msgs['processdefinition.heading']}"/>
+                            </gs:th>
+                        </tr>
+                        <tr>
+                            <td>
+                                #{msgs['processdefinition.heading.id']}
+                            </td>
+                            <td style="width:120px;">
+                                #{msgs['processdefinition.heading.name']}
+                            </td>
+                            <td style="width:50px;">
+                                #{msgs['processdefinition.heading.version']}
+                            </td>
+                            <td colspan="#{actionColspan}" style="width:300px;">
+                                #{msgs['menu.actions']}
+                            </td>
+                        </tr>
+                    </thead>
+                    <tbody class="filter">
+                        <tr>
+                            <td/>
+                            <td>
+                                <input name="name_i" type="text" style="width:110px;" value="#{name}" onkeypress="keypress(event,'apply')"/>
+                            </td>
+                            <td>
+                                <input name="version_i" type="text" style="width:40px;" value="#{version}" 
+                                onkeypress="keypress(event,'apply')"/>
+                            </td>
+                            <td colspan="#{actionColspan}" style="width:150px;">
+                                <form id="sf" action="processes.jsf">
+                                    <input type="hidden" name="name"/>
+                                    <input type="hidden" name="version"/>
+                                </form>
+                                <a href="#" id="apply" accesskey="a" 
+                                onclick="document.getElementsByName('name')[0].value=document.getElementsByName('name_i')[0].value;document.getElementsByName('version')[0].value=document.getElementsByName('version_i')[0].value;document.getElementById('sf').submit();return false;">#{msgs['filter.apply']}</a>
+                                <a href="?" style="margin-left:10px">#{msgs['filter.clear']}</a>
+                            </td>
+                        </tr>
+                    </tbody>
+                    <h:outputText>
+                        <ga:attribute name="rendered" value="#{! empty proclist}"/>
+                        <tbody class="results">
+                            <gd:repeat value="#{proclist}" var="pd" idVar="rid" first="#{pager.first}" limit="#{pager.limit}">
+                                <h:outputText rendered="#{false}">
+                                    <ga:attribute name="value" value="#{rid}"/>
+                                </h:outputText>
+                                <gs:tr>
+                                    <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                                    <td>
+                                        #{pd.id}
+                                    </td>
+                                    <td>
+                                        <h:outputText value="#{pd.name}"/>
+                                    </td>
+                                    <td>
+                                        <h:outputText value="#{pd.version}"/>
+                                    </td>
+                                    <td>
+                                        <h:outputLink value="procdef.jsf?id=#{pd.id}">
+                                            #{msgs['action.examine']}
+                                        </h:outputLink>
+                                    </td>
+                                    <ga:checkRole roles="#{access.role.process.delete}">
+                                        <td>
+                                            <h:form>
+                                                <h:commandLink>#{msgs['action.delete']}
+                                                    <ga:attribute name="onclick" 
+                                                    value="return confirm('#{msgs['confirm.processdefinition.delete']}')"/>
+                                                    <f:param name="id" value="#{pd.id}"/>
+                                                    <ga:parameter name="id" target="#{id}">
+                                                        <f:convertNumber integerOnly="true"/>
+                                                    </ga:parameter>
+                                                    <j4j:loadProcess id="#{id}" target="#{pdx}"/>
+                                                    <j4j:delete value="#{pdx}"/>
+                                                    <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                                </h:commandLink>
+                                            </h:form>
+                                        </td>
+                                    </ga:checkRole>
+                                    <ga:checkRole roles="#{access.role.process.start}">
+                                        <td>
+                                            <h:form>
+                                                <h:commandLink>#{msgs['action.start']}
+                                                    <ga:attribute name="onclick" 
+                                                    value="return confirm('#{msgs['confirm.processinstance.start']}')"/>
+                                                    <f:param name="id" value="#{pd.id}"/>
+                                                    <ga:parameter name="id" target="#{id}">
+                                                        <f:convertNumber integerOnly="true"/>
+                                                    </ga:parameter>
+                                                    <j4j:loadProcess id="#{id}" target="#{pdx}"/>
+                                                    <j4j:startProcess process="#{pdx}" target="#{pi}"/>
+                                                    <n:nav outcome="started" url="procins.jsf?id=#{pi.id}" storeMessages="true"/>
+                                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                                </h:commandLink>
+                                            </h:form>
+                                        </td>
+                                    </ga:checkRole>
+                                </gs:tr>
+                            </gd:repeat>
+                        </tbody>
+                    </h:outputText>
+                </table>
+            </gs:div>
+        </ui:define>
+    </ui:composition>
+
+
+</html>

@@ -1,0 +1,1 @@
+select * from voisc.bericht where status = 'SENT_TO_MAILBOX';

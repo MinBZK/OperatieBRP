@@ -1,0 +1,227 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.migratiebrp</groupId>
+        <artifactId>migr-bericht</artifactId>
+        <version>145.3</version>
+        <relativePath>../migr-bericht</relativePath>
+    </parent>
+
+    <artifactId>migr-bericht-model</artifactId>
+    <packaging>jar</packaging>
+    <name>Migr - Bericht - Model</name>
+
+    <dependencies>
+        <!-- Project -->
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-conversie-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-util-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp.util</groupId>
+            <artifactId>migr-util-gbav</artifactId>
+        </dependency>
+
+        <!-- Koppelvlak -->
+        <dependency>
+            <groupId>nl.bzk.brp</groupId>
+            <artifactId>brp-koppelvlak</artifactId>
+        </dependency>
+
+        <!-- JAXB -->
+        <dependency>
+            <groupId>javax.xml.bind</groupId>
+            <artifactId>jaxb-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jvnet.jaxb2_commons</groupId>
+            <artifactId>jaxb2-basics</artifactId>
+        </dependency>
+
+        <!-- CODEC (base64) -->
+        <dependency>
+            <groupId>commons-codec</groupId>
+            <artifactId>commons-codec</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+        </dependency>
+
+        <!-- TEST -->
+        <!-- TEST -->
+        <!-- TEST -->
+
+        <!-- Reflections -->
+        <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-conversie-model</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-resources-brp-xsd</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${basedir}/target/xsd/brp</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>src/main/resources/xsd/brp</directory>
+                                </resource>
+                                <resource>
+                                    <directory>src/main/resources/xsd/notificatie</directory>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-brp-xsd</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp</groupId>
+                                    <artifactId>brp-koppelvlak</artifactId>
+                                    <version>${koppelvlak.version}</version>
+                                    <type>jar</type>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${basedir}/target/xsd/brp</outputDirectory>
+                                    <includes>xsd/**</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jaxb2-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>isc-xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>-Xequals -XhashCode -XtoString</arguments>
+                            <schemaFiles>isc/ISC_Berichten.xsd</schemaFiles>
+                            <packageName>nl.bzk.migratiebrp.bericht.model.isc.generated</packageName>
+                            <outputDirectory>${project.build.directory}/generated-sources/jaxb</outputDirectory>
+                            <staleFile>${project.build.directory}/jaxb/.xjcIscStaleFlag</staleFile>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>notificatie-xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <extension>true</extension>
+                            <arguments>-Xequals -XhashCode -XtoString</arguments>
+                            <schemaFiles>NOTIFICATIE_Berichten.xsd</schemaFiles>
+                            <packageName>nl.bzk.migratiebrp.bericht.model.notificatie.generated</packageName>
+                            <outputDirectory>${project.build.directory}/generated-sources/jaxb</outputDirectory>
+                            <staleFile>${project.build.directory}/jaxb/.xjcNotificatieStaleFlag</staleFile>
+                            <schemaDirectory>${basedir}/target/xsd/brp/</schemaDirectory>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>brp-xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <extension>true</extension>
+                            <arguments>-Xequals -XhashCode -XtoString</arguments>
+                            <schemaFiles>BRP_Berichten.xsd</schemaFiles>
+                            <packageName>nl.bzk.migratiebrp.bericht.model.brp.generated</packageName>
+                            <outputDirectory>${project.build.directory}/generated-sources/jaxb</outputDirectory>
+                            <staleFile>${project.build.directory}/jaxb/.xjcBrpStaleFlag</staleFile>
+                            <schemaDirectory>${basedir}/target/xsd/brp/</schemaDirectory>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>sync-xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>-Xequals -XhashCode -XtoString</arguments>
+                            <schemaFiles>sync/SYNC_Berichten.xsd</schemaFiles>
+                            <packageName>nl.bzk.migratiebrp.bericht.model.sync.generated</packageName>
+                            <outputDirectory>${project.build.directory}/generated-sources/jaxb</outputDirectory>
+                            <staleFile>${project.build.directory}/jaxb/.xjcSyncStaleFlag</staleFile>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
+                    <bindingDirectory>${basedir}/src/main/resources</bindingDirectory>
+                    <bindingFiles>jaxb-bindings.xml</bindingFiles>
+                    <clearOutputDir>false</clearOutputDir>
+                </configuration>
+                <!--
+                 <dependencies>
+                    <dependency>
+                        <groupId>org.jvnet.jaxb2_commons</groupId>
+                        <artifactId>jaxb2-basics</artifactId>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.jvnet.jaxb2_commons</groupId>
+                        <artifactId>jaxb2-commons-lang</artifactId>
+                    </dependency>
+                </dependencies>
+                -->
+            </plugin>
+        </plugins>
+    </build>
+</project>
+

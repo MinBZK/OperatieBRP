@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.bzk.migratiebrp.isc.deploy</groupId>
+    <artifactId>migr-isc-deploy-init-logging</artifactId>
+    <name>Migr - ISC - Deploy - Init Logging</name>
+    <packaging>pom</packaging>
+    <parent>
+        <groupId>nl.bzk.migratiebrp.isc.deploy</groupId>
+        <artifactId>migr-isc-deploy-properties</artifactId>
+        <version>1.0</version>
+        <relativePath>./deploy-properties.pom.xml</relativePath>
+    </parent>
+
+    <properties>
+        <!-- Ant plugin config -->
+        <ant.build.file>init-logging-as.build.xml</ant.build.file>
+        <!-- Copy plugin config (copy-single execution) -->
+        <copy.groupId>nl.bzk.brp</copy.groupId>
+        <copy.artifactId>distributie-zip-iv-logging</copy.artifactId>
+        <copy.version>${migratie.init-logging.version}</copy.version>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>install</id>
+            <activation>
+                <property>
+                    <name>deploy.target</name>
+                    <value>install</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-single</id>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>properties-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>system-properties-single</id>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>install</id>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,304 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.bzk.migratiebrp.isc.deploy</groupId>
+    <artifactId>migr-isc-deploy-properties</artifactId>
+    <name>Migr - ISC - Deploy - Deploy Properties</name>
+    <version>1.0</version>
+    <packaging>pom</packaging>
+
+    <properties>
+        <!-- ALGEMEEN versie(s) -->
+        <algemeen.version>LATEST</algemeen.version>
+        <!-- -->
+        <algemeen.webapp.jmx.version>${algemeen.version}</algemeen.webapp.jmx.version>
+        <algemeen.database.version>${brp.version}</algemeen.database.version>
+        <!-- -->
+        <!-- BRP Applicatie versie(s) -->
+        <brp.version>LATEST</brp.version>
+        <!-- -->
+        <brp.bijhouding.version>${brp.version}</brp.bijhouding.version>
+        <brp.bevraging.version>${brp.version}</brp.bevraging.version>
+        <brp.mutatielevering.version>${brp.version}</brp.mutatielevering.version>
+        <brp.protocollering.version>${brp.version}</brp.protocollering.version>
+        <brp.vrijbericht.version>${brp.version}</brp.vrijbericht.version>
+        <brp.verzending.version>${brp.version}</brp.verzending.version>
+        <brp.gba-centrale.version>${brp.version}</brp.gba-centrale.version>
+        <brp.afnemerindicatie.version>${brp.version}</brp.afnemerindicatie.version>
+        <brp.afnemer-voorbeeld.version>${brp.version}</brp.afnemer-voorbeeld.version>
+        <brp.archivering.version>${brp.version}</brp.archivering.version>
+        <brp.beheer.version>${brp.version}</brp.beheer.version>
+        <brp.message-broker.version>${brp.version}</brp.message-broker.version>
+        <!-- -->
+        <!-- MIGRATIE Applicatie versie(s) -->
+        <migratie.version>LATEST</migratie.version>
+        <!-- -->
+        <migratie.ggo.version>${migratie.version}</migratie.ggo.version>
+        <migratie.ggo-db.version>${migratie.version}</migratie.ggo-db.version>
+        <migratie.gbav-db.version>${migratie.version}
+        </migratie.gbav-db.version> <!-- init-naarbrp -->
+        <migratie.tools-hornetq.version>${migratie.version}</migratie.tools-hornetq.version>
+        <migratie.init-logging.version>${migratie.version}</migratie.init-logging.version>
+        <migratie.init-naarbrp.version>${migratie.version}</migratie.init-naarbrp.version>
+        <migratie.init-naarlo3.version>${migratie.version}</migratie.init-naarlo3.version>
+        <migratie.isc.version>${migratie.version}</migratie.isc.version>
+        <migratie.isc-console.version>${migratie.version}</migratie.isc-console.version>
+        <migratie.isc-db.version>${migratie.version}</migratie.isc-db.version>
+        <migratie.routering.version>${migratie.version}</migratie.routering.version>
+        <migratie.routering-db.version>${migratie.version}</migratie.routering-db.version>
+        <migratie.tools-mailbox.version>${migratie.version}</migratie.tools-mailbox.version>
+        <migratie.tools-mailbox-db.version>${migratie.version}</migratie.tools-mailbox-db.version>
+        <migratie.synchronisatie.version>${migratie.version}</migratie.synchronisatie.version>
+        <migratie.synchronisatie-db.version>${migratie.version}</migratie.synchronisatie-db.version>
+        <migratie.tools-leveringsvergelijking.version>${migratie.version}
+        </migratie.tools-leveringsvergelijking.version>
+        <migratie.tools-proefsynchronisatie.version>${migratie.version}
+        </migratie.tools-proefsynchronisatie.version>
+        <migratie.tools-proefsynchronisatie-db.version>${migratie.version}
+        </migratie.tools-proefsynchronisatie-db.version>
+        <migratie.voisc.version>${migratie.version}</migratie.voisc.version>
+        <migratie.voisc-db.version>${migratie.version}</migratie.voisc-db.version>
+        <!-- -->
+        <migratie.tools-controle.version>${migratie.version}</migratie.tools-controle.version>
+        <!-- -->
+        <!-- MISC Applicatie versie(s) -->
+        <tomcat.version>7.0.77</tomcat.version>
+        <hornetq.version>2.2.14.Final</hornetq.version>
+        <elasticsearch.version>1.5.2</elasticsearch.version>
+        <logstash.version>1.4.2</logstash.version>
+        <kibana.version>4.0.2-linux</kibana.version>
+
+        <!-- Copy plugin config (copy-single execution) -->
+        <copy.output>target/artifacts</copy.output>
+        <copy.type>zip</copy.type>
+        <!-- Properties doorgegeven aan Ant file (correct als gebruik gemaakt wordt van copy-single) -->
+        <application.bin.source>../${copy.output}</application.bin.source>
+        <application.bin.file>${copy.artifactId}-${migratie.isc.version}.${copy.type}
+        </application.bin.file>
+
+        <alg.webapp.jmx.bin.source>../${copy.output}</alg.webapp.jmx.bin.source>
+        <alg.webapp.jmx.bin.file>${alg-webapp-jmx}-${algemeen.webapp.jmx.version}.war
+        </alg.webapp.jmx.bin.file>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>
+                            <files>
+                                <file>${deploy.propfile}</file>
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.10</version>
+                    <executions>
+                        <execution>
+                            <id>copy-alg-webapp-jmx</id>
+                            <phase>none</phase>
+                            <goals>
+                                <goal>copy</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${copy.output}</outputDirectory>
+                                <overWriteSnapshots>true</overWriteSnapshots>
+                                <artifactItems>
+                                    <artifactItem>
+                                        <groupId>nl.bzk.algemeenbrp</groupId>
+                                        <artifactId>alg-webapp-jmx</artifactId>
+                                        <type>war</type>
+                                        <version>${algemeen.webapp.jmx.version}</version>
+                                        <destFileName>${alg.webapp.jmx.bin.file}</destFileName>
+                                    </artifactItem>
+                                </artifactItems>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>copy-single</id>
+                            <goals>
+                                <goal>copy</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>${copy.output}</outputDirectory>
+                                <overWriteSnapshots>true</overWriteSnapshots>
+                                <artifactItems>
+                                    <artifactItem>
+                                        <groupId>${copy.groupId}</groupId>
+                                        <artifactId>${copy.artifactId}</artifactId>
+                                        <type>${copy.type}</type>
+                                        <version>${copy.version}</version>
+                                        <destFileName>${application.bin.file}</destFileName>
+                                    </artifactItem>
+                                </artifactItems>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>copy-tomcat</id>
+                            <phase>none</phase>
+                            <goals>
+                                <goal>copy</goal>
+                            </goals>
+                            <configuration>
+                                <outputDirectory>target/tomcat</outputDirectory>
+                                <artifactItems>
+                                    <artifactItem>
+                                        <groupId>org.apache.tomcat</groupId>
+                                        <artifactId>tomcat</artifactId>
+                                        <version>${tomcat.version}</version>
+                                        <type>zip</type>
+                                        <destFileName>apache-tomcat.zip</destFileName>
+                                    </artifactItem>
+                                </artifactItems>
+                            </configuration>
+                        </execution>
+
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>properties-maven-plugin</artifactId>
+                    <version>1.0.0</version>
+                    <executions>
+                        <execution>
+                            <id>system-properties-single</id>
+                            <goals>
+                                <goal>set-system-properties</goal>
+                            </goals>
+                            <configuration>
+                                <properties>
+                                    <property>
+                                        <name>application.source</name>
+                                        <value>${application.bin.source}</value>
+                                    </property>
+                                    <property>
+                                        <name>application.bin.source</name>
+                                        <value>${application.bin.source}</value>
+                                    </property>
+                                    <property>
+                                        <name>application.file</name>
+                                        <value>${application.bin.file}</value>
+                                    </property>
+                                    <property>
+                                        <name>application.bin.file</name>
+                                        <value>${application.bin.file}</value>
+                                    </property>
+                                </properties>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <plugin>
+                    <groupId>org.liquibase</groupId>
+                    <artifactId>liquibase-maven-plugin</artifactId>
+                    <version>3.1.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>sql-maven-plugin</artifactId>
+                    <version>1.5</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>postgresql</groupId>
+                            <artifactId>postgresql</artifactId>
+                            <version>9.1-901.jdbc4</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-antrun-plugin</artifactId>
+                    <version>1.7</version>
+                    <executions>
+                        <execution>
+                            <id>install</id>
+                            <phase>install</phase>
+                            <configuration>
+                                <target>
+                                    <echo message="Target: ${deploy.target}"/>
+                                    <echo message="Property file: ${deploy.propfile}"/>
+                                    <fail unless="deploy.target"
+                                          message="Geen deploy.target opgegeven!"/>
+                                    <fail unless="deploy.propfile"
+                                          message="Geen deploy.propfile opgegeven!"/>
+                                    <fail message="${deploy.propfile} bestaat niet!">
+                                        <condition>
+                                            <not>
+                                                <resourcecount count="1">
+                                                    <fileset dir="${basedir}">
+                                                        <include name="${deploy.propfile}"/>
+                                                    </fileset>
+                                                </resourcecount>
+                                            </not>
+                                        </condition>
+                                    </fail>
+                                    <ant antfile="${basedir}/build/${ant.build.file}"
+                                         useNativeBasedir="true" inheritAll="false"
+                                         inheritRefs="false" target="${deploy.target}">
+                                        <property file="${deploy.propfile}"/>
+                                    </ant>
+                                </target>
+                            </configuration>
+                            <goals>
+                                <goal>run</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.ant</groupId>
+                            <artifactId>ant-jsch</artifactId>
+                            <version>1.9.2</version>
+                            <exclusions>
+                                <exclusion>
+                                    <groupId>ant</groupId>
+                                    <artifactId>ant</artifactId>
+                                </exclusion>
+                            </exclusions>
+                        </dependency>
+                        <dependency>
+                            <groupId>com.jcraft</groupId>
+                            <artifactId>jsch</artifactId>
+                            <version>0.1.50</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>ant-contrib</groupId>
+                            <artifactId>ant-contrib</artifactId>
+                            <version>1.0b3</version>
+                            <exclusions>
+                                <exclusion>
+                                    <groupId>ant</groupId>
+                                    <artifactId>ant</artifactId>
+                                </exclusion>
+                            </exclusions>
+                        </dependency>
+                        <dependency>
+                            <groupId>nl.bzk.migratiebrp</groupId>
+                            <artifactId>migr-tools-controle</artifactId>
+                            <version>${migratie.tools-controle.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>

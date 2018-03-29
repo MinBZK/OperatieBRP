@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder />
+
+    <bean id="hornetQSystemProperties"
+          class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject">
+            <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+                <property name="targetClass" value="java.lang.System"/>
+                <property name="targetMethod" value="getProperties"/>
+            </bean>
+        </property>
+        <property name="targetMethod" value="putAll"/>
+        <property name="arguments">
+            <props>
+                <prop key="test.hornetq.port">${test.hornetq.port}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="embeddedHornetQ" class="org.hornetq.core.server.embedded.EmbeddedHornetQ" init-method="start"
+          destroy-method="stop" depends-on="hornetQSystemProperties">
+        <property name="configResourcePath" value="test-embedded-hornetq-configuration.xml"/>
+    </bean>
+
+    <bean class="nl.bzk.migratiebrp.init.naarbrp.util.HornetQConfigurer">
+        <property name="embeddedHornetQ" ref="embeddedHornetQ"/>
+        <property name="queues">
+            <list>
+                <value>init.vulling.naarlo3</value>
+                <value>init.vulling.naarlo3.response</value>
+                <value>init.vulling.naarbrp</value>
+                <value>init.vulling.naarbrp.response</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean name="hornetConnectionFactory" class="org.hornetq.jms.client.HornetQJMSConnectionFactory">
+        <constructor-arg name="ha" value="false"/>
+        <constructor-arg>
+            <bean class="org.hornetq.api.core.TransportConfiguration">
+                <constructor-arg
+                        value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory"/>
+                <constructor-arg>
+                    <map key-type="java.lang.String" value-type="java.lang.Object">
+                        <entry key="host" value="localhost"/>
+                        <entry key="port" value="${test.hornetq.port}"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="connectionFactory"
+          class="org.springframework.jms.connection.SingleConnectionFactory">
+        <constructor-arg ref="hornetConnectionFactory"/>
+    </bean>
+
+    <bean name="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="connectionFactory"/>
+        <!--<property name="sessionTransacted" value="true"/>-->
+        <property name="receiveTimeout" value="1000"/>
+    </bean>
+
+    <bean name="destination" class="org.hornetq.jms.client.HornetQQueue">
+        <constructor-arg value="init.vulling.naarbrp"/>
+    </bean>
+</beans>

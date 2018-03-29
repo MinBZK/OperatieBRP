@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>local</groupId>
+    <artifactId>local-liquibase</artifactId>
+    <version>1.0</version>
+
+    <properties>
+        <liquibase.plugin.version>3.1.1</liquibase.plugin.version>
+        <brp.database.version>LATEST</brp.database.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <version>${liquibase.plugin.version}</version>
+                <executions>
+                    <execution>
+                        <id>create-db</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${maven.test.skip}</skip>
+                            <dropFirst>true</dropFirst>
+                            <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                            <changeLogFile>liquibase/changeset/brp-databases.xml</changeLogFile>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>nl.bzk.algemeenbrp</groupId>
+                        <artifactId>alg-test-dal</artifactId>
+                        <version>${brp.database.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <driver>org.postgresql.Driver</driver>
+                    <url>jdbc:postgresql://localhost/brp</url>
+                    <username>migratie</username>
+                    <password>M1gratie</password>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

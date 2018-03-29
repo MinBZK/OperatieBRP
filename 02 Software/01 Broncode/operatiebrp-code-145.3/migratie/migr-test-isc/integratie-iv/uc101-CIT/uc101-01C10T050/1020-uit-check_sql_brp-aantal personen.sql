@@ -1,0 +1,1 @@
+select count(*) as aantal from kern.pers where anr = '1401046539' or anr = '5525599521';

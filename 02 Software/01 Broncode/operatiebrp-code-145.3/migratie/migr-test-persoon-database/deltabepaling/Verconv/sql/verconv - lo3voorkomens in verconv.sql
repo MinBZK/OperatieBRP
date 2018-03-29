@@ -1,0 +1,1 @@
+select lo3ber,lo3categorie,lo3stapelvolgnr,lo3voorkomenvolgnr,lo3conversiesortering from verconv.lo3voorkomen order by lo3categorie

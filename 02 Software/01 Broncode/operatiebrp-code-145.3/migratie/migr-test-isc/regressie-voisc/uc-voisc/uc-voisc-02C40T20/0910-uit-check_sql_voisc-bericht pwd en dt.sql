@@ -1,0 +1,1 @@
+select mailboxpwd from voisc.lo3_mailbox where  partijcode = '177101' and mailboxpwd ='test1771';

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="syncDalDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="syncDatabase"/>
+            </bean>
+        </property>
+        <property name="xaDataSourceClassName" value="${sync.database.driver:org.postgresql.xa.PGXADataSource}"/>
+        <property name="xaProperties">
+            <props>
+                <prop key="ServerName">${sync.database.host:localhost}</prop>
+                <prop key="PortNumber">${sync.database.port:5432}</prop>
+                <prop key="DatabaseName">${sync.database.name:brp}</prop>
+                <prop key="User">${sync.database.username:postgres}</prop>
+                <prop key="Password">${sync.database.password:postgres}</prop>
+            </props>
+        </property>
+        <property name="maxPoolSize" value="${sync.database.maxpool:20}"/>
+        <property name="minPoolSize" value="${sync.database.minpool:1}"/>
+        <!--
+        <property name="testQuery" value="select now()"/>
+        -->
+    </bean>
+
+    <bean name="syncDalJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQL9Dialect"/>
+    </bean>
+</beans>

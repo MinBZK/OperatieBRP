@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+
+    <bean id="loggingDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init"
+          destroy-method="close">
+        <property name="uniqueResourceName">
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="loggingDatabase"/>
+            </bean>
+        </property>
+        <property name="xaDataSourceClassName" value="${logging.database.driver:org.postgresql.xa.PGXADataSource}"/>
+        <property name="xaProperties">
+            <props>
+                <prop key="ServerName">${logging.database.host:localhost}</prop>
+                <prop key="PortNumber">${logging.database.port:5432}</prop>
+                <prop key="DatabaseName">${logging.database.name:GBAV}</prop>
+                <prop key="User">${logging.database.username:postgres}</prop>
+                <prop key="Password">${logging.database.password:postgres}</prop>
+            </props>
+        </property>
+        <property name="maxPoolSize" value="${logging.database.maxpool:200}"/>
+        <property name="minPoolSize" value="${logging.database.minpool:1}"/>
+        <property name="testQuery" value="select 41+1"/>
+    </bean>
+
+    <bean id="syncDalDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init"
+          destroy-method="close">
+        <property name="uniqueResourceName">
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="syncDalDatabase"/>
+            </bean>
+        </property>
+
+        <property name="xaDataSourceClassName" value="${brp.database.driver:org.postgresql.xa.PGXADataSource}"/>
+        <property name="xaProperties">
+            <props>
+                <prop key="ServerName">${brp.database.host:localhost}</prop>
+                <prop key="PortNumber">${brp.database.port:5432}</prop>
+                <prop key="DatabaseName">${brp.database.name:BRP}</prop>
+                <prop key="User">${brp.database.username:postgres}</prop>
+                <prop key="Password">${brp.database.password:postgres}</prop>
+            </props>
+        </property>
+        <property name="maxPoolSize" value="${brp.database.maxpool:200}"/>
+        <property name="minPoolSize" value="${brp.database.minpool:1}"/>
+        <property name="testQuery" value="select 41+1"/>
+    </bean>
+</beans>

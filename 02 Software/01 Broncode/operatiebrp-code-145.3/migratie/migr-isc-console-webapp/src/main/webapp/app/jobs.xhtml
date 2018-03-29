@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+>
+<ui:composition template="t_loggedin.xhtml">
+    <ui:define name="menu">
+        <ga:checkRole roles="#{access.role.jobs}" message="#{msgs.unauthorized}">
+            <table class="leftmenu">
+                <tbody>
+                    <tr class="leftmenuheader">
+                        <th colspan="2" class="nf">#{msgs['menu.views']}</th>
+                    </tr>
+                    <tr class="leftmenu">
+                        <td colspan="2">
+                            <gs:ul>
+                                <gs:li>
+                                    <h:outputLink style="#{viewMode == 'all' ? 'font-weight:bold' : ''}">
+                                        <f:param name="view" value="all"/>
+                                        #{msgs['jobs.menu.all']}
+                                    </h:outputLink>
+                                </gs:li>
+                                <gs:li>
+                                    <h:outputLink style="#{viewMode == 'timers' ? 'font-weight:bold' : ''}">
+                                        <f:param name="view" value="timers"/>
+                                        #{msgs['jobs.menu.timers']}
+                                    </h:outputLink>
+                                </gs:li>
+                                <gs:li>
+                                    <h:outputLink style="#{viewMode == 'action' ? 'font-weight:bold' : ''}">
+                                        <f:param name="view" value="action"/>
+                                        #{msgs['jobs.menu.action']}
+                                    </h:outputLink>
+                                </gs:li>
+                                <gs:li>
+                                    <h:outputLink style="#{viewMode == 'node' ? 'font-weight:bold' : ''}">
+                                        <f:param name="view" value="node"/>
+                                        #{msgs['jobs.menu.node']}
+                                    </h:outputLink>
+                                </gs:li>
+                            </gs:ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </ga:checkRole>
+    </ui:define>
+
+    <ui:define name="actions">
+        <ga:responseActions>
+            <ga:parameter name="view" target="#{viewMode}" default="all"/>
+            <ga:parameter name="page" target="#{page}" default="1"/>
+
+		     <ga:parameter name="page" target="#{page}">
+		        <f:convertNumber integerOnly="true"/>
+		    </ga:parameter>
+		    <mig:pager target="#{jobs_pager}" page="#{page}" pageSize="25" />
+		    <mig:listJobs  target="#{jobs}" pager="#{jobs_pager}" viewMode="#{viewMode}" />
+
+			<f:setPropertyActionListener
+            value="#{viewMode == 'timers' ? 12 : viewMode == 'action' ? 9 : viewMode == 'node' ? 9 : 10}"
+            target="#{colspan}"/>
+        </ga:responseActions>
+    </ui:define>
+
+    <ui:define name="body">
+        <table class="results">
+            <thead>
+                <tr>
+                    <th colspan="#{colspan}">
+                        <ui:decorate template="t_pager.xhtml">
+			                <ui:param name="pager" value="#{jobs_pager}"/>
+			            </ui:decorate>
+                        <h:outputText rendered="#{viewMode == 'timers'}" value="#{msgs['jobs.menu.timers']}" />
+                        <h:outputText rendered="#{viewMode == 'action'}" value="#{msgs['jobs.menu.action']}" />
+                        <h:outputText rendered="#{viewMode == 'node'}" value="#{msgs['jobs.menu.node']}"/>
+                        <h:outputText rendered="#{viewMode != 'timers' and viewMode != 'action' and viewMode != 'node'}" value="#{msgs['jobs.menu.all']}"/>
+                    </th>
+                </tr>
+                <tr>
+                    <td>#{msgs['jobs.heading.id']}</td>
+                    <h:outputText rendered="#{viewMode == 'timers'}">
+                        <td>#{msgs['jobs.heading.name']}</td>
+                        <td>#{msgs['jobs.heading.repeat']}</td>
+                        <td>#{msgs['jobs.heading.transition.name']}</td>
+                    </h:outputText>
+                    <h:outputText rendered="#{viewMode == 'all'}">
+                        <td>#{msgs['jobs.heading.type']}</td>
+                    </h:outputText>
+                    <td>#{msgs['jobs.heading.due']}</td>
+                    <td>#{msgs['jobs.heading.status']}</td>
+                    <td>#{msgs['jobs.heading.process.instance']}</td>
+                    <td>#{msgs['jobs.heading.token']}</td>
+                    <td>#{msgs['jobs.heading.task.instance']}</td>
+                    <td>#{msgs['jobs.heading.exception']}</td>
+                    <td>#{msgs['jobs.heading.retries']}</td>
+                    <td>#{msgs['jobs.heading.actions']}</td>
+                </tr>
+            </thead>
+            <h:outputText>
+                <ga:attribute name="rendered" value="#{! empty jobs}"/>
+                <tbody class="results">
+
+                    <gd:repeat value="#{jobs}" var="job" idVar="rid"  first="#{jobs_pager.first}" limit="#{jobs_pager.limit}">
+                        <gs:tr>
+                            <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                            <td>
+                                <h:outputText value="#{job.id}"/>
+                            </td>
+                            <h:outputText rendered="#{viewMode == 'timers'}">
+                                <td>
+                                    <h:outputText value="#{job.name}"/>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{job.repeat}"/>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{job.transitionName}"/>
+                                </td>
+                            </h:outputText>
+                            <h:outputText rendered="#{viewMode == 'all'}">
+                                <td>
+                                    <h:outputText
+                                    value="#{job.class.name == 'org.jbpm.job.Timer' ? 'Timer' : job.class.name == 'org.jbpm.job.ExecuteActionJob' ? 'Execute Action' : job.class.name == 'org.jbpm.job.ExecuteNodeJob' ? 'Execute Node' : job.class.name}"/>
+                                </td>
+                            </h:outputText>
+                            <td>
+                                <h:outputText value="#{job.dueDate}">
+                                    <f:convertDateTime type="both" timeZone="Europe/Amsterdam"/>
+                                </h:outputText>
+                            </td>
+                            <td>
+                                <h:outputText value="Running" rendered="#{! job.suspended}" styleClass="statusRunning"/>
+                                <h:outputText value="Suspended" rendered="#{job.suspended}" styleClass="statusSuspended"/>
+                            </td>
+                            <td>
+                                <h:outputLink value="procins.jsf" rendered="#{job.processInstance != null}">
+                                    <f:param name="id" value="#{job.processInstance.id}"/>
+                                    <gs:b>
+                                        <h:outputText value="#{job.processInstance.processDefinition.name}"/>
+                                    </gs:b>
+                                    <h:outputText value=" ID #{job.processInstance.id}"/>
+                                </h:outputLink>
+                            </td>
+                            <td>
+                                <h:outputLink value="token.jsf" rendered="#{job.token != null}">
+                                    <f:param name="id" value="#{job.token.id}"/>
+                                    <h:outputText value="#{job.token.name}" rendered="#{! empty job.token.name}"/>
+                                    <h:outputText value="(Unnamed)" rendered="#{empty job.token.name}"/>
+                                    <h:outputText value=" ID #{job.token.id}"/>
+                                </h:outputLink>
+                            </td>
+                            <td>
+                                <h:outputLink value="task.jsf" rendered="#{job.taskInstance != null}">
+                                    <f:param name="id" value="#{job.taskInstance.id}"/>
+                                    <h:outputText value="#{job.taskInstance.name}"/>
+                                </h:outputLink>
+                            </td>
+                            <td>
+                                <h:outputText value="#{job.exception}"/>
+                            </td>
+                            <td>
+                                <h:outputText value="#{job.retries}"/>
+                            </td>
+                            <td>
+                                <h:form>
+                                    <h:commandLink
+                                    onclick="return confirm('#{msgs['confirm.jobs.delete']}');">
+                                        <h:outputText value="#{msgs['jobs.delete']}"/>
+                                        <j4j:loadJob id="#{job.id}" target="#{xjob}"/>
+                                        <j4j:delete value="#{xjob}"/>
+                                        <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                        <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                    </h:commandLink>
+                                </h:form>
+                            </td>
+                        </gs:tr>
+                    </gd:repeat>
+                </tbody>
+            </h:outputText>
+            <h:outputText rendered="#{empty jobs}">
+                <tbody class="filter">
+                    <tr>
+                        <td colspan="#{colspan}" style="text-align:center;">#{msgs['jobs.results.no.results.in.view']}</td>
+                    </tr>
+                </tbody>
+            </h:outputText>
+        </table>
+    </ui:define>
+</ui:composition>
+
+</html>

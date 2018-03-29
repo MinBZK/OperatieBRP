@@ -1,0 +1,1 @@
+SELECT voornamen, geslnaamstam, voornamennaamgebruik, geslnaamstamnaamgebruik FROM kern.pers WHERE anr = '6725781793';

@@ -1,0 +1,1 @@
+select bsn, tsreg, tsverval, dataanvgel, dateindegel from kern.his_persids where anr = '1538570130' ORDER by dataanvgel, dateindegel;

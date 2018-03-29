@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jbpm-configuration>
+    <jbpm-context>
+        <service name="authentication" factory="org.jbpm.security.authentication.DefaultAuthenticationServiceFactory"/>
+        <service name="logging" factory="nl.bzk.migratiebrp.isc.runtime.jbpm.logging.MigratieLoggingServiceFactory"/>
+
+        <service name="persistence" factory="nl.bzk.migratiebrp.isc.runtime.jbpm.persistence.Hibernate4PersistenceServiceFactory"/>
+
+        <service name="scheduler" factory="nl.bzk.migratiebrp.isc.runtime.jbpm.job.QuartzSchedulerServiceFactory"/>
+        <service name="message" factory="nl.bzk.migratiebrp.isc.runtime.jbpm.job.QuartzMessageServiceFactory"/>
+
+        <service name="tx" factory="org.jbpm.tx.TxServiceFactory"/>
+
+        <service name="spring" factory="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringServiceFactory"/>
+    </jbpm-context>
+
+    <!-- entries pointing to default configuration resources in jbpm-jpdl.jar -->
+    <string name="resource.business.calendar" value="org/jbpm/calendar/jbpm.business.calendar.properties"/>
+    <string name="resource.default.modules" value="org/jbpm/graph/def/jbpm.default.modules.properties"/>
+    <string name="resource.converter" value="org/jbpm/db/hibernate/jbpm.converter.properties"/>
+    <string name="resource.action.types" value="org/jbpm/graph/action/action.types.xml"/>
+    <string name="resource.node.types" value="org/jbpm/graph/node/node.types.xml"/>
+    <string name="resource.parsers" value="org/jbpm/jpdl/par/jbpm.parsers.xml"/>
+    <string name="resource.varmapping" value="org/jbpm/context/exe/jbpm.varmapping.xml"/>
+    <string name="resource.mail.templates" value="jbpm.mail.templates.xml"/>
+
+    <set name="jbpm.schema.resources">
+        <string value="org/jbpm/jpdl/xml/jpdl-3.0.xsd"/>
+        <string value="org/jbpm/jpdl/xml/jpdl-3.1.xsd"/>
+        <string value="org/jbpm/jpdl/xml/jpdl-3.2.xsd"/>
+        <string value="org/jboss/seam/pageflow-2.2.xsd"/>
+    </set>
+
+    <!-- alternate delegation class loader -->
+    <string name="jbpm.class.loader" value="context"/>
+    <!--
+    <bean name="process.class.loader.factory"
+      class="org.jbpm.instantiation.SharedProcessClassLoaderFactory" singleton="true">
+      <field name="jbpmConfiguration"><ref bean="jbpm.configuration" /></field>
+    </bean>
+    -->
+
+    <!-- make sure the block size matches the length in ByteArray.hbm.xml -->
+    <int name="jbpm.byte.block.size" value="1024"/>
+
+    <bean name="jbpm.sub.process.resolver" class="org.jbpm.graph.node.DbSubProcessResolver" singleton="true"/>
+
+    <boolean name="jbpm.sub.process.async" value="false"/>
+
+    <!--  JBPM EL -->
+    <bean name="jbpm.expression.evaluator" class="org.jbpm.jpdl.el.impl.ExpressionEvaluatorImpl" singleton="true"/>
+    <bean name="jbpm.variable.resolver" class="nl.bzk.migratiebrp.isc.runtime.jbpm.el.JbpmVariableResolver" singleton="true"/>
+    <!-- bean name="jbpm.function.mapper" class="nl.bzk.migratiebrp.isc.runtime.jbpm.el.FunctionMapper" singleton="true" /-->
+
+    <!-- TASKS -->
+    <bean name="jbpm.task.instance.factory" class="org.jbpm.taskmgmt.impl.DefaultTaskInstanceFactoryImpl" singleton="true"/>
+
+    <!-- user code interceptor
+    <bean name="jbpm.user.code.interceptor" class="org.example.UserCodeInterceptorImpl" />
+    -->
+    <!-- custom date generator
+    <bean name="jbpm.date.generator" class="org.example.DateGeneratorImpl" />
+    -->
+
+    <!-- outgoing mail properties
+    <string name="jbpm.mail.smtp.host" value="localhost" />
+    <int name="jbpm.mail.smtp.port" value="25" />
+    <string name="jbpm.mail.from.address" value="no-reply@migratievoorziening.operatiebrp.minbzk.nl" />
+    <bean name="jbpm.mail.address.resolver" class="org.jbpm.identity.mail.IdentityAddressResolver"
+      singleton="true" />
+    -->
+
+    <null name="jbpm.job.executor"/>
+</jbpm-configuration>

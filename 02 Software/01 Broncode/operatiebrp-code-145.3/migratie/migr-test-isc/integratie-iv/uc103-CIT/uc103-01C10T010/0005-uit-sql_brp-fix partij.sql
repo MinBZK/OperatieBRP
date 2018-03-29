@@ -1,0 +1,16 @@
+delete from kern.his_partijrol where partijrol in (select id from kern.partijrol where partij in (select id from kern.partij where code in ('999907','999908','999909','999910','999911','999971')));
+delete from kern.partijrol where partij in (select id from kern.partij where code in ('999907','999908','999909','999910','999911','999971'));
+delete from kern.his_partij where partij in (select id from kern.partij where code in ('999907','999908','999909','999910','999911','999971'));
+delete from kern.partij where code in ('999907','999908','999909','999910','999911','999971');
+insert into kern.partij (naam, code, datingang) values ('ATR indicatie3','999907','19700101');
+insert into kern.his_partij (partij, tsreg, naam, datingang, indverstrbeperkingmogelijk) select id, now(), 'ATR indicatie3','19700101', false from kern.partij where code = '999907';
+insert into kern.partij (naam, code, datingang) values ('ATR indicatie2','999908','19700101');
+insert into kern.his_partij (partij, tsreg, naam, datingang, indverstrbeperkingmogelijk) select id, now(), 'ATR indicatie2','19700101', false from kern.partij where code = '999908';
+insert into kern.partij (naam, code, datingang) values ('ATR geen indicatie','999909','19700101');
+insert into kern.his_partij (partij, tsreg, naam, datingang, indverstrbeperkingmogelijk) select id, now(), 'ATR geen indicatie','19700101', false from kern.partij where code = '999909';
+insert into kern.partij (naam, code, datingang) values ('ATR indicatie1','999910','19700101');
+insert into kern.his_partij (partij, tsreg, naam, datingang, indverstrbeperkingmogelijk) select id, now(), 'ATR indicatie1','19700101', false from kern.partij where code = '999910';
+insert into kern.partij (naam, code, datingang) values ('ATR indicatie','999911','19700101');
+insert into kern.his_partij (partij, tsreg, naam, datingang, indverstrbeperkingmogelijk) select id, now(), 'ATR indicatie','19700101', false from kern.partij where code = '999911';
+insert into kern.partij (naam, code, datingang) values ('ATR met volledig gegevens voor vullen autorisatietabel','999971','19700101');
+insert into kern.his_partij (partij, tsreg, naam, datingang, indverstrbeperkingmogelijk) select id, now(), 'ATR met volledig gegevens voor vullen autorisatietabel','19700101', false from kern.partij where code = '999971';

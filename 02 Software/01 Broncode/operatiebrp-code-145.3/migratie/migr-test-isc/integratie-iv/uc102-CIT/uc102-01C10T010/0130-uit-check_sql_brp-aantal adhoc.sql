@@ -1,0 +1,1 @@
+select count(*) as aantal from autaut.dienst d join autaut.dienstbundel db on db.id = d.dienstbundel and db.naam = 'Ad hoc';

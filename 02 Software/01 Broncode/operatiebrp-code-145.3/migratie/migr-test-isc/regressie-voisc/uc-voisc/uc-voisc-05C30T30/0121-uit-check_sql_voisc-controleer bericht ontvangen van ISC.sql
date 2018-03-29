@@ -1,0 +1,1 @@
+select * from voisc.bericht where status = 'ERROR';

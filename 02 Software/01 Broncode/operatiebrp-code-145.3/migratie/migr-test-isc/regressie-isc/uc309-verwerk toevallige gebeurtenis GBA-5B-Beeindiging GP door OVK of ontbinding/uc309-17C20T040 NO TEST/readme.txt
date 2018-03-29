@@ -1,0 +1,1 @@
+Geen meerdere 85.10 in akte 5 B.

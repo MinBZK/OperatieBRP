@@ -1,0 +1,1 @@
+ALTER SEQUENCE lo3_bericht_id_sequence RESTART WITH 1;

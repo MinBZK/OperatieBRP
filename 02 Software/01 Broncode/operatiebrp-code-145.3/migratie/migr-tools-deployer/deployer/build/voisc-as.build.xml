@@ -1,0 +1,252 @@
+<project name="VOISC" basedir="." default="fail">
+
+    <!--
+        Server connectie
+
+        server.host
+        server.username
+        server.password
+
+        VOISC Database verbinding
+
+        voisc.database.host
+        voisc.database.port
+        voisc.database.name
+        voisc.database.username
+        voisc.database.password
+
+        VOISC Queue verbinding
+
+        voisc.jndi.url
+        voisc.queue.receivetimeout
+
+        VOISC Mailbox verbinding
+
+        voisc.mailbox.hostname
+        voisc.mailbox.portnumber
+        voisc.mailbox.ssl.keystore.password
+        voisc.mailbox.ssl.key.password
+        voisc.mailbox.ssl.truststore.password
+
+        Te bedienen mailboxen:
+
+        voisc.mailboxen
+
+        VOISC Jobs
+
+        voisc.job.isc.cron
+        voisc.job.mailbox.cron
+        voisc.job.opschonen.cron
+        voisc.job.opschonen.wachttijd
+        voisc.job.herstellen.cron
+        voisc.job.herstellen.wachttijd
+
+        VOISC Startup
+
+        start.check.mailbox
+        start.check.config
+
+        VOISC JMX Access
+
+        voisc.jmx.serialize.port
+
+    -->
+
+    <property name="application.directory" value="voisc"/>
+
+    <target name="checkProperties">
+        <fail unless="server.host" message="server.host property is verplicht."/>
+        <fail unless="server.username" message="server.username property is verplicht."/>
+        <fail unless="server.password" message="server.password property is verplicht."/>
+    </target>
+
+    <target name="checkInstallProperties" depends="checkProperties">
+        <!-- Check file settings -->
+        <fail unless="application.source" message="application.source property is verplicht bij het installeren."/>
+        <fail unless="application.file" message="application.file property is verplicht bij het installeren."/>
+
+        <!-- Check file exists -->
+        <fail message="${application.source}/${application.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+            <condition>
+                <not>
+                    <resourcecount count="1">
+                        <fileset dir="${application.source}">
+                            <include name="${application.file}"/>
+                        </fileset>
+                    </resourcecount>
+                </not>
+            </condition>
+        </fail>
+
+        <!-- Check configuration settings -->
+        <fail unless="voisc.database.host" message="voisc.database.host property is verplicht."/>
+        <fail unless="voisc.database.port" message="voisc.database.port property is verplicht."/>
+        <fail unless="voisc.database.name" message="voisc.database.name property is verplicht."/>
+        <fail unless="voisc.database.username" message="voisc.database.username property is verplicht."/>
+        <fail unless="voisc.database.password" message="voisc.database.password property is verplicht."/>
+        <fail unless="voisc.jndi.url" message="voisc.jndi.url property is verplicht."/>
+        <fail unless="voisc.queue.receivetimeout" message="voisc.queue.receivetimeout property is verplicht."/>
+        <fail unless="voisc.mailbox.hostname" message="voisc.mailbox.hostname property is verplicht."/>
+        <fail unless="voisc.mailbox.portnumber" message="voisc.mailbox.portnumber property is verplicht."/>
+        <fail unless="voisc.mailbox.ssl.keystore.password"
+              message="voisc.mailbox.ssl.keystore.password property is verplicht."/>
+        <fail unless="voisc.mailbox.ssl.key.password" message="voisc.mailbox.ssl.key.password property is verplicht."/>
+        <fail unless="voisc.mailbox.ssl.truststore.password"
+              message="voisc.mailbox.ssl.truststore.password property is verplicht."/>
+        <fail unless="voisc.mailboxen" message="voisc.mailboxen property is verplicht."/>
+        <fail unless="voisc.job.isc.cron" message="voisc.job.isc.cron property is verplicht."/>
+        <fail unless="voisc.job.mailbox.cron" message="voisc.job.mailbox.cron property is verplicht."/>
+        <fail unless="voisc.job.opschonen.cron" message="voisc.job.opschonen.cron property is verplicht."/>
+        <fail unless="voisc.job.opschonen.wachttijd" message="voisc.job.opschonen.wachttijd property is verplicht."/>
+        <fail unless="voisc.job.herstellen.cron" message="voisc.job.herstellen.cron property is verplicht."/>
+        <fail unless="voisc.job.herstellen.wachttijd" message="voisc.job.herstellen.wachttijd property is verplicht."/>
+        <fail unless="start.check.mailbox" message="start.check.mailbox property is verplicht."/>
+        <fail unless="start.check.config" message="start.check.config property is verplicht."/>
+        <fail unless="voisc.jmx.serialize.port" message="voisc.jmx.serialize.port property is verplicht."/>
+    </target>
+
+
+    <target name="install" depends="checkInstallProperties">
+        <echo message="Copying ${ant.project.name}"/>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;"/>
+
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true"
+             failonerror="true">
+            <fileset dir="${application.source}">
+                <include name="${application.file}"/>
+            </fileset>
+        </scp>
+
+        <echo message="Unpacking ${ant.project.name}"/>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; mkdir ${application.directory}; cd ${application.directory}; unzip -o /tmp/${application.directory}/${application.file} -d .; chmod u+x *.sh"/>
+
+        <echo message="Creating configuration ${ant.project.name}"/>
+        <delete dir="tmp"/>
+        <mkdir dir="tmp"/>
+        <echo file="tmp/voisc-runtime.properties" append="false" force="true"># DATABASE
+            voisc.database.driver=org.postgresql.xa.PGXADataSource
+            voisc.database.host=${voisc.database.host}
+            voisc.database.port=${voisc.database.port}
+            voisc.database.name=${voisc.database.name}
+            voisc.database.username=${voisc.database.username}
+            voisc.database.password=${voisc.database.password}
+            voisc.database.maxpool=20
+            voisc.database.minpool=1
+            voisc.hibernate.dialect=org.hibernate.dialect.PostgreSQLDialect
+
+            # ROUTERING
+            voisc.queue.minpool=1
+            voisc.queue.maxpool=20
+            voisc.queue.receivetimeout=${voisc.queue.receivetimeout}
+
+            routering.activemq.url=${voisc.jndi.url}
+            routering.queue.voisc.ontvangst=voisc.ontvangst
+            routering.queue.voisc.verzenden=voisc.verzenden
+            routering.topic.gemeente.register=gemeente.register
+            routering.queue.gemeente.register=gemeente.verzoek
+
+
+            # TRANSACTIES
+            atomikos.max.timeout=300000
+            atomikos.default.timeout=10000
+            atomikos.max.actives=50
+            atomikos.unique.name=voisc-runtime
+            atomikos.base.dir=work/atomikos
+
+
+            # MAILBOX
+            mailbox.host=${voisc.mailbox.hostname}
+            mailbox.port=${voisc.mailbox.portnumber}
+            mailbox.ssl.keystore.password=${voisc.mailbox.ssl.keystore.password}
+            mailbox.ssl.key.password=${voisc.mailbox.ssl.key.password}
+            mailbox.ssl.truststore.password=${voisc.mailbox.ssl.truststore.password}
+
+            #
+            # Te bedienen mailboxen:
+            #
+            # - Indien leeg: alle mailboxen (gemeenten,centraal)
+            # - Indien gevuld met negatieve nummers: alle mailboxen (gemeenten,centraal), behalve de genoemde
+            # - Indien gevuld met postieve nummers: de genoemde mailboxen
+            #
+            voisc.mailboxen=${voisc.mailboxen}
+
+            # JOBS
+            voisc.job.isc.cron=${voisc.job.isc.cron}
+            voisc.job.mailbox.cron=${voisc.job.mailbox.cron}
+            voisc.job.opschonen.cron=${voisc.job.opschonen.cron}
+            voisc.job.opschonen.wachttijd=${voisc.job.opschonen.wachttijd}
+            voisc.job.herstellen.cron=${voisc.job.herstellen.cron}
+            voisc.job.herstellen.wachttijd=${voisc.job.herstellen.wachttijd}
+
+            # STARTUP
+            voisc.start.check.mailbox=${start.check.mailbox}
+            voisc.start.check.config=${start.check.config}
+
+            # REGISTER CLIENT
+            registerclient.partij.autostart=true
+
+            # JMX
+            voisc.jmx.serialize.port=${voisc.jmx.serialize.port}
+        </echo>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; cd ${application.directory}/conf; rm voisc-runtime.properties; rm log4j2.xml"/>
+
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf/" trust="true"
+             failonerror="true">
+            <fileset dir="tmp">
+                <include name="voisc-runtime.properties"/>
+            </fileset>
+        </scp>
+
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf/" trust="true">
+            <fileset dir="deps/algemeen">
+                <include name="log4j2.xml"/>
+            </fileset>
+        </scp>
+
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; cd ${application.directory}; cd conf; chmod 600 voisc-runtime.properties; chmod 600 log4j2.xml"/>
+    </target>
+
+    <target name="deinstall" depends="checkProperties">
+        <echo message="Removing ${ant.project.name}"/>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; rm -Rf ${application.directory}"/>
+
+        <echo message="Succesfully removed ${ant.project.name}" />
+    </target>
+
+    <target name="start" depends="checkProperties">
+        <echo message="Starting ${ant.project.name}"/>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; cd ${application.directory}; ./runVoisc.sh"/>
+
+        <java classname="nl.bzk.migratiebrp.tools.controle.waiter.VoiscInitializationWaiter" failonerror="true">
+            <arg line="${waiter.arguments}"/>
+            <sysproperty key="jmx.service.url" value="service:jmx:simple://${server.host}:${voisc.jmx.serialize.port}"/>
+            <sysproperty key="jmx.service.username" value="admin"/>
+            <sysproperty key="jmx.service.password" value="admin"/>
+        </java>
+
+        <echo message="Succesfully started ${ant.project.name}" />
+    </target>
+
+    <target name="stop" depends="checkProperties">
+        <echo message="Stopping ${ant.project.name} (and sleeping 15s)"/>
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; cd ${application.directory}; ./stopVoisc.sh; sleep 15s; tail -n 100 output.txt"
+                 failonerror="false"/>
+
+        <echo message="Succesfully stopped ${ant.project.name}" />
+    </target>
+
+    <target name="clean" depends="checkProperties">
+    </target>
+
+    <target name="fail">
+        <fail message="Call with valid task"/>
+    </target>
+
+</project>

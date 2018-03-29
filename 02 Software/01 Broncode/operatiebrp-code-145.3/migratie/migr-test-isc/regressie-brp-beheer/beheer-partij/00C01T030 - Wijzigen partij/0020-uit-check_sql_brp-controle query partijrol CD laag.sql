@@ -1,0 +1,1 @@
+SELECT hp.* FROM kern.his_partijrol hp JOIN kern.partijrol pr ON hp.partijrol = pr.id JOIN kern.partij p ON pr.partij = p.id WHERE p.naam LIKE 'Test Wijzigen Partij%' AND extract(EPOCH FROM LOCALTIMESTAMP - hp.tsreg)/3600 < 1

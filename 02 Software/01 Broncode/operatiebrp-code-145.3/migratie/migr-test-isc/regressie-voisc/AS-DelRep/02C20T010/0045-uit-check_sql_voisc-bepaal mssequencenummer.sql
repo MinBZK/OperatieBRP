@@ -1,0 +1,1 @@
+select dispatch_sequence_number from voisc.bericht where message_id = '$$messageid$$'

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- Register: Partij -->
+
+    <bean id="partijRegisterBerichtListener"
+          class="nl.bzk.migratiebrp.synchronisatie.runtime.listener.PartijRegisterBerichtListener">
+        <property name="jmsTemplate">
+            <bean class="org.springframework.jms.core.JmsTemplate">
+                <property name="connectionFactory" ref="queueConnectionFactory"/>
+                <property name="sessionTransacted" value="true"/>
+                <property name="defaultDestination" ref="partijRegisterTopic"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="partijRegisterContainer"
+          class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${register.partij.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager"/>
+        <property name="connectionFactory" ref="queueConnectionFactory"/>
+
+        <property name="destination" ref="partijVerzoekQueue"/>
+        <property name="messageListener" ref="partijRegisterBerichtListener"/>
+    </bean>
+
+</beans>

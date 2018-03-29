@@ -1,0 +1,79 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+        >
+<ui:component>
+
+<ga:responseActions>
+    <ga:parameter name="page" target="#{page}">
+        <f:convertNumber integerOnly="true"/>
+    </ga:parameter>
+    <gd:pager value="#{logs}" target="#{logs_pager}" page="#{page}" pageSize="25" />
+</ga:responseActions>
+<table class="results">
+<thead>
+    <tr>
+        <th colspan="3">
+            <ui:decorate template="t_pager.xhtml">
+                <ui:define name="pager_params">
+                    <ui:insert name="params"/>
+                </ui:define>
+                <ui:param name="pager" value="#{logs_pager}"/>
+            </ui:decorate>
+            <ui:insert name="berichten_title">#{msgs['log.heading']}</ui:insert>
+        </th>
+    </tr>
+    <tr>
+        <td style="width:150px;">
+            #{msgs['log.heading.tijdstip']}
+        </td>
+        <td style="width:50px;">
+            #{msgs['log.heading.process']}
+        </td>
+        <td style="width:450px;">
+            #{msgs['log.heading.destination']}
+        </td>
+    </tr>
+</thead>
+
+<h:outputText>
+    <ga:attribute name="rendered" value="#{! empty logs}"/>
+    <tbody class="results">
+        <gd:repeat value="#{logs}" var="log" idVar="rid" first="#{logs_pager.first}" limit="#{logs_pager.limit}">
+            <gs:tr>
+                <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                <td>
+                    #{log.date}
+                </td>
+                <td>
+                    #{log.token.processInstance.processDefinition.name}
+                </td>
+                <td>
+                    <h:outputText rendered="#{log.class == 'class org.jbpm.graph.log.TransitionLog'}">
+                        #{log.destinationNode.name}
+                    </h:outputText>
+                    <h:outputText rendered="#{(log.class == 'class org.jbpm.graph.log.TransitionLog') and (not empty log.transition.name)}">
+                        (#{log.transition.name})
+                    </h:outputText>
+                    <h:outputText rendered="#{log.class == 'class org.jbpm.logging.log.MessageLog'}">
+                        #{log.message}
+                    </h:outputText>
+                </td>
+            </gs:tr>
+        </gd:repeat>
+    </tbody>
+</h:outputText>
+</table>
+</ui:component>
+
+</html>

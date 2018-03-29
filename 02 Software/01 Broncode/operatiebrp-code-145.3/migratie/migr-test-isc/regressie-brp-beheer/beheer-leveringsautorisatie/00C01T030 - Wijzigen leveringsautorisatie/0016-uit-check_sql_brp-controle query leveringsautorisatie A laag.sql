@@ -1,0 +1,1 @@
+SELECT id, stelsel, indmodelautorisatie, naam, protocolleringsniveau, indaliassrtadmhndleveren, datingang, dateinde, populatiebeperking, toelichting, indblok, indag FROM autaut.levsautorisatie ORDER BY id;

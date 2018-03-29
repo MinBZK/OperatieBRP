@@ -1,0 +1,1 @@
+select afnemer_code, conversie_resultaat from initvul.initvullingresult_aut order by afnemer_code;

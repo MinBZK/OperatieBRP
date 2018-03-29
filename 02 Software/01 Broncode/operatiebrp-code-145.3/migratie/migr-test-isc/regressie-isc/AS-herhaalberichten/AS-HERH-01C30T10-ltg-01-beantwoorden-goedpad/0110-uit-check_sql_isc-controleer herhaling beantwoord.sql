@@ -1,0 +1,1 @@
+select 'x' from mig_bericht where actie = 'herhalingBeantwoord';

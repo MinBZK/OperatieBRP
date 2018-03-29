@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="herhaal">
+
+
+	<start-state name="start">
+		<transition to="1. Loggen start proces"></transition>
+	</start-state>
+
+
+	<node name="1. Loggen start proces">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                startProcesInstantieAction
+            </bean>
+        </action>
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                foutafhandelingRegistreerFoutAction
+            </bean>
+        </action>
+        <transition to="2. Foutafhandeling"></transition>
+    </node>
+
+	<process-state name="2. Foutafhandeling">
+		<sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="lo3Bericht" name="lo3Bericht"></variable>
+        <variable access="read" mapped-name="bronPartijCode" name="bronPartijCode"></variable>
+        <variable access="read" mapped-name="doelPartijCode" name="doelPartijCode"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="fout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="indicatieBeheerder"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+		<transition to="3. Keuze"></transition>
+	</process-state>
+
+	<decision name="3. Keuze">
+		<transition to="4. Versturen herhaling" name="3a. Versturen herhaling">
+            <condition expression="#{restart == 'Opnieuw antwoord versturen'}"></condition>
+        </transition>
+		<transition to="5. Loggen einde proces" name="3b. Afbreken"></transition>
+	</decision>
+
+	<node name="4. Versturen herhaling">
+        <transition to="5. Loggen einde proces" name="Versturen herhaling">
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>lo3Bericht</value></entry>
+                </parameters>
+            </action>
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.actionhandler.EsbActionHandler">
+                <esbServiceName>
+                    VOISC-Outbound
+                </esbServiceName>
+                <bpmToEsbVars>
+                    <mapping bpm="lo3Bericht" esb="BODY_CONTENT"></mapping>
+                </bpmToEsbVars>
+            </action>
+        </transition>
+	</node>
+
+	<node name="5. Loggen einde proces">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                beeindigProcesInstantieAction
+            </bean>
+        </action>
+        <transition to="end" name="log einde foutafhandeling"></transition>
+    </node>
+
+	<end-state name="end"></end-state>
+
+    <exception-handler>
+        <action name="exception-handler" class="nl.bzk.migratiebrp.isc.jbpm.common.ExceptionLogger"/>
+    </exception-handler>
+
+</process-definition>

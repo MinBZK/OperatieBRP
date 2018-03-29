@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+
+    <ui:composition template="t_loggedin.xhtml">
+
+        <ui:define name="menu">
+            <ga:checkRole roles="#{access.role.process.deploy}" message="#{msgs.unauthorized}"/>
+            <table class="leftmenu">
+                <tbody>
+                    <tr class="leftmenu">
+                        <td colspan="2"/>
+                    </tr>
+                </tbody>
+            </table>
+        </ui:define>
+
+        <ui:define name="body">
+            <ga:checkRole roles="#{access.role.process.deploy}">
+                <h:form enctype="multipart/form-data">
+                    <table class="results">
+                        <thead>
+                            <tr>
+                                <th colspan="2">#{msgs['deploy.heading']}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="results">
+                            <tr>
+                                <th>#{msgs['deploy.prompt']}</th>
+                                <td>
+                                    <gd:inputFile target="#{stream}" maxSize="104857600"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th/>
+                                <td style="text-align:right;">
+                                    <h:commandButton value="#{msgs['deploy.button']}">
+                                        <j4j:deployProcess archive="#{stream}" target="#{pd}"/>
+                                        <n:nav outcome="success" url="procdef.jsf?id=#{pd.id}" storeMessages="true"/>
+                                        <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                    </h:commandButton>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </h:form>
+            </ga:checkRole>
+
+        </ui:define>
+
+    </ui:composition>
+
+</html>

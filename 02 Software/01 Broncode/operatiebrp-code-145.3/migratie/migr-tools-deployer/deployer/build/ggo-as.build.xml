@@ -1,0 +1,343 @@
+<project name="GGO Viewer" basedir="." default="fail">
+
+	<!--
+	 | Algemene properties
+	 |
+	 | server.host
+	 | server.username
+	 | server.password
+	 |
+	 | File properties
+	 |
+	 | application.bin.source
+	 | application.bin.file
+	 | application.war.source
+	 | application.war.file
+	 |
+	 | GGO properties
+	 |
+	 | ggo.port
+     |	 
+	 | brp.database.host
+	 | brp.database.name
+	 | brp.database.username
+	 | brp.database.password
+     |	 
+	 | ggo.database.host
+	 | ggo.database.name
+	 | ggo.database.username
+	 | ggo.database.password
+	 |
+	-->
+	
+	<property name="application.directory" value="ggo" />
+	<property name="ggo.port" value="8080" />
+
+	<target name="checkProperties">
+		<fail unless="server.host" message="server.host property is verplicht." />
+		<fail unless="server.username" message="server.username property is verplicht." />
+		<fail unless="server.password" message="server.password property is verplicht." />
+	</target>
+
+	<target name="checkInstallProperties" depends="checkProperties">
+		<!-- Check file settings -->
+		<fail unless="application.bin.source" message="application.bin.source property is verplicht bij het installeren." />
+		<fail unless="application.bin.file" message="application.bin.file property is verplicht bij het installeren." />
+		<fail unless="application.war.source" message="application.war.source property is verplicht bij het installeren." />
+		<fail unless="application.war.file" message="application.war.file property is verplicht bij het installeren." />
+
+		<!-- Check file exists -->
+		<fail message="${application.bin.source}/${application.bin.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1" >
+						<fileset dir="${application.bin.source}">
+							<include name="${application.bin.file}" />
+						</fileset>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+		<fail message="${application.war.source}/${application.war.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1" >
+						<fileset dir="${application.war.source}">
+							<include name="${application.war.file}" />
+						</fileset>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>		
+	
+		<fail unless="ggo.port" message="ggo.port property is verplicht." />
+		<fail unless="brp.database.host" message="brp.database.host property is verplicht." />
+		<fail unless="brp.database.name" message="brp.database.name property is verplicht." />
+		<fail unless="brp.database.username" message="brp.database.username property is verplicht." />
+		<fail unless="brp.database.password" message="brp.database.password property is verplicht." />
+
+		<fail unless="ggo.database.host" message="ggo.database.host property is verplicht." />
+		<fail unless="ggo.database.name" message="ggo.database.name property is verplicht." />
+		<fail unless="ggo.database.username" message="ggo.database.username property is verplicht." />
+		<fail unless="ggo.database.password" message="ggo.database.password property is verplicht." />
+	</target>
+
+    <target name="install" depends="checkInstallProperties,createLocalConfigurationFile">
+		<echo message="Installing ${ant.project.name} ...." />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+		
+		<echo message="Copying ${application.bin.file}" />
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true" failonerror="true">
+			<fileset dir="${application.bin.source}">
+				<include name="${application.bin.file}" />
+			</fileset>
+		</scp>
+		<echo message="Copying ${application.war.file}" />
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true" failonerror="true">
+			<fileset dir="${application.war.source}">
+				<include name="${application.war.file}" />
+			</fileset>
+		</scp>
+		
+		<echo message="Unpacking ${application.bin.file}" />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; mkdir ${application.directory}; cd ${application.directory}; unzip -o /tmp/${application.directory}/${application.bin.file} -d .;" />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+				 command="cd ~/${application.directory}; cd apache-tomcat-*; mv * ..; cd ..; rm -rf apache-tomcat-*; chmod u+x bin/*.sh; mkdir appconf;" />
+
+		<echo message="Installing ${application.war.file} as default webapplication" />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+				 command="cd ~/${application.directory}/webapps; rm -rf *; cp /tmp/${application.directory}/${application.war.file} ROOT.war" />
+	
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/appconf" trust="true" failonerror="true">
+			<fileset dir="tmp">
+				<include name="ggo-viewer.properties" />
+			</fileset>
+		</scp>
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/appconf" trust="true" failonerror="true">
+			<fileset dir="deps/ggo">
+				<include name="login.ini" />
+			</fileset>
+		</scp>
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf" trust="true" failonerror="true">
+			<fileset dir="tmp">
+				<include name="server.xml" />
+			</fileset>
+		</scp>
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf" trust="true" failonerror="true">
+			<fileset dir="deps/ggo">
+				<include name="catalina.properties" />
+			</fileset>
+		</scp>
+		
+    </target>
+	
+	<target name="createLocalConfigurationFile" depends="checkProperties">
+	<echo message="Creating configuration ${ant.project.name}" />
+		<delete dir="tmp" />
+		<mkdir dir="tmp" />
+		<echo file="tmp/ggo-viewer.properties" append="false" force="true"><![CDATA[#BCM module gebruiken
+ggoviewer.bcm.enabled=false
+ 
+##### BCM Configuratie #####
+# Locatie waar het bestand bcmCheckDescriptions.properties staat met alle BCM omschrijvingen
+ba.bcm.descriptions.path=~/${application.directory}/bcm/
+# Pad en prefix van BCM resultaatbestanden (word niet gebruikt vanuit de ggo-viewer)
+bcm.results.path.prefix=
+# Pad van de root van de BCM installatie
+bcm.root.path=~/${application.directory}/bcm/
+# Locatie van de bestandscontrolelijst met alle BCM checks
+bcm.checks.path =~/${application.directory}/bcm/bcm.xls
+ 
+# BRP database verbinding
+jdbc.driverClassName=org.postgresql.Driver
+jdbc.url=jdbc:postgresql://${brp.database.host}/${brp.database.name}
+jdbc.username=${brp.database.username}
+jdbc.password=${brp.database.password}
+ 
+# protocollering database
+viewer.jdbc.driverClassName=org.postgresql.Driver
+viewer.jdbc.url=jdbc:postgresql://${ggo.database.host}/${ggo.database.name}
+viewer.jdbc.username=${ggo.database.username}
+viewer.jdbc.password=${ggo.database.password}
+ 
+#Default PL-en op de server
+demo.mode=false
+defaultpl.location=~/${application.directory}/demo/]]></echo>
+
+		<echo file="tmp/server.xml" append="false" force="true"><![CDATA[<?xml version='1.0' encoding='utf-8'?>
+<!--
+  Licensed to the Apache Software Foundation (ASF) under one or more
+  contributor license agreements.  See the NOTICE file distributed with
+  this work for additional information regarding copyright ownership.
+  The ASF licenses this file to You under the Apache License, Version 2.0
+  (the "License"); you may not use this file except in compliance with
+  the License.  You may obtain a copy of the License at
+
+      http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+-->
+<!-- Note:  A "Server" is not itself a "Container", so you may not
+     define subcomponents such as "Valves" at this level.
+     Documentation at /docs/config/server.html
+ -->
+<Server port="8006" shutdown="SHUTDOWN">
+  <!-- Security listener. Documentation at /docs/config/listeners.html
+  <Listener className="org.apache.catalina.security.SecurityListener" />
+  -->
+  <!--APR library loader. Documentation at /docs/apr.html -->
+  <Listener className="org.apache.catalina.core.AprLifecycleListener" SSLEngine="on" />
+  <!--Initialize Jasper prior to webapps are loaded. Documentation at /docs/jasper-howto.html -->
+  <Listener className="org.apache.catalina.core.JasperListener" />
+  <!-- Prevent memory leaks due to use of particular java/javax APIs-->
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+
+  <!-- Global JNDI resources
+       Documentation at /docs/jndi-resources-howto.html
+  -->
+  <GlobalNamingResources>
+    <!-- Editable user database that can also be used by
+         UserDatabaseRealm to authenticate users
+    -->
+    <Resource name="UserDatabase" auth="Container"
+              type="org.apache.catalina.UserDatabase"
+              description="User database that can be updated and saved"
+              factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
+              pathname="conf/tomcat-users.xml" />
+  </GlobalNamingResources>
+
+  <!-- A "Service" is a collection of one or more "Connectors" that share
+       a single "Container" Note:  A "Service" is not itself a "Container",
+       so you may not define subcomponents such as "Valves" at this level.
+       Documentation at /docs/config/service.html
+   -->
+  <Service name="Catalina">
+
+    <!--The connectors can use a shared executor, you can define one or more named thread pools-->
+    <!--
+    <Executor name="tomcatThreadPool" namePrefix="catalina-exec-"
+        maxThreads="150" minSpareThreads="4"/>
+    -->
+
+
+    <!-- A "Connector" represents an endpoint by which requests are received
+         and responses are returned. Documentation at :
+         Java HTTP Connector: /docs/config/http.html (blocking & non-blocking)
+         Java AJP  Connector: /docs/config/ajp.html
+         APR (HTTP/AJP) Connector: /docs/apr.html
+         Define a non-SSL HTTP/1.1 Connector on port 8080
+    -->
+    <Connector port="${ggo.port}" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443" />
+    <!-- A "Connector" using the shared thread pool-->
+    <!--
+    <Connector executor="tomcatThreadPool"
+               port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               redirectPort="8443" />
+    -->
+    <!-- Define a SSL HTTP/1.1 Connector on port 8443
+         This connector uses the JSSE configuration, when using APR, the
+         connector should be using the OpenSSL style configuration
+         described in the APR documentation -->
+    <!--
+    <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true"
+               maxThreads="150" scheme="https" secure="true"
+               clientAuth="false" sslProtocol="TLS" />
+    -->
+
+    <!-- Define an AJP 1.3 Connector on port 8009 -->
+    <Connector port="8009" protocol="AJP/1.3" redirectPort="8443" />
+
+
+    <!-- An Engine represents the entry point (within Catalina) that processes
+         every request.  The Engine implementation for Tomcat stand alone
+         analyzes the HTTP headers included with the request, and passes them
+         on to the appropriate Host (virtual host).
+         Documentation at /docs/config/engine.html -->
+
+    <!-- You should set jvmRoute to support load-balancing via AJP ie :
+    <Engine name="Catalina" defaultHost="localhost" jvmRoute="jvm1">
+    -->
+    <Engine name="Catalina" defaultHost="localhost">
+
+      <!--For clustering, please take a look at documentation at:
+          /docs/cluster-howto.html  (simple how to)
+          /docs/config/cluster.html (reference documentation) -->
+      <!--
+      <Cluster className="org.apache.catalina.ha.tcp.SimpleTcpCluster"/>
+      -->
+
+      <!-- Use the LockOutRealm to prevent attempts to guess user passwords
+           via a brute-force attack -->
+      <Realm className="org.apache.catalina.realm.LockOutRealm">
+        <!-- This Realm uses the UserDatabase configured in the global JNDI
+             resources under the key "UserDatabase".  Any edits
+             that are performed against this UserDatabase are immediately
+             available for use by the Realm.  -->
+        <Realm className="org.apache.catalina.realm.UserDatabaseRealm"
+               resourceName="UserDatabase"/>
+      </Realm>
+
+      <Host name="localhost"  appBase="webapps"
+            unpackWARs="true" autoDeploy="true">
+
+        <!-- SingleSignOn valve, share authentication between web applications
+             Documentation at: /docs/config/valve.html -->
+        <!--
+        <Valve className="org.apache.catalina.authenticator.SingleSignOn" />
+        -->
+
+        <!-- Access log processes all example.
+             Documentation at: /docs/config/valve.html
+             Note: The pattern used is equivalent to using pattern="common" -->
+        <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
+               prefix="localhost_access_log." suffix=".txt"
+               pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+
+      </Host>
+    </Engine>
+  </Service>
+</Server>
+]]></echo>
+
+	</target>
+
+    <target name="deinstall" depends="checkProperties">
+		<echo message="Removing ${ant.project.name}" />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+		         command="cd ~; rm -Rf ${application.directory}" />
+    </target>
+	
+	<target name="start" depends="checkProperties">
+		<echo message="Starting ${ant.project.name}" />
+
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+		         command="cd ~; cd ${application.directory}; cd bin; ./startup.sh" />
+
+        <echo message="Succesfully started ${ant.project.name}" />
+    </target>
+
+	<target name="stop" depends="checkProperties">
+		<echo message="Stopping ${ant.project.name} (and sleeping 15s)" />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" failonerror="false" 
+		         command="cd ~; cd ${application.directory}; cd bin; ./shutdown.sh" />
+    </target>
+
+    <target name="clean" depends="checkProperties">
+    </target>
+
+	<target name="fail">
+		<fail message="Call with valid task" />
+	</target>
+	
+</project>

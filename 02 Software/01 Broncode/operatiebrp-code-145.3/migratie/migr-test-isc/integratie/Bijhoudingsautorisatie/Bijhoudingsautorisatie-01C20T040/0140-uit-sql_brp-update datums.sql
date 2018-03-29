@@ -1,0 +1,2 @@
+UPDATE autaut.his_bijhautorisatie SET dateinde = to_number((to_char(now() - interval '1 day', 'YYYYMMDD')),'99999999') WHERE naam = 'Integratietest Bijhoudingsautorisatie';
+UPDATE autaut.bijhautorisatie SET dateinde = to_number((to_char(now() - interval '1 day', 'YYYYMMDD')),'99999999') WHERE naam = 'Integratietest Bijhoudingsautorisatie';

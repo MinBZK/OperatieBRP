@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+        targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        version="000101">
+
+    <include schemaLocation="SYNC_Attribuuttypen.xsd"/>
+    <include schemaLocation="SYNC_Objecttypen.xsd"/>
+
+    <!--
+     | Berichten die te maken hebben met de initiele vulling van protocollering data.
+     +-->
+    <element name="protocollering" type="sync:ProtocolleringLijstType"/>
+    <element name="protocolleringAntwoord" type="sync:ProtocolleringAntwoordLijstType"/>
+
+    <complexType name="ProtocolleringLijstType">
+        <sequence>
+            <element name="protocollering" type="sync:ProtocolleringType" maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ProtocolleringType">
+        <sequence>
+            <element name="activiteitId" type="sync:ActiviteitIdType" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <element name="persoonId" type="sync:PersoonIdType" minOccurs="0" maxOccurs="1" nillable="false"/>
+            <element name="nadereBijhoudingsaardCode" type="sync:NadereBijhoudingsaardType" minOccurs="0" maxOccurs="1"
+                     nillable="false"/>
+            <element name="toegangLeveringsautorisatieId" type="sync:ToegangLeveringsautorisatieIdType" minOccurs="0"
+                     maxOccurs="1" nillable="false"/>
+            <element name="toegangLeveringsautorisatieCount" type="sync:ToegangLeveringsautorisatieCountType"
+                     minOccurs="1" maxOccurs="1" nillable="false"/>
+            <element name="dienstId" type="sync:DienstIdType" minOccurs="0" maxOccurs="1" nillable="false"/>
+            <element name="startTijdstip" type="sync:TijdstipType" minOccurs="0" maxOccurs="1" nillable="false"/>
+            <element name="laatsteActieTijdstip" type="sync:TijdstipType" minOccurs="0" maxOccurs="1" nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ProtocolleringAntwoordLijstType">
+        <sequence>
+            <element name="protocolleringAntwoord" type="sync:ProtocolleringAntwoordType" maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="ProtocolleringAntwoordType">
+        <sequence>
+            <element name="activiteitId" type="sync:ActiviteitIdType" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Ok">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat alle protocollering data succesvol is opgeslagen in de
+                                    database.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Fout">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat het bericht compleet niet verwerkt is.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1" nillable="false"/>
+        </sequence>
+    </complexType>
+</schema>

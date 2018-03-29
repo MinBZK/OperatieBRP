@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+  <!-- Datasource Definitie -->
+    <bean id="voiscDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName" >
+            	<property name="baseName" value="voiscDatabase" />
+            </bean>
+        </property>        <property name="xaDataSourceClassName" value="${voisc.database.driver:org.postgresql.xa.PGXADataSource}" />
+        <property name="xaProperties">
+            <props>
+                <prop key="ServerName">${voisc.database.host:localhost}</prop>
+                <prop key="PortNumber">${voisc.database.port:5432}</prop>
+                <prop key="DatabaseName">${voisc.database.name:voisc}</prop>
+                <prop key="User">${voisc.database.username:postgres}</prop>
+                <prop key="Password">${voisc.database.password:postgres}</prop>
+            </props>
+        </property>
+        <property name="maxPoolSize" value="${voisc.database.maxpool:20}" />
+        <property name="minPoolSize" value="${voisc.database.minpool:1}"/>
+        <property name="testQuery" value="select now()"/>
+    </bean>
+
+    <bean name="voiscJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+        <property name="databasePlatform" value="${voisc.database.dialect:org.hibernate.dialect.PostgreSQLDialect}" />
+    </bean>
+    
+    <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
+        <!--  when close is called, should we force transactions to terminate or not? -->
+        <property name="forceShutdown"><value>true</value></property>
+    </bean>
+
+    <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout"><value>300</value></property>
+    </bean>
+
+    <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+    <bean id="voiscTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager"><ref bean="atomikosTransactionManager"  /></property>
+        <property name="userTransaction"><ref bean="atomikosUserTransaction"  /></property>
+    </bean>
+
+    <bean id="voiscEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="VoiscEntities" />
+        <property name="dataSource" ref="voiscDataSource" />
+        <property name="jpaVendorAdapter" ref="voiscJpaVendorAdapter" />
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.transaction.manager_lookup_class">com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                <prop key="hibernate.transaction.jta.platform">nl.bzk.migratiebrp.voisc.database.repository.jta.AtomikosJtaPlatform</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="voiscJpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+
+</beans>

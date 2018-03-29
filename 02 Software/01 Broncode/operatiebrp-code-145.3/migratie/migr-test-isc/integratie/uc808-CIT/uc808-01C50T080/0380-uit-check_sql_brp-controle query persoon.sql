@@ -1,0 +1,1 @@
+select anr, bsn, versienr from kern.pers where anr = '1538570130' OR anr = '2434613906' order by anr;

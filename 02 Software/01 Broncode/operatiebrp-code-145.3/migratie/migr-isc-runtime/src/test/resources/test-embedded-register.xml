@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- Config -->
+    <context:annotation-config/>
+    <context:property-placeholder/>
+
+    <amq:connectionFactory id="connectionFactory" brokerURL="tcp://localhost:${test.routering.port}">
+        <amq:redeliveryPolicy>
+            <amq:redeliveryPolicy maximumRedeliveries="0"/>
+        </amq:redeliveryPolicy>
+    </amq:connectionFactory>
+
+    <bean name="partijConnectionFactory" class="nl.bzk.migratiebrp.register.client.util.RefBeanFactory">
+        <property name="bean" ref="connectionFactory"/>
+    </bean>
+
+    <amq:topic id="partijRegisterTopic" physicalName="partij.register"/>
+    <amq:queue id="partijVerzoekQueue" physicalName="partij.verzoek"/>
+
+</beans>

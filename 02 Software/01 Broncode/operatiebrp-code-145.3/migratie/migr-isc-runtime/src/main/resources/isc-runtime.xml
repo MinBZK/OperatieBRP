@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd"
+       xml:id="brp-routering">
+
+    <context:annotation-config/>
+    <tx:annotation-driven/>
+
+    <!-- Config -->
+    <context:property-placeholder/>
+
+    <import resource="alg-util-common-logging.xml"/>
+
+    <!-- Infra -->
+    <import resource="isc-runtime-datasource.xml"/>
+    <import resource="isc-runtime-jms.xml"/>
+    <import resource="isc-runtime-jta.xml"/>
+
+    <!-- JBPM -->
+    <import resource="isc-jbpm-algemeen.xml"/>
+    <import resource="classpath*:isc-jbpm-usecase-beans.xml"/>
+
+    <bean id="outboundHandler" class="nl.bzk.migratiebrp.isc.runtime.handler.OutboundMessageHandler">
+        <property name="syncOutboundService" ref="syncOutboundService"/>
+        <property name="voiscOutboundService" ref="voiscOutboundService"/>
+    </bean>
+
+    <!-- Commands -->
+    <import resource="isc-jbpm-command.xml"/>
+
+    <!-- Partij register -->
+    <import resource="register-client-partij.xml"/>
+    <bean class="nl.bzk.migratiebrp.isc.runtime.start.RegisterStarter"/>
+
+    <!-- Services -->
+    <import resource="isc-runtime-levering.xml"/>
+    <import resource="isc-runtime-notificatie.xml"/>
+    <import resource="isc-runtime-sync.xml"/>
+    <import resource="isc-runtime-voisc.xml"/>
+
+    <!-- Opschoner -->
+    <import resource="isc-opschoner.xml"/>
+    <!-- Telling -->
+    <import resource="isc-telling.xml"/>
+
+    <!-- JMX -->
+    <import resource="isc-runtime-jmx.xml"/>
+
+</beans>

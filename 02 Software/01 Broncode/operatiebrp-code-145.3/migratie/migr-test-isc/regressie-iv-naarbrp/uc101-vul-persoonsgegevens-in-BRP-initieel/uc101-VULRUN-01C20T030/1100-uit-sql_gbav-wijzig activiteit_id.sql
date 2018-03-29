@@ -1,0 +1,25 @@
+INSERT INTO public.activiteit (
+    activiteit_id ,
+    activiteit_type,
+    activiteit_subtype,
+    moeder_id,
+    toestand,
+    start_dt,
+    laatste_actie_dt,
+    uiterlijke_actie_dt,
+    pl_id,
+    communicatie_partner,
+    nr_1,
+    nr_2,
+    nr_3,
+    nr_4,
+    nr_5,
+    tekst_1,
+    tekst_2,
+    tekst_3,
+    tekst_4,    
+    tekst_5,    
+    trace_level, 
+    creatie_dt)
+VALUES 
+(999999, 100, 1111, null, 8000, '2017-02-01 18:04:59.744', '2017-02-01 18:04:59.744', '2017-02-01 18:04:59.744', null, null, null, null, null, null, null, null, null, null, null, null, null, '2017-02-01 18:04:59.744');

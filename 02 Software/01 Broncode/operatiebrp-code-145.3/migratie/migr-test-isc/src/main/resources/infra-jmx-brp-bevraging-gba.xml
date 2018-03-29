@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="brpBevragingGbaJmxConnectorCredentials" class="nl.bzk.algemeenbrp.util.jmx.client.CredentialsFactory">
+		<property name="username" value="${brp.bevraging-gba.jmx.service.username:admin}" />
+		<property name="password" value="${brp.bevraging-gba.jmx.service.password:admin}" />
+	</bean>
+
+	<bean id="brpBevragingGbaJmxConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+		<property name="environment">
+			<map>
+				<entry key="jmx.remote.credentials" value-ref="brpBevragingGbaJmxConnectorCredentials" />
+				<entry key="jmx.remote.requesttimeout" value="60" />
+			</map>
+		</property>
+		<property name="serviceUrl" value="service:jmx:simple://${brp.bevraging-gba.jmx.service.host:localhost}:${brp.bevraging-gba.jmx.service.port:3481}"/>
+	</bean>
+</beans>

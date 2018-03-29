@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+
+    <bean name="voiscJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+        <property name="databasePlatform" value="${voisc.database.dialect:org.hibernate.dialect.PostgreSQLDialect}" />
+    </bean>
+
+    <bean id="voiscTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="voiscEntityManagerFactory"/>
+        <property name="jpaDialect" ref="voiscJpaDialect" />
+    </bean>
+
+
+    <bean id="voiscEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="VoiscEntities" />
+        <property name="dataSource" ref="voiscDataSource" />
+        <property name="jpaVendorAdapter" ref="voiscJpaVendorAdapter" />
+    </bean>
+
+    <bean id="voiscJpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+
+</beans>

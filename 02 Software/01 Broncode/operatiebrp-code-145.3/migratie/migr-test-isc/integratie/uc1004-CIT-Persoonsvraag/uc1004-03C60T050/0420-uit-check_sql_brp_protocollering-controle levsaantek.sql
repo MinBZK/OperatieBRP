@@ -1,0 +1,1 @@
+select id, toeganglevsautorisatie, dienst, tsklaarzettenlev, tseindeformeleperioderes, scopepatroon from prot.levsaantek where id = $$levsaantek$$;

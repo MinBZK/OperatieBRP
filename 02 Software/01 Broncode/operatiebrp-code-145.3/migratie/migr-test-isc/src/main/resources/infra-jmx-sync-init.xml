@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="syncJmxConnectorCredentials"
+          class="nl.bzk.algemeenbrp.util.jmx.client.CredentialsFactory">
+        <property name="username" value="${sync.jmx.service.username:admin}"/>
+        <property name="password" value="${sync.jmx.service.password:admin}"/>
+    </bean>
+
+    <bean id="syncInitNaarBrpJmxConnector"
+          class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+        <property name="environment">
+            <map>
+                <entry key="jmx.remote.credentials" value-ref="syncJmxConnectorCredentials"/>
+            </map>
+        </property>
+        <property name="serviceUrl"
+                  value="service:jmx:simple://${sync.init.naarbrp.jmx.service.host:localhost}:${sync.init.naarbrp.jmx.service.port:3485}"/>
+    </bean>
+
+    <bean id="syncInitNaarLo3JmxConnector"
+          class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+        <property name="environment">
+            <map>
+                <entry key="jmx.remote.credentials" value-ref="syncJmxConnectorCredentials"/>
+                <entry key="jmx.remote.requesttimeout" value="60" />
+            </map>
+        </property>
+        <property name="serviceUrl"
+                  value="service:jmx:simple://${sync.init.naarlo3.jmx.service.host:localhost}:${sync.init.naarlo3.jmx.service.port:4485}"/>
+    </bean>
+</beans>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="iscCommandClient" class="nl.bzk.migratiebrp.isc.jbpm.command.client.CommandClientImpl">
+		<property name="serverConnection" ref="iscMBeanServerConnection" />
+	</bean>
+
+	<bean id="iscMBeanServerConnectionCredentials" class="nl.bzk.algemeenbrp.util.jmx.client.CredentialsFactory">
+		<property name="username" value="${isc.jmx.service.username:admin}" />
+		<property name="password" value="${isc.jmx.service.password:admin}" />
+	</bean>
+
+    <bean id="iscMBeanServerConnection" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+    	<property name="environment">
+			<map>
+				<entry key="jmx.remote.credentials" value-ref="iscMBeanServerConnectionCredentials" />
+				<entry key="jmx.remote.requesttimeout" value="60" />
+			</map>
+    	</property>
+        <property name="serviceUrl" value="service:jmx:simple://${isc.jmx.service.host:localhost}:${isc.jmx.service.port:3481}"/>
+    </bean>
+
+</beans>

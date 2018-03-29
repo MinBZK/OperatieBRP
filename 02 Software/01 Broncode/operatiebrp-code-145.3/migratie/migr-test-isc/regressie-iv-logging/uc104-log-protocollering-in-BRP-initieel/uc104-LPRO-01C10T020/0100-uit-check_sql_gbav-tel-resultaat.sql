@@ -1,0 +1,1 @@
+SELECT activiteit_id, conversie_resultaat FROM initvul.initvullingresult_protocollering;

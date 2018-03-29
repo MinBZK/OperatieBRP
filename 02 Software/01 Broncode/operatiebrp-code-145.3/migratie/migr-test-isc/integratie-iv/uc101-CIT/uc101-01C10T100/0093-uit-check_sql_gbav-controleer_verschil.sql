@@ -1,0 +1,1 @@
+select voorkomen_verschil from initvul.fingerprint;

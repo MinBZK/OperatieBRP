@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+        targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        version="000101">
+
+    <include schemaLocation="SYNC_Objecttypen.xsd"/>
+
+    <!-- 
+     | Berichten die te maken hebben met conversie en stam tabellen.
+     +-->
+
+    <element name="leesPartijRegisterVerzoek" type="sync:LeesPartijRegisterVerzoekType"/>
+    <element name="leesPartijRegisterAntwoord" type="sync:LeesPartijRegisterAntwoordType"/>
+
+    <!-- Lees partij register -->
+
+    <complexType name="LeesPartijRegisterVerzoekType">
+        <sequence>
+        </sequence>
+    </complexType>
+
+    <complexType name="LeesPartijRegisterAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Ok">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat het partij register succesvol is
+                                    gelezen.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="partijRegister" type="sync:PartijRegisterType" minOccurs="1"
+                     maxOccurs="1"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="PartijRegisterType">
+        <sequence>
+            <element name="partij" type="sync:PartijType" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="PartijType">
+        <sequence>
+            <element name="partijCode" type="sync:PartijcodeType" minOccurs="1" maxOccurs="1"/>
+            <element name="gemeenteCode" type="sync:GemeentecodeType" minOccurs="0" maxOccurs="1"/>
+            <element name="datumBrp" type="sync:DatumType" minOccurs="0" maxOccurs="1"/>
+            <element name="rollen" type="sync:RolType" minOccurs="0" maxOccurs="unbounded"/>
+        </sequence>
+    </complexType>
+
+    <simpleType name="RolType">
+        <restriction base="string">
+            <enumeration value="AFNEMER"/>
+            <enumeration value="BIJHOUDINGSORGAAN_COLLEGE"/>
+            <enumeration value="BIJHOUDINGSORGAAN_MINISTER"/>
+            <enumeration value="BIJHOUDINGSVOORSTELORGAAN"/>
+        </restriction>
+    </simpleType>
+</schema>

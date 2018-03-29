@@ -1,0 +1,1 @@
+SELECT bijhouderfiatuitz FROM autaut.his_bijhouderfiatuitz WHERE extract(EPOCH FROM localtimestamp-tsreg)/3600 < 1 ORDER BY id;

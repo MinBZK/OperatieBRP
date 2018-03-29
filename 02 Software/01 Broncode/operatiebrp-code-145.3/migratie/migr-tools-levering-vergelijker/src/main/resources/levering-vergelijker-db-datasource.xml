@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+           xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <!-- Properties -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="ignoreUnresolvablePlaceholders" value="true"/>
+    </bean>
+
+    <!-- JPA BRP -->
+
+    <bean name="leveringVergelijkerJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+        <property name="databasePlatform" value="${brp.database.dialect:org.hibernate.dialect.PostgreSQLDialect}" />
+    </bean>
+
+    <bean id="leveringVergelijkerJpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+    <bean id="leveringVergelijkerTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="leveringVergelijkerEntityManagerFactory"/>
+        <property name="jpaDialect" ref="leveringVergelijkerJpaDialect" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="leveringVergelijkerTransactionManager"/>
+
+    <bean id="leveringVergelijkerEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="LeveringsVergelijkingEntities" />
+        <property name="dataSource" ref="leveringVergelijkerDataSource" />
+        <property name="jpaVendorAdapter" ref="leveringVergelijkerJpaVendorAdapter" />
+    </bean>
+
+    <bean id="leveringVergelijkerDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${brp.jdbc.driverClassName:org.postgresql.Driver}"/>
+        <property name="jdbcUrl" value="${brp.jdbc.url:jdbc:postgresql://localhost/soa}"/>
+        <property name="user" value="${brp.jdbc.username:migratie}"/>
+        <property name="password" value="${brp.jdbc.password:M1gratie}"/>
+        <property name="minPoolSize" value="1"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="maxIdleTime" value="3600"/>
+        <property name="testConnectionOnCheckin" value="true"/>
+        <property name="idleConnectionTestPeriod" value="30"/>
+        <property name="preferredTestQuery" value="SELECT 41+1"/>
+    </bean>
+
+    <!-- JPA GBA-V -->
+
+    <bean name="gbaJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+        <property name="databasePlatform" value="${gba.database.dialect:org.hibernate.dialect.PostgreSQLDialect}" />
+    </bean>
+
+    <bean id="gbaJpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+    <bean id="gbaTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="gbaEntityManagerFactory"/>
+        <property name="jpaDialect" ref="gbaJpaDialect" />
+    </bean>
+
+    <bean id="gbaEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="GbaEntities" />
+        <property name="dataSource" ref="gbaDataSource" />
+        <property name="jpaVendorAdapter" ref="gbaJpaVendorAdapter" />
+    </bean>
+
+    <bean id="gbaDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${gba.jdbc.driverClassName:org.postgresql.Driver}"/>
+        <property name="jdbcUrl" value="${gba.jdbc.url:jdbc:postgresql://localhost/gbav}"/>
+        <property name="user" value="${gba.jdbc.username:migratie}"/>
+        <property name="password" value="${gba.jdbc.password:M1gratie}"/>
+        <property name="minPoolSize" value="1"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="maxIdleTime" value="3600"/>
+        <property name="testConnectionOnCheckin" value="true"/>
+        <property name="idleConnectionTestPeriod" value="30"/>
+        <property name="preferredTestQuery" value="SELECT 41+1"/>
+    </bean>
+</beans>

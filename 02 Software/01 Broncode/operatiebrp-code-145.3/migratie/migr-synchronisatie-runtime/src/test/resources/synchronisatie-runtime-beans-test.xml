@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+    <import resource="synchronisatie-beans-test.xml"/>
+
+    <bean name="queueConnectionFactory" class="org.hornetq.jms.client.HornetQXAConnectionFactory">
+        <constructor-arg value="false"/>
+        <constructor-arg>
+            <bean name="transportConfiguration" class="org.hornetq.api.core.TransportConfiguration">
+                <constructor-arg value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory"/>
+                <constructor-arg>
+                    <map key-type="java.lang.String" value-type="java.lang.Object">
+                        <entry key="host" value="127.0.0.1"/>
+                        <entry key="port" value="5453"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+        <property name="connectionTTL" value="600000"/>
+        <property name="callTimeout" value="300000"/>
+        <property name="retryInterval" value="1000"/>
+        <property name="retryIntervalMultiplier" value="1.5"/>
+        <property name="reconnectAttempts" value="1000"/>
+        <property name="maxRetryInterval" value="60000"/>
+        <property name="producerWindowSize" value="100"/>
+    </bean>
+
+    <bean name="queueInbound" class="org.hornetq.jms.client.HornetQQueue">
+        <constructor-arg value="init.vulling.naarlo3"/>
+    </bean>
+
+    <bean name="queueOutbound" class="org.hornetq.jms.client.HornetQQueue">
+        <constructor-arg value="init.vulling.naarlo3.response"/>
+    </bean>
+
+    <bean name="syncMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.SynchronisatieMessageHandler">
+        <property name="syncBerichtServices">
+            <list>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.SynchroniseerNaarBrpService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.LeesUitBrpService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.ConverteerNaarBrpService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.ConverteerNaarLo3Service"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.PartijRegisterService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.BlokkeringVerzoekService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.BlokkeringInfoVerzoekService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.DeblokkeringVerzoekService"/>
+            </list>
+        </property>
+    </bean>
+
+</beans>

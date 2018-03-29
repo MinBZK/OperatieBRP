@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                             http://www.springframework.org/schema/beans/spring-beans.xsd
+                             http://www.springframework.org/schema/context 
+                             http://www.springframework.org/schema/context/spring-context.xsd
+
+
+                             http://www.springframework.org/schema/mvc
+                             http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+
+    <context:annotation-config />
+    <context:component-scan base-package="nl.bzk.migratiebrp.ggo.viewer"/>
+    <mvc:annotation-driven />
+    
+    <!-- Configure from which .properties file Spring gets its information -->
+    <context:property-placeholder location="classpath:ggo-viewer.properties" />
+
+    <import resource="classpath:conversie-beans.xml" />
+    <import resource="classpath:synchronisatie-dal.xml"/>
+    <import resource="classpath:excel-adapter-beans.xml" />
+    <!-- Override entityManager from synchronisatie-beans.xml -->
+    <import resource="classpath:viewer-beans-datasource.xml" />
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.velocity.VelocityViewResolver">
+        <property name="suffix"><value>.html</value></property>
+        <property name="contentType" value="text/html; charset=UTF-8" />
+    </bean>
+    
+    <bean id="velocityConfig" class="org.springframework.web.servlet.view.velocity.VelocityConfigurer">
+        <property name="resourceLoaderPath"><value>/WEB-INF/velocity/</value></property>
+        <property name="configLocation" value="classpath:/velocity.properties"/>
+    </bean>
+    
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+        
+    <!-- This component will check the PL data according to the GBA business rules. -->
+    <bean id="checker" class="nl.gba.gbav.impl.checker.Checker"/>
+</beans>

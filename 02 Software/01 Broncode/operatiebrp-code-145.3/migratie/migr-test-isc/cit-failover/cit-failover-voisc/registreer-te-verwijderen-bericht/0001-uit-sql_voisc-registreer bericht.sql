@@ -1,0 +1,2 @@
+insert into voisc.bericht(id, status, tijdstip_ontvangst, tijdstip_verzonden, version)
+ values(nextval('voisc.bericht_id_sequence'), 'IGNORED', now() - INTERVAL '14 days', now() - INTERVAL '14 days', 0);

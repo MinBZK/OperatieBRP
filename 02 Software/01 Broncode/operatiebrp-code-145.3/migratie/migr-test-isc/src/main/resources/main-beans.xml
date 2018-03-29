@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+
+    <import resource="alg-util-common-logging.xml"/>
+
+    <!-- Test environment -->
+
+    <bean name="correlator" class="nl.bzk.migratiebrp.test.isc.environment.correlatie.Correlator"/>
+    <bean name="idGenerator" class="nl.bzk.migratiebrp.test.isc.environment.id.IdGeneratorImpl"/>
+
+    <bean name="testEnviroment" class="nl.bzk.migratiebrp.test.isc.EnvironmentImpl"/>
+    <bean name="jbpmHelperKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.JbpmHelperKanaal"/>
+    <bean name="jbpmCleanKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.CleanJbpmKanaal"/>
+
+    <!-- KANAAL: BZM -->
+    <bean name="bzmBhgHuwelijkKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.BzmBhgHuwelijkKanaal"/>
+    <bean name="bzmBhgOverlijdenKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.BzmBhgOverlijdenKanaal"/>
+    <bean name="bzmBhgVerblijfAdresKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.BzmBhgVerblijfAdresKanaal"/>
+    <bean name="bzmBhgBevragingKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.BzmBhgBevragingKanaal"/>
+    <bean name="bzmBhgVrijberichtKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.BzmBhgVrijberichtKanaal"/>
+
+    <!-- KANAAL: BRP, LEVERING, SYNC, VOISC (Isc Queue) -->
+    <bean name="archiefKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.ArchiefQueueKanaal"/>
+    <bean name="archiefDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.ArchiefDlqKanaal"/>
+    <bean name="leveringKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.LeveringQueueKanaal"/>
+    <bean name="voiscKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.VoiscQueueKanaal"/>
+    <bean name="voiscAltKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.VoiscAltQueueKanaal"/>
+    <bean name="voiscOntvangstDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.VoiscOntvangstDlqKanaal"/>
+    <bean name="voiscVerzendenDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.VoiscVerzendenDlqKanaal"/>
+    <bean name="syncKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.SyncQueueKanaal"/>
+    <bean name="syncAltKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.SyncAltQueueKanaal"/>
+    <bean name="syncVerzoekDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.SyncVerzoekDlqKanaal"/>
+    <bean name="syncAntwoordDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.SyncAntwoordDlqKanaal"/>
+    <bean name="notificatieKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.NotificatieQueueKanaal"/>
+    <bean name="notificatieDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.NotificatieDlqKanaal"/>
+    <!-- KANAAL: MAILBOX -->
+    <bean id="mailboxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.mailbox.MailboxKanaal"/>
+
+    <!-- KANAAL: WACHT -->
+    <bean id="wachtKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.WachtKanaal"/>
+    <bean id="dummyKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.DummyKanaal"/>
+    <bean id="quitKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.QuitKanaal"/>
+
+    <!-- KANALEN: JBPM -->
+    <bean name="handKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.HandKanaal"/>
+    <bean name="nodeCheckKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.NodeCheckKanaal"/>
+    <bean name="transCheckKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.TransCheckKanaal"/>
+    <bean name="transitieKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.TransitieKanaal"/>
+    <bean name="deleteProcessenKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.isc.DeleteProcessenKanaal"/>
+
+    <!-- KANALEN: SQL -->
+    <bean id="checkSqlAfnemervoorbeeldKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlAfnemervoorbeeldKanaal"/>
+    <bean id="checkSqlBrpKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlBrpKanaal"/>
+    <bean id="checkSqlBrpArchiveringKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlBrpArchiveringKanaal"/>
+    <bean id="checkSqlBrpProtocolleringKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlBrpProtocolleringKanaal"/>
+    <bean id="checkSqlGbavKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlGbavKanaal"/>
+    <bean id="checkSqlIscKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlIscKanaal"/>
+    <bean id="checkSqlVoiscKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlVoiscKanaal"/>
+
+    <bean id="checkSqlResultKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlResultKanaal"/>
+    <bean id="checkSqlExistsKnaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlExistsKanaal"/>
+
+    <bean id="sqlAfnemervoorbeeldKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlAfnemervoorbeeldKanaal"/>
+    <bean id="sqlBrpKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlBrpKanaal"/>
+    <bean id="sqlBrpArchiveringKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlBrpArchiveringKanaal"/>
+    <bean id="sqlBrpProtocolleringKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlBrpProtocolleringKanaal"/>
+    <bean id="sqlGbavKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlGbavKanaal"/>
+    <bean id="sqlIscKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlIscKanaal"/>
+    <bean id="sqlVoiscKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlVoiscKanaal"/>
+
+    <bean id="cleanDbKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CleanDatabaseKanaal"/>
+
+    <!-- KANAAL: PL -->
+    <bean id="checkPlKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.pl.CheckPlKanaal"/>
+    <bean id="checkPlResultKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.pl.CheckPlResultKanaal"/>
+
+    <!-- KANAAL: GEMEENTE -->
+    <bean id="gemeenteKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GemeenteQueueKanaal"/>
+    <bean id="gemeenteAltKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GemeenteAltQueueKanaal"/>
+
+    <!-- KANAAL: PARTIJ -->
+    <bean id="partijKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.PartijQueueKanaal"/>
+    <bean id="partijAltKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.PartijAltQueueKanaal"/>
+
+    <!-- KANELEN: PERSOON, ABONNEMENT, AFNEMERSINDICATIE -->
+    <bean id="abonnementKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.AbonnementKanaal"/>
+    <bean id="persoonKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.PersoonKanaal"/>
+    <bean id="afnemersindicatieKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.AfnemersindicatieKanaal"/>
+
+    <bean id="deleteAbonnementenKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeleteAbonnementenKanaal"/>
+    <bean id="deletePersonenKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeletePersonenKanaal"/>
+    <bean id="deletePartijenKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeletePartijenKanaal"/>
+    <bean id="deleteLeveringsaantekeningenKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeleteLeveringsaantekeningenKanaal"/>
+
+    <bean id="naarBrpKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.NaarBRPKanaal"/>
+    <bean id="naarBrpAltKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.NaarBRPAltKanaal"/>
+    <bean id="naarBrpDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.NaarBRPDlqKanaal"/>
+
+    <bean id="naarLo3Kanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.NaarLo3Kanaal"/>
+    <bean id="naarLo3AltKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.NaarLo3AltKanaal"/>
+    <bean id="naarLo3DlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.NaarLo3DlqKanaal"/>
+
+    <!-- KANALEN: JMX -->
+    <bean id="brpArchiveringJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpArchiveringJmxKanaal"/>
+    <bean id="brpAfnemerindicatieGbaJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpAfnemerindicatieGbaJmxKanaal"/>
+    <bean id="brBevragingGbaJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpBevragingGbaJmxKanaal"/>
+    <bean id="brBevragingGbaWsJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpBevragingGbaWsJmxKanaal"/>
+    <bean id="brpBijhoudingJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpBijhoudingJmxKanaal"/>
+    <bean id="brpBijhoudingGbaJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpBijhoudingGbaJmxKanaal"/>
+    <bean id="brpMessageBrokerJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpMessageBrokerJmxKanaal"/>
+    <bean id="brpMutatieLeveringJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpMutatieLeveringJmxKanaal"/>
+    <bean id="brpSelectieJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpSelectieJmxKanaal"/>
+    <bean id="brpSelectieAfnemerindicatieJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpSelectieAfnemerindicatieJmxKanaal"/>
+    <bean id="brpSelectieMessagebrokerJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpSelectieMessagebrokerJmxKanaal"/>
+    <bean id="brpSelectieSchrijverJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpSelectieSchrijverJmxKanaal"/>
+    <bean id="brpSelectieVerwerkerJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpSelectieVerwerkerJmxKanaal"/>
+    <bean id="brpVerzendingJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpVerzendingJmxKanaal"/>
+    <bean id="brpVrijBerichtJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpVrijBerichtJmxKanaal"/>
+    <bean id="brpVrijBerichtGbaJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpVrijBerichtGbaJmxKanaal"/>
+    <bean id="iscJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.IscJmxKanaal"/>
+    <bean id="hornetqJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.HornetQJmxKanaal"/>
+    <bean id="mailboxJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.MailboxJmxKanaal"/>
+    <bean id="opschonenJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.OpschonenJmxKanaal"/>
+    <bean id="tellingenJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.TellingenJmxKanaal"/>
+    <bean id="voiscJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.VoiscJmxKanaal"/>
+    <bean id="syncJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.SyncJmxKanaal"/>
+    <bean id="syncInitNaarBrpJmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.SyncInitNaarBrpJmxKanaal"/>
+    <bean id="syncInitNaarLo3JmxKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.SyncInitNaarLo3JmxKanaal"/>
+
+    <!-- KANALEN: ISC -->
+    <bean name="iscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.isc.IscKanaal"/>
+
+    <!-- KANALEN: SELENIUM -->
+    <bean name="selenium"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.selenium.SeleniumKanaal">
+        <property name="baseUrl" value="${selenium.baseurl}"/>
+        <property name="kanaal" value="selenium"/>
+    </bean>
+
+    <bean name="seleniumBrpBeheer"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.selenium.SeleniumKanaal">
+        <property name="baseUrl" value="${selenium.brpbeheer.baseurl}"/>
+        <property name="kanaal" value="seleniumbrpbeheer"/>
+    </bean>
+
+    <!--  KANAAL: BRP QUEUES -->
+    <bean name="brpArchiefKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.BrpArchiefKanaal"/>
+    <bean name="brpArchiefDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.BrpArchiefDlqKanaal"/>
+    <bean name="brpProtocolleringKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.BrpProtocolleringKanaal"/>
+    <bean name="brpProtocolleringDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.BrpProtocolleringDlqKanaal"/>
+    <bean name="brpGbaBijhoudingKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaBijhoudingenKanaal"/>
+    <bean name="brpGbaBijhoudingDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaBijhoudingenDlqKanaal"/>
+    <bean name="brpGbaAfnemerindicatiesKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAfnemerindicatiesKanaal"/>
+    <bean name="brpGbaAfnemerindicatiesDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAfnemerindicatiesDlqKanaal"/>
+    <bean name="brpGbaAfnemerindicatiesAntwoordKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAfnemerindicatiesAntwoordKanaal"/>
+    <bean name="brpGbaAfnemerindicatiesAntwoordDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAfnemerindicatiesAntwoordDlqKanaal"/>
+    <bean name="brpGbaToevalligeGebeurtenissenKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaToevalligeGebeurtenissenKanaal"/>
+    <bean name="brpGbaToevalligeGebeurtenissenDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaToevalligeGebeurtenissenDlqKanaal"/>
+    <bean name="brpGbaToevalligeGebeurtenissenAntwoordKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaToevalligeGebeurtenissenAntwoordKanaal"/>
+    <bean name="brpGbaToevalligeGebeurtenissenAntwoordDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaToevalligeGebeurtenissenAntwoordDlqKanaal"/>
+    <bean name="brpGbaLeveringKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaLeveringKanaal"/>
+    <bean name="brpGbaLeveringDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaLeveringDlqKanaal"/>
+    <bean name="brpGbaNotificatieKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaNotificatieKanaal"/>
+    <bean name="brpGbaNotificatieDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaNotificatieDlqKanaal"/>
+
+    <bean name="brpBrpBijhoudingKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.BrpBijhoudingenKanaal"/>
+
+    <bean name="brpGbaAdhocPersoonsvraagKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAdhocPersoonsvraagKanaal"/>
+    <bean name="brpGbaAdhocPersoonsvraagDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAdhocPersoonsvraagDlqKanaal"/>
+    <bean name="brpGbaAdhocPersoonsvraagAntwoordKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAdhocPersoonsvraagAntwoordKanaal"/>
+    <bean name="brpGbaAdhocPersoonsvraagAntwoordDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAdhocPersoonsvraagAntwoordDlqKanaal"/>
+
+    <bean name="brpGbaAdhocAdresvraagKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAdhocAdresvraagKanaal"/>
+    <bean name="brpGbaAdhocAdresvraagDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAdhocAdresvraagDlqKanaal"/>
+    <bean name="brpGbaAdhocAdresvraagAntwoordKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAdhocAdresvraagAntwoordKanaal"/>
+    <bean name="brpGbaAdhocAdresvraagAntwoordDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAdhocAdresvraagAntwoordDlqKanaal"/>
+
+    <bean name="brpGbaVrijeBerichtenKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaVrijeBerichtenKanaal"/>
+    <bean name="brpGbaVrijeBerichtenDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaVrijeBerichtenDlqKanaal"/>
+    <bean name="brpGbaVrijeBerichtenAntwoordKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaVrijeBerichtenAntwoordKanaal"/>
+    <bean name="brpGbaVrijeBerichtenAntwoordDlqKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaVrijeBerichtenAntwoordDlqKanaal"/>
+
+    <!-- KANALEN: DUMP -->
+    <bean name="dumpIscKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.dump.DumpKanaal"/>
+
+    <!-- KANALEN: GBAV -->
+    <bean id="deleteInitVullingKanaal"
+          class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeleteInitVullingKanaal"/>
+    <bean id="deleteGbavKanaal"
+          class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeleteGbavKanaal"/>
+    <bean id="gbavPersoonKanaal"
+          class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.GbavPersoonKanaal"/>
+    <bean id="gbavAutorisatieKanaal"
+          class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.GbavAutorisatieKanaal"/>
+    <bean id="gbavAfnemersindicatieKanaal"
+          class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.GbavAfnemersindicatieKanaal"/>
+    <bean id="gbavBerichtKanaal"
+          class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.GbavBerichtKanaal"/>
+
+    <!-- KANALEN: SSH -->
+    <bean name="initNaarBrpSshKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.SshExecKanaal">
+        <property name="naam" value="initNaarBrpSsh"/>
+        <property name="host" value="${initNaarBrpSsh.host:localhost}"/>
+        <property name="username" value="${initNaarBrpSsh.username:jboss}"/>
+        <property name="password" value="${initNaarBrpSsh.password:secret}"/>
+    </bean>
+    <bean name="initNaarBrpScphKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.ScpKanaal">
+        <property name="naam" value="initNaarBrpScp"/>
+        <property name="host" value="${initNaarBrpSsh.host:localhost}"/>
+        <property name="username" value="${initNaarBrpSsh.username:jboss}"/>
+        <property name="password" value="${initNaarBrpSsh.password:secret}"/>
+    </bean>
+    <bean name="initNaarLo3SshKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.SshExecKanaal">
+        <property name="naam" value="initNaarLoSsh"/>
+        <property name="host" value="${initNaarLo3Ssh.host:localhost}"/>
+        <property name="username" value="${initNaarLo3Ssh.username:jboss}"/>
+        <property name="password" value="${initNaarLo3Ssh.password:secret}"/>
+    </bean>
+    <bean name="proefsyncSshKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.SshExecKanaal">
+        <property name="naam" value="proefsyncSsh"/>
+        <property name="host" value="${proefsyncSsh.host:localhost}"/>
+        <property name="username" value="${proefsyncSsh.username:jboss}"/>
+        <property name="password" value="${proefsyncSsh.password:secret}"/>
+    </bean>
+    <bean name="leveringsvergelijkingSshKanaal"
+          class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.SshExecKanaal">
+        <property name="naam" value="leveringsvergelijkingSsh"/>
+        <property name="host" value="${leveringsvergelijkingSsh.host:localhost}"/>
+        <property name="username" value="${leveringsvergelijkingSsh.username:jboss}"/>
+        <property name="password" value="${leveringsvergelijkingSsh.password:secret}"/>
+    </bean>
+
+    <!-- KANALEN: IV -->
+    <bean id="ivNaarVoiscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.IvNaarVoiscKanaal"/>
+
+    <!-- KANALEN: DOCKER -->
+    <bean name="dockerKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.DockerKanaal"/>
+
+    <!-- KANALEN: GBA WEBSERVICES -->
+    <bean name="vraagWsKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.gbaws.GbaWsKanaal">
+        <property name="kanaal" value="ws_gba_vraag"/>
+        <property name="url" value="${gba.webservice.baseurl:http://localhost:8080/bevraging-gba/}${gba.webservice.vraag:vraag}"/>
+    </bean>
+    <bean name="vraagPLWsKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.gbaws.GbaWsKanaal">
+        <property name="kanaal" value="ws_gba_vraagPL"/>
+        <property name="url" value="${gba.webservice.baseurl:http://localhost:8080/bevraging-gba/}${gba.webservice.vraagPL:vraagPL}"/>
+    </bean>
+
+    <context:property-placeholder location="datasource.properties"/>
+</beans>

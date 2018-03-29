@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="voiscInboundService" class="nl.bzk.migratiebrp.isc.runtime.service.ServiceImpl">
+        <constructor-arg index="0" value="VOISC"/>
+        <constructor-arg index="1">
+            <list>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.AuditInkomendAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.ParseBerichtAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.CorrelerenAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.ControleerMsSequenceNumberAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.VerwerkStatusReportAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.VerwerkDeliveryReportAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.VerwerkHerhalingAction">
+                    <property name="voiscOutboundService" ref="voiscOutboundService"/>
+                </bean>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.VerwerkInProcesAction"/>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="2" value="ISC_VOISC_VERWERKT"/>
+    </bean>
+
+    <bean id="voiscInboundListener" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${isc.voisc.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="concurrentConsumers" value="${isc.voisc.minconsumers:1}"/>
+        <property name="maxConcurrentConsumers" value="${isc.voisc.maxconsumers:10}"/>
+
+        <property name="connectionFactory" ref="iscJmsConnectionFactory"/>
+        <property name="transactionManager" ref="iscTransactionManager"/>
+        <property name="destination" ref="voiscOntvangstQueue"/>
+
+        <property name="messageListener">
+            <bean class="nl.bzk.migratiebrp.isc.runtime.handler.InboundMessageListener">
+                <property name="inboundService" ref="voiscInboundService"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="voiscOutboundService" class="nl.bzk.migratiebrp.isc.runtime.service.ServiceImpl">
+        <constructor-arg index="0" value="VOISC"/>
+        <constructor-arg index="1">
+            <list>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.AuditUitgaandAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.CorrelatieOpslaanAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.VerzendenAction">
+                    <property name="jmsTemplate" ref="voiscVerzendenJmsTemplate"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="2" value="ISC_VOISC_VERSTUURD"/>
+    </bean>
+
+</beans>

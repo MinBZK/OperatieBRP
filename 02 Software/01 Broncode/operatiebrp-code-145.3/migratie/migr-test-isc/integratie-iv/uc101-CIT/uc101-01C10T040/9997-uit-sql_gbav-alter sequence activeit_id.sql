@@ -1,0 +1,1 @@
+ALTER SEQUENCE activiteit_id_sequence RESTART WITH 1;

@@ -1,0 +1,52 @@
+=============================================================================
+Beknopte handleiding ISC database
+=============================================================================
+Precondities:
+- Postgres 9.x geinstalleerd
+
+-----------------------------------------------------------------------------
+Installatie 
+-----------------------------------------------------------------------------
+
+1. Download *.sql naar /tmp
+
+createVoa.sql
+insertMailboxen.sql
+
+2. Log in op server en wordt postgres
+
+sudo su - postgres
+
+3.  Configureer /etc/postgresql/9.1/main/pg_hba.conf
+(/var/lib/pgsql/data/pg_hba.conf)
+
+local all migratie md5
+host all migratie 0.0.0.0/0 md5
+
+4. Configureer /etc/postgresql/9.1/main/postgresql.conf
+
+listen_addresses = '*'
+max_connections = 300
+
+5. Restart postgres
+
+/etc/init.d/postgres-9.1 restart
+
+5. Start psql
+
+cd /tmp
+psql
+
+6. Maak de soa database
+
+CREATE ROLE migratie LOGIN ENCRYPTED PASSWORD 'M1gratie' SUPERUSER INHERIT NOCREATEDB NOCREATEROLE;
+CREATE DATABASE "voisc" WITH OWNER = migratie ENCODING = 'UTF8' TABLESPACE = pg_default TEMPLATE = template0 LC_COLLATE = 'POSIX' LC_CTYPE = 'POSIX' CONNECTION LIMIT = -1;
+
+7. Connect naar de soa database
+
+\c voisc
+
+8. Voer de eerste .sql bestanden uit
+
+\i createVoa.sql
+\i insertMailboxen.sql

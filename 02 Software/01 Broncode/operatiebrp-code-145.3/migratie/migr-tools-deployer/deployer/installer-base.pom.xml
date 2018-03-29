@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<groupId>nl.bzk.migratiebrp.isc.deploy</groupId>
+	<artifactId>migr-isc-deploy-installer-base</artifactId>
+	<name>Migr - ISC - Deploy - Installer (base)</name>
+	<version>1.0</version>
+	<packaging>pom</packaging>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.4.1</version>
+				<executions>
+					<execution>
+						<id>enforce-property</id>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+						<configuration>
+							<rules>
+								<requireProperty>
+									<property>test.server</property>
+									<message>You must set a test.server property!</message>
+								</requireProperty>
+								<requireProperty>
+									<property>test.type</property>
+									<message>You must set a test.type property!</message>
+								</requireProperty>
+							</rules>
+							<fail>true</fail>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>properties-maven-plugin</artifactId>
+				<version>1.0.0</version>
+				<executions>
+				   <execution>
+					  <phase>initialize</phase>
+					  <goals>
+						 <goal>read-project-properties</goal>
+					  </goals>
+					  <configuration>
+						 <files>
+							<file>testtype/${test.type}.properties</file>
+						 </files>
+					  </configuration>
+				   </execution>
+				</executions>
+			</plugin>
+		</plugins>
+			
+		<pluginManagement>
+            <plugins>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-invoker-plugin</artifactId>
+					<version>2.0.0</version>
+					<configuration>
+						<testPropertiesFile>testserver/${test.server}.properties</testPropertiesFile>
+						<goals>
+							<goal>-U install</goal>
+						</goals>
+						<debug>false</debug>
+						<encoding>UTF-8</encoding>
+						<streamLogs>true</streamLogs>
+						<suppressSummaries>true</suppressSummaries>
+						<!--
+						<disableReports>true</disableReports>
+						-->
+					</configuration>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+	</build>
+</project>

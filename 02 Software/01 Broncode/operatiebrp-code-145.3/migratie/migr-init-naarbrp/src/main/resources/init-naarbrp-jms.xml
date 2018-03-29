@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- Atomikos JTA-enabled ConnectionFactory, configured with the vendor's XA factory. -->
+    <bean name="queueConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean" init-method="init"
+          destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="initQueues"/>
+            </bean>
+        </property>
+        <property name="xaConnectionFactory" ref="initXaConnectionFactory"/>
+        <property name="minPoolSize" value="${init.queue.minpool:1}"/>
+        <property name="maxPoolSize" value="${init.queue.maxpool:20}"/>
+    </bean>
+
+    <!-- Hornet queue -->
+    <bean name="initXaConnectionFactory" class="org.hornetq.jms.client.HornetQXAConnectionFactory">
+        <constructor-arg value="false"/>
+        <constructor-arg>
+            <bean class="org.hornetq.api.core.TransportConfiguration">
+                <constructor-arg value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory"/>
+                <constructor-arg>
+                    <map key-type="java.lang.String" value-type="java.lang.Object">
+                        <entry key="host" value="${initQueue.host}"/>
+                        <entry key="port" value="${initQueue.port}"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+        <property name="connectionTTL" value="600000"/> <!-- TTL van de connectie -->
+        <property name="callTimeout" value="10000"/> <!-- Timeout voordat er een nieuwe poging wordt gedaan -->
+        <property name="retryInterval" value="1000"/> <!-- Standaard wachtperiode voor een retry -->
+        <property name="retryIntervalMultiplier" value="1.5"/> <!-- Multiplier voor de wachtperiode voor een retry -->
+        <property name="reconnectAttempts" value="100"/> <!-- Aantal reconnects -->
+        <property name="maxRetryInterval" value="60000"/> <!-- Maximale wachtperiode voor een retry -->
+        <property name="producerMaxRate" value="250"/> <!-- Maximaal 250 berichten/sec aanleveren -->
+        <property name="producerWindowSize" value="16777216"/> <!-- 16 MB -->
+    </bean>
+
+    <bean name="destination" class="org.hornetq.jms.client.HornetQQueue">
+        <constructor-arg value="${initQueue.name}"/>
+    </bean>
+
+    <!-- jmsTemplate -->
+    <bean name="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="queueConnectionFactory"/>
+        <property name="receiveTimeout" value="30000"/>
+        <property name="sessionTransacted" value="true"/>
+    </bean>
+</beans>

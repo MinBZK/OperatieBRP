@@ -1,0 +1,2 @@
+UPDATE autaut.his_toegangbijhautorisatie SET datingang = to_number((to_char(now() - interval '1 day', 'YYYYMMDD')),'99999999') WHERE toegangbijhautorisatie IN (SELECT tb.id FROM autaut.toegangbijhautorisatie tb JOIN autaut.bijhautorisatie b ON tb.bijhautorisatie = b.id WHERE b.naam = 'Integratietest Bijhoudingsautorisatie');
+UPDATE autaut.toegangbijhautorisatie SET datingang = to_number((to_char(now() - interval '1 day', 'YYYYMMDD')),'99999999') WHERE bijhautorisatie=(SELECT id FROM autaut.bijhautorisatie WHERE naam='Integratietest Bijhoudingsautorisatie');

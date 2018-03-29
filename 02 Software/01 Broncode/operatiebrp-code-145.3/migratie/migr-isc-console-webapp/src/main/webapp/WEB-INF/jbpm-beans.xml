@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+				           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <tx:annotation-driven/>
+    <context:property-placeholder location="classpath:console.properties"/>
+
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject">
+            <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+                <property name="targetClass" value="java.lang.System"/>
+                <property name="targetMethod" value="getProperties"/>
+            </bean>
+        </property>
+        <property name="targetMethod" value="putAll"/>
+        <property name="arguments">
+            <props>
+                <prop key="org.apache.el.parser.SKIP_IDENTIFIER_CHECK">true</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="iscDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init"
+          destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="iscDatabase"/>
+            </bean>
+        </property>
+        <property name="xaDataSourceClassName"
+                  value="${isc.database.driver:org.postgresql.xa.PGXADataSource}"/>
+        <property name="xaProperties">
+            <props>
+                <prop key="ServerName">${isc.database.host:localhost}</prop>
+                <prop key="PortNumber">${isc.database.port:5432}</prop>
+                <prop key="DatabaseName">${isc.database.name:isc}</prop>
+                <prop key="User">${isc.database.username:postgres}</prop>
+                <prop key="Password">${isc.database.password:postgres}</prop>
+            </props>
+        </property>
+        <property name="maxPoolSize" value="${isc.database.maxpool:20}"/>
+        <property name="minPoolSize" value="${isc.database.minpool:1}"/>
+        <property name="testQuery" value="select now()"/>
+    </bean>
+
+    <!-- Persistence -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="configLocation" value="classpath:isc-jbpm-algemeen-hibernate.cfg.xml"/>
+        <property name="dataSource" ref="iscDataSource"/>
+        <property name="jtaTransactionManager" ref="iscTransactionManager"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">
+                    ${jbpm.hibernate.dialect:org.hibernate.dialect.PostgreSQLDialect}
+                </prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+
+                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.cache.region.factory_class">
+                    org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory
+                </prop>
+                <prop key="net.sf.ehcache.configurationResourceName">isc-jbpm-algemeen-ehcache.xml
+                </prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- JBPM -->
+    <bean name="jbpmConfiguration"
+          class="nl.bzk.migratiebrp.isc.runtime.jbpm.configuration.JbpmConfigurationFactoryBean">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <import resource="classpath:isc-jbpm-command-client.xml"/>
+
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout">
+            <value>300</value>
+        </property>
+    </bean>
+
+    <bean id="iscTransactionManager"
+          class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager"/>
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction"/>
+        </property>
+    </bean>
+
+</beans>

@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
+    <appender name="BRP" class="org.apache.log4j.ConsoleAppender">
+        <param name="Threshold" value="INFO"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} [%t] %-2p (%C{2}:%-3L) %X{berichtId} %X{organisatieNaam} %X{refNr} %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="Syslog" class="org.apache.log4j.net.SyslogAppender">
+        <param name="SyslogHost" value="127.0.0.1" />
+        <param name="Facility" value="USER" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%-5p (%-18C{1}:%-3L) %X{administratieveHandeling} %X{abonnement} %X{afnemer} %m%n" />
+        </layout>
+    </appender>
+
+    <appender name="DASHBOARD" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="Append" value="true"/>
+        <param name="DatePattern" value="'.'yyyy-MM-dd" />
+        <param name="File" value="${catalina.base}/logs/dashboard.log"/>
+        <param name="Threshold" value="INFO"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} [%t] %-2p (%C{2}:%-3L) %X{administratieveHandeling} %X{abonnement} %X{afnemer} %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="FUNCTIONAL_FILE" class="org.apache.log4j.RollingFileAppender">
+        <param name="Append" value="true"/>
+        <param name="File" value="${catalina.base}/logs/levering-functioneel.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%d{dd MMM yyyy HH:mm:ss}[%t] %-5p (%C{5}:%-3L) %X{administratieveHandeling} %X{abonnement} %X{afnemer}%m%n"/>
+        </layout>
+    </appender>
+
+    <category name="FUNCTIONELE_LOG">
+        <priority value="INFO"/>
+        <appender-ref ref="FUNCTIONAL_FILE"/>
+    </category>
+
+    <category name="org.mortbay.jetty"/>
+    <category name="org.hibernate"/>
+    <category name="org.jboss"/>
+    <category name="org.springframework"/>
+
+    <category name="org.springframework.orm.jpa"/>
+
+
+    <logger name="nl.bzk.brp">
+        <level value="INFO"/>
+    </logger>
+
+
+    <logger name="nl.moderniseringgba.brp">
+        <level value="INFO"/>
+    </logger>
+
+    <logger name="org.apache.activemq">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.apache.camel">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.hibernate">
+        <level value="WARN"/>
+    </logger>
+
+    <logger name="org.hibernate.SQL">
+        <level value="WARN"/>
+    </logger>
+
+    <logger name="org.springframework">
+        <level value="WARN"/>
+    </logger>
+
+    <logger name="org.apache.activemq.store.jdbc">
+        <level value="ERROR"/>
+    </logger>
+
+    <root>
+        <priority value="INFO"/>
+        <appender-ref ref="BRP"/>
+    </root>
+
+</log4j:configuration>

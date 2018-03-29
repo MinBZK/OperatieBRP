@@ -1,0 +1,1 @@
+select 'x' from voisc.bericht where status = 'RECEIVED_FROM_ISC' having count(*) = 3;

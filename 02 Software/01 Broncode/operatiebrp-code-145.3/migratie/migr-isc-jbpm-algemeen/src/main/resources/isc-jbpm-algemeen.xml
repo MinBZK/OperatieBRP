@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <tx:annotation-driven/>
+
+    <context:property-placeholder/>
+
+    <!-- Persistence -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="configLocation" value="classpath:isc-jbpm-algemeen-hibernate.cfg.xml"/>
+        <property name="dataSource" ref="iscDataSource"/>
+        <property name="jtaTransactionManager" ref="iscTransactionManager"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">${jbpm.hibernate.dialect:org.hibernate.dialect.PostgreSQLDialect}</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+
+                <prop key="hibernate.jdbc.batch_size">30</prop>
+                <prop key="hibernate.jdbc.batch_versioned_data">true</prop>
+
+                <prop key="hibernate.cache.use_second_level_cache">true</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">isc-jbpm-algemeen-ehcache.xml</prop>
+            </props>
+        </property>
+    </bean>
+
+    <!-- JBPM -->
+    <bean name="jbpmConfiguration" class="nl.bzk.migratiebrp.isc.runtime.jbpm.configuration.JbpmConfigurationFactoryBean">
+        <property name="sessionFactory" ref="sessionFactory"/>
+        <property name="scheduler" ref="jbpmQuartzScheduler"/>
+    </bean>
+    <bean name="jbpmInvoker" class="nl.bzk.migratiebrp.isc.runtime.jbpm.JbpmInvokerImpl">
+        <property name="jbpmConfiguration" ref="jbpmConfiguration"/>
+    </bean>
+    <bean name="jbpmService" class="nl.bzk.migratiebrp.isc.runtime.jbpm.JbpmServiceImpl">
+        <property name="jbpmInvoker" ref="jbpmInvoker"/>
+    </bean>
+    <bean class="nl.bzk.migratiebrp.isc.runtime.jbpm.configuration.JbpmProcessInstallerLifecycle"/>
+
+    <!-- Algemene processen -->
+    <bean name="commonProcesses" class="nl.bzk.migratiebrp.isc.runtime.jbpm.configuration.JbpmProcessInstallerImpl">
+        <constructor-arg>
+            <list>
+                <value>/foutafhandeling/</value>
+                <value>/herhaal/</value>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- Scheduler -->
+    <bean name="jbpmQuartzScheduler" class="nl.bzk.migratiebrp.isc.runtime.jbpm.quartz.CustomSchedulerFactoryBean">
+        <property name="nonTransactionalDataSource" ref="iscNonTransactionalDataSource"/>
+        <property name="dataSource" ref="iscDataSource"/>
+        <!-- Transaction manager wordt alleen gebruikt als binnen deze factory bean ook jobs en triggers
+             worden toegevoegd aan de scheduler.
+        <property name="transactionManager" ref="iscTransactionManager" />
+         -->
+        <property name="quartzProperties">
+            <props>
+                <!-- MAIN -->
+                <prop key="org.quartz.scheduler.instanceName">JbpmScheduler</prop>
+                <prop key="org.quartz.scheduler.instanceId">${jbpm.scheduler.instanceid:AUTO}</prop>
+                <prop key="org.quartz.scheduler.idleWaitTime">${jbpm.scheduler.idlewaittime:15000}</prop>
+                <prop key="org.quartz.scheduler.wrapJobExecutionInUserTransaction">false</prop>
+                <prop key="org.quartz.scheduler.skipUpdateCheck">true</prop>
+                <!-- THREADS -->
+                <prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
+                <prop key="org.quartz.threadPool.threadCount">${jbpm.scheduler.threads:10}</prop>
+                <prop key="org.quartz.threadPool.threadPriority">5</prop>
+                <!-- RMI -->
+                <prop key="org.quartz.scheduler.rmi.export">false</prop>
+                <prop key="org.quartz.scheduler.rmi.proxy">false</prop>
+                <!-- JOBSTORE -->
+                <!-- wordt door spring gezet naar org.springframework.scheduling.quartz.LocalDataSourceJobStore maar wij
+                overriden deze naar CustomSchedulerFactoryBean -->
+                <prop key="org.quartz.jobStore.tablePrefix">QRTZ_</prop>
+                <prop key="org.quartz.jobStore.isClustered">true</prop>
+                <prop key="org.quartz.jobStore.driverDelegateClass">${jbpm.scheduler.driver:org.quartz.impl.jdbcjobstore.StdJDBCDelegate}</prop>
+            </props>
+        </property>
+        <property name="applicationContextSchedulerContextKey" value="applicationContext"/>
+        <property name="autoStartup" value="${jbpm.scheduler.autostart:true}"/>
+    </bean>
+    <bean class="nl.bzk.migratiebrp.isc.runtime.jbpm.job.ExecuteServiceImpl"/>
+
+</beans>

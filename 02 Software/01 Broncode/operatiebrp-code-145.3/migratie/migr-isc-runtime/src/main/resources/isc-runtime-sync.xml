@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="syncInboundService" class="nl.bzk.migratiebrp.isc.runtime.service.ServiceImpl">
+        <constructor-arg index="0" value="SYNC"/>
+        <constructor-arg index="1">
+            <list>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.AuditInkomendAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.ParseBerichtAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.CorrelerenAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.VerwerkInProcesAction"/>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="2" value="ISC_SYNC_VERWERKT"/>
+    </bean>
+
+    <bean id="syncInboundListener" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${isc.sync.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="concurrentConsumers" value="${isc.sync.minconsumers:1}"/>
+        <property name="maxConcurrentConsumers" value="${isc.sync.maxconsumers:10}"/>
+
+        <property name="connectionFactory" ref="iscJmsConnectionFactory"/>
+        <property name="transactionManager" ref="iscTransactionManager"/>
+        <property name="destination" ref="syncAntwoordQueue"/>
+
+        <property name="messageListener">
+            <bean class="nl.bzk.migratiebrp.isc.runtime.handler.InboundMessageListener">
+                <property name="inboundService" ref="syncInboundService"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="syncOutboundService" class="nl.bzk.migratiebrp.isc.runtime.service.ServiceImpl">
+        <constructor-arg index="0" value="SYNC"/>
+        <constructor-arg index="1">
+            <list>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.AuditUitgaandAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.CorrelatieOpslaanAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.VerzendenAction">
+                    <property name="jmsTemplate" ref="syncVerzoekJmsTemplate"/>
+                </bean>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="2" value="ISC_SYNC_VERSTUURD"/>
+    </bean>
+
+</beans>

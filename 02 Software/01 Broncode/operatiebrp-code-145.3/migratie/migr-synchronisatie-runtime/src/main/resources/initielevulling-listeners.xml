@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="maxConcurrentConsumers" value="${jms.maxConcurrentConsumers:1}"/>
+
+        <property name="connectionFactory" ref="queueConnectionFactory"/>
+        <property name="destination" ref="queueSyncVerzoek"/>
+
+        <property name="messageListener" ref="syncMessageHandler"/>
+    </bean>
+
+    <bean name="syncMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.SynchronisatieMessageHandler">
+        <property name="syncBerichtServices">
+            <list>
+                <ref bean="synchroniseerNaarBrpService"/>
+                <ref bean="leesUitBrpService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.AfnemersindicatieService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.AutorisatieService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.ProtocolleringService"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Synchroniseer naar BRP Service -->
+    <bean name="synchroniseerNaarBrpService"
+          class="nl.bzk.migratiebrp.synchronisatie.runtime.service.SynchroniseerNaarBrpService"/>
+    <context:component-scan base-package="nl.bzk.migratiebrp.synchronisatie.runtime.service.synchronisatie"/>
+
+    <bean name="leesUitBrpService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.LeesUitBrpService"/>
+</beans>

@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+    >
+<ui:composition template="t_loggedin.xhtml">
+
+<ui:define name="actions">
+    <ga:responseActions>
+        <ga:parameter name="view" target="#{viewMode}" default="none"/>
+        <ga:parameter name="gemeente" target="#{lq01_gemeente}" />
+        <ga:parameter name="anummer" target="#{lq01_anummer}" />
+    </ga:responseActions>
+</ui:define>
+
+<ui:define name="menu">
+<gs:div style="padding:0;margin:0">
+    <table class="leftmenu">
+        <tbody>
+            <tr class="leftmenuheader">
+                <th colspan="2">#{msgs['actions.actions']}</th>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <gs:ul>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'lq01' ? 'font-weight:bold' : ''}">
+                                <f:param name="view" value="lq01"/>
+                                #{msgs['actions.lq01']}
+                            </h:outputLink>
+                        </gs:li>
+                    </gs:ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</gs:div>
+</ui:define>
+
+<ui:define name="body">
+    <gs:div>
+        <ga:attribute name="rendered" value="#{viewMode == 'none'}"/>
+        <h:form id="none">
+            &nbsp;
+        </h:form>
+
+    </gs:div>
+
+    <gs:div>
+        <ga:attribute name="rendered" value="#{viewMode == 'lq01'}"/>
+        <h:form id="lq01" enctype="multipart/form-data">
+            <table class="results">
+                <h:inputHidden id="lq01_viewMode" value="#{viewMode}" />
+                <thead>
+                    <tr>
+                        <th colspan="2">#{msgs['actions.lq01.heading']}</th>
+                    </tr>
+                </thead>
+                <tbody class="results">
+                    <tr>
+                        <th>#{msgs['actions.lq01.gemeente']}</th>
+                        <td>
+                            <h:inputText id="lq01_gemeente" value="#{lq01_gemeente}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>#{msgs['actions.lq01.anummer']}</th>
+                        <td>
+                            <h:inputText id="lq01_anummer"  value="#{lq01_anummer}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>#{msgs['actions.lq01.of']}</th>
+                        <td>&nbsp;
+                        </td>
+                    </tr>
+                    <tr>
+                        <th>#{msgs['actions.lq01.bulkbestand']}</th>
+                        <td>
+                            <gd:inputFile target="#{lq_bulk}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <th/>
+                        <td style="text-align:right;">
+                            <h:commandButton value="#{msgs['actions.lq01.button']}">
+                                <mig:synchronisatievraag gemeente="#{lq01_gemeente}" aNummer="#{lq01_anummer}" bulkBestand="#{lq_bulk}" target="#{processInstanceId}"/>
+                                <n:nav outcome="success" url="procins.jsf?id=#{processInstanceId}" storeMessages="true"/>
+                                <n:nav outcome="error" url="actions.jsf?view=#{viewMode}&amp;gemeente=#{lq01_gemeente}&amp;anummer=#{lq01_anummer}" storeMessages="true"/>
+                            </h:commandButton>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </h:form>
+    </gs:div>
+</ui:define>
+
+</ui:composition>
+
+</html>

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd">
+
+    <bean id="routeringJmx" class= "nl.bzk.migratiebrp.routering.runtime.JmxImpl" />
+
+    <bean id="routeringMBeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
+        <!-- Use only PlatformMBeamServer -->
+        <property name="agentId" value=""/>
+    </bean>
+
+    <bean id="routeringServerConnectorSsl" class="org.springframework.jmx.support.ConnectorServerFactoryBean">
+        <property name="serviceUrl" value="service:jmx:simple://0.0.0.0:${routering.jmx.serialize.port:3481}"/>
+        <property name="environmentMap">
+            <map>
+                <entry key="jmx.remote.authenticator">
+                    <bean class="nl.bzk.algemeenbrp.util.jmx.authenticator.PropertiesAuthenticator">
+                        <constructor-arg>
+                            <props>
+                                <prop key="admin">admin</prop>
+                            </props>
+                        </constructor-arg>
+                    </bean>
+                </entry>
+                <entry key="jmx.remote.accesscontroller">
+                    <bean class="nl.bzk.algemeenbrp.util.jmx.access.AllAccessController"/>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="routeringMBeanExporter" class="org.springframework.jmx.export.MBeanExporter" lazy-init="false">
+        <property name="assembler" ref="routeringMBeanAssembler" />
+        <property name="server" ref="routeringMBeanServer" />
+        <property name="namingStrategy" ref="routeringNamingStrategy" />
+        <property name="autodetect" value="true" />
+    </bean>
+
+    <bean id="routeringJmsAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+    <bean id="routeringMBeanAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+        <property name="attributeSource" ref="routeringJmsAttributeSource"/>
+    </bean>
+    <bean id="routeringNamingStrategy" class="nl.bzk.migratiebrp.util.common.jmx.DynamicDomainNamingStrategy">
+        <property name="delegate">
+            <bean class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+                <property name="attributeSource" ref="routeringJmsAttributeSource"/>
+            </bean>
+        </property>
+        <property name="domain" value="nl.bzk.migratiebrp.routering"/>
+    </bean>
+
+</beans>

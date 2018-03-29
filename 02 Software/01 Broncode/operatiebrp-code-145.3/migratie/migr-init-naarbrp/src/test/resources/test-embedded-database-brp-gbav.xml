@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <jdbc:embedded-database id="init-runtime-datasource" type="HSQL"/>
+
+	<!--  Deze datasource gebruiken ipv de bovenstaande als je op een lokale postgres wil testen
+    <bean id="init-runtime-datasource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean" >
+        <property name="uniqueResourceName">
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName">
+                <property name="baseName" value="initDatabase"/>
+            </bean>
+        </property>
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="url" value="jdbc:postgresql://localhost:5832/gbav"/>
+
+        <property name="user" value="migratie"/>
+        <property name="password" value="M1gratie"/>
+
+        <property name="minPoolSize" value="1"/>
+        <property name="maxPoolSize" value="20"/>
+    </bean>
+    -->
+
+
+    <jdbc:initialize-database data-source="init-runtime-datasource" ignore-failures="ALL">
+        <jdbc:script location="classpath:sql/postgres.sql"/>
+        <jdbc:script location="classpath:sql/drop_lo3.sql"/>
+    </jdbc:initialize-database>
+
+
+    <bean name="gbavInitializer" class="org.springframework.jdbc.datasource.init.DataSourceInitializer">
+    	<property name="dataSource" ref="init-runtime-datasource" />
+    	<property name="databasePopulator">
+    		<bean class="org.springframework.jdbc.datasource.init.ResourceDatabasePopulator">
+    			<property name="sqlScriptEncoding" value="UTF-8" />
+    			<property name="scripts">
+    				<list>
+        				<value>classpath:sql/create_lo3.sql</value>
+			        	<bean class="nl.bzk.migratiebrp.init.naarbrp.util.HsqlSqlAdapter">
+			        		<property name="sqlResource" value="classpath:sql/createInitVullingTables.sql" />
+			        	</bean>
+				        <!-- Deze hieronder uitzetten als je op een lokale postgres wil testen -->
+			        	<value>classpath:bmr/HSQLDB/HSQLDB.sql</value>
+				        <value>classpath:bmr/HSQLDB/PENDING_BMR_CHANGES.sql</value>
+				        <value>classpath:sql/clear_brp_data.sql</value>
+    				</list>
+    			</property>
+    		</bean>
+    	</property>
+    </bean>
+
+    <context:component-scan base-package="nl.bzk.migratiebrp.init.naarbrp.util"/>
+
+	<bean id="initRuntimeTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="init-runtime-datasource"/>
+	</bean>
+</beans>

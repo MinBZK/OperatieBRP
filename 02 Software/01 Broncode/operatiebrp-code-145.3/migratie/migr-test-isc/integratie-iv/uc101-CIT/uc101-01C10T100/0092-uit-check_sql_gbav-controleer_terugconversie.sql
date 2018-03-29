@@ -1,0 +1,1 @@
+select inhoud_na_terugconversie from initvul.initvullingresult where anummer = '5291659297';

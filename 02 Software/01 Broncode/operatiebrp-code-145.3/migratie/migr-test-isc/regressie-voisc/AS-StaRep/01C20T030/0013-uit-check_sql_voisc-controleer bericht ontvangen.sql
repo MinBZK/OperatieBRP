@@ -1,0 +1,1 @@
+select count(*) from voisc.bericht where status = 'RECEIVED_FROM_ISC' having count(*) = 0;

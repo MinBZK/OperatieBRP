@@ -1,0 +1,1 @@
+select berichttype, count(*) as aantal from initvul.initvullingresult group by berichttype;

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="notificatieInboundService" class="nl.bzk.migratiebrp.isc.runtime.service.ServiceImpl">
+        <constructor-arg index="0" value="NOTIFICATIE"/>
+        <constructor-arg index="1">
+            <list>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.AuditInkomendAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.ParseBerichtAction"/>
+                <bean class="nl.bzk.migratiebrp.isc.runtime.service.VerwerkInProcesAction"/>
+            </list>
+        </constructor-arg>
+        <constructor-arg index="2" value="ISC_NOTIFICATIE_VERWERKT"/>
+    </bean>
+
+    <bean id="notificatieInboundListener" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${isc.notificatie.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="concurrentConsumers" value="${isc.notificatie.minconsumers:1}"/>
+        <property name="maxConcurrentConsumers" value="${isc.notificatie.maxconsumers:30}"/>
+
+        <property name="connectionFactory" ref="iscJmsConnectionFactory"/>
+        <property name="transactionManager" ref="iscTransactionManager"/>
+        <property name="destination" ref="notificatieQueue"/>
+
+        <property name="messageListener">
+            <bean class="nl.bzk.migratiebrp.isc.runtime.handler.InboundMessageListener">
+                <property name="inboundService" ref="notificatieInboundService"/>
+            </bean>
+        </property>
+    </bean>
+</beans>

@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+>
+<ui:composition template="t_loggedin.xhtml">
+
+    <ui:define name="actions">
+        <ga:responseActions>
+            <ga:parameter name="id" target="#{id}" required="true">
+                <f:validateLongRange minimum="0"/>
+                <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+            </ga:parameter>
+            <mig:loadBericht id="#{id}" target="#{bericht}"/>
+            <mig:prettyPrintBericht bericht="#{bericht}" target="#{berichtHtml}"/>
+        </ga:responseActions>
+    </ui:define>
+
+    <ui:define name="menu">
+        <gs:div style="padding:0;margin:0">
+            <table class="leftmenu">
+                <tbody>
+                <tr class="leftmenuheader">
+                    <th colspan="2">#{msgs['bericht.summary']}</th>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.id']}</th>
+                    <td>
+                        <h:outputText value="ID #{id}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.tijdstip']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.tijdstip}">
+                            <f:convertDateTime pattern="#{msgs['format.tijdstempel']}"
+                                               timeZone="Europe/Amsterdam"/>
+                        </h:outputText>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.kanaal']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.kanaal}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.richting']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.richting}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.bron']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.bronPartijCode}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.doel']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.doelPartijCode}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.type']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.naam}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.messageid']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.messageId}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.correlationid']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.correlationId}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.mssequencenumber']}</th>
+                    <td>
+                        <h:outputText value="#{bericht.msSequenceNumber}"/>
+                    </td>
+                </tr>
+                <tr class="leftmenu">
+                    <th>#{msgs['bericht.heading.processInstanceId']}</th>
+                    <td>
+                        <h:outputLink style="font-weight:bold" value="procins.jsf">
+                            <f:param name="id" value="#{bericht.processInstanceId}"/>
+                            <h:outputText value="ID #{bericht.processInstanceId}"/>
+                        </h:outputLink>
+                    </td>
+                </tr>
+                <tr class="leftmenuheader">
+                    <th colspan="2" class="nf">#{msgs['menu.actions']}</th>
+                </tr>
+                </tbody>
+            </table>
+
+        </gs:div>
+    </ui:define>
+
+    <ui:define name="body">
+        <style>
+            textarea.pretty-xml {
+                width: 99%;
+            }
+
+            .popup {
+                overflow: scroll;
+            }
+
+            .ui-dialog {
+                background: white;
+                border: 1px solid black;
+                padding: 3px;
+            }
+
+            .ui-dialog-titlebar {
+                padding: 3px;
+                background-color: #900;
+                color: #FF9;
+                font-size: 12px;
+                font-weight: bold;
+            }
+
+            .dataform {
+                width: 100%;
+                margin-left: 16px;
+            }
+
+            a.foldToggle {
+                text-decoration: none;
+                margin-right: 8px;
+            }
+
+            a.foldToggle span {
+                display: none;
+            }
+
+            a.foldToggle.folded {
+                display: inline-block;
+                background-color: white;
+                background-image: url(../images/icons.png);
+                background-position: left -37px;
+                background-repeat: no-repeat;
+                height: 11px;
+                width: 11px;
+            }
+
+            a.foldToggle.unfolded {
+                display: inline-block;
+                background-color: white;
+                background-image: url(../images/icons.png);
+                background-repeat: no-repeat;
+                height: 11px;
+                width: 11px;
+            }
+
+            tr.folded {
+                display: none;
+            }
+
+
+        </style>
+
+        <h:outputText escape="false" value="#{berichtHtml}"/>
+
+        <script type="text/javascript">// <![CDATA[
+        var toggleFold = function (categorie) {
+            var $toggle = $("tr.categorie." + categorie + " th a.foldToggle");
+            if ($toggle.hasClass("unfolded")) {
+                $("tr.element." + categorie).removeClass("unfolded").addClass("folded");
+                $toggle.removeClass("unfolded").addClass("folded");
+            } else {
+                $("tr.element." + categorie).removeClass("folded").addClass("unfolded");
+                $toggle.removeClass("folded").addClass("unfolded");
+            }
+        };
+
+        $(document).ready(function () {
+            $(".popup").dialog({autoOpen: false, modal: true, width: 800, height: 600});
+            $(".tab-container").tabs();
+        });
+        // ]]></script>
+    </ui:define>
+
+
+</ui:composition>
+
+</html>

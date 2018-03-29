@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+       http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache-4.2.xsd">
+
+    <!-- Properties -->
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <bean id="syncDalEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="BrpEntities"/>
+        <property name="dataSource" ref="syncDalDataSource"/>
+        <property name="jpaVendorAdapter" ref="syncDalJpaVendorAdapter"/>
+        <property name="jpaProperties">
+            <props>
+                <!-- JTA -->
+                <prop key="hibernate.transaction.manager_lookup_class">
+                    com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup
+                </prop>
+                <prop key="hibernate.transaction.jta.platform">
+                    nl.bzk.algemeenbrp.jta.AtomikosJtaPlatform
+                </prop>
+
+                <!-- Cache -->
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <!--
+                <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">conversietabel-ehcache.xml</prop>
+                -->
+
+                <!-- Logging -->
+                <prop key="hibernate.generate_statistics">${synchronisatie.dal.hibernate.statistics:false}</prop>
+                <prop key="hibernate.use_sql_comments">false</prop>
+                <prop key="hibernate.format_sql">false</prop>
+
+                <!-- JDBC -->
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+
+                <!--  Batching -->
+                <prop key="hibernate.jdbc.fetch_size">100</prop>
+                <prop key="hibernate.jdbc.batch_size">30</prop>
+
+                <!-- Connection -->
+                <prop key="hibernate.connection.release_mode">after_transaction</prop>
+            </props>
+        </property>
+    </bean>
+
+    <cache:annotation-driven/>
+
+    <!-- the cache -->
+    <bean id="cacheManager"
+          class="org.springframework.cache.ehcache.EhCacheCacheManager"
+          p:cacheManager-ref="conversietabelEhCache"/>
+
+    <!-- Ehcache library setup -->
+    <bean id="conversietabelEhCache"
+          class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+          p:configLocation="conversietabel-ehcache.xml"
+          p:shared="true"/>
+</beans>

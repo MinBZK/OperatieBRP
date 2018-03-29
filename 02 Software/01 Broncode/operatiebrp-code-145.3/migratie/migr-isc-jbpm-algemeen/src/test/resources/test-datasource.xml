@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="jbpm.hibernate.dialect">nl.bzk.migratiebrp.isc.jbpm.hibernate.HSQLJbpmDialect</prop>
+			</props>
+		</property>
+	</bean>
+
+    <bean name="iscDataSource,iscNonTransactionalDataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.algemeenbrp.jta.util.UniqueName" >
+            	<property name="baseName" value="iscDatabase" />
+            </bean>
+        </property>
+		<property name="url" value="jdbc:hsqldb:mem:isc" />
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<!-- 
+        <property name="url" value="jdbc:h2:mem:isc;DB_CLOSE_DELAY=-1"/>
+        <property name="driverClassName" value="org.h2.Driver"/>
+        -->
+        <property name="user" value="sa"/>
+        <property name="password" value="" />
+        <property name="maxPoolSize" value="20" />
+        <property name="minPoolSize" value="1"/>
+    </bean>
+
+    <jdbc:initialize-database ignore-failures="ALL" data-source="iscDataSource">
+        <jdbc:script location="classpath:sql/mig-drop.sql"  />
+        <jdbc:script location="classpath:sql/jbpm-drop.sql"  />
+        <jdbc:script location="classpath:sql/qrtz-drop.sql"  />
+        <jdbc:script location="classpath:sql/hsqldb4postgres.sql"  />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="iscDataSource">
+        <jdbc:script location="classpath:sql/jbpm-create.sql" />
+        <jdbc:script location="classpath:sql/mig-create.sql" />
+        <jdbc:script location="classpath:sql/mig-data.sql" />
+        <jdbc:script location="classpath:sql/qrtz-create.sql" />
+    </jdbc:initialize-database>
+
+
+</beans>

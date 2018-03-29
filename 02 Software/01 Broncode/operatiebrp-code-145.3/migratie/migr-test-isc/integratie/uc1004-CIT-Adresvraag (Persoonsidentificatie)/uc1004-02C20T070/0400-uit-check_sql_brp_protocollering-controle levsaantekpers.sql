@@ -1,0 +1,1 @@
+select levsaantek, tsklaarzettenlev, pers,dataanvmaterieleperiode,tslaatstewijzpers from prot.levsaantekpers where pers = $$persoonid$$;

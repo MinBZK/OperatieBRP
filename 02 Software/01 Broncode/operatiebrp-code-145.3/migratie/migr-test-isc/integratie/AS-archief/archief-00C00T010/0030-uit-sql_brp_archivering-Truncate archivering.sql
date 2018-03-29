@@ -1,0 +1,1 @@
+truncate ber.ber cascade;

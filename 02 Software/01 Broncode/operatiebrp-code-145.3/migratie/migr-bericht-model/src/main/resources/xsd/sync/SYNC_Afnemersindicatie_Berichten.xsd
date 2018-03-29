@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+        targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified"
+        attributeFormDefault="unqualified"
+        version="000101">
+
+    <include schemaLocation="SYNC_Objecttypen.xsd"/>
+
+    <!--
+     | Berichten die te maken hebben met de initiele vulling van afnemersindicaties.
+     +-->
+    <element name="afnemersindicaties" type="sync:AfnemersindicatiesType"/>
+    <element name="afnemersindicatiesAntwoord" type="sync:AfnemersindicatiesAntwoordType"/>
+
+    <!--
+     | Berichten die te maken hebben met plaatsen en verwijderen van afnemersindicaties (door afnemers).
+     +-->
+    <element name="plaatsAfnemersindicatieVerzoek" type="sync:PlaatsAfnemersindicatieVerzoekType"/>
+    <element name="verwijderAfnemersindicatieVerzoek"
+             type="sync:VerwerkAfnemersindicatieVerzoekType"/>
+    <element name="verwerkAfnemersindicatieAntwoord"
+             type="sync:VerwerkAfnemersindicatieAntwoordType"/>
+
+    <!-- Initiele vulling afnemersindicatie-->
+
+    <complexType name="AfnemersindicatiesType">
+        <sequence>
+            <!-- PL_ID vertaald naar a-nummer -->
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"
+                     nillable="false"/>
+            <element name="afnemersindicatie" type="sync:AfnemersindicatieRecordType" minOccurs="1"
+                     maxOccurs="unbounded" nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="AfnemersindicatieRecordType">
+        <sequence>
+            <element name="stapelNummer" type="sync:LogLo3StapelType" minOccurs="1" maxOccurs="1"
+                     nillable="false"/>
+            <element name="volgNummer" type="sync:LogLo3VoorkomenType" minOccurs="1" maxOccurs="1"
+                     nillable="false"/>
+            <element name="afnemerCode" type="sync:AfnemerCodeType" minOccurs="0" maxOccurs="1"
+                     nillable="false"/>
+            <element name="geldigheidStartDatum" type="sync:DatumType" minOccurs="0" maxOccurs="1"
+                     nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="AfnemersindicatiesAntwoordType">
+        <sequence>
+            <element name="afnemersindicatie" type="sync:AfnemersindicatieAntwoordRecordType"
+                     minOccurs="1" maxOccurs="unbounded" nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="AfnemersindicatieAntwoordRecordType">
+        <sequence>
+            <element name="stapelNummer" type="sync:LogLo3StapelType" minOccurs="1" maxOccurs="1"
+                     nillable="false"/>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Toegevoegd">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de stapel is toegevoegd als afnemer
+                                    indicatie in de BRP database.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Fout">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de stapel niet is verwerkt in de BRP
+                                    database.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1"
+                     nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="PlaatsAfnemersindicatieVerzoekType">
+        <complexContent>
+            <extension base="sync:VerwerkAfnemersindicatieVerzoekType">
+                <sequence>
+                    <element name="referentie" type="sync:ReferentieType" minOccurs="1"
+                             maxOccurs="1"/>
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+
+    <complexType name="VerwerkAfnemersindicatieVerzoekType">
+        <sequence>
+            <!-- Persoon identificatie -->
+            <element name="bsn" type="sync:BsnType" minOccurs="1" maxOccurs="1"/>
+            <!-- Partij identificatie -->
+            <element name="partijCode" type="sync:PartijcodeType" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="VerwerkAfnemersindicatieAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Ok">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de afnemersindicatie succesvol is
+                                    geplaatst.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                        <enumeration value="Fout">
+                            <annotation>
+                                <documentation>
+                                    Dit resultaat geeft aan dat de afnemersindicatie niet geplaatst
+                                    is.
+                                </documentation>
+                            </annotation>
+                        </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="foutcode" type="sync:AfnemersindicatieFoutcodeType" minOccurs="0"
+                     maxOccurs="1"
+                     nillable="false"/>
+        </sequence>
+    </complexType>
+
+</schema>

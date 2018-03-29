@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="brpVrijBerichtGbaJmxConnectorCredentials" class="nl.bzk.algemeenbrp.util.jmx.client.CredentialsFactory">
+		<property name="username" value="${brp.vrijbericht-gba.jmx.service.username:admin}" />
+		<property name="password" value="${brp.vrijbericht-gba.jmx.service.password:admin}" />
+	</bean>
+
+    <bean id="brpVrijBerichtGbaJmxConnector" class="org.springframework.jmx.support.MBeanServerConnectionFactoryBean">
+    	<property name="environment">
+			<map>
+				<entry key="jmx.remote.credentials" value-ref="brpVrijBerichtGbaJmxConnectorCredentials" />
+				<entry key="jmx.remote.requesttimeout" value="60" />
+			</map>
+    	</property>
+        <property name="serviceUrl" value="service:jmx:simple://${brp.vrijbericht-gba.jmx.service.host:localhost}:${brp.vrijbericht-gba.jmx.service.port:3481}"/>
+    </bean>
+</beans>

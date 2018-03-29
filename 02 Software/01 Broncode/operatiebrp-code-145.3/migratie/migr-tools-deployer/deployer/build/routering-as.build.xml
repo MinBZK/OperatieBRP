@@ -1,0 +1,188 @@
+<project name="Routering" basedir="." default="fail">
+
+    <!--
+     | Algemene properties
+     |
+     | server.host
+     | server.host.node1
+     | server.host.node2
+     | server.username
+     | server.password
+     |
+     | File properties
+     |
+     | application.source
+     | application.file
+     |
+     | Routering properties
+     |
+     | activemq.database.host
+     | activemq.database.port
+     | activemq.database.name
+     | activemq.database.username
+     | activemq.database.password
+     | activemq.url
+     |
+     | JMX properties
+     |
+     | routering.jmx.serialize.port
+     |
+    -->
+
+    <property name="application.directory" value="routering" />
+
+    <target name="checkProperties">
+        <fail unless="server.host" message="server.host property is verplicht." />
+        <fail unless="server.username" message="server.username property is verplicht." />
+        <fail unless="server.password" message="server.password property is verplicht." />
+    </target>
+
+    <target name="checkInstallProperties" depends="checkProperties">
+        <!-- Check file settings -->
+        <fail unless="application.bin.source" message="application.bin.source property is verplicht bij het installeren." />
+        <fail unless="application.bin.file" message="application.bin.file property is verplicht bij het installeren." />
+
+        <!-- Check file(s) exist -->
+        <fail message="${application.bin.source}/${application.bin.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+            <condition>
+                <not>
+                    <resourcecount count="1" >
+                        <fileset dir="${application.bin.source}">
+                            <include name="${application.bin.file}" />
+                        </fileset>
+                    </resourcecount>
+                </not>
+            </condition>
+        </fail>
+
+        <!-- Check configuration settings -->
+        <fail unless="activemq.database.host" message="activemq.database.host property is verplicht." />
+        <fail unless="activemq.database.port" message="activemq.database.port property is verplicht." />
+        <fail unless="activemq.database.name" message="activemq.database.name property is verplicht." />
+        <fail unless="activemq.database.username" message="activemq.database.username property is verplicht." />
+        <fail unless="activemq.database.password" message="activemq.database.password property is verplicht." />
+        <fail unless="activemq.url" message="activemq.url property is verplicht." />
+        <fail unless="routering.jmx.serialize.port" message="routering.jmx.serialize.port property is verplicht." />
+
+    </target>
+
+    <target name="install" depends="checkInstallProperties,createLocalConfigurationFiles">
+        <echo message="Installing ${ant.project.name} ..." />
+
+        <echo message="Setup temporary directory" />
+        <sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+                 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+
+        <echo message="Copy ${application.bin.file}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+            <fileset dir="${application.bin.source}">
+                <include name="${application.bin.file}" />
+            </fileset>
+        </scp>
+
+        <echo message="Unpacking ${ant.project.name}" />
+        <sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+                 command="cd ~; mkdir ${application.directory}; cd ${application.directory}; unzip -o -q /tmp/${application.directory}/${application.bin.file} -d ." />
+
+        <echo message="Remove default configuration" />
+        <sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+                 command="cd ~; cd ${application.directory}/conf; rm routering-runtime.properties; rm log4j2.xml" />
+
+        <echo message="Making scripts executable" />
+        <sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+                 command="chmod u+x ~/${application.directory}/*.sh" />
+
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf" trust="true" >
+            <fileset dir="tmp">
+                <include name="routering-runtime.properties" />
+            </fileset>
+        </scp>
+
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf/" trust="true" >
+            <fileset dir="deps/algemeen">
+                <include name="log4j2.xml" />
+            </fileset>
+        </scp>
+
+        <echo message="Succesfully installed ${ant.project.name}" />
+    </target>
+
+
+
+    <target name="createLocalConfigurationFiles" depends="checkInstallProperties">
+        <echo message="Creating configuration files for ${ant.project.name} ..." />
+        <delete dir="tmp" />
+        <mkdir dir="tmp" />
+
+        <echo file="tmp/routering-runtime.properties"># DATABASE
+routering.database.driver=org.postgresql.Driver
+routering.database.url=jdbc:postgresql://${activemq.database.host}:${activemq.database.port}/${activemq.database.name}
+routering.database.username=${activemq.database.username}
+routering.database.password=${activemq.database.password}
+routering.database.minpool=1
+routering.database.maxpool=20
+
+# ACTIVEMQ
+routering.activemq.url=${activemq.url}
+routering.activemq.data.directory=work/activemq-data
+routering.activemq.kahadb.directory=work/activemq-kahadb
+routering.activemq.scheduler.directory=work/activemq-scheduler
+routering.activemq.memory.usage=64 mb
+routering.activemq.store.usage=0
+routering.activemq.temp.usage=0
+
+routering.queue.sync.verzoek=sync.verzoek
+routering.queue.sync.antwoord=sync.antwoord
+routering.queue.voisc.ontvangst=voisc.ontvangst
+routering.queue.voisc.verzenden=voisc.verzenden
+routering.queue.levering=levering
+routering.queue.gemeente.verzoek=gemeente.verzoek
+routering.topic.gemeente.register=gemeente.register
+routering.queue.afnemer.verzoek=afnemer.verzoek
+routering.topic.afnemer.register=afnemer.register
+
+# JMX
+routering.jmx.serialize.port=${routering.jmx.serialize.port}
+routering.rmi.registry=${routering.jmx.register}
+        </echo>
+    </target>
+
+    <target name="deinstall" depends="checkProperties">
+        <echo message="Removing ${ant.project.name}  ..." />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+                 command="cd ~; rm -Rf ${application.directory}" />
+
+        <echo message="Succesfully removed ${ant.project.name}" />
+    </target>
+
+    <target name="start" depends="checkProperties">
+        <echo message="Starting ${ant.project.name}" />
+        <sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+                 command="cd ~; cd ${application.directory}; ./runRoutering.sh > output.txt &amp;" />
+
+        <java classname="nl.bzk.migratiebrp.tools.controle.waiter.RouteringInitializationWaiter" failonerror="true">
+            <arg line="${waiter.arguments}"/>
+            <sysproperty key="jmx.service.url" value="service:jmx:simple://${server.host}:${routering.jmx.serialize.port}"/>
+            <sysproperty key="jmx.service.username" value="admin"/>
+            <sysproperty key="jmx.service.password" value="admin"/>
+        </java>
+
+        <echo message="Succesfully started ${ant.project.name}" />
+    </target>
+
+    <target name="stop" depends="checkProperties">
+        <echo message="Stopping ${ant.project.name} (and sleeping 15s)" />
+        <sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true" failonerror="false"
+                 command="cd ~; cd ${application.directory}; ./stopRoutering.sh ; sleep 15s; tail -n 100 ../output.txt" />
+
+        <echo message="Succesfully stopped ${ant.project.name}" />
+    </target>
+
+    <target name="clean" depends="checkProperties">
+    </target>
+
+    <target name="fail">
+        <fail message="Call with valid task" />
+    </target>
+
+</project>

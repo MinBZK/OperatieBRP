@@ -1,0 +1,2 @@
+SELECT id, dienstbundel, srt, effectafnemerindicaties, datingang, dateinde, indblok, indag, attenderingscriterium, indagattendering, maxaantalzoekresultaten, indagzoeken, srtsel, eersteseldat, selinterval, eenheidselinterval, nadereselcriterium, selpeilmommaterieelresultaat, selpeilmomformeelresultaat, historievormsel, indselresultaatcontroleren, maxaantalpersperselbestand, maxgrootteselbestand, indverzvolberbijwijzafninase, leverwijzesel, indagsel
+	FROM autaut.dienst ORDER BY id;
