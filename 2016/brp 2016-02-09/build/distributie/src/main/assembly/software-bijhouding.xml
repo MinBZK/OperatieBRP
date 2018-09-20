@@ -1,0 +1,84 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="
+            http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
+            http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>software-bijhouding</id>
+    <formats>
+        <format>zip</format>
+        <format>dir</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+
+    <fileSets>
+        <!-- De certificaten scripts worden tijdelijk nog niet meegenomen in de ZIP.
+        Dit wordt mogelijk nog opgepakt. -->
+
+        <!--<fileSet>-->
+            <!--<directory>src/main/scripts</directory>-->
+            <!--<outputDirectory>scripts</outputDirectory>-->
+            <!--<includes>-->
+                <!--<include>**/*.sh</include>-->
+            <!--</includes>-->
+            <!--<fileMode>0774</fileMode>-->
+        <!--</fileSet>-->
+        <!--<fileSet>-->
+            <!--<directory>src/main/scripts</directory>-->
+            <!--<outputDirectory>scripts</outputDirectory>-->
+            <!--<excludes>-->
+                <!--<exclude>**/*.sh</exclude>-->
+            <!--</excludes>-->
+        <!--</fileSet>-->
+<!--
+        <fileSet>
+            <directory>src/main/keystores</directory>
+            <outputDirectory>keystores</outputDirectory>
+        </fileSet>
+-->
+
+        <fileSet>
+            <directory>src/main/tomcat</directory>
+            <outputDirectory>log4j</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>src/main/configuratie</directory>
+            <outputDirectory>brp properties</outputDirectory>
+            <excludes>
+                <exclude>dashboard-jdbc.properties</exclude>
+                <exclude>dashboard-restapi.properties</exclude>
+                <exclude>bezemwagen.properties</exclude>
+                <exclude>afnemer-voorbeeld.properties</exclude>
+            </excludes>
+        </fileSet>
+        <!-- Deze set zorgt ervoor dat er geen release nummer meer zichtbaar is in de uiteindelijke release directory,
+        voor eenduidigheid naar de systeembeheerder -->
+        <fileSet>
+            <directory>src/main/release-instructies/release ${parsedVersion.majorVersion}</directory>
+            <outputDirectory>release</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>target/database</directory>
+            <outputDirectory>database</outputDirectory>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <file>
+            <source>src/main/root/LEESMIJ-SOFTWARE-BIJHOUDING</source>
+            <destName>LEESMIJ</destName>
+        </file>
+    </files>
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>artefacten/bijhouding</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp.bijhouding:brp-bijhouding-webservice:war</include>
+            </includes>
+            <outputFileNameMapping>bijhouding${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>

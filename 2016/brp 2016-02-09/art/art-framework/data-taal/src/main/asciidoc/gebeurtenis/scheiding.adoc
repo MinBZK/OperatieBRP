@@ -1,0 +1,50 @@
+
+=== Scheiding
+De gebeurtenis scheiding. Scheiding wordt gebruikt voor het
+ontbinden van een _huwelijk_ of _geregistreerd partnerschap_. Deze kunnen zowel
+in Nederland als het buitenland worden ontbonden.
+
+
+==== Van wie (de partner)
+Voor het ontbinden van een huwelijk wordt eerst aangegeven van wie er wordt
+gescheiden. Dit is een persoon die is opgehaald uit de database of eerder gemaakt in
+het DSL script.
+
+[source, groovy]
+----
+def truus = Persoon.metBsn(12345678)
+scheiding() {
+  van truus
+  ...
+}
+----
+
+
+==== Ontbinding Huwelijk / Geregistreerd partnerschap in Nederland
+De scheiding gebeurtenis eindigt met het aanduiden van wanneer en waar:
+
+[source, groovy]
+----
+scheiding() {
+  ...
+  op '2010/03/24' te 'Monster' gemeente 'Westland'
+  op 19890531 te "'s-Gravenhage" gemeente 1786
+  op(20090000).te('Groningen').gemeente('Groningen')
+}
+----
+De datum is een datum zoals ook genoteerd wordt in de expressietaal. Dit mag dus ook
+een (deels)onbekende datum zijn, waarbij bijvoorbeeld dag of maand als `00` wordt
+geschreven. Daarna volgt de woonplaats, een Plaats in de BRP. Als laatste de gemeente.
+
+
+==== Ontbinding Huwelijk / Geregistreerd partnerschap in Buitenland
+Bij scheiding in buitenland wordt nu het land meegegeven, in plaats van de gemeente.
+
+[source, groovy]
+----
+scheiding() {
+  ...
+  op '2010/03/24' te 'Boekarest' land 'Roemenië'
+  op(20090000).te('Boedapest').land('Hongarije')
+}
+----

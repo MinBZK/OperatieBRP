@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        <RollingFile name="Systeem" fileName="target/logs/brp-systeem.log"
+                     filePattern="target/logs/brp-systeem-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT"/>
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy />
+        </RollingFile>
+
+        <RollingFile name="Functioneel" fileName="target/logs/brp-functioneel.log"
+                     filePattern="target/logs/brp-functioneel-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy />
+        </RollingFile>
+
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Systeem"/>
+            <AppenderRef ref="Functioneel"/>
+        </Root>
+        <logger name="nl.bzk.brp" level="DEBUG"/>
+        <logger name="org.hibernate" level="INFO"/>
+    </Loggers>
+</Configuration>

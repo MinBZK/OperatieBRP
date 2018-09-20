@@ -1,0 +1,53 @@
+22 Augustus 2013 - BRP Release 9
+
+Deze release is gebaseerd op BMR Release 14 en koppelvlak Release 13.
+Ditmaal starten we weer met een compleet nieuwe database. Nieuw in de oplevering is de configuratie bestanden, waarbij
+deze als voorbeeld dienen voor de installatie.
+Er is uitgegaan van een deployment op twee servers, 1 server met de bijhouding en 1 server met de overige war's
+(levering, routering-centrale, protocollering enz.)
+
+TOMCAT INSTELLINGEN
+Voor beide applicatie servers moeten de default geheugen instellingen worden aangepast. Hiervoor raden we de volgende
+waardes aan:
+(In /etc/default/tomcat6 of setenv.sh)
+JAVA_OPTS="-Djava.awt.headless=true -Xmx4096m -server -Xms1024m  -XX:NewSize=256m -XX:MaxNewSize=256m -XX:PermSize=256m -XX:MaxPermSize=512m"
+
+Hierbij zijn we ervan uit gegaan dat het fysieke geheugen van de machine minimaal 4G is. Zo niet, graag relatief
+aanpassen naar bovengenoemde waardes.
+
+
+DATABASE
+Zoals reeds vernoemd zal er in deze release weer gestart worden met een volledig nieuwe database. Hiertoe dient uit
+voorzorg eerst een backup gedraaid te worden van de huidige database. Verder kan (grotendeels) de standaard installatie
+handleiding BRP worden gevolgd voor een installatie van een nieuwe database (paragraaf 2.1, 2.1.1 en 2.1.3).
+
+Daar in deze release een geheel nieuwe database geinstalleerd dient te worden, maar wel de authenticatiemiddellen en
+certificaten voor de partijen herbruikt dienen te worden, zou normaliter eerst nog een aparte backup gemaakt dienen
+te worden van de autaut.certificaat en autaut.authenticatiemiddel tabellen (zie paragraaf 2.1). Daar de structuur van
+deze tabellen echter gewijzigd is tussen de huidige versie op de proeftuin en deze nieuwe database, kan er geen gewone
+backup van deze tabellen worden teruggezet. In 'doc/backup-en-restore-certificaten.txt' is daarom beschreven hoe dit
+toch gedaan kan worden. Deze handleiding in dit tekst bestand zal dus ook uitgevoerd moeten worden.
+
+
+BIJHOUDING v 0.6.0
+    De standaard installatie voor BRP is van toepassing;
+        - stop de BRP server, 
+        - verwijder de BRP directory,
+        - vervang de BRP war file met de nieuwe versie
+        - start de BRP server
+
+LEVERING v0.3.7
+    - Stop de server(s)
+    - Voer het SQL bestand 'levering-diensten.sql' uit dat in de db directory staat
+    - Verwijder de oude wars en directories
+    - Deploy de war's uit de levering folder en start de server.
+
+ROUTERING CENTRALE 1.0.0
+    - Stop de server(s)
+    - Deploy de war routering-centrale.war.
+    - Start de server
+
+PROTOCOLLERING VERWERKER 1.0
+    - Stop de server(s)
+    - Deploy de war protocollering-verwerker.war.
+    - Start de server

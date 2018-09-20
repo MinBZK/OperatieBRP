@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.bzk.brp</groupId>
+    <artifactId>brp-software</artifactId>
+    <version>96-SNAPSHOT</version>
+
+    <packaging>pom</packaging>
+
+    <name>BRP Software</name>
+    <url>https://www.modernodam.nl/confluence/display/mGBA/BRP</url>
+    <description>
+        Aggregator pom om de modules mee te bouwen.
+    </description>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk</developerConnection>
+    </scm>
+
+    <distributionManagement>
+        <repository>
+            <id>brpcentral</id>
+            <name>mGBA releases voor BRP</name>
+            <url>https://www.modernodam.nl/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>brpcentral</id>
+            <name>mGBA snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <arguments>-DskipTestsFunqmachine=true -DskipTestsGeneratoren=true</arguments>
+                    <tagNameFormat>v@{project.version}</tagNameFormat>
+                    <releaseProfiles>release,uml_in_javadoc</releaseProfiles>
+                    <checkModificationExcludes>
+                        <checkModificationExclude>pom.xml</checkModificationExclude>
+                    </checkModificationExcludes>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>perform</goal>
+                        </goals>
+                        <configuration>
+                            <arguments>-DskipTests=true</arguments>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>default-modules</id>
+            <activation>
+                <property>
+                    <name>!disableDefaultModules</name>
+                </property>
+            </activation>
+            <modules>
+                <!-- taglets moeten eerst gebouwd worden, vanwege een dependency in de pluginManagement van brp-parent! -->
+                <module>build/brp-test-properties</module>
+                <module>build/code-stijl-regels</module>
+                <module>utils/bedrijfsregels/bedrijfsregel-javadoc-taglet</module>
+                <module>utils/maven-huisregels</module>
+                <module>brp-parent</module>
+                <module>algemeen/algemeen-util</module>
+                <module>algemeen/algemeen-model</module>
+                <module>algemeen/algemeen-opslag</module>
+                <module>algemeen/algemeen-kern</module>
+                <module>algemeen/algemeen-webservice</module>
+                <module>algemeen/algemeen-koppelvlak</module>
+                <module>message-broker</module>
+                <module>bevraging</module>
+                <module>bijhouding</module>
+				<module>gba</module>
+                <module>levering/levering-kern</module>
+                <module>levering/levering-protocollering</module>
+                <module>levering/levering-services</module>
+				<module>logging</module>
+                <module>beheer</module>
+                <module>blobify</module>
+                <module>relateren</module>
+                <module>art/art-basis</module>
+                <module>art/art-data</module>
+                <module>art/art-framework</module>
+                <module>test/testcases</module>
+                <module>test/lo3conversie</module>
+                <module>build/distributie</module>
+                <!--<module>build/test-distributie</module>-->
+                <!--<module>build/docker-distributie</module>-->
+            </modules>
+        </profile>
+
+        <profile>
+            <id>generatie-modules</id>
+            <modules>
+                <module>generatie/generatoren</module>
+                <module>generatie/metaregister</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>analyse-alles</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <modules>
+                <module>algemeen/algemeen-util</module>
+                <module>algemeen/algemeen-model</module>
+                <module>algemeen/algemeen-opslag</module>
+                <module>algemeen/algemeen-kern</module>
+                <module>algemeen/algemeen-webservice</module>
+                <module>bevraging</module>
+                <module>bijhouding</module>
+                <module>levering/levering-kern/algemeen</module>
+                <module>levering/levering-kern/afnemerindicaties</module>
+                <module>levering/levering-protocollering</module>
+                <module>gba</module>
+                <module>levering/levering-services/afnemer-voorbeeld</module>
+                <module>levering/levering-services/bezemwagen</module>
+                <module>levering/levering-services/mutatielevering</module>
+                <module>levering/levering-services/onderhoud-afnemerindicaties</module>
+                <module>levering/levering-services/synchronisatie</module>
+                <module>levering/levering-services/verzending</module>
+                <module>beheer</module>
+                <module>blobify</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>analyse-levering</id>
+            <modules>
+                <module>bevraging</module>
+                <module>levering/levering-kern/algemeen</module>
+                <module>levering/levering-kern/afnemerindicaties</module>
+                <module>levering/levering-protocollering</module>
+                <module>levering/levering-services/afnemer-voorbeeld</module>
+                <module>levering/levering-services/bezemwagen</module>
+                <module>levering/levering-services/mutatielevering</module>
+                <module>levering/levering-services/onderhoud-afnemerindicaties</module>
+                <module>levering/levering-services/synchronisatie</module>
+                <module>levering/levering-services/verzending</module>
+                <module>blobify</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>analyse-lo3</id>
+            <properties>
+                <sonar.branch>lo3</sonar.branch>
+            </properties>
+            <modules>
+                <module>gba</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>analyse-bijhouding</id>
+            <modules>
+                <module>bijhouding</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>analyse-beheer</id>
+            <properties>
+                <sonar.branch>beheer</sonar.branch>
+            </properties>
+            <modules>
+                <module>beheer</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>analyse-gezamenlijk</id>
+            <modules>
+                <module>algemeen/algemeen-util</module>
+                <module>algemeen/algemeen-model</module>
+                <module>algemeen/algemeen-opslag</module>
+                <module>algemeen/algemeen-kern</module>
+                <module>algemeen/algemeen-webservice</module>
+                <module>levering/levering-kern/algemeen</module>
+                <module>blobify</module>
+            </modules>
+        </profile>
+
+    </profiles>
+
+</project>

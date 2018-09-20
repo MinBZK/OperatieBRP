@@ -1,0 +1,372 @@
+<binding direction="output">
+
+    <namespace uri="http://www.bzk.nl/brp/brp0200" default="all" prefix="brp"/>
+
+    <include path="classpath:/binding/basis/binding-brpxml.xml" precompiled="false"/>
+    <include path="classpath:/binding/basis/binding-handmatige-extras.xml" precompiled="false"/>
+    <include path="classpath:/binding/bijhouden/binding-objecttypen-bericht.xml" precompiled="false"/>
+
+    <mapping abstract="true" type-name="Abstract_AntwoordBericht_Gemeenschappelijk"
+             class="nl.bzk.brp.model.bijhouding.BijhoudingAntwoordBericht">
+        <structure name="stuurgegevens" map-as="Stuurgegevens_SynchroonResultaat" get-method="getStuurgegevens"/>
+        <structure name="resultaat" map-as="Groep_BerichtResultaat_Bijhouding" get-method="getResultaat"/>
+        <structure name="meldingen" map-as="Container_BerichtMeldingen_Bijhouding" get-method="getMeldingen"
+                   usage="optional"/>
+    </mapping>
+
+    <mapping name="bhg_ovlRegistreerOverlijden_R"
+             class="nl.bzk.brp.model.bijhouding.RegistreerOverlijdenAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="overlijdenInNederland" usage="optional" test-method="isOverlijdenInNederland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="overlijdenInBuitenland" usage="optional" test-method="isOverlijdenInBuitenland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_afsRegistreerGeboorte_R" class="nl.bzk.brp.model.bijhouding.RegistreerGeboorteAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="geboorteInNederland" usage="optional" test-method="isGeboorteInNederland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="geboorteInNederlandMetErkenning" usage="optional"
+                   test-method="isGeboorteInNederlandMetErkenning">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_afsRegistreerAdoptie_R" class="nl.bzk.brp.model.bijhouding.RegistreerAdoptieAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="adoptieIngezetene" usage="optional" test-method="isAdoptieIngezetene">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_afsRegistreerErkenning_R" class="nl.bzk.brp.model.bijhouding.RegistreerErkenningAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="erkenningNaGeboorte" usage="optional" test-method="isErkenningNaGeboorte">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_afsActualiseerAfstamming_R"
+             class="nl.bzk.brp.model.bijhouding.ActualiseerAfstammingAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="vaststellingOuderschap" usage="optional"
+                   test-method="isVaststellingOuderschap">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"
+                       usage="optional"/>
+        </structure>
+        <structure name="toevoegingGeboorteakte" usage="optional"
+                   test-method="isToevoegingGeboorteakte">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"
+                       usage="optional"/>
+        </structure>
+        <structure name="verbeteringGeboorteakte" usage="optional"
+                   test-method="isVerbeteringGeboorteakte">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"
+                       usage="optional"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_nmgRegistreerNaamGeslacht_R"
+             class="nl.bzk.brp.model.bijhouding.RegistreerNaamGeslachtAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="wijzigingGeslachtsnaam" usage="optional" test-method="isWijzigingGeslachtsnaam">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="wijzigingGeslachtsaanduiding" usage="optional" test-method="isWijzigingGeslachtsaanduiding">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="wijzigingVoornaam" usage="optional" test-method="isWijzigingVoornaam">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="wijzigingNaamgebruik" usage="optional" test-method="isWijzigingNaamgebruik">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_hgpRegistreerHuwelijkGeregistreerdPartnerschap_R"
+             class="nl.bzk.brp.model.bijhouding.RegistreerHuwelijkGeregistreerdPartnerschapAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="voltrekkingHuwelijkInNederland" usage="optional"
+                   test-method="isVoltrekkingHuwelijkInNederland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling" usage="optional"/>
+        </structure>
+        <structure name="ontbindingHuwelijkInNederland" usage="optional" test-method="isOntbindingHuwelijkInNederland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="voltrekkingHuwelijkInBuitenland" usage="optional"
+                   test-method="isVoltrekkingHuwelijkInBuitenland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="ontbindingHuwelijkInBuitenland" usage="optional"
+                   test-method="isOntbindingHuwelijkInBuitenland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="aangaanGeregistreerdPartnerschapInNederland" usage="optional"
+                   test-method="isAangaanGeregistreerdPartnerschapInNederland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="beeindigingGeregistreerdPartnerschapInNederland" usage="optional"
+                   test-method="isBeeindigingGeregistreerdPartnerschapInNederland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="aangaanGeregistreerdPartnerschapInBuitenland" usage="optional"
+                   test-method="isAangaanGeregistreerdPartnerschapInBuitenland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="beeindigingGeregistreerdPartnerschapInBuitenland" usage="optional"
+                   test-method="isBeeindigingGeregistreerdPartnerschapInBuitenland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="omzettingGeregistreerdPartnerschapInHuwelijk" usage="optional"
+                   test-method="isOmzettingGeregistreerdPartnerschapInHuwelijk">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="nietigverklaringHuwelijk" usage="optional" test-method="isNietigverklaringHuwelijk">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="nietigverklaringGeregistreerdPartnerschap" usage="optional"
+                   test-method="isNietigverklaringGeregistreerdPartnerschap">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="isc_migRegistreerHuwelijkGeregistreerdPartnerschap_R"
+             class="nl.bzk.brp.model.bijhouding.RegistreerGBAHuwelijkGeregistreerdPartnerschapAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="gBASluitingHuwelijkGeregistreerdPartnerschap" usage="optional"
+                   test-method="isGBASluitingHuwelijkGeregistreerdPartnerschap">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling" usage="optional"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_vbaRegistreerVerhuizing_R"
+             class="nl.bzk.brp.model.bijhouding.RegistreerVerhuizingAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="verhuizingBinnengemeentelijk" usage="optional"
+                   test-method="isVerhuizingBinnengemeentelijk">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling" usage="optional"/>
+        </structure>
+        <structure name="verhuizingIntergemeentelijk" usage="optional"
+                   test-method="isVerhuizingIntergemeentelijk">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="verhuizingNaarBuitenland" usage="optional" test-method="isVerhuizingNaarBuitenland">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_vbaCorrigeerAdres_R" class="nl.bzk.brp.model.bijhouding.CorrigeerAdresAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="correctieAdres">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling" usage="optional"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_natRegistreerNationaliteit_R"
+             class="nl.bzk.brp.model.bijhouding.RegistreerNationaliteitAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="verkrijgingNederlandseNationaliteit" usage="optional"
+                   test-method="isVerkrijgingNederlandseNationaliteit">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="verkrijgingVreemdeNationaliteit" usage="optional"
+                   test-method="isVerkrijgingVreemdeNationaliteit">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="wijzigingIndicatieNationaliteit" usage="optional"
+                   test-method="isWijzigingIndicatieNationaliteit">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_rsdRegistreerReisdocument_R"
+             class="nl.bzk.brp.model.bijhouding.RegistreerReisdocumentAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="verkrijgingReisdocument" usage="optional" test-method="isVerkrijgingReisdocument">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="onttrekkingReisdocument" usage="optional" test-method="isOnttrekkingReisdocument">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="signaleringReisdocument" usage="optional"
+                   test-method="isSignaleringReisdocument">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_dvmRegistreerMededelingVerzoek_R"
+             class="nl.bzk.brp.model.bijhouding.RegistreerMededelingVerzoekAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="wijzigingVerstrekkingsbeperking" usage="optional"
+                   test-method="isWijzigingVerstrekkingsbeperking">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="wijzigingGezag" usage="optional" test-method="isWijzigingGezag">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="wijzigingCuratele" usage="optional" test-method="isWijzigingCuratele">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="bhg_vkzRegistreerKiesrecht_R" class="nl.bzk.brp.model.bijhouding.RegistreerKiesrechtAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <structure name="wijzigingUitsluitingKiesrecht" usage="optional"
+                   test-method="isWijzigingUitsluitingKiesrecht">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="wijzigingDeelnameEUVerkiezingen" usage="optional"
+                   test-method="isWijzigingDeelnameEuVerkiezingen">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping name="lvg_synRegistreerAfnemerindicatie_R"
+             class="nl.bzk.brp.model.synchronisatie.RegistreerAfnemerindicatieAntwoordBericht">
+        <structure map-as="Abstract_AntwoordBericht_Gemeenschappelijk"/>
+        <!-- Choice: -->
+        <structure name="plaatsingAfnemerindicatie" usage="optional" test-method="isPlaatsingAfnemerIndicatie">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+        <structure name="verwijderingAfnemerindicatie" usage="optional" test-method="isVerwijderingAfnemerIndicatie">
+            <structure map-as="Abstract_Handeling_Resultaat" get-method="getAdministratieveHandeling"/>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="Abstract_Handeling_Resultaat"
+             class="nl.bzk.brp.model.bericht.kern.AbstractAdministratieveHandelingBericht">
+        <value name="partijCode" field="partijCode"/>
+        <structure map-as="DatumTijdAttribuut" name="tijdstipRegistratie" field="tijdstipRegistratie" usage="optional"/>
+        <structure map-as="Container_AdministratieveHandelingGedeblokkeerdeMeldingen_BijhoudingResultaat"
+                   name="gedeblokkeerdeMeldingen"
+                   field="gedeblokkeerdeMeldingen" usage="optional"/>
+        <structure map-as="Container_AdministratieveHandelingBijgehoudenPersonen_Bijhouding" name="bijgehoudenPersonen"
+                   field="bijgehoudenPersonen" usage="optional"/>
+        <structure map-as="Container_AdministratieveHandelingBijgehoudenDocumenten_BijhoudingResultaat"
+                   name="bijgehoudenDocumenten"
+                   field="bijgehoudenDocumenten" usage="optional"/>
+        <value style="attribute" name="objecttype" constant="AdministratieveHandeling"/>
+        <value style="attribute" name="objectSleutel" get-method="getObjectSleutel"
+               usage="optional"/>
+        <value style="attribute" name="referentieID" get-method="getReferentieID"
+               usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" class="nl.bzk.brp.model.bericht.ber.BerichtResultaatGroepBericht"
+             type-name="Groep_BerichtResultaat_Bijhouding">
+        <structure map-as="AbstractGroep_BerichtResultaat_Bijhouding"/>
+    </mapping>
+
+    <mapping abstract="true" class="nl.bzk.brp.model.bericht.ber.AbstractBerichtResultaatGroepBericht"
+             type-name="AbstractGroep_BerichtResultaat_Bijhouding">
+        <structure field="verwerking" usage="optional">
+            <value name="verwerking" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+        <structure field="bijhouding" usage="optional">
+            <value name="bijhouding" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+        <structure field="hoogsteMeldingsniveau" usage="optional">
+            <value name="hoogsteMeldingsniveau" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+    </mapping>
+
+
+    <mapping class="java.util.List" abstract="true" type-name="Container_BerichtMeldingen_Bijhouding">
+        <collection usage="optional">
+            <structure map-as="AbstractBerichtMeldingBerichtResultaat" name="melding"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.AbstractBerichtMeldingBericht" abstract="true"
+             type-name="AbstractBerichtMeldingBerichtResultaat">
+        <structure map-as="Objecttype_Melding_Bijhouding" field="melding" usage="optional"/>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.AbstractMeldingBericht" abstract="true"
+             type-name="Objecttype_Melding_Bijhouding">
+        <value name="objecttype" constant="Melding" style="attribute"/>
+        <value name="referentieID" get-method="getReferentieID" style="attribute" usage="optional"/>
+        <structure field="regel">
+            <value name="regelCode" get-method="getWaarde" enum-value-method="getCode"/>
+        </structure>
+        <structure field="soort" usage="optional">
+            <value name="soortNaam" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+        <structure name="melding" field="melding" map-as="MeldingtekstAttribuut"/>
+        <!--<structure field="element" usage="optional">
+            <value name="elementNaam" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>-->
+    </mapping>
+
+    <mapping class="java.util.List" abstract="true"
+             type-name="Container_AdministratieveHandelingGedeblokkeerdeMeldingen_BijhoudingResultaat">
+        <collection usage="optional">
+            <structure map-as="AdministratieveHandelingGedeblokkeerdeMelding" name="gedeblokkeerdeMelding"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.kern.AbstractAdministratieveHandelingGedeblokkeerdeMeldingBericht"
+             abstract="true"
+             type-name="AdministratieveHandelingGedeblokkeerdeMelding">
+        <structure map-as="Objecttype_GedeblokkeerdeMelding_BijhoudingResultaat" field="gedeblokkeerdeMelding"
+                   usage="optional"/>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.kern.AbstractGedeblokkeerdeMeldingBericht" abstract="true"
+             type-name="Objecttype_GedeblokkeerdeMelding_BijhoudingResultaat">
+        <value name="objecttype" constant="GedeblokkeerdeMelding" style="attribute"/>
+        <value name="referentieID" get-method="getReferentieID" style="attribute"/>
+        <structure field="regel">
+            <value name="regelCode" get-method="getWaarde" enum-value-method="getCode"/>
+        </structure>
+        <structure map-as="MeldingtekstAttribuut" name="melding" field="melding" usage="optional"/>
+        <!--<tructure field="element" usage="optional">
+            <value name="elementNaam" get-method="getWaarde"  enum-value-method="getNaam"/>
+        </structure>-->
+    </mapping>
+
+    <mapping class="java.util.List" abstract="true"
+             type-name="Container_AdministratieveHandelingBijgehoudenPersonen_Bijhouding">
+        <collection usage="optional">
+            <structure map-as="BijgehoudenPersoon_Bijhouding" name="persoon"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.AbstractAdministratieveHandelingBijgehoudenPersoonBericht"
+             abstract="true" type-name="BijgehoudenPersoon_Bijhouding">
+        <structure field="persoon" usage="optional">
+            <value name="objecttype" constant="Persoon" style="attribute"/>
+            <value name="referentieID" get-method="getReferentieID" style="attribute" usage="optional"/>
+            <structure name="identificatienummers" get-method="getIdentificatienummers">
+                <structure name="burgerservicenummer" get-method="getBurgerservicenummer"
+                           map-as="BurgerservicenummerAttribuut"/>
+            </structure>
+        </structure>
+    </mapping>
+
+    <mapping class="java.util.List" abstract="true"
+             type-name="Container_AdministratieveHandelingBijgehoudenDocumenten_BijhoudingResultaat">
+        <collection usage="optional">
+            <structure map-as="BijgehoudenDocument_BijhoudingResultaat" name="document"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.AbstractAdministratieveHandelingBijgehoudenDocumentBericht"
+             abstract="true" type-name="BijgehoudenDocument_BijhoudingResultaat">
+        <structure field="document">
+            <value name="objecttype" constant="Document" style="attribute"/>
+            <value name="objectSleutel" get-method="getObjectSleutel" style="attribute"/>
+            <value name="referentieID" get-method="getReferentieID" style="attribute"/>
+            <value name="soortNaam" get-method="getSoortNaam" usage="optional"/>
+            <structure get-method="getStandaard">
+                <structure map-as="DocumentIdentificatieAttribuut" name="identificatie" nillable="true"
+                           get-method="getIdentificatie" usage="optional"/>
+                <value name="partijCode" get-method="getPartijCode" usage="optional"/>
+            </structure>
+        </structure>
+    </mapping>
+</binding>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd
+	">
+
+    <!-- Uitgaande berichten queue -->
+    <bean id="afnemersJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cachedConnectionFactoryAfnemers"/>
+    </bean>
+
+    <bean id="jmsConnectionFactoryAfnemers" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${jms.broker.afnemers.url}" />
+    </bean>
+
+    <bean id="cachedConnectionFactoryAfnemers"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsConnectionFactoryAfnemers"/>
+        <!-- ivm 1500 afnemers de sessionCacheSize voor nu op 10 gezet (default = 1), is een waarde waarmee we nog
+        moeten spelen -->
+        <property name="sessionCacheSize" value="10"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsTransactionManagerAfnemers" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="cachedConnectionFactoryAfnemers" />
+    </bean>
+</beans>

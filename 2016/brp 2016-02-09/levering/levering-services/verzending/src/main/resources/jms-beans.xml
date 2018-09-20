@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:jms="http://activemq.apache.org/schema/core"
+    xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+    ">
+
+    <!-- Uitgaande berichten queue -->
+    <jms:queue id="lo3Queue" physicalName="${jms.broker.lo3.leveringen.queue}"/>
+
+    <bean id="lo3AfnemersJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cachedConnectionFactoryLo3Afnemers"/>
+        <property name="defaultDestination" ref="lo3Queue"/>
+    </bean>
+
+    <bean id="jmsConnectionFactoryLo3Afnemers" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${jms.broker.afnemers.url}" />
+    </bean>
+
+    <bean id="cachedConnectionFactoryLo3Afnemers"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsConnectionFactoryLo3Afnemers"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsTransactionManagerLo3Afnemers" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="cachedConnectionFactoryLo3Afnemers" />
+    </bean>
+
+    <bean id="jmsConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${jms.broker.afnemers.url}"/>
+        <property name="prefetchPolicy" ref="afnemerQueuePrefetchPolicy"/>
+    </bean>
+
+    <bean id="pooledConnectionFactory" class="org.apache.activemq.pool.PooledConnectionFactory">
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    </bean>
+
+    <bean id="afnemerQueuePrefetchPolicy" class="org.apache.activemq.ActiveMQPrefetchPolicy">
+        <property name="queuePrefetch" value="${verzending.aantal.berichten.periteratie:25}" />
+    </bean>
+
+    <bean id="jmsTransactionManager" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="pooledConnectionFactory"/>
+    </bean>
+</beans>

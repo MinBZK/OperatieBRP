@@ -1,0 +1,53 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<wsdl:definitions name="afnemerindicaties"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:brp="http://www.bzk.nl/brp/brp0200"
+                  xmlns:tns="http://www.bzk.nl/brp/levering/afnemerindicaties/service"
+                  targetNamespace="http://www.bzk.nl/brp/levering/afnemerindicaties/service">
+
+    <wsdl:types>
+        <xsd:schema>
+            <xsd:import schemaLocation="/xsd/BRP0200/brp0200_lvgAfnemerindicatie_Berichten.xsd"
+                        namespace="http://www.bzk.nl/brp/brp0200"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="RegistreerAfnemerindicatie">
+        <wsdl:part element="brp:lvg_synRegistreerAfnemerindicatie"
+                   name="registreerAfnemerindicatie"/>
+    </wsdl:message>
+
+    <wsdl:message name="RegistreerAfnemerindicatieResultaat">
+        <wsdl:part element="brp:lvg_synRegistreerAfnemerindicatie_R"
+                   name="registreerAfnemerindicatieResultaat"/>
+    </wsdl:message>
+
+    <wsdl:portType name="lvgAfnemerindicaties">
+        <wsdl:operation name="registreerAfnemerindicatie">
+            <wsdl:input message="tns:RegistreerAfnemerindicatie"/>
+            <wsdl:output message="tns:RegistreerAfnemerindicatieResultaat"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="AfnemerindicatiesBinding" type="tns:lvgAfnemerindicaties">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="registreerAfnemerindicatie">
+            <soap:operation soapAction="registreerAfnemerindicatie"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="AfnemerindicatiesService">
+        <wsdl:port binding="tns:AfnemerindicatiesBinding" name="lvgAfnemerindicaties">
+            <soap:address location="http://localhost:8080/afnemerindicaties/AfnemerindicatiesService"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

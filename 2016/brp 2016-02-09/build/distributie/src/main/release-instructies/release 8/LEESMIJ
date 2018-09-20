@@ -1,0 +1,35 @@
+?? ?? 2013 - BRP Release 8
+
+Database BMR v 10.1
+    Geen enkel database wijzigingen. Het verschil tussen 10.0 en 10.1 zijn allerlei helper SQL die gebruikt worden voor testers en ontwikkelaars.
+        
+
+BIJHOUDING v 4.25
+    De standaard installatie voor BRP is van toepassing; er zijn geen enkel configuratie wijzigingen.Alle wijzigingen in deze versie zijn functionele wijzigingen.
+        - stop de BRP server, 
+        - verwijder de BRP direcotory,
+        - vervang de BRP war file met de nieuwe versie
+        - start de BRP server
+        
+        
+
+LEVERING v0.3.4
+    - Stop de server(s)
+    - Voeg een extra log4j category en appender aan de configuratie tbv de toegevoegde functionele log. Het volgende dient te worden toegevoegd aan de log4j.xml (pas eventueel de waarde van param name="File" aan):
+    ======================
+        <appender name="FUNCTIONAL_FILE" class="org.apache.log4j.RollingFileAppender">
+            <param name="Append" value="true"/>
+            <param name="File" value="/var/lib/tomcat6/logs/levering-functioneel.log"/>
+            <layout class="org.apache.log4j.PatternLayout">
+                <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss}[%t] %-5p (%C{5}:%-3L) %X{administratieveHandeling} %X{abonnement} %X{afnemer} %m%n" />
+            </layout>
+        </appender>
+    
+        <category name="FUNCTIONELE_LOG">
+            <priority value="INFO"/>
+            <appender-ref ref="FUNCTIONAL_FILE"/>
+        </category>
+    =======================
+    - Voer het SQL bestand '41-lev-abonnementen.sql' uit dat in de db directory staat
+    - Verwijder de oude wars en directories
+    - Deploy de war's uit de levering folder en start de server.

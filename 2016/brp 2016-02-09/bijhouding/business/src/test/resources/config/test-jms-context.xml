@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms" xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+    ">
+
+    <amq:broker id="broker" persistent="false" useJmx="false"
+                brokerName="localhost">
+        <amq:transportConnectors>
+            <amq:transportConnector uri="${jms.broker.ah.url}"/>
+        </amq:transportConnectors>
+        <amq:systemUsage>
+            <amq:systemUsage>
+                <amq:memoryUsage>
+                    <amq:memoryUsage limit="32mb"/>
+                </amq:memoryUsage>
+                <amq:storeUsage>
+                    <amq:storeUsage limit="32mb"/>
+                </amq:storeUsage>
+                <amq:tempUsage>
+                    <amq:tempUsage limit="32mb"/>
+                </amq:tempUsage>
+            </amq:systemUsage>
+        </amq:systemUsage>
+    </amq:broker>
+
+    <jms:listener-container container-type="default"
+                            connection-factory="actualConnectionFactory"
+                            acknowledge="auto" destination-type="queue" concurrency="1">
+        <jms:listener destination="${jms.broker.ah.queue}"
+                      ref="administratieveHandelingListener"/>
+    </jms:listener-container>
+
+</beans>

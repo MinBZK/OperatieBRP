@@ -1,0 +1,2 @@
+--insert into autaut.dienst (id,catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('100','2','40',null,null,'20130101',null,'4')
+--insert into autaut.dienst (id,catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('101','3','40',null,null,'20130101',null,'4')

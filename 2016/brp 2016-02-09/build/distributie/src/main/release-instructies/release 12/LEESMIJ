@@ -1,0 +1,86 @@
+25 November 2013 - BRP Release 12
+
+Deze release is gebaseerd op BMR versie 20, database versie 20.2 en koppelvlak versie 14.6.
+
+DATABASE
+Voor deze release is GEEN nieuwe database vereist. Er dienen slechts een paar scripts
+gedraaid te worden op de huidige database versie, in genoemde volgorde. Uiteraard is het aan te raden deze
+scripts pas te draaien nadat alle servers/services zijn gestopt en in ieder geval zeker voordat de (nieuwe) services
+weer worden gestart. De scripts die uitgevoerd dienen te worden zijn in volgorde van boven naar beneden:
+    - db/19-naar-20.sql
+    - db/44-autaut-abonnementexpressies_aanmaken.sql
+
+LOGGING
+Voorheen werd op alle Tomcat instanties een appender geconfigureerd in Log4j om naar de syslog van de locale server te
+loggen. Om de logging makkelijk in te kunnen kijken en te door te kunnen zoeken, gaan we nu gebruik maken van graylog.
+Daarvoor dient de volgende Log4j Appender te worden toegevoegd:
+
+      <appender name="LOGSERVER" class="org.graylog2.log.GelfAppender">
+          <param name="graylogHost" value="192.168.202.140"/>
+          <param name="graylogPort" value="12201" />
+          <param name="originHost" value="[VUL HIER DE HOSTNAME IN WAAROP DEZE TOMCAT DRAAIT (BIJVOORBEELD PT-LINKS-AP01)"/>
+          <param name="additionalFields" value="{'environment': 'env', 'applicatie': 'applicatie', 'administratieveHandeling : 'administratieveHandeling', 'afnemer':'afnemer', 'berichtId':'berichtId','abonnement':'abonnement', 'refNr':'refNr', 'organisatieNaam':'organisatieNaam'}"/>
+          <param name="extractStacktrace" value="true"/>
+          <param name="addExtendedInformation" value="true"/>
+          <param name="Facility" value="USER"/>
+          <param name="FacilityPrinting" value="true"/>
+          <param name="Threshold" value="DEBUG"/>
+      </appender>
+
+In deze configuratie is vooral de confuguratie van de graylogHost en de originHost van belang om op elke server goed in te stellen.
+
+Vervolgens moet onderaan de log4j.xml file ervoor worden gezorgd dat er ook daadwerkelijk naar deze server wordt gelogd,
+dat kan door <appender-ref ref="LOGSERVER"/> op te nemen in de <root> tag. Als voorbeeld de volgende concfiguratie:
+     <root>
+         <priority value="DEBUG"/>
+         <appender-ref ref="BRP"/>
+         <appender-ref ref="LOGSERVER"/>
+     </root>
+
+Belangrijk is dat vanaf elke machine waar een Tomcat draait voor de BRP er een connectie kan worden gemaakt naar de graylog server op de graylog poort zoals die is ingesteld (nu 12201).
+Deze wijzigingen worden pas actief als Tomcat opnieuw wordt opgestart.
+
+PROPERTIES
+De properties bestanden zijn bedoeld om de WAR-bestanden te configureren en zijn te vinden in de "tomcat/lib"-directory.
+- brp-routering.properties
+De volgende properties dienen te worden toegevoegd:
+    berichtencentrale.memory.usage=512mb
+    berichtencentrale.store.usage=1024mb
+    berichtencentrale.temp.usage=1024mb
+Dit betekent dat er ook daadwerkelijk 1024 MB beschikbaar moet zijn voor de routering centrale op het filesysteem en 512 MB geheugen.
+
+
+BIJHOUDING v 0.6.6
+    - Stop de server(s)
+    - Verwijder de oude wars en directories
+    - Deploy de war's uit de bevraging folder en start de server
+
+BEVRAGING v 0.4.5
+    - Stop de server(s)
+    - Verwijder de oude wars en directories
+    - Deploy de war's uit de bevraging folder en start de server
+
+LEVERING v0.3.22
+    - Stop de server(s)
+    - Verwijder de oude wars en directories
+    - Deploy de war's uit de levering folder en start de server
+
+ROUTERING CENTRALE v1.0.2
+    - Stop de server(s)
+    - Deploy de war routering-centrale.war.
+    - Start de server
+
+PROTOCOLLERING VERWERKER v1.0.3
+    - Stop de server(s)
+    - Deploy de war protocollering-verwerker.war
+    - Start de server
+
+VERIFICATIE
+    - Verifieer dat de tomcat instanties alle contexts hebben opgestart en er geen errors zijn in de logging.
+    - Verfificatie urls voor de versies:
+        * Bijhouding: https://APPSERVER:8080/brp/services/version.html
+        * Bevraging:  https://APPSERVER:8080/bevraging/services/version.html
+        * Levering ah-notificatie-verwerker:  https://APPSERVER:8080/ah-notificatie-verwerker/versie.html
+        * Levering ah-kennisgeving-verstuurder:  https://APPSERVER:8080/kennisgeving-verstuurder/versie.html
+        (Voor het verifieren van de levering applicaties, dient de appserver ook bereikbaar te zijn, dat was tot nu toe niet zo!)
+

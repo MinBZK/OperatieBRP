@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+             http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+             http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd
+       ">
+
+    <context:annotation-config/>
+
+    <context:property-placeholder system-properties-mode="OVERRIDE"
+            location="classpath*:brp-*.properties"/>
+
+    <import resource="classpath:datasource-beans.xml"/>
+    <import resource="alleenlezen-emf-bean.xml" />
+    <import resource="lezenschrijven-emf-bean.xml" />
+    <import resource="classpath:blobifier-beans.xml" />
+
+    <context:component-scan base-package="nl.bzk.brp.serialisatie"/>
+    <context:component-scan base-package="nl.bzk.brp.vergrendeling"/>
+
+    <!-- Inkomende PersoonSerialisatieNotificatie queue -->
+    <bean id="jmsConnectionFactoryPersoonNotificatie" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${jms.persoonserialisatienotificatie.listener.broker.url}"/>
+        <property name="optimizeAcknowledge" value="true"/>
+    </bean>
+
+    <jms:listener-container container-type="default" connection-factory="cachedConnectionFactoryAfnemers"
+                            acknowledge="auto" destination-type="queue"
+                            concurrency="${jms.persoonserialisatienotificatie.concurrent}">
+        <jms:listener destination="${jms.persoonserialisatienotificatie.queue}" ref="serialisatieNotificatieListener"/>
+    </jms:listener-container>
+
+    <bean id="cachedConnectionFactoryAfnemers"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsConnectionFactoryPersoonNotificatie"/>
+        <property name="sessionCacheSize" value="10"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+</beans>

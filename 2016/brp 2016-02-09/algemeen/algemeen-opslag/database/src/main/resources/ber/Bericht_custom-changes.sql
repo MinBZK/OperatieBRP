@@ -1,0 +1,3 @@
+-- Deze file bevat 'handmatige' aanpassingen.
+-- Dit zijn aanpassingen die bijvoorbeeld tijdelijk nodig zijn om het geheel werkend te krijgen.
+-- Uiteindelijk is de doelstelling dat deze file niet meer nodig hoeft te zijn.

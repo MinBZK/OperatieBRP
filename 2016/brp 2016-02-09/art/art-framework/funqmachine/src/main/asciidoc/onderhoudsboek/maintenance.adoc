@@ -1,0 +1,50 @@
+
+## Verwacht onderhoud
+
+### Snelheid van uitvoeren testen
+Ten aanzien van de snelheid van afhandelinen van de testen die met de FunqMachinator
+worden gedaan, kan er nog een en andere worden verbeterd. Momenteel worden testen
+niet parallel uitgevoerd, waar dit wel zou kunnen. Zowel op het niveau van jbehave als
+junit is het mogelijk om multithreaded, parallel, testen te laten uitvoeren. Tevens
+zijn alle testen afhankelijk van de bestaande abonnementen in de database.
+
+Bij het doorvoeren van verbeteringen moet met het volgende rekening
+gehouden worden:
+
+#### Abonnementen cq. autorisaties
+De FunqMachinator pas bij het opstarten de bestaande abonnementen aan. Het afleveradres
+wordt aangepast, zodat leveringen naar de FunqMachinator worden gestuurd. Indien dit
+door meerdere instanties wordt gedaan, worden berichten naar de verkeerde test gestuurd.
+
+Het parallel uitvoeren van stories en scenario's is dus pas mogelijk als deze hun eigen
+autorisaties aanmaken en verwijderen. Een andere mogelijkheid is het fijnmaziger aanpassen
+van bestaande abonnementen, bijvoorbeeld per scenario. Dit blijft echter foutgevoelig
+als meerdere scenario's dezelfde autorisaties gebruiken.
+
+
+#### Parallel junit tests runnen
+De implementaties van `AbstractSpringJBehaveStories` voeren een aantal scenario's uit.
+Deze JUnit klasses kunnen parallel worden uitgevoerd door maven. Hierdoor wordt de duur
+van een testrun korter. Hierbij moet worden opgelet dat de (levering)ontvangers per test
+op een verschillende port worden gestart.
+
+
+#### Parallel stories uitvoeren door JBehave
+JBehave geeft de mogelijkheid om meerdere threads te gebruiken voor het uitvoeren van
+stories. De optie is beschikbaar als constante in de klasse `AbstractSpringJBehaveStories`.
+Dit heeft echter een nadelig gevolg voor de manier waarop wij testen.
+
+We hebben in de `@Steps` klasses een `ContextView` attribuut dat door middel van het jbehave
+rapportage mechanisme steeds wordt bijgewerkt met de huidige story en het huidige scenario.
+Deze informatie gebruiken we om de resultaten van SOAP request/responses op te kunnen slaan op
+een logische lokatie (subdirectories). Omdat het uitvoeren van scenario's momenteel met 1
+thread gebeurd, is de context altijd correct voorzien van informatie. Als we zouden overgaan
+naar meerdere threads, zorgt jbehave ervoor dat de rapportage over een story pas aan het einde
+van het uitvoeren wordt gedaan. De steps klasses weten dan niet tijdens de uitvoer van de
+status en is het niet langer zeker dat deze correct is bij het wegschrijven van resultaten.
+
+Een mogelijke oplossing is door middel van Aspect Oriented Programming (OAP) de excepties uit
+de methodes van `@Steps` klasses onderscheppen en verrijken met de verzamelde resultaten die
+op dat moment beschikbaar zijn. In een `StoryReporter` kan dan voor gefaalde scenario's deze
+exceptie worden uitgelezen en de resultaten (alsnog) weggeschreven worden. Het nadeel is dat
+voor succesvolle scenario's deze oplossing geen resultaten beschikbaar heeft.

@@ -1,0 +1,309 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-parent</artifactId>
+        <groupId>nl.bzk.brp</groupId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../brp-parent</relativePath>
+    </parent>
+
+    <groupId>nl.bzk.brp.gba</groupId>
+    <artifactId>brp-gba</artifactId>
+    <packaging>pom</packaging>
+
+    <name>BRP GBA</name>
+
+    <modules>
+        <module>gba-algemeen</module>
+        <module>gba-centrale</module>
+        <module>gba-conversie</module>
+    </modules>
+
+    <properties>
+        <!-- Connectie naar de database voor de JMS Broker (ActiveMQ) voor Persistence van queues -->
+        <maven.jdbc.activemq.driverClassName>org.postgresql.Driver</maven.jdbc.activemq.driverClassName>
+        <maven.jdbc.activemq.password>brp</maven.jdbc.activemq.password>
+        <maven.jdbc.activemq.url>jdbc:postgresql://localhost/activemq</maven.jdbc.activemq.url>
+        <maven.jdbc.activemq.username>brp</maven.jdbc.activemq.username>
+
+        <maven.jdbc.archivering.driverClassName>org.postgresql.Driver</maven.jdbc.archivering.driverClassName>
+        <maven.jdbc.archivering.url>jdbc:postgresql://localhost/brpjunit</maven.jdbc.archivering.url>
+        <maven.jdbc.archivering.password>brp</maven.jdbc.archivering.password>
+        <maven.jdbc.archivering.username>brp</maven.jdbc.archivering.username>
+
+        <maven.jdbc.master.driverClassName>org.postgresql.Driver</maven.jdbc.master.driverClassName>
+        <maven.jdbc.master.url>jdbc:postgresql://localhost/brpjunit</maven.jdbc.master.url>
+        <maven.jdbc.master.password>brp</maven.jdbc.master.password>
+        <maven.jdbc.master.username>brp</maven.jdbc.master.username>
+
+        <!-- De default JDBC properties bedoeld voor lokaal ontwikkelen met een lokale PostgreSQL database. -->
+        <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+        <maven.jdbc.url>jdbc:postgresql://localhost/brpjunit</maven.jdbc.url>
+        <maven.jdbc.password>brp</maven.jdbc.password>
+        <maven.jdbc.username>brp</maven.jdbc.username>
+        <maven.jdbc.pool.maxActive>100</maven.jdbc.pool.maxActive>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.util</groupId>
+            <artifactId>brp-algemeen-util-logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <!-- logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemPropertyVariables>
+                        <org.jboss.logging.provider>slf4j</org.jboss.logging.provider>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>create-db</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipTests}</skip>
+                            <driver>${maven.jdbc.driverClassName}</driver>
+                            <dropFirst>true</dropFirst>
+                            <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                            <changeLogFile>changeset/brp-databases.xml</changeLogFile>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                        <artifactId>brp-algemeen-opslag-database</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <driver>${maven.jdbc.driverClassName}</driver>
+                    <url>${maven.jdbc.url}</url>
+                    <username>${maven.jdbc.username}</username>
+                    <password>${maven.jdbc.password}</password>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <!--properties voor test uitpakken-->
+                    <execution>
+                        <id>unpack-test-properties</id>
+                        <phase>generate-test-resources</phase>
+                    </execution>
+                    <!--properties voor docker uitpakken-->
+                    <execution>
+                        <id>unpack-docker-properties</id>
+                        <phase>generate-test-resources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--properties voor test uitpakken filteren zodat ze gevuld worden -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>filter-test-properties</id>
+                        <phase>process-test-resources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+        	<plugins>
+        		<!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+        		<plugin>
+        			<groupId>org.eclipse.m2e</groupId>
+        			<artifactId>lifecycle-mapping</artifactId>
+        			<version>1.0.0</version>
+        			<configuration>
+        				<lifecycleMappingMetadata>
+        					<pluginExecutions>
+        						<pluginExecution>
+        							<pluginExecutionFilter>
+        								<groupId>org.liquibase</groupId>
+        								<artifactId>
+        									liquibase-maven-plugin
+        								</artifactId>
+        								<versionRange>
+        									[3.1.1,)
+        								</versionRange>
+        								<goals>
+        									<goal>update</goal>
+        								</goals>
+        							</pluginExecutionFilter>
+        							<action>
+        								<ignore />
+        							</action>
+        						</pluginExecution>
+        					</pluginExecutions>
+        				</lifecycleMappingMetadata>
+        			</configuration>
+        		</plugin>
+        	</plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>inmemory</id>
+            <activation>
+                <property>
+                    <name>db.inmemory</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.activemq.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.activemq.driverClassName>
+                <maven.jdbc.activemq.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.activemq.url>
+                <maven.jdbc.activemq.password>brp</maven.jdbc.activemq.password>
+                <maven.jdbc.activemq.username>brp</maven.jdbc.activemq.username>
+
+                <maven.jdbc.archivering.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.archivering.driverClassName>
+                <maven.jdbc.archivering.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.archivering.url>
+                <maven.jdbc.archivering.username>brp</maven.jdbc.archivering.username>
+                <maven.jdbc.archivering.password>brp</maven.jdbc.archivering.password>
+
+                <maven.jdbc.master.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.master.driverClassName>
+                <maven.jdbc.master.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.master.url>
+                <maven.jdbc.master.username>brp</maven.jdbc.master.username>
+                <maven.jdbc.master.password>brp</maven.jdbc.master.password>
+
+                <maven.jdbc.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.url>
+                <maven.jdbc.username>brp</maven.jdbc.username>
+                <maven.jdbc.password>brp</maven.jdbc.password>
+                <maven.jdbc.pool.maxActive>100</maven.jdbc.pool.maxActive>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create-db</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skipTests}</skip>
+                                    <driver>${maven.jdbc.driverClassName}</driver>
+                                    <dropFirst>true</dropFirst>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changeLogFile>changeset/brp-hsqldb-databases.xml</changeLogFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.hsqldb</groupId>
+                                <artifactId>hsqldb</artifactId>
+                                <version>${hsqldb.version}</version>
+                            </dependency>
+                            <dependency>
+                                <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                                <artifactId>brp-algemeen-opslag-database</artifactId>
+                                <version>${project.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.surefire</groupId>
+                                <artifactId>surefire-junit47</artifactId>
+                                <version>2.16</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <excludedGroups>nl.bzk.brp.utils.junit.OverslaanBijInMemoryDatabase</excludedGroups>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>ci.build</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.activemq.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_gba</maven.jdbc.activemq.url>
+                <maven.jdbc.activemq.username>${jenkins.postgresql.gebruiker}</maven.jdbc.activemq.username>
+                <maven.jdbc.activemq.password>${jenkins.postgresql.wachtwoord}</maven.jdbc.activemq.password>
+                <!-- speciale database connectie voor archivering/logging en protocollering -->
+                <maven.jdbc.archivering.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_gba</maven.jdbc.archivering.url>
+                <maven.jdbc.archivering.username>${jenkins.postgresql.gebruiker}</maven.jdbc.archivering.username>
+                <maven.jdbc.archivering.password>${jenkins.postgresql.wachtwoord}</maven.jdbc.archivering.password>
+                <!-- connectie naar de master database om locks te leggen en wijzigingen te doen -->
+                <maven.jdbc.master.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_gba</maven.jdbc.master.url>
+                <maven.jdbc.master.username>${jenkins.postgresql.gebruiker}</maven.jdbc.master.username>
+                <maven.jdbc.master.password>${jenkins.postgresql.wachtwoord}</maven.jdbc.master.password>
+                <!-- overridden properties -->
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_gba</maven.jdbc.url>
+                <maven.jdbc.username>${jenkins.postgresql.gebruiker}</maven.jdbc.username>
+                <maven.jdbc.password>${jenkins.postgresql.wachtwoord}</maven.jdbc.password>
+            </properties>
+        </profile>
+    </profiles>
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/gba</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/gba</developerConnection>
+    </scm>
+</project>

@@ -1,0 +1,33 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>finish-db</id>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <!-- Bestanden uit project -->
+    <fileSets>
+        <fileSet>
+            <directory>src/main/resources/kern/helper</directory>
+            <outputDirectory>kern/helper</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <!-- Bestanden uit dependencies -->
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-db</include>
+            </includes>
+            <unpack>true</unpack>
+            <unpackOptions>
+                <includes>
+                    <include>kern/helper/01-constraintsAdd.sql</include>
+                    <include>kern/helper/01-indexesAdd.sql</include>
+                    <include>kern/helper/92-sequencesUpdate.sql</include>
+                </includes>
+            </unpackOptions>
+        </dependencySet>
+    </dependencySets>
+</assembly>

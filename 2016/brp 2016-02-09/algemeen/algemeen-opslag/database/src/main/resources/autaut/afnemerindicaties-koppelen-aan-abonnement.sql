@@ -1,0 +1,10 @@
+-- Er zijn mogelijk nog afnemerindicaties die nu losgekoppeld zijn van abonnementen.
+-- Koppel de afnemerindicaties aan het juiste abonnement
+--FIXME autaut proeftuin
+-- UPDATE autaut.persafnemerindicatie
+-- SET abonnement =
+--   (
+--   SELECT a.id
+--   FROM autaut.abonnement a
+--   WHERE a.naam = concat('Synchroniseren via indicatie voor partij ', lpad(CAST((SELECT p.code FROM kern.partij p WHERE p.id = afnemer) as TEXT), 6, '0'),'')
+--   );

@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 10-01-2014 Status:Concept -->
+<!-- -->
+<!-- Wijzigingen: -->
+<!-- 1) Consoldiatie gegevensmodel; type 'Geslachtsnaamstam' bij Zoekcriteria) -->
+<!-- -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:stuf="http://www.kinggemeenten.nl/StUF/StUF0302" xmlns:brp="http://www.bzk.nl/brp/brp0100" targetNamespace="http://www.bzk.nl/brp/brp0100" elementFormDefault="qualified" attributeFormDefault="unqualified" version="010007">
+	<import namespace="http://www.kinggemeenten.nl/StUF/StUF0302" schemaLocation="BRP0100_StUF.xsd"/>
+	<include schemaLocation="BRP0100_Bevraging_Basis.xsd"/>
+	<!-- ... -->
+	<element name="ALG_ZoekPersoon_V" type="brp:Algemeen_ZoekPersoon_Bevraging"/>
+	<element name="ALG_ZoekPersoon_VR" type="brp:Algemeen_ZoekPersoon_BevragingResultaat"/>
+	<element name="ALG_GeefDetailsPersoon_V" type="brp:Algemeen_GeefDetailsPersoon_Bevraging"/>
+	<element name="ALG_GeefDetailsPersoon_VR" type="brp:Algemeen_GeefDetailsPersoon_BevragingResultaat"/>
+	<element name="ALG_BepaalKandidaatVader_Vi" type="brp:Algemeen_BepaalKandidaatVader_Bevraging"/>
+	<element name="ALG_BepaalKandidaatVader_ViR" type="brp:Algemeen_BepaalKandidaatVader_BevragingResultaat"/>
+	<element name="ALG_GeefPersonenOpAdresMetBetrokkenheden_Vi" type="brp:Algemeen_PersonenOpAdresMetBetrokkenheden_Bevraging"/>
+	<element name="ALG_GeefPersonenOpAdresMetBetrokkenheden_ViR" type="brp:Algemeen_PersonenOpAdresMetBetrokkenheden_BevragingResultaat"/>
+	<!-- ... -->
+	<!-- ... -->
+	<!-- Vraagbericht: Zoek Persoon -->
+	<complexType name="Algemeen_ZoekPersoon_Bevraging">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDi02_Vraag" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bevraging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="vraag" type="brp:Objecttype_Vraag_ZoekPersoon" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Vraag_ZoekPersoon">
+		<complexContent>
+			<restriction base="brp:Objecttype_Vraag">
+				<sequence>
+					<element name="zoekcriteria" type="brp:Groep_VraagZoekcriteria_ZoekPersoon" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="Vraag"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_VraagZoekcriteria_ZoekPersoon">
+		<complexContent>
+			<restriction base="brp:Groep_VraagZoekcriteria">
+				<sequence>
+					<!-- Via bedrijfsregels worden juiste combinaties gecontroleerd -->
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="administratienummer" type="brp:Administratienummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaam" type="brp:Geslachtsnaamstam" nillable="false" minOccurs="0" maxOccurs="1"/>	
+					<element name="geboortedatum" type="stuf:OnvolledigeDatum" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummer" type="brp:Huisnummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisletter" type="brp:Huisletter" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="postcode" type="brp:Postcode" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="prohibited"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- VraagberichtResultaat: Zoek Persoon -->
+	<complexType name="Algemeen_ZoekPersoon_BevragingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDu02_Vraag" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bevraging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="antwoord" type="brp:Objecttype_Antwoord_PersoonIdentificerend_Selectie" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Antwoord_PersoonIdentificerend_Selectie">
+		<complexContent>
+			<restriction base="brp:Objecttype_Antwoord">
+				<sequence>
+					<choice>
+						<element name="personen" type="brp:Container_AntwoordPersonen_PersoonIdentificerend_Selectie" nillable="true" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="Antwoord"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="prohibited"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_AntwoordPersonen_PersoonIdentificerend_Selectie">
+		<complexContent>
+			<restriction base="brp:Container_AntwoordPersonen">
+				<sequence>
+					<choice>
+						<element name="persoon" type="brp:Referentie_PersoonIdentificerendZoekPersoon_Antwoord" nillable="false" minOccurs="1" maxOccurs="10"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Vraagbericht: Geef Details Persoon -->
+	<complexType name="Algemeen_GeefDetailsPersoon_Bevraging">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDi02_Vraag" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bevraging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="vraag" type="brp:Objecttype_Vraag_DetailsPersoon" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Vraag_DetailsPersoon">
+		<complexContent>
+			<restriction base="brp:Objecttype_Vraag">
+				<sequence>
+					<element name="zoekcriteria" type="brp:Groep_VraagZoekcriteria_Burgerservicenummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="Vraag"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- VraagberichtResultaat: Geef Details Persoon - Actueel -->
+	<complexType name="Algemeen_GeefDetailsPersoon_BevragingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDu02_Vraag" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bevraging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="antwoord" type="brp:Objecttype_Antwoord_DetailsPersoon" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Antwoord_DetailsPersoon">
+		<complexContent>
+			<restriction base="brp:Objecttype_Antwoord">
+				<sequence>
+					<choice>
+						<element name="personen" type="brp:Container_AntwoordPersonen_DetailsPersoon" nillable="true" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="Antwoord"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="prohibited"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_AntwoordPersonen_DetailsPersoon">
+		<complexContent>
+			<restriction base="brp:Container_AntwoordPersonen">
+				<sequence>
+					<choice>
+						<element name="persoon" type="brp:Objecttype_DetailsPersoon_Antwoord" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Vraagbericht: InformatieVraag Bepaal kandidaat Vader -->
+	<complexType name="Algemeen_BepaalKandidaatVader_Bevraging">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDi02_Vraag" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_BevragingOpPeilmomentMaterieel" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="vraag" type="brp:Objecttype_Vraag_KandidaatVader" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Vraag_KandidaatVader">
+		<complexContent>
+			<restriction base="brp:Objecttype_Vraag">
+				<sequence>
+					<element name="zoekcriteria" type="brp:Groep_VraagZoekcriteria_KandidaatVader" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="Vraag"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_VraagZoekcriteria_KandidaatVader">
+		<complexContent>
+			<restriction base="brp:Groep_VraagZoekcriteria">
+				<sequence>
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="geboortedatumKind" type="stuf:OnvolledigeDatum" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="prohibited"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- VraagberichtResultaat: InformatieVraag Bepaal kandidaat Vader -->
+	<complexType name="Algemeen_BepaalKandidaatVader_BevragingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDu02_Vraag" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bevraging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="antwoord" type="brp:Objecttype_Antwoord_KandidaatVader" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Vraagbericht: InformatieVraag Personen op adres inclusief betrokkenheden -->
+	<complexType name="Algemeen_PersonenOpAdresMetBetrokkenheden_Bevraging">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDi02_Vraag" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_BevragingOpPeilmomentMaterieel" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="vraag" type="brp:Objecttype_Vraag_PersonenOpAdresMetBetrokkenheden" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Vraag_PersonenOpAdresMetBetrokkenheden">
+		<complexContent>
+			<restriction base="brp:Objecttype_Vraag">
+				<sequence>
+					<element name="zoekcriteria" type="brp:Groep_VraagZoekcriteria_PersonenOpAdresMetBetrokkenheden" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="Vraag"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_VraagZoekcriteria_PersonenOpAdresMetBetrokkenheden">
+		<complexContent>
+			<restriction base="brp:Groep_VraagZoekcriteria">
+				<sequence>
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeenteCode" type="brp:GemeenteCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="naamOpenbareRuimte" type="brp:NaamOpenbareRuimte" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummer" type="brp:Huisnummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisletter" type="brp:Huisletter" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="postcode" type="brp:Postcode" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="prohibited"/>
+				<attribute ref="stuf:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- VraagberichtResultaat: InformatieVraag Personen op adres inclusief betrokkenheden -->
+	<complexType name="Algemeen_PersonenOpAdresMetBetrokkenheden_BevragingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDu02_Vraag" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bevraging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="antwoord" type="brp:Objecttype_Antwoord_PersoonOpAdresMetBetrokkenheden" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

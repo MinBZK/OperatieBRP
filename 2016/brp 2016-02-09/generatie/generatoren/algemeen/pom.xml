@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.generatie</groupId>
+        <artifactId>brp-generatie-generatoren</artifactId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>brp-generatie-generatoren-algemeen</artifactId>
+    <name>BRP Generatie Generatoren - Algemeen</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.generatie</groupId>
+            <artifactId>brp-generatie-metaregister-dataaccess</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.generatie</groupId>
+            <artifactId>brp-generatie-metaregister-metamodel</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>jaxen</groupId>
+            <artifactId>jaxen</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jibx</groupId>
+            <artifactId>jibx-run</artifactId>
+            <version>${jibx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jibx</groupId>
+            <artifactId>jibx-bind</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <generatedSourcesDirectory>${generated.sources}</generatedSourcesDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jibx</groupId>
+                <artifactId>maven-jibx-plugin</artifactId>
+                <version>${jibx.version}</version>
+                <executions>
+                    <execution>
+                        <id>schema-codegen-generatoren-info</id>
+                        <goals>
+                            <goal>schema-codegen</goal>
+                            <goal>bind</goal>
+                        </goals>
+                        <configuration>
+                            <multimodule>true</multimodule>
+                            <schemaLocation>src/main/resources</schemaLocation>
+                            <includeSchemas>
+                                <includeSchema>generatie-info.xsd</includeSchema>
+                            </includeSchemas>
+                            <schemaBindingDirectory>target/generated-sources</schemaBindingDirectory>
+                            <defaultPackage>nl.bzk.brp.generatoren.algemeen.generatieinfo</defaultPackage>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/generatoren/algemeen</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/generatoren/brp-generatie-generatoren-algemeen</developerConnection>
+  </scm>
+
+</project>

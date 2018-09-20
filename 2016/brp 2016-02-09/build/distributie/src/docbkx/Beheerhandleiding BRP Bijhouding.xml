@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+<book xmlns="http://docbook.org/ns/docbook">
+    <title>Beheerhandleiding BRP Bijhouding software</title>
+    <titleabbrev>Versie 1.0</titleabbrev>
+
+    <chapter>
+        <title>Inleiding</title>
+
+        <para>
+            Dit document beschrijft de beheeraspecten van de BRP Bijhouding software.
+        </para>
+
+        <section>
+            <title>Doel</title>
+            <para>
+                Operationeel beheer ondersteunen bij het beheren van de BRP Bijhouding software.
+            </para>
+        </section>
+
+        <section>
+            <title>Scope</title>
+            <para>
+                Handleiding voor het beheren van de BRP Bijhouding software op een nieuwe omgeving op een bestaande omgeving.
+                Dit document is bedoeld voor operationeel beheerders van de BRP Bijhouding software.
+            </para>
+        </section>
+
+        <section>
+            <title>Doelgroep</title>
+            <para>Operationeel beheerders met gedegen kennis van PostgreSQL en Apache Tomcat.</para>
+        </section>
+
+        <section>
+            <title>Precondities</title>
+            <para>Aan de volgende precondities moet worden voldaan om tot een correcte installatie van de software te komen.</para>
+            <section>
+                <title>Database</title>
+                <para>Er is een BRP database geïnstalleerd en toegankelijk op een bekende hostname + port (zie handleiding database installatie).
+                </para>
+            </section>
+        </section>
+    </chapter>
+
+    <chapter>
+        <title>Certificaten</title>
+
+        <para>Certificaten worden binnen het BRP-systeem gebruikt voor de volgende drie doeleinden:
+            <itemizedlist>
+                <listitem>
+                    <para>Encryptie en Authenticatie - SSL over TLS met Client Authentication</para>
+                </listitem>
+                <listitem>
+                    <para>Autorisatie - Autorisatie van de partij waarmee gecommuniceerd wordt</para>
+                </listitem>
+                <listitem>
+                    <para>Verificatie - Controle van de integriteit van berichten</para>
+                </listitem>
+            </itemizedlist>
+
+            De volgende paragrafen beschrijven deze doeleinden in meer detail en geven aan wat er moet gebeuren om het systeem correct te configureren.
+
+            Voor server- en clientcertificaten van partijen zijn Certificate Signing Requests (CSR) nodig. Deze zullen self-signed zijn en daarom
+            moeten worden toegevoegd aan de trust store van de ontvangende partij worden toegevoegd.
+
+            Als er niet gebruik wordt gemaakt van SSL offloading middels een webserver, dient Tomcat zelf de SSL verbinding te verzorgen en als
+            zodanig te worden geconfigureerd.
+        </para>
+
+        <section>
+            <title>Encryptie</title>
+            <section>
+                <title>BRP als server</title>
+                <para>
+                    Encryptie van de communicatie en authenticatie van de client wordt verzorgd door de webserver. Het is de bedoeling dat er
+                    een webserver voor de applicatieserver komt te draaien, die de SSL verbinding opzet. Hierbij wordt gebruik gemaakt van SSL met client
+                    authentication. Creëer een CSR en signeer deze. Voeg het certificaat en private key toe aan de private store van de webserver.
+                    Verstrek het gesigneerde certificaat aan de client en voeg het toe aan de trust store van de client.
+                    Vanwege de Client Authentication heeft elke client een clientcertificaat nodig, welke gebruikt zal worden tijdens
+                    de SSL handshake. Voeg het clientcertificaat toe aan de trust store van de webserver. Het clientcertificaat en private key
+                    zullen moeten worden toegevoegd aan de private store van de client.
+                    Deze vorm van communicatie wordt gebruikt voor de Bevraging services.
+                </para>
+            </section>
+        </section>
+
+        <section>
+            <title>Autorisatie</title>
+            <para>
+                Om clients te kunnen autoriseren moet er een gesigneerd certificaat aan de client verstrekt zijn. Dit is hetzelfde certificaat dat
+                wordt gebruikt voor de SSL encryptie. De subject, serial en signature van het certificaat dient aanwezig te zijn in de certificaat
+                tabel van het autaut database schema. Deze gegevens worden bij een request uit de SOAP header gehaald en geverifieerd tegen de
+                gegevens uit de genoemde database tabel. Op die manier weten we met wie we te maken hebben en of de partij ook is wie het
+                pretendeert te zijn.
+                De client dient de certificaatgegevens mee te sturen in de WS-Security headers van uitgaande berichten.
+            </para>
+        </section>
+
+        <section>
+            <title>Verificatie</title>
+            <para>
+                Inkomende (request) berichten worden geverifieerd op integriteit door een signature te decrypten met de public key uit het certificaat
+                van de client. Het client certificaat dient daarom aanwezig te zijn in de public store van de applicatieserver. Voor bijvoorbeeld
+                Synchronisatie is er een security.keystore.public.file property opgenomen in het synchronisatie.properties bestand.
+                Uitgaande (response) berichten worden voorzien van een signature. De BRP private en public key dienen daarom aanwezig te zijn de
+                private store van de applicatieserver. Voor bijvoorbeeld Synchronisatie is er een security.keystore.private.file property opgenomen
+                in het synchronisatie.properties bestand.
+            </para>
+        </section>
+    </chapter>
+</book>

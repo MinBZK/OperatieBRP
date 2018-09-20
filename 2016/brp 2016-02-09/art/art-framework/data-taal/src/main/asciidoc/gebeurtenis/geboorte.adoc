@@ -1,0 +1,214 @@
+
+:sourcedir: ../../../test/asciidoc/geboorte
+
+=== Geboorte
+Geboorte is veel al de eerste gebeurtenis van een persoon.
+
+
+==== Wanneer, waar?
+De geboorte gebeurtenis begint met het aanduiden van wanneer en waar:
+
+[source, groovy]
+----
+geboorte() {
+  op '2010/03/24' te 'Monster' gemeente 'Westland'
+  op 19890531 te "'s-Gravenhage" gemeente 1786
+  op(20090000).te('Groningen').gemeente('Groningen')
+}
+----
+De datum is een datum zoals ook genoteerd wordt in de expressietaal. Dit mag dus ook
+een (deels)onbekende datum zijn, waarbij bijvoorbeeld dag of maand als `00` wordt
+geschreven. Daarna volgt de woonplaats, een Plaats in de BRP. Als laatste de gemeente.
+Dit zorgt voor het aanmaken van een voorkomen van de groep _geboorte_.
+
+
+==== Geslacht
+[source, groovy]
+----
+geboorte() {
+  geslacht('MAN')
+  geslacht 'VROUW'
+
+  jongen()
+  meisje()
+}
+----
+Er zijn verschillende manieren om het geslacht van een persoon aan te duiden.
+Het resulteert in een voorkomen in de groep _geslachtsaanduiding_.
+
+
+==== Namen
+Een persoon heeft _voornamen_, _geslachtsnamen_.
+De namen van de persoon worden geregistreerd in een `namen() {}` blok. In het blok
+kunnen de voornamen, geslachtsnamen en optioneel een (niet afgeleide) _samengestelde naam_ worden vastgelegd. Aan het einde van de uitvoer van dit blok wordt de samengestelde naam (indien
+niet handmatig vastgelegd) afgeleid, alsmede een voorkomen van de groep _naamgebruik_.
+
+[source,groovy]
+.Het namen blok
+----
+geboorte() {
+  namen {
+    //... <1>
+  }
+}
+----
+<1> voornamen etc. komen hier
+
+===== Voornamen
+Een of meer voornamen worden opgegeven. De voornamen krijgen een volgnummer (vanaf *1*) in de
+volgorde waarin ze zijn opgesomd.
+
+[source,groovy]
+----
+  namen {
+    voornamen 'Jan', 'Piet', 'Klaas'
+    //...
+  }
+----
+
+===== Geslachtsnaamcomponenten
+Geslachtsnaamcomponenten kunnen in verschillende vormen worden vastgelegd. Indien er slechts
+een is met uitsluitend een _stam_ kan de volgende verkorte versie worden gebruikt:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam 'Jansen'
+  }
+----
+
+Het is ook mogelijk om een geslachtsnaam uitgebreider vast te leggen:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam(
+      [stam: 'Jansen', voorvoegsel: 'van', scheidingsteken:'-', adellijkeTitel: 'P', predicaat: 'H'] <1>
+    )
+  }
+----
+<1> volledige opties voor een geslachtsnaamcomponent
+
+
+===== Samengestelde naam
+Normaal gesproken wordt de samengestelde naam afgeleid van de voornamen en geslachtsnaamcomponenten.
+Het is echter ook mogelijk om de samengestelde naam met de hand op te geven. Als
+dit gebeurd, wordt de afleiding van de samengestelde naam overgeslagen.
+
+[source,groovy]
+----
+  namen {
+    //...
+    samengesteldenaam([voornamen: 'Jan Piet', stam: 'Jansen', voorvoegsel: 'van', scheidingsteken:'-', adellijkeTitel: 'P', predicaat: 'H'])
+  }
+----
+
+===== Naamgebruik
+Na het opgeven van de voornamen, geslachtsnaamcomponenten en samengestelde naam
+wordt het _naamgebruik_ afgeleid en als voorkomen van deze groep opgenomen.
+
+
+==== Identificatienummers
+Een persoon heeft een _Burgerservicenummer_ en _Administratienummer_.
+
+[source, groovy]
+----
+geboorte() {
+  identificatienummers bsn:123, anummer:456
+  identificatienummers([bsn: 123, anummer: 456])
+}
+----
+
+
+==== Ouders
+Als de `ouders()` functie wordt aangeroepen wordt er voor de persoon die wordt 'geboren'
+een _kind betrokkenheid_ en _familierechtelijke betrekking_ aangemaakt. Óf en welke
+_ouder betrokkenheden_ er zijn wordt bepaald door de parameters van de aanroep. Indien
+er een moeder of eerste ouder is, wordt deze aangemerkt als de _adresgevende ouder_.
+Is die persoon een _ingeschrevene_ dan wordt het adres gekopieerd naar het kind.
+
+Het is toegestaan om `null` als waarde voor een ouder op te geven. Indien de eerste ouder of
+moeder `null` is, wordt daarvoor wel een ouderbetrokkenheid aangemaakt (dus met onbekende ouder).
+Als de vader (of 2e ouder) `null` is wordt er ook betrokkenheid vastgelegd. Door het niet opgeven
+van de vader, is het mogelijk om erkenning bij of na geboorte te laten gebeuren.
+
+====
+[NOTE]
+.Ontbrekende ouders
+Indien er wordt geschreven `ouders()` worden er geen ouderbetrokkenheden aangemaakt, en
+zijn er _ontbrekende ouders_ .
+====
+
+[source,groovy]
+----
+geboorte() {
+  ouders(ouder1, ouder2)
+  ouders ouder1, ouder2 <1>
+
+  ouders([moeder:marie, vader:piet])
+  ouders vader:marie, moeder:piet <2>
+
+  ouders() <3>
+  ouders(ouder1, null) <4>
+  ouders(moeder:null) <5>
+}
+----
+<1> ouders als lijst, de eerste ouder is de adresgevende ouder
+<2> ouders als map, de _moeder_ is de adresgevende ouder
+<3> ontbrekende ouders, dus geen ouderbetrokkenheden
+<4> variaties waarbij er geen twee ouders zijn
+<5> een onbekende ouder
+
+
+==== Erkenning
+Het is ook mogelijk om de erkenning van het kind door een ouder vast
+te leggen. Hierbij zal de administratieve handeling veranderen van _Geboorte
+in Nederland_ naar _Geboorte in Nederland met Erkenning_. Erkenning werkt alleen
+als er slechts een moeder is geregistreerd.
+
+[source,groovy]
+----
+geboorte() {
+  ouders moeder: marie
+  erkendDoor piet
+}
+----
+
+
+==== Nationaliteiten
+Een geboorte registreert de persoon automatisch als Nederlander. Extra nationaliteiten
+kunnen worden toegevoegd als dat nodig is.
+
+[source,groovy]
+----
+geboorte() {
+  nationaliteiten('Canadese', 'Turkse')
+}
+----
+
+
+==== Indicaties
+Een persoon kan één of meerdere indicaties hebben. Deze kunnen bij geboorte alleen
+worden aangezet.
+
+[source,groovy]
+----
+geboorte() {
+  behandeldAlsNederlander(true)
+  staatloos(true)
+  verstrekkingsbeperkingen { } <1>
+}
+----
+<1> verstrekkingsbeperkingen zoals bij <<gebeurtenis/afnemerindicaties.adoc#verstrekkingsbeperkingen,Verstrekkingsbeperkingen>>
+
+
+==== Voorbeeld
+Een voorbeeld van  de gebeurtenis geboorte met alle opties getoond:
+
+[source,groovy, numbered]
+.geboorte-voorbeeld.groovy
+----
+include::{sourcedir}/volledig.groovy[lines=3..-1]
+----

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+		<groupId>nl.bzk.brp.gba</groupId>
+		<artifactId>brp-gba</artifactId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>brp-gba-algemeen</artifactId>
+    <packaging>jar</packaging>
+
+    <name>BRP GBA - Algemeen</name>
+    <description>Algemene functionaliteit (zoals dataaccess) voor GBA</description>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/gba/gba-algemeen</connection>
+		<developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/gba/gba-algemeen</developerConnection>
+	</scm>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- Project -->
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-dataaccess</artifactId>
+        </dependency>
+
+        <!-- testing -->
+        
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-dataaccess</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+        <!-- DBCP -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <scope>test</scope>
+        </dependency>
+        
+    </dependencies>
+
+    <build>
+        <defaultGoal>install</defaultGoal>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
+        <testResources>
+            <testResource>
+                <filtering>true</filtering>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <!--properties voor test uitpakken-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>unpack-test-properties</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-test-resources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.properties</groupId>
+                                    <artifactId>brp-test-properties</artifactId>
+                                    <version>${project.version}</version>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/test-resources/template</outputDirectory>
+                                    <includes>**/*.properties</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--properties voor test uitpakken filteren zodat ze gevuld worden -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>filter-test-properties</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                        <configuration>
+
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.directory}/test-resources/template</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>*.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>db.postgresql</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_gba_algemeen</maven.jdbc.url>
+            </properties>
+        </profile>
+    </profiles>	
+</project>

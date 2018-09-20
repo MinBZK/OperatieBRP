@@ -1,0 +1,63 @@
+2 april 2014 - BRP Release 14
+
+Deze release is gebaseerd op BMR versie 29, database versie 29 en koppelvlak versie 16.1.
+
+DATABASE
+Geen upgrade uitvoeren, maar een nieuwe database neerzetten m.b.v. een backup-file.
+Hier zit alles direct in, er zijn geen aparte sql-scripts nodig.
+Dump voor deze release zit in database-dump\whitebox29.backup
+
+LOGGING
+In log4j.xml is abonnement gewijzigd in toegangAbonnementId in de <param name="additionalFields" van de
+<appender name="LOGSERVER" class="org.graylog2.log.GelfAppender">. De volgende tekst dient te worden vervangen:
+
+'abonnement':'abonnement'
+voor:
+'toegangAbonnementId':'toegangAbonnementId'
+
+
+PROPERTIES
+De module kennisgeving-verstuurder is hernoemd naar brp-verstrekking. Hierdoor is de volgende actie nodig:
+    - Hernoem het bestand kennisgeving-verstuurder.properties naar brp-verstrekking.properties.
+
+
+BIJHOUDING
+    - De bijhouding module is hernoemd van brp.war naar bijhouding.war
+    - Stop de server(s)
+    - Verwijder de oude wars en directories. (brp directory en brp.war)
+    - Deploy de war uit de bijhouding folder en start de server
+
+BEVRAGING
+    - Stop de server(s)
+    - Verwijder de oude wars en directories
+    - Deploy de war's uit de bevraging folder en start de server
+
+LEVERING
+Let op: De module kennisgeving-verstuurder is hernoemd naar brp-verstrekking.
+    - Stop de server(s)
+    - Verwijder de oude wars en directories
+    - Deploy de war's uit de levering folder en start de server
+
+ROUTERING CENTRALE
+Let op: Er zijn properties gewijzigd in het bestand brp-route-configuratie.properties. Er is een (1)
+property vervallen (bijhouding.admhnd.publicatie.queue.name) en er zijn twee (2) properties bijgekomen
+(bijhouding.brp.admhnd.publicatie.queue.name en bijhouding.gba.admhnd.publicatie.queue.name).
+    - Stop de server(s)
+    - pas de inhoud aan van het bestand brp-route-configuratie.properties
+    - Deploy de war routering-centrale.war.
+    - Start de server
+
+PROTOCOLLERING VERWERKER
+    - Stop de server(s)
+    - Deploy de war protocollering-verwerker.war
+    - Start de server
+
+VERIFICATIE
+    - Verifieer dat de tomcat instanties alle contexts hebben opgestart en er geen errors zijn in de logging.
+    - Verfificatie urls voor de versies:
+        * Bijhouding: https://APPSERVER:8080/bijhouding/BijhoudingService/version.html
+        * Bevraging:  https://APPSERVER:8080/bevraging/BijhoudingBevragingService/version.html
+        * Levering ah-notificatie-verwerker:  https://APPSERVER:8080/ah-notificatie-verwerker/versie.html
+        * Levering brp-verstrekking:  https://APPSERVER:8080/brp-verstrekking/versie.html
+        (Voor het verifieren van de levering applicaties, dient de appserver ook bereikbaar te zijn, dat was tot nu toe niet zo!)
+

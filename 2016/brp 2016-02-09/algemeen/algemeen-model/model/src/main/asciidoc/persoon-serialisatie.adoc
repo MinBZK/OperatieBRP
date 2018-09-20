@@ -1,0 +1,133 @@
+# Persoon serialisatie en deserialisatie
+BRP Ontwikkelaars
+v0, Maart 2015
+:revnumber: {docVersion}
+:icons: font
+:numbered:
+
+Serialisatie is het kunnen opslaan van een persoon in een andere vorm dan het relationele. Dit
+heeft als voordeel dat een persoon veel sneller kan wordt gelezen uit een opslagmechanisme. Welke
+stappen nodig zijn om dit te doen, en welke details daarin belangrijk zijn staat in dit document
+beschreven.
+
+
+## Onderzoek notities
+Om een attribuut of object te serialiseren moet deze expliciet worden geannoteerd met `@JsonProperty`.
+Om ervoor te zorgen dat de JSON string geen onnodige geneste objecten bevat moet voor de serialisatie de `@JsonValue`
+annotatie worden gebruikt (dan wordt er niet een object met `{waarde: xxx}` maar gewoon `burgerservicenummer:xxx`).
+
+[source, java]
+----
+@JsonCreator
+public Burgerservicenummer(final String waarde) {
+   this(waarde, false, null);
+}
+
+@JsonValue
+public String getWaarde() {
+   return waarde;
+}
+----
+
+Annotatie te gebruiken bij terugverwijzingen naar 'parent' objecten (zoals bijvoorbeeld een Persoon object), zodat deze
+niet mee geserialiseeerd wordt: `@JsonBackReference`. Er kan een methode worden toegevoegd die wordt gebruikt als er een
+ onbekende property wordt gevonden:
+
+----
+@JsonAnySetter (method)
+public void handleUnknownProperty(String propertyKey, String value) { }
+----
+
+### Custom serialisatie
+Voor het toevoegen van custom serializers kan je een eigen module (met eigen versionering) gebruiken, zie wiki pagina:
+http://wiki.fasterxml.com/JacksonFeatureModules
+
+### Opties voor serialisatie
+
+- WRITE_ENUMS_USING_TO_STRING -> true
+- WRITE_NULL_MAP_VALUES -> true
+- WRITE_EMPTY_JSON_ARRAYS -> true
+- FAIL_ON_EMPTY_BEANS -> false
+
+### Opties voor deserialisatie
+
+- FAIL_ON_UNKNOWN_PROPERTIES -> false
+- http://wiki.fasterxml.com/JacksonFeaturesDeserialization?highlight=%28%28JacksonAnnotations%29%29
+
+### Mapper configuratie
+De onderstaande mapper configuratie is gebruikt voor serialisatie / deserialisatie
+
+[source, java]
+----
+mapper.disable(MapperFeature.AUTO_DETECT_GETTERS);
+mapper.disable(MapperFeature.AUTO_DETECT_CREATORS);
+mapper.disable(MapperFeature.AUTO_DETECT_SETTERS);
+mapper.disable(MapperFeature.AUTO_DETECT_IS_GETTERS);
+mapper.disable(MapperFeature.AUTO_DETECT_FIELDS);
+mapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.NONE);
+mapper.enable(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY);
+mapper.enable(MapperFeature.CAN_OVERRIDE_ACCESS_MODIFIERS);
+// serialization
+mapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
+mapper.setSerializationInclusion(JsonInclude.Include.NON_EMPTY);
+// deserialization
+mapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+----
+
+### Smile configuratie
+Smile is de library voor binaire JSON (de-)serialisatie die gebruikt wordt als aanvulling op de Jackson library,
+
+[source, java]
+----
+SmileFactory f = new SmileFactory();
+f.enable(SmileGenerator.Feature.CHECK_SHARED_NAMES);
+f.enable(SmileGenerator.Feature.CHECK_SHARED_STRING_VALUES);
+f.enable(SmileGenerator.Feature.WRITE_HEADER);
+----
+
+### Versionering
+Door een versie object te maken die door het PersoonHisModel wordt geextend, is het mogelijk om alleen de versie van de
+blob op te vragen.
+
+[source, java]
+----
+ObjectReader versionReader = mapper
+    .reader(VersionedHis.class)
+    .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+VersionedHis versioned = versionReader.readValue(bits);
+----
+
+Versionering issues waar we rekening mee moeten houden zijn:
+
+- Toevoegen van een nieuwe property (object of attribuut);
+Door deze property te annoteren met @JsonProperty, wordt deze automatisch meegenomen in het serialiseren/deserialiseren.
+Doordat de FAIL_ON_UNKNOWN_PROPERTIES feature uit staat, kunnen we gewoon oude blobs inlezen.
+- Hernoemen van een property (object of attribuut);
+Om dit te ondersteunen zal een custom serialize / deserialize moeten worden geschreven. Deze kan op alleen deze property
+worden gezet door middel van de @JsonSerialize(using = CustomSerializer.class) en @JsonDeserialize(using =
+CustomDeSerializer.class) annotaties.
+
+- Verwijderen van een property (object of attribuut);
+Oude blob kan worden gelezen omdat het niet meer bestaan van een property kan worden genegeerd met de @AnySetter
+annotatie. (En de FAIL_ON_UNKNOWN_PROPERTIES mapper feature)
+- Veranderen van de cardinaliteit van een property;
+Verandering van cardinaliteit betekent ook veel database wijzigingen, dus de kans is groot dat dit gewoon betekent dat
+het opnieuw maken van de blob afgedwongen moet worden. (Kan door middel van een versie check bijvoorbeeld gebeuren).
+
+### Custom Serializer
+
+[source, java]
+----
+public class CustomSerializer extends JsonSerializer<MyObject> {
+     @Override
+     public void serialize(MyObject value, JsonGenerator generator, SerializerProvider provider) throws IOException, JsonProcessingException {
+        if (value.getWaarde() == 1) {
+            generator.writeString("one");
+        } else if (value.getWaarde() == 2) {
+            generator.writeString("two");
+        } else {
+            generator.writeString("Unsupported");
+        }
+    }
+}
+----

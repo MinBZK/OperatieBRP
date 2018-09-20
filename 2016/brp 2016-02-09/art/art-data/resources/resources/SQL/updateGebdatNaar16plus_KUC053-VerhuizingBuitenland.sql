@@ -1,0 +1,2 @@
+UPDATE kern.pers SET datgeboorte=[vandaagsql(-16,0,-1)] WHERE bsn=${DataSource Values#|objectid.burgerservicenummer_ipv4|};
+UPDATE kern.his_persgeboorte SET datgeboorte=[vandaagsql(-16,0,-1)] WHERE id in(select id from kern.pers where bsn=${DataSource Values#|objectid.burgerservicenummer_ipv4|});

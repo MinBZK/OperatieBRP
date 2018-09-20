@@ -1,0 +1,71 @@
+Deze folder bevat de proeftuin distributie.
+
+Inhoud:
+==============================
+/database-dump                                  Directory voor database dumps met proeftuin data.
+    /LEESMIJ                                    Instructies voor het inladen van de database dumps.
+    /whitebox**.backup                          De proeftuin database dump, gebaseerd op 1352 ambtenaren.
+
+/logging                                        Directory met voorbeelden van de configuratie bestanden.
+    /jmx/activemq.conf                          Logstash JMX connectie configuratie
+    /kibana-dashboard/jmx.json                  Kibana dashboard voor routeringcentrale.
+    /kibana-dashboard/proeftuin.json            Kibana dashboard voor proeftuin.
+    /log4j2.xml                                 Log4j2 configuratie.
+    /logstash.conf                              Logstash standaard configuratie.
+    /logstash-jmx.conf                          Logstash configuratie voor routering centrale.
+
+/soapui-tests                                   Directory met een SoapUi project om tests uit te voeren tegen de proeftuin.
+    /certificaten/**                            Directory met certificaten benodigd in het SoapUI project.
+    /LEESMIJ                                    Instructies voor het gebruik van het SoapUI project.
+    /Proeftuin-Controle-soapui-project.xml      Het SoapUI project waarmee berichten naar de Proeftuin omgeving kunnen worden verstuurd.
+
+
+Informatie:
+==============================
+1- Database dump
+2- Logstash configuratie
+3- Kibana dashboard
+4- Bekende problemen
+5- SoapUI tests
+
+1: Database dump
+De database dump bevat een versie van de brp-database met daarin de volgende zaken:
+ - een aantal testpersonen waar de afnemers van gebruik kunnen maken.
+ - een ingericht 'autaut'-schema waarin de abonnementen zijn ingericht voor de afnemers.
+ - de certificaten en het authenticatiemiddel voor alle afnemers
+
+Instructies voor het inladen van de database dump is te vinden in de LEESMIJ in de directory 'database-dump'.
+
+2: Logstash configuratie
+Logstash dient correct geconfigureerd te worden op elke afzonderlijke server waarvan we logging willen verzamelen.
+Een standaard configuratie voor logstash kun je vinden in "logging/logstash.conf". Dit bestand wordt standaard geplaatst
+op "/etc/logstash/conf.d/logstash.conf". Deze configuratie dient in de OUTPUT nog wel aangepast te worden voor de
+"host" (de logging server), "node_name" en "index".
+
+Voor de routering centrale is een uitgebreide versie van de standaard configuratie te vinden in "logging/logstash-jmx.conf".
+Deze dient geplaatst te worden op de server waar de RouteringCentrale draait. Deze configuratie verzamelt naast de "gewone"
+logging ook waarden via het JMX protocol (denk aan informatie over queues en leveringsberichten).
+Let op: deze configuratie dien je op de server in kwestie wel op te slaan als "/etc/logstash/conf.d/logstash.conf" (dus niet
+logstash-jmx.conf). Daarnaast dien je daar een subdirectory te maken voor de JMX connectie/configuratie. Maak dus een
+directory "jmx" waarin je het bestand "activemq.conf" kunt plaatsen, precies zoals in dit project. In dit bestand dien je
+nog wel even de "host" en "alias" naar wens aan te passen.
+
+NB: om de configuratie te testen kun je het volgende commando uitvoeren:
+ "/opt/logstash/bin/logstash --configtest --config /etc/logstash/conf.d/logstash.conf"
+
+3: Kibana dashboard
+Voor Kibana zijn er vooropgezette dashboards die geimporteerd kunnen worden. Deze kun je vinden in de directory
+"logging/kibana-dashboard". Het inladen in Kibana is eenvoudig: Kies "Load -> Advanced -> Local file".
+
+Let op: de dashboards zijn gekoppeld aan indices en nodenames. Hierdoor dienen queries wellicht aangepast te worden. Via
+"Configure dashboard" -> "Index" kun je de juiste index kiezen die in de logstash configuratie is doorgegeven.
+
+4: Bekende problemen
+Bij nieuwe proeftuin releases kunnen de volgende bekende problemen zijn opgelost:
+- TEAMBRP-2292: Apache CXF logging ontbreekt (hiervoor is het puppet script aangepast, zodat CXF toch kan loggen naar SLF4J)
+
+5: SoapUI tests
+Om te verifieren dat de proeftuin draait zoals verwacht kun je via het SoapUI project berichten verzenden naar de omgeving.
+Uit de responses valt dan af te leiden of de deployment goed is verlopen en de BRP software functioneert zoals verwacht.
+In de directory 'soapui-tests' is alles aanwezig om dit te kunnen testen. Importeer het SoapUI project, verwijs naar de juiste keystores en vervolgens
+kunt u berichten naar de BRP verzenden.

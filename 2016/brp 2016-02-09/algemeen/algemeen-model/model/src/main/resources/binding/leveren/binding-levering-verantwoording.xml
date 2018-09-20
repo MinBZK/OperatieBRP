@@ -1,0 +1,150 @@
+<binding direction="output">
+    <!-- hand geschreven bindings voor de verantwoordingsinformatie voor leveren. -->
+    <mapping class="java.util.List" abstract="true" type-name="Container_PersoonAdministratieveHandelingen_Levering">
+        <collection usage="optional">
+            <structure map-as="Objecttype_AdministratieveHandeling_Levering" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.AdministratieveHandelingHisVolledigView"
+             type-name="Objecttype_AdministratieveHandeling_Levering" abstract="true">
+        <structure name="administratieveHandeling" usage="optional" test-method="isMagGeleverdWorden">
+            <value name="objecttype" constant="AdministratieveHandeling" style="attribute"/>
+            <value style="attribute" name="objectSleutel" usage="required" get-method="getID" />
+            <structure get-method="getSoort" usage="optional">
+                <structure get-method="getWaarde">
+                    <value name="code" get-method="getCode" usage="optional"/>
+                    <value name="naam" get-method="getNaam" usage="optional"/>
+                    <structure get-method="getCategorieAdministratieveHandeling" usage="optional">
+                        <value name="categorie" enum-value-method="getNaam"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure name="partijCode" get-method="getPartij" map-as="PartijAttribuut" usage="optional"/>
+            <structure name="toelichtingOntlening" get-method="getToelichtingOntlening"
+                       map-as="OntleningstoelichtingAttribuut" usage="optional"/>
+            <structure name="gedeblokkeerdeMeldingen" get-method="getGedeblokkeerdeMeldingenVoorLeveren"
+                       test-method="heeftGedeblokkeerdeMeldingen"
+                       map-as="Container_AdministratieveHandelingGedeblokkeerdeMeldingen" usage="optional"/>
+            <structure name="bronnen" get-method="getHandelingBronnen" test-method="heeftBronnen"
+                       map-as="Container_AdministratieveHandelingBronnen_Levering" usage="optional"/>
+            <structure name="bijgehoudenActies" get-method="getActiesVoorLeveren"
+                       map-as="Container_AdministratieveHandelingActies_Levering"
+                       test-method="heeftActiesDieGeleverdMogenWorden" usage="optional"/>
+        </structure>
+    </mapping>
+
+    <mapping class="java.util.Set" abstract="true"
+             type-name="Container_AdministratieveHandelingGedeblokkeerdeMeldingen">
+        <collection usage="optional">
+            <structure name="gedeblokkeerdeMelding" map-as="Objecttype_GedeblokkeerdeMelding" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.AdministratieveHandelingGedeblokkeerdeMeldingHisVolledigView"
+             abstract="true"
+             type-name="Objecttype_GedeblokkeerdeMelding">
+        <structure get-method="getGedeblokkeerdeMelding">
+            <value name="objecttype" constant="GedeblokkeerdeMelding" style="attribute"/>
+            <structure get-method="getRegel" usage="optional">
+                <value name="regelCode" get-method="getWaarde" enum-value-method="getCode"/>
+            </structure>
+            <structure name="melding" get-method="getMelding" map-as="MeldingtekstAttribuut" usage="optional"/>
+        </structure>
+    </mapping>
+
+    <mapping class="java.util.Set" abstract="true" type-name="Container_AdministratieveHandelingBronnen_Levering">
+        <collection usage="optional">
+            <structure name="bron" map-as="Objecttype_AdministratieveHandelingBron_Levering" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.ActieBronHisVolledigView" abstract="true"
+             type-name="Objecttype_AdministratieveHandelingBron_Levering" test-method="isZichtbaar">
+        <value name="objecttype" constant="AdministratieveHandelingBron" style="attribute"/>
+        <value name="communicatieID" get-method="getCommunicatieId" style="attribute"/>
+        <value style="attribute" name="objectSleutel" usage="required" get-method="getID" />
+        <structure get-method="getDocument" usage="optional">
+            <structure get-method="getDocumentHistorieVoorLeveren">
+                <collection get-method="getHistorie">
+                    <structure map-as="Objecttype_Document_Levering"/>
+                </collection>
+            </structure>
+        </structure>
+
+        <structure name="rechtsgrondCode" get-method="getRechtsgrond" map-as="RechtsgrondAttribuut" usage="optional"/>
+        <structure name="rechtsgrondomschrijving" get-method="getRechtsgrondomschrijving"
+                   map-as="OmschrijvingEnumeratiewaardeAttribuut" usage="optional"/>
+    </mapping>
+
+    <!-- Dit objectttype is een aangepaste kopie van de gegenereerde "Groep_Document_Levering"-objecttype. Helaas wordt in de gegenereerde code
+     gebruik gemaakt van "isMagGeleverdWorden"-methoden als test-methods en deze ontbreken in HisDocumentModel.
+     Voorlopig wordt geen gebruik gemaakt van een test-method en zal onderstaand objecttype dus altijd geleverd worden, mits
+     bovenliggende objecttypen geleverd mogen worden. Tevens wordt er (nog) geen formele historie getoond.
+     -->
+    <mapping class="nl.bzk.brp.model.operationeel.kern.HisDocumentModel" abstract="true" type-name="Objecttype_Document_Levering">
+        <structure name="document" usage="optional">
+            <!--<structure map-as="FormeleHistorieEntiteitMetVerantwoording"/>-->
+            <value constant="Document" style="attribute" name="objecttype"/>
+            <value style="attribute" name="voorkomenSleutel" usage="required" get-method="getID" />
+            <value style="attribute" name="verwerkingssoort" usage="optional" get-method="getVerwerkingssoort"
+                   enum-value-method="getVasteWaarde"/>
+            <structure map-as="DatumTijdAttribuut" name="tijdstipRegistratie" usage="optional" get-method="getTijdstipRegistratie" />
+            <structure type="nl.bzk.brp.model.hisvolledig.impl.kern.DocumentHisVolledigImpl" get-method="getDocument">
+                <value style="attribute" name="objectSleutel" usage="required" get-method="getID" />
+                <structure usage="optional" get-method="getSoort">
+                    <structure map-as="SoortDocumentAttribuut" name="soortNaam" usage="optional" />
+                </structure>
+            </structure>
+            <structure usage="optional" get-method="getIdentificatie">
+                <structure map-as="DocumentIdentificatieAttribuut" name="identificatie" usage="optional" test-method="isMagGeleverdWorden" />
+            </structure>
+            <structure usage="optional" get-method="getAktenummer">
+                <structure map-as="AktenummerAttribuut" name="aktenummer" usage="optional" test-method="isMagGeleverdWorden" />
+            </structure>
+            <structure usage="optional" get-method="getOmschrijving">
+                <structure map-as="DocumentOmschrijvingAttribuut" name="omschrijving" usage="optional" test-method="isMagGeleverdWorden" />
+            </structure>
+            <structure usage="optional" get-method="getPartij">
+                <structure map-as="PartijAttribuut" name="partijCode" usage="optional" test-method="isMagGeleverdWorden" />
+            </structure>
+        </structure>
+    </mapping>
+
+    <mapping class="java.util.Set" abstract="true" type-name="Container_AdministratieveHandelingActies_Levering">
+        <collection usage="optional">
+            <structure map-as="Objecttype_Actie_Levering" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.ActieHisVolledigView" abstract="true"
+             type-name="Objecttype_Actie_Levering">
+        <structure name="actie" usage="optional" test-method="isMagGeleverdWorden">
+            <value name="objecttype" constant="Actie" style="attribute"/>
+            <value name="objectSleutel" get-method="getObjectSleutel" style="attribute"/>
+            <structure get-method="getSoort" usage="optional">
+                <value name="soortNaam" get-method="getWaarde" enum-value-method="getNaam" usage="optional"
+                       test-method="isMagGeleverdWorden"/>
+            </structure>
+            <structure get-method="getDatumOntlening" usage="optional">
+                <value name="datumOntlening" map-as="DatumTijdAttribuut" usage="optional"
+                       test-method="isMagGeleverdWorden"/>
+            </structure>
+            <structure name="bronnen" get-method="getActieBronnen" map-as="Container_ActieBronnen_Levering"
+                       usage="optional" test-method="heeftActieBronnen"/>
+        </structure>
+    </mapping>
+
+    <mapping class="java.util.Set" abstract="true" type-name="Container_ActieBronnen_Levering">
+        <collection usage="optional">
+            <structure name="bron" map-as="Objecttype_ActieBron_Levering" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.ActieBronHisVolledigView" abstract="true"
+             type-name="Objecttype_ActieBron_Levering">
+        <value name="objecttype" constant="ActieBron" style="attribute"/>
+        <value name="referentieID" get-method="getCommunicatieId" style="attribute"/>
+    </mapping>
+
+</binding>

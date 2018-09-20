@@ -1,0 +1,24 @@
+<div class="col-md-5 col-sm-8 col-xs-12" ng-if="!((!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly))">
+    <input id="{{kolom.id}}"
+           type="number"
+           name="{{kolom.id}}"
+           ng-model="waarde[kolom.display]"
+           ng-minlength="{{kolom.minlength}}"
+           ng-maxlength="{{kolom.maxlength}}"
+           ng-pattern="{{kolom.pattern}}"
+           ng-required="{{kolom.required}}"
+           ng-readonly="(!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly)"
+           ng-trim="{{kolom.trim}}"
+           class="form-control {{((!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly)) ? 'readonly' : ''}}"
+           maxlength="{{kolom.maxlength}}"
+           min="0"/>
+    <div ng-show="editForm.$submitted || editForm[kolom.id].$touched">
+        <span ng-show="editForm[kolom.id].$error.required">Dit veld is verplicht</span>
+        <span ng-show="editForm[kolom.id].$error.minlength">Dit veld moet minimaal {{kolom.minlength}} cijfers lang zijn</span>
+        <span ng-show="editForm[kolom.id].$error.maxlength">Dit veld mag maximaal {{kolom.maxlength}} cijfers lang zijn</span>
+        <span ng-show="editForm[kolom.id].$error.pattern">Dit veld voldoet niet aan het verplichte patroon</span>
+        <span ng-show="editForm[kolom.id].$error.number">Dit veld mag alleen cijfers bevatten</span>
+        <span ng-show="editForm[kolom.id].$error.min">Negatieve waarden niet toegestaan</span>
+    </div>
+</div>
+<div class="col-md-5 col-sm-8 col-xs-12" ng-if="(!status.nieuw && kolom.readonly) || (status.nieuw && kolom.nieuwReadonly)">{{waarde[kolom.display]}}</div>

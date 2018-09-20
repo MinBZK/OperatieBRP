@@ -1,0 +1,43 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.model.bijhouding;
+
+import nl.bzk.brp.model.algemeen.stamgegeven.ber.SoortBericht;
+import nl.bzk.brp.model.algemeen.stamgegeven.kern.SoortAdministratieveHandeling;
+
+
+/**
+ * Het antwoord bericht voor geboorte inschrijvingen.
+ */
+public final class RegistreerGeboorteAntwoordBericht extends BijhoudingAntwoordBericht {
+
+    /**
+     * Standaard constructor (die direct de soort van het bericht initialiseert/zet).
+     */
+    public RegistreerGeboorteAntwoordBericht() {
+        super(SoortBericht.BHG_AFS_REGISTREER_GEBOORTE_R);
+    }
+
+    /**
+     * Check of actie van de goede type (wordt gebruikt in Jibx).
+     *
+     * @return true als goede type, false anders.
+     */
+    public boolean isGeboorteInNederland() {
+        return isAdministratieveHandelingVanType(SoortAdministratieveHandeling.GEBOORTE_IN_NEDERLAND);
+    }
+
+    /**
+     * Check of actie van de goede type (wordt gebruikt in Jibx).
+     *
+     * @return true als goede type, false anders.
+     */
+    public boolean isGeboorteInNederlandMetErkenning() {
+        return isAdministratieveHandelingVanType(SoortAdministratieveHandeling.GEBOORTE_IN_NEDERLAND_MET_ERKENNING);
+    }
+
+}

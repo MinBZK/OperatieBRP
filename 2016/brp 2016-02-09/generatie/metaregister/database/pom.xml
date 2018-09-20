@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.generatie</groupId>
+        <artifactId>brp-generatie-metaregister</artifactId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+    <artifactId>brp-generatie-metaregister-database</artifactId>
+  <version>96-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>BRP Generatie Metaregister - Database Afslag</name>
+    <description>Project dat de database van het BMR aanmaakt en een export van de originele BMR importeert in een portable
+        hsqldb database</description>
+
+    <properties>
+        <db.bmr.driver>org.firebirdsql.jdbc.FBDriver</db.bmr.driver>
+        <db.bmr.url>jdbc:firebirdsql://brp-metaregister.modernodam.nl:3050/BMR-44?roleName=Info</db.bmr.url>
+        <db.bmr.user>GEN</db.bmr.user>
+        <db.bmr.password>gen</db.bmr.password>
+
+        <db.lokaal.driver>org.hsqldb.jdbcDriver</db.lokaal.driver>
+        <db.lokaal.url>jdbc:hsqldb:file:${db.lokaal.pad}/${db.lokaal.file.naam};create=true;shutdown=true;sessionVariables=REFERENTIAL_INTEGRITY=0;</db.lokaal.url>
+        <db.lokaal.user>sa</db.lokaal.user>
+        <db.lokaal.password />
+
+        <project.file.schema.naam>bmr-diff.xml</project.file.schema.naam>
+        <project.file.schema>${project.build.directory}/${project.file.schema.naam}</project.file.schema>
+        <project.file.schema.stylesheet>bmr-diff-transformatie.xsl</project.file.schema.stylesheet>
+        <project.file.data.naam>bmr-data.xml</project.file.data.naam>
+        <project.file.data>${project.build.directory}/${project.file.data.naam}</project.file.data>
+        <project.skip.export>false</project.skip.export>
+        <project.skip.import>false</project.skip.import>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.firebirdsql.jdbc</groupId>
+            <artifactId>jaybird-jdk17</artifactId>
+            <version>2.2.8</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>${cobertura.plugin.version}</version>
+                <configuration>
+                    <check />
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <configuration>
+                    <changeLogFile>${project.file.schema}</changeLogFile>
+                    <diffChangeLogFile>${project.file.schema}</diffChangeLogFile>
+                    <referenceUsername>${db.bmr.user}</referenceUsername>
+                    <referencePassword>${db.bmr.password}</referencePassword>
+                    <referenceDriver>${db.bmr.driver}</referenceDriver>
+                    <referenceUrl>${db.bmr.url}</referenceUrl>
+                    <driver>${db.lokaal.driver}</driver>
+                    <url>${db.lokaal.url}</url>
+                    <username>${db.lokaal.user}</username>
+                    <password>${db.lokaal.password}</password>
+                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                    <verbose>true</verbose>
+                    <logging>INFO</logging>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.firebirdsql.jdbc</groupId>
+                        <artifactId>jaybird-jdk17</artifactId>
+                        <version>2.2.8</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.hsqldb</groupId>
+                        <artifactId>hsqldb</artifactId>
+                        <version>${hsqldb.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <!-- Het genereren van het BMR schema middels Liquibase -->
+                    <execution>
+                        <id>bmr-schema-creatie</id>
+                        <goals>
+                            <goal>diff</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <skip>${project.skip.export}</skip>
+                        </configuration>
+                    </execution>
+                    <!-- Het creeeren van een lokale database conform het BMR schema -->
+                    <execution>
+                        <id>lokale-bmr-creatie</id>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <skip>${project.skip.import}</skip>
+                            <dropFirst>true</dropFirst>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>xml-maven-plugin</artifactId>
+                <version>1.0</version>
+                <configuration>
+                    <transformationSets>
+                        <transformationSet>
+                            <dir>${project.build.directory}</dir>
+                            <includes>
+                                <include>${project.file.schema.naam}</include>
+                            </includes>
+                            <stylesheet>src/main/resources/${project.file.schema.stylesheet}</stylesheet>
+                            <outputDir>${project.build.directory}</outputDir>
+                        </transformationSet>
+                    </transformationSets>
+                    <forceCreation>true</forceCreation>
+                </configuration>
+                <!-- Het transformeren van het BMR schema: het verwijderen van tabellen en andere zaken die niet nodig zijn -->
+                <executions>
+                    <execution>
+                        <id>bmr-schema-transformatie</id>
+                        <goals>
+                            <goal>transform</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.2.1</version>
+                <executions>
+                    <!-- Exporteert de BMR data naar lokaal XML formaat -->
+                    <execution>
+                        <id>export-bmr</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <phase>process-classes</phase>
+                        <configuration>
+                            <mainClass>nl.bzk.brp.metaregister.database.ExportBmr</mainClass>
+                            <skip>${project.skip.export}</skip>
+                        </configuration>
+                    </execution>
+                    <!-- Importeert de BMR data van lokaal XML formaat naar lokale database -->
+                    <execution>
+                        <id>import-bmr</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                        <configuration>
+                            <mainClass>nl.bzk.brp.metaregister.database.ImportBmr</mainClass>
+                            <skip>${project.skip.import}</skip>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>assemble-database</id>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/main/assembly/bmr-database.xml</descriptor>
+                                <descriptor>src/main/assembly/bmr-export.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister/database</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister/brp-generatie-metaregister-database</developerConnection>
+    <url>https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister/brp-generatie-metaregister-database</url>
+  </scm>
+</project>

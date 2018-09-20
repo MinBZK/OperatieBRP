@@ -1,0 +1,37 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <import resource="classpath:stap-administratieve-handeling-beans.xml" />
+    <import resource="classpath:blobifier-beans.xml" />
+    <import resource="classpath:locking-beans.xml" />
+
+    <context:annotation-config />
+    <context:spring-configured />
+    <task:annotation-driven />
+
+    <!-- Geraakte attributen administratie per request. -->
+    <bean id="requestAttribuutAccessAdministratie"
+          class="nl.bzk.brp.hismodelattribuutaccess.HisModelAttribuutAccessAdministratieImpl" scope="request">
+        <!-- Moet een scoped proxy zijn, want deze bean wordt gebruikt in een Singleton-scoped-bean. -->
+        <aop:scoped-proxy proxy-target-class="false"/>
+    </bean>
+
+    <!-- Aspect voor geraakte attributen. -->
+    <bean id="attribuutAccessAspect"
+          class="nl.bzk.brp.hismodelattribuutaccess.HisModelAttribuutAccessAspect"
+          factory-method="aspectOf">
+        <property name="administratie" ref="requestAttribuutAccessAdministratie"/>
+    </bean>
+
+    <context:component-scan base-package="nl.bzk.brp.configuratie" />
+    <context:component-scan base-package="nl.bzk.brp.business" />
+    <context:component-scan base-package="nl.bzk.brp.bijhouding" />
+    <context:component-scan base-package="nl.bzk.brp.locking" />
+
+</beans>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <bean id="gbaQueueConnectionFactory" class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory">
+		    <bean class="org.apache.activemq.ActiveMQConnectionFactory">
+		        <property name="brokerURL" value="failover:(${berichtcentrale.consumer-producer.url})?maxReconnectAttempts=3"/>
+		    </bean>
+        </property>
+
+        <property name="sessionCacheSize" value="20"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <!-- Destinations -->
+
+  	<amq:queue id="gbaQueueAfnemerindicaties" physicalName="${afnemerindicaties.migratie.queue.name:GbaAfnemerindicaties}" />
+  	<amq:queue id="gbaQueueAfnemerindicatiesAntwoorden" physicalName="${afnemerindicaties.migratie.antwoord.queue.name:GbaAfnemerindicatiesAntwoorden}" />
+  	<amq:queue id="gbaQueueArchief" physicalName="${archief.migratie.queue.name:GbaArchief}" />
+  	<amq:queue id="gbaQueueBijhoudingen" physicalName="${bijhouding.gba.admhnd.publicatie.queue.name:GbaAdministratieveHandelingen}" />
+  	<amq:queue id="gbaQueueLeveringen" physicalName="${jms.broker.lo3.leveringen.queue:lo3Queue}" />
+  	<amq:queue id="gbaQueueToevalligeGebeurtenissen" physicalName="${toevalligegebeurtenis.migratie.queue.name:GbaToevalligeGebeurtenissen}" />
+  	<amq:queue id="gbaQueueToevalligeGebeurtenissenAntwoorden" physicalName="${toevalligegebeurtenis.migratie.antwoord.queue.name:GbaToevalligeGebeurtenissenAntwoorden}" />
+
+	<amq:queue id="brpQueueAdministratieveHandelingen" physicalName="${jms.broker.ah.queue:AdministratieveHandelingen}" />
+
+</beans>

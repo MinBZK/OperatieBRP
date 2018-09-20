@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-algemeen-util</artifactId>
+        <groupId>nl.bzk.brp.algemeen.util</groupId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+    <artifactId>brp-algemeen-util-logging</artifactId>
+
+    <packaging>jar</packaging>
+
+    <name>BRP Algemeen Utiliteits klassen - Logging</name>
+    <description>Bibliotheek voor logging-specifieke zaken voor de BRP.</description>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-util/logging</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-util/brp-algemeen-util-logging</developerConnection>
+  </scm>
+
+
+    <dependencies>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Logging -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+			<scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+			<scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <filtering>true</filtering>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>ci.build</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.archivering.junit.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_util_logging</maven.jdbc.archivering.junit.url>
+                <maven.jdbc.archivering.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_util_logging</maven.jdbc.archivering.url>
+                <maven.jdbc.junit.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_util_logging</maven.jdbc.junit.url>
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_util_logging1</maven.jdbc.url>
+
+            </properties>
+        </profile>
+    </profiles>
+</project>

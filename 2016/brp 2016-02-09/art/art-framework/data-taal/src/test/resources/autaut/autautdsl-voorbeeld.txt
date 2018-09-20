@@ -1,0 +1,80 @@
+# AUTAUT DSL REFERENTIE
+#
+# In het algemeen:
+# - naamgeving is exact.
+# - Datum ingang is een alias voor databasekolom datingang (voor aanvullingen, zie kolomalias.properties)
+# - Veel velden hebben defaults hoeven niet opgenomen te worden
+#       Een dienst, dienstbundel, leveringautorisatie etc zonder Datum ingang en Datum einde resulteert in een geldig object
+
+Toegang Levering autorisatie
+Datum ingang				: 20130101
+Datum einde					:
+Nadere Populatie Beperking	: WAAR
+geautoriseerde: Gemeente Tiel
+
+Toegang Levering autorisatie
+Datum ingang				: 20130101
+Datum einde					:
+Nadere Populatie Beperking	:
+geautoriseerde: Gemeente Almere
+
+# Definieer maximaal één 'Levering autorisatie' sectie
+Levering autorisatie
+Stelsel						: BRP
+Naam						: Geen pop.bep. levering op basis van doelbinding
+Protocolleringniveau		: Geen beperkingen
+Alias soort admnhnd leveren	: 
+Populatie Beperking			: WAAR
+Geblokkeerd					: 
+Datum ingang				: 20130101
+Datum Einde					:
+
+# Definieer één of meerdere 'DienstenBundel / Dienst' secties
+# Geautoriseerde Groepen
+#   - '*' betekent alle groepen
+#   - '*/FMV' betekent alle groepen, alles formeel, materieel, verantwoording
+#   - '*/F' betekent alles formeel
+#   - 'Persoon.SamengesteldeNaam, Persoon.Geboorte betekent neem enkel deze groepen op
+#   - 'Persoon.SamengesteldeNaam/M, Persoon.Geboorte/F'
+#   - '*, !Persoon.SamengesteldeNaam' betekent alle groepen behalve Persoon.SamengesteldeNaam
+# Geautoriseerde attributen
+#   - '*' betekent alle attributen voor enkel geautoriseerde groepen
+#   - 'Persoon.SamengesteldeNaam.Voornaam' betekent alleen voornaam
+#   - '*, !Persoon.SamengesteldeNaam.Voornaam' betekent alle attruten behalve voornaam
+# LO3Rubrieken
+#   - Voor nu supporten we enkel * (alle LO3 rubrieken)
+DienstenBundel
+Naam						: Mutatielevering op basis van doelbinding en Synchronisatie persoon
+Nadere Populatie Beperking	:
+Datum ingang				: 20130101
+Datum Einde					:
+Geautoriseerde Groepen	 	: */FMV, !Persoon.Geboorte/FV,
+Geautoriseerde attributen 	: *, !Persoon.SamengesteldeNaam.DatumAanvangGeldigheid
+LO3Rubrieken                : *
+
+# Definieer één of meerdere 'Dienst' secties
+Dienst
+Soort				: Mutatielevering op basis van doelbinding
+Effect afnemer indicatie	: Plaatsing
+Attenderingscriterium		: ONWAAR
+
+Dienst
+Soort				        : Synchronisatie persoon
+Effect afnemer indicatie	: 
+Attenderingscriterium		: 
+Datum ingang				: 20130101
+Datum Einde					:
+
+# Nog een dienstbundel
+DienstenBundel
+Naam						: Geef details persoon Bundel
+Nadere Populatie Beperking	:
+Datum ingang				: 20130101
+Datum Einde					:
+Geautoriseerde Groepen	 	: */FMV, !Persoon.Geboorte/FV,
+Geautoriseerde attributen 	: *, !Persoon.SamengesteldeNaam.DatumAanvangGeldigheid
+
+Dienst
+Soort				        : Geef details persoon
+Effect afnemer indicatie	:
+Attenderingscriterium		:

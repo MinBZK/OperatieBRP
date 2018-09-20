@@ -1,0 +1,1 @@
+mvn install -Pcreate-leveren-db,nieuwste -Ddbprefix=art-

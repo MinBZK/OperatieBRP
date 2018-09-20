@@ -1,0 +1,99 @@
+
+=== Erkenning
+Indien er bij de geboorte geen 2e ouder (of vader) is vastgelegd, kan dit
+later nog gebeuren door de erkenning van het kind door een ouder. Hiertoe is
+de gebeurtenis erkenning. Bij de erkenning is het mogelijk dat de namen van het
+kind worden aangepast.
+
+
+==== Door wie wordt er erkend?
+Eerst wordt er vastgelegd wie het kind erkent.
+
+[source, groovy]
+----
+def piet = Persoon.metBsn(98765432)
+erkend() {
+  door piet
+}
+----
+
+
+==== Namen
+Een persoon heeft _voornamen_, _geslachtsnamen_.
+De namen van de persoon worden geregistreerd in een `namen() {}` blok. In het blok
+kunnen de voornamen, geslachtsnamen worden vastgelegd. Aan het einde van de uitvoer van dit
+blok wordt de samengestelde naam afgeleid, alsmede een voorkomen van de groep _naamgebruik_.
+
+[source,groovy]
+.Het namen blok
+----
+erkend() {
+  namen {
+    //... <1>
+  }
+}
+----
+<1> voornamen etc. komen hier
+
+===== Voornamen
+Een of meer voornamen worden opgegeven. De voornamen krijgen een volgnummer (vanaf *1*) in de
+volgorde waarin ze zijn opgesomd. Indien er al voornamen waren vastgelegd, worden de voorkomens
+daarvan beeindigd.
+
+[source,groovy]
+----
+  namen {
+    voornamen 'Jan', 'Piet', 'Klaas'
+    //...
+  }
+----
+
+===== Geslachtsnaamcomponent
+Geslachtsnaamcomponent kan in verschillende vormen worden vastgelegd. Ook hier geldt dat
+een bestaand voorkomen wordt beeindigd. Indien er slechts
+een is met uitsluitend een _stam_ kan de volgende verkorte versie worden gebruikt:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam 'Jansen'
+  }
+----
+
+Het is ook mogelijk om een geslachtsnaam uitgebreider vast te leggen:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam(
+      [stam: 'Jansen', voorvoegsel: 'van', scheidingsteken:'-', adellijkeTitel: 'P', predicaat: 'H'] <1>
+    )
+  }
+----
+<1> volledige opties voor een geslachtsnaamcomponent
+
+
+==== Nationaliteiten
+Extra nationaliteiten kunnen worden toegevoegd als dat nodig is.
+
+[source,groovy]
+----
+erkend() {
+  nationaliteiten('Canadese', 'Turkse')
+}
+----
+
+
+==== Indicaties
+Een persoon kan één of meerdere indicaties hebben. Deze kunnen bij erkenning alleen
+worden aangezet.
+
+[source,groovy]
+----
+erkend() {
+  behandeldAlsNederlander(true)
+  staatloos(true)
+}
+----

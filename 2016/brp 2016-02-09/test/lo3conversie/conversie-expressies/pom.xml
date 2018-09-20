@@ -1,0 +1,156 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+    <parent>
+		<groupId>nl.bzk.brp.art</groupId>
+		<artifactId>lo3conversie</artifactId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../</relativePath>
+    </parent>
+	
+	<groupId>nl.bzk.brp.art.lo3conversie</groupId>
+    <artifactId>conversie-expressies</artifactId>
+	<name>Test - LO3 - Conversie expressies</name>
+
+	<dependencies>
+		<dependency>
+ 			<groupId>nl.bzk.migratiebrp.synchronisatie</groupId>
+    		<artifactId>migr-synchronisatie-dal</artifactId>
+    	</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-beans</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>nl.bzk.migratiebrp.test</groupId>
+			<artifactId>migr-test-common</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp.test</groupId>
+            <artifactId>migr-test-dal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp.conversie</groupId>
+            <artifactId>migr-conversie-regels</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.migratiebrp.conversie</groupId>
+            <artifactId>migr-conversie-regels</artifactId>
+            <type>test-jar</type>
+        </dependency>
+
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+        </dependency>
+
+ 		<dependency>
+		    <groupId>nl.bzk.brp.algemeen.util</groupId>
+		    <artifactId>brp-algemeen-util-versie</artifactId>
+    	</dependency>
+
+		<dependency>
+        	<groupId>nl.bzk.brp.gba</groupId>
+		    <artifactId>brp-gba-conversie</artifactId>
+		</dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.bijhouding</groupId>
+            <artifactId>brp-bijhouding-business</artifactId>
+        </dependency>
+
+		<!-- JSON -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-hibernate4</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-smile</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>gbav</groupId>
+			<artifactId>core</artifactId>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>default-tests</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<argLine>-Dspring.profiles.active=memoryDS</argLine>
+							<excludes>
+                                <exclude>**/ConversieTest.java</exclude>
+								<exclude>**/ParameterizedTest.java</exclude>
+   								<exclude>**/RegressieTest.java</exclude>
+								<exclude>**/SingleTest.java</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>regressie</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<test>RegressieTest</test>
+							<excludes>
+								<exclude>**/*</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>conversie</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<test>ConversieTest</test>
+							<excludes>
+								<exclude>**/*</exclude>
+							</excludes>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+</project>

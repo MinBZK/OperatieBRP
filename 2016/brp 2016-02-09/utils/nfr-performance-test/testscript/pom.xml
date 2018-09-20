@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>brp-parent</artifactId>
+        <version>94-SNAPSHOT</version>
+        <relativePath>../../../brp-parent</relativePath>
+    </parent>
+
+    <artifactId>brp-nfr-testscript</artifactId>
+    <packaging>pom</packaging>
+    <version>94-SNAPSHOT</version>
+    <name>BRP NFR Testscript</name>
+
+    <properties>
+        <brp-release-versie>94-SNAPSHOT</brp-release-versie>
+        <brp-nfr-load-generator-versie>94-SNAPSHOT</brp-nfr-load-generator-versie>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.10</version>
+                <executions>
+                    <execution>
+                        <id>copy</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.levering.services</groupId>
+                                    <artifactId>brp-levering-services-verzending</artifactId>
+                                    <version>${brp-release-versie}</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>verzending.war</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.levering.services</groupId>
+                                    <artifactId>brp-levering-services-afnemer-voorbeeld</artifactId>
+                                    <version>${brp-release-versie}</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>brp-kennisgeving-ontvanger.war</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.levering.protocollering</groupId>
+                                    <artifactId>brp-levering-protocollering</artifactId>
+                                    <version>${brp-release-versie}</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>protocollering.war</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.levering.routering</groupId>
+                                    <artifactId>gba-levering-routering-centrale</artifactId>
+                                    <version>${brp-release-versie}</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>gba-routering-centrale.war</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.levering.services</groupId>
+                                    <artifactId>brp-levering-services-mutatielevering</artifactId>
+                                    <version>${brp-release-versie}</version>
+                                    <type>war</type>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>mutatielevering.war</destFileName>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp</groupId>
+                                    <artifactId>brp-nfr-load-generator</artifactId>
+                                    <version>${brp-nfr-load-generator-versie}</version>
+                                    <type>jar</type>
+                                    <overWrite>true</overWrite>
+                                    <destFileName>NFR-load-generator.jar</destFileName>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/deployables</outputDirectory>
+                            <overWriteReleases>false</overWriteReleases>
+                            <overWriteSnapshots>true</overWriteSnapshots>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>script-assembly</id>
+                        <!--
+                        phase none, zorgt ervoor dat projecten die maven-assembly plugin gebruiken niet ook
+                        automatisch de docker-assemply voor hun kiezen krijgen.
+
+                        Uitleg:
+                        Most plugins will bind executions to a default phase. So when one execution of a plugin is triggered,
+                        all unbound executions will be bound to the default phase and will also run. To avoid this behavior,
+                        all executions of the plugin in the pluginManagement section of the parent pom should be bound to
+                        phase=none (as shown in the provided example). This way no execution will run unless the phase
+                        is explicitly overridden in the child poms.
+                        -->
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>nfr-omgeving-installatie</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/script-assembly.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

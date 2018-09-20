@@ -1,0 +1,134 @@
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="
+            http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2
+            http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>software-synchronisatie-attendering</id>
+    <formats>
+        <format>zip</format>
+        <format>dir</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+
+    <fileSets>
+        <!-- De certificaten scripts worden tijdelijk nog niet meegenomen in de ZIP.
+        Dit wordt mogelijk nog opgepakt. -->
+
+        <!--<fileSet>-->
+            <!--<directory>src/main/scripts</directory>-->
+            <!--<outputDirectory>scripts</outputDirectory>-->
+            <!--<includes>-->
+                <!--<include>**/*.sh</include>-->
+            <!--</includes>-->
+            <!--<fileMode>0774</fileMode>-->
+        <!--</fileSet>-->
+        <!--<fileSet>-->
+            <!--<directory>src/main/scripts</directory>-->
+            <!--<outputDirectory>scripts</outputDirectory>-->
+            <!--<excludes>-->
+                <!--<exclude>**/*.sh</exclude>-->
+            <!--</excludes>-->
+        <!--</fileSet>-->
+<!--
+        <fileSet>
+            <directory>src/main/keystores</directory>
+            <outputDirectory>keystores</outputDirectory>
+        </fileSet>
+-->
+
+        <fileSet>
+            <directory>src/main/log4j</directory>
+            <outputDirectory>log4j</outputDirectory>
+        </fileSet>
+<!--        <fileSet>
+            <directory>src/main/configuratie</directory>
+            <outputDirectory>brp properties</outputDirectory>
+        </fileSet>-->
+        <fileSet>
+            <directory>src/main/drivers</directory>
+            <outputDirectory>drivers</outputDirectory>
+        </fileSet>
+        <!-- Deze set zorgt ervoor dat er geen release nummer meer zichtbaar is in de uiteindelijke release directory,
+        voor eenduidigheid naar de systeembeheerder -->
+        <fileSet>
+            <directory>src/main/release-instructies/release ${parsedVersion.majorVersion}</directory>
+            <outputDirectory>release</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>target/database</directory>
+            <outputDirectory>database</outputDirectory>
+        </fileSet>
+    </fileSets>
+
+    <files>
+        <file>
+            <source>src/main/root/LEESMIJ-SOFTWARE-SYNCHRONISATIE-ATTENDERING</source>
+            <destName>LEESMIJ</destName>
+        </file>
+
+        <file>
+            <source>target/properties_jar/config/brp-alles-oplevering.properties</source>
+            <destName>brp properties/brp-alles.properties</destName>
+        </file>
+    </files>
+
+
+
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp.levering.services:brp-levering-services-mutatielevering:war</include>
+            </includes>
+            <outputFileNameMapping>mutatielevering${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp.levering.services:brp-levering-services-synchronisatie:war</include>
+            </includes>
+            <outputFileNameMapping>synchronisatie${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp.levering.services:brp-levering-services-verzending:war</include>
+            </includes>
+            <outputFileNameMapping>verzending${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                 <include>nl.bzk.brp.levering.protocollering:brp-levering-protocollering:war</include>
+            </includes>
+            <outputFileNameMapping>protocollering${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp.levering.services:brp-levering-services-onderhoud-afnemerindicaties:war</include>
+            </includes>
+            <outputFileNameMapping>afnemerindicaties${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+        <dependencySet>
+            <outputDirectory>artefacten/levering</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <includes>
+                <include>nl.bzk.brp:brp-message-broker:war</include>
+            </includes>
+            <outputFileNameMapping>brp-message-broker${dashClassifier?}.${artifact.extension}</outputFileNameMapping>
+            <unpack>false</unpack>
+        </dependencySet>
+    </dependencySets>
+
+</assembly>

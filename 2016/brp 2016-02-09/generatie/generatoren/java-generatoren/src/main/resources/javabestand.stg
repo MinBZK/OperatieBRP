@@ -1,0 +1,413 @@
+klasse(object) ::= <<
+
+package <object.packagePad>;
+
+<object.imports;separator="\r\n">
+
+<klasseDefinitie(object)>
+>>
+
+klasseDefinitie(object) ::= <<
+/**
+ * <object.javaDoc;separator=" ">
+ *
+ */
+<if(object.annotaties)><object.annotaties:annotatie();separator="\r\n"><endif>
+public <if(object.final)>final <endif><if(object.abstractClass)>abstract <endif>class <object.naam><if(object.heeftSuperKlasse)> extends <javaType(object.superKlasse)><endif> <if(object.superInterfaces)>implements <object.superInterfaces:javaType();separator=", "><endif> {
+
+<object.handmatigeCodeBovenin>
+
+<object.velden:veld();separator="\r\n">
+
+<object.constructoren:constructor();separator="\r\n\r\n">
+
+<object.getters:getter();separator="\r\n\r\n">
+
+<object.setters:setter();separator="\r\n\r\n">
+
+<object.functies:functie();separator="\r\n\r\n">
+
+<object.handmatigeCodeOnderin>
+
+<object.innerKlassen:klasseDefinitie();separator="\r\n\r\n">
+
+}
+
+>>
+
+interface(object) ::= <<
+
+package <object.packagePad>;
+
+<object.imports;separator="\r\n">
+
+/**
+ * <object.javaDoc;separator=" ">
+ *
+ */
+<if(object.annotaties)><object.annotaties:annotatie();separator="\r\n"><endif>
+public interface <object.naam> <if(object.superInterfaces)>extends <object.superInterfaces:javaType();separator=", "><endif> {
+
+<object.handmatigeCodeBovenin>
+
+<object.functies:functieInterfaceDeclaratie();separator="\r\n\r\n">
+
+<object.handmatigeCodeOnderin>
+
+}
+
+>>
+
+enumeratie(object) ::= <<
+
+package <object.packagePad>;
+
+<object.imports;separator="\r\n">
+
+/**
+ * <object.javaDoc;separator=" ">
+ *
+ */
+<if(object.annotaties)><object.annotaties:annotatie();separator="\r\n"><endif>
+public enum <object.naam> <if(object.superInterfaces)>implements <object.superInterfaces:javaType();separator=", "><endif> {
+
+<object.enumeratieWaarden:enumWaarde();separator=",\r\n">;
+
+<object.velden:veld();separator="\r\n">
+
+<object.constructoren:constructor();separator="\r\n">
+
+<object.getters:getter();separator="\r\n\r\n">
+
+<object.functies:functie();separator="\r\n\r\n">
+
+<object.handmatigeCodeOnderin>
+
+}
+
+>>
+
+
+genericParameter(genericParameter) ::= <<
+<if(genericParameter.genericParameterSubtypesToegestaan)>? extends <endif><javaType(genericParameter.javaType)>
+>>
+
+javaType(javaType) ::= <<
+<javaType.naam><if(javaType.geparametriseerd)>\<<javaType.genericParameters:genericParameter();separator=", ">\><endif>
+>>
+
+enumWaarde(enumWaarde) ::= <<
+    /**
+     * <enumWaarde.javaDoc; wrap="\r\n * ", separator=" ">
+     */
+    <enumWaarde.naam>(<enumWaarde.constructorParameters:enumConstructorParameter();separator=", ">)
+>>
+
+enumConstructorParameter(constructorParameter) ::= <<
+<if(constructorParameter.string)>"<constructorParameter.waarde>"<else><constructorParameter.waarde><endif>
+>>
+
+veld(veld) ::= <<
+<if(!veld.annotaties.empty)>
+    <veld.annotaties:annotatie();separator="\r\n">
+<endif>
+    <if(veld.static && veld.final && veld.public)>
+     /**
+      * <veld.javaDoc; wrap="\r\n     * ", separator=" ">
+      */
+    <endif>
+    <veld.accessModifier.modifierNaam> <if(veld.static)>static <endif><if(veld.final)>final <endif><javaType(veld.type)> <veld.naam><if(veld.geinstantieerd)> = <veld.geinstantieerdeWaarde><endif>;
+>>
+
+functie(fn) ::= <<
+<if(fn.overriden && !fn.forceerJavaDoc)>
+    /**
+     * {@inheritDoc}
+     */
+<else>
+    /**
+     * <fn.javaDoc; wrap="\r\n     * ", separator=" ">
+     *
+     <fn.parameters:functieParameterJavadoc(); separator ="\r\n">
+     <if(fn.returnValue)>* @return <fn.returnWaardeJavaDoc><endif>
+     */
+<endif>
+    <fn.annotaties:annotatie(); separator ="\r\n">
+    <fn.accessModifier.modifierNaam> <if(fn.abstract)>abstract <endif> <if(fn.static)>static <endif><if(fn.final)>final <endif><javaType(fn.returnType)> <fn.naam>(<if(fn.parameters)><fn.parameters:functieParameter();separator=", "><endif>)<if(fn.exceptions)> throws <fn.thrownExceptions; separator=","><endif> <if(fn.abstract)>;<else>{
+        <fn.body>
+    }<endif>
+>>
+
+constructor(cons) ::= <<
+    /**
+     * <cons.javaDoc; wrap="\r\n     * ", separator=" ">
+     *
+     <cons.parameters:functieParameterJavadoc(); separator ="\r\n">
+     */
+    <cons.annotaties:annotatie(); separator="\r\n">
+    <cons.accessModifier.modifierNaam> <cons.naam>(<if(cons.parameters)><cons.parameters:functieParameter();separator=", "><endif>)<if(cons.exceptions)> throws <cons.thrownExceptions; separator=","><endif> {
+        <cons.body>
+    }
+>>
+
+
+getter(getter) ::= <<
+<if(getter.overriden && !getter.forceerJavaDoc)>
+    /**
+     * {@inheritDoc}
+     */
+<else>
+    /**
+     * <getter.javaDoc; wrap="\r\n     * ", separator=" ">
+     *
+     * @return <getter.returnWaardeJavaDoc>
+     */
+<endif>
+    <getter.annotaties:annotatie(); separator="\r\n">
+    <getter.accessModifier.modifierNaam> <if(getter.final)>final <endif><javaType(getter.returnType)> <getter.naam>()<if(getter.exceptions)> throws <getter.thrownExceptions; separator=","><endif> {
+        return <getter.accessingClassVariabeleNaam>;
+    }
+>>
+
+
+setter(setter) ::= <<
+<if(setter.overriden && !setter.forceerJavaDoc)>
+    /**
+     * {@inheritDoc}
+     */
+<else>
+    /**
+     * <setter.javaDoc; wrap="\r\n     * ", separator=" ">
+     *
+     <setter.parameters:functieParameterJavadoc(); separator ="\r\n">
+     */
+<endif>
+    <setter.annotaties:annotatie(); separator="\r\n">
+    <setter.accessModifier.modifierNaam> <if(setter.final)>final <endif>void <setter.naam>(<setter.parameters:functieParameter();separator=", ">)<if(setter.exceptions)> throws <setter.thrownExceptions; separator=","><endif> {
+        this.<setter.mutatingClassVariabeleNaam> = <setter.parameterNaam>;
+        <setter.body>
+    }
+>>
+
+
+functieInterfaceDeclaratie(functie) ::= <<
+    /**
+     * <functie.javaDoc; wrap="\r\n * ", separator=" ">
+     *
+     <functie.parameters:functieParameterJavadoc();separator="\r\n    ">
+     <if(functie.returnValue)>* @return <functie.returnWaardeJavaDoc><endif>
+     */
+    <javaType(functie.returnType)> <functie.naam>(<functie.parameters:functieInterfaceParameter();separator=", ">);
+>>
+
+
+functieInterfaceParameter(param) ::= <<
+<javaType(param.javaType)> <param.naam>
+>>
+
+
+functieParameter(param) ::= <<
+final <javaType(param.javaType)> <param.naam>
+>>
+
+
+functieParameterJavadoc(param) ::= <<
+* @param <param.naam> <param.javaDoc; wrap="\r\n * ", separator=" ">
+>>
+
+
+annotatie(annotatie) ::= <<
+@<annotatie.type.naam><if(annotatie.parameters)>(<annotatie.parameters:annotatieParameter();separator=", ">)<endif>
+>>
+
+annotatieParameter(param) ::= <<
+<param.parameterString>
+>>
+
+symboltable(object) ::= <<
+package <object.packagePad>;
+
+<object.imports;separator="\r\n">
+
+/**
+ * Opsomming van alle attributen zoals die in het BMR voorkomen en zoals die gebruikt kunnen worden in expressies.
+ *
+ */
+<if(object.annotaties)><object.annotaties:annotatie();separator="\r\n"><endif>
+public enum <object.naam> {
+
+<object.symbols:enumWaarde();separator=",\r\n">;
+
+   private final String             syntax;
+   private final boolean            isLijst;
+   private final ExpressieType      type;
+   private final ExpressieType      parentType;
+   private final ExpressieAttribuut parent;
+   private final AttributeGetter    getter;
+
+   /**
+    * Constructor.
+    *
+    * @param syntax Naam (syntax) van het attribuut.
+    * @param isLijst TRUE als het een lijst-attribuut is (bijv. adressen en nationaliteiten).
+    * @param type Type van de attribuutwaarde.
+    * @param parentType Type waartoe het attribuut behoort.
+    * @param parent Lijst-attribuut (inverse associatie) waartoe het attribute behoort.
+    * @param getter Getter voor het attribuut.
+    */
+   private ExpressieAttribuut(final String syntax, final boolean isLijst, final ExpressieType type,
+                              final ExpressieType parentType, final ExpressieAttribuut parent,
+                              final AttributeGetter getter)
+   {
+       this.syntax = syntax.toLowerCase();
+       this.isLijst = isLijst;
+       this.type = type;
+       this.parentType = parentType;
+       this.parent = parent;
+       this.getter = getter;
+   }
+
+   /**
+    * Constructor.
+    *
+    * @param syntax Naam (syntax) van het attribuut.
+    * @param isLijst TRUE als het een lijst-attribuut is, anders FALSE.
+    * @param type Type van de attribuutwaarde.
+    * @param parentType Type waartoe het attribuut behoort.
+    * @param getter Getter voor het attribuut.
+    */
+   private ExpressieAttribuut(final String syntax, final boolean isLijst, final ExpressieType type,
+                              final ExpressieType parentType, final AttributeGetter getter)
+   {
+       this(syntax, isLijst, type, parentType, null, getter);
+   }
+
+   public String getSyntax() {
+       return syntax;
+   }
+
+   public boolean isLijst() {
+       return isLijst;
+   }
+
+   public ExpressieType getType() {
+       return type;
+   }
+
+   public ExpressieType getParentType() {
+       return parentType;
+   }
+
+   public ExpressieAttribuut getParent() {
+       return parent;
+   }
+
+   /**
+    * Geeft de waarde van het attribuut voor het betreffende BRP-object terug.
+    *
+    * @param brpObject Object waarvan de attribuutwaarde bepaald moet worden.
+    * @return Waarde van het attribuut of NULL indien niet gevonden.
+    */
+   public Expressie getAttribuutWaarde(final BrpObject brpObject) {
+       return getter.getAttribuutWaarde(brpObject);
+   }
+
+   /**
+    * Geeft het attribuut voor het betreffende BRP-object terug.
+    *
+    * @param brpObject Object waarvan het attribuut bepaald moet worden.
+    * @return Het attribuut of NULL indien niet gevonden.
+    */
+   public Attribuut getAttribuut(final BrpObject brpObject) {
+       return getter.getAttribuut(brpObject);
+   }
+
+   /**
+    * Geeft de historische attributen voor het betreffende BRP-object terug.
+    *
+    * @param brpObject Object waarvan de attributen bepaald moeten worden.
+    * @return List met attributen of NULL indien niet gevonden.
+    */
+   public List\<Attribuut> getHistorischeAttributen(final BrpObject brpObject) {
+       return getter.getHistorischeAttributen(brpObject);
+   }
+
+   @Override
+   public String toString() {
+       return getParentType().toString() + "." + getSyntax() + " (" + getType().toString() + ")";
+   }
+}
+>>
+
+
+symboltablegroep(object) ::= <<
+package <object.packagePad>;
+
+<object.imports;separator="\r\n">
+
+/**
+ * Opsomming van alle groepen zoals die in het BMR voorkomen en zoals die gebruikt kunnen worden in expressies.
+ *
+ */
+<if(object.annotaties)><object.annotaties:annotatie();separator="\r\n"><endif>
+public enum <object.naam> {
+
+<object.symbols:enumWaarde();separator=",\r\n">;
+
+   private final String             syntax;
+   private final boolean            isLijst;
+   private final ExpressieType      type;
+   private final GroepGetter        getter;
+
+   /**
+    * Constructor.
+    *
+    * @param syntax Naam (syntax) van de groep.
+    * @param type Type van de groep.
+    * @param getter Getter voor de groep.
+    */
+   private ExpressieGroep(final String syntax, final boolean isLijst, final ExpressieType type, final GroepGetter getter) {
+       this.syntax = syntax.toLowerCase();
+       this.isLijst = isLijst;
+       this.type = type;
+       this.getter = getter;
+   }
+
+   public String getSyntax() {
+       return syntax;
+   }
+
+   public boolean isLijst() {
+           return isLijst;
+       }
+
+   public ExpressieType getType() {
+       return type;
+   }
+
+   /**
+    * Geeft de groep voor het betreffende BRP-object terug.
+    *
+    * @param brpObject Object waarvan de groep bepaald moet worden.
+    * @return De groep of NULL indien niet gevonden.
+    */
+   public Groep getGroep(final BrpObject brpObject) {
+       return getter.getGroep(brpObject);
+   }
+
+   /**
+    * Geeft de historische groepen voor het betreffende BRP-object terug.
+    *
+    * @param brpObject Object waarvan de groepen bepaald moeten worden.
+    * @return List met groepen of NULL indien niet gevonden.
+    */
+   public List\<Groep> getHistorischeGroepen(final BrpObject brpObject) {
+       return getter.getHistorischeGroepen(brpObject);
+   }
+
+   @Override
+   public String toString() {
+       return getSyntax() + " (" + getType().toString() + ")";
+   }
+}
+>>

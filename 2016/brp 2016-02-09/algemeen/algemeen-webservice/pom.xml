@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>brp-parent</artifactId>
+        <groupId>nl.bzk.brp</groupId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../../brp-parent</relativePath>
+    </parent>
+
+    <groupId>nl.bzk.brp.algemeen.webservice</groupId>
+    <artifactId>brp-algemeen-webservice</artifactId>
+    <packaging>pom</packaging>
+
+    <name>BRP Algemeen Webservice</name>
+    <description>Top level pom en dus parent project van de BRP Webservice.</description>
+
+    <modules>
+        <module>business</module>
+        <module>webservice-basis</module>
+        <module>webservice-kern</module>
+    </modules>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-webservice</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-webservice</developerConnection>
+    </scm>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.model</groupId>
+                <artifactId>brp-algemeen-model-model</artifactId>
+                <version>${project.version}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.model</groupId>
+                <artifactId>brp-algemeen-model-model</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.util</groupId>
+                <artifactId>brp-algemeen-util-logging</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                <artifactId>brp-algemeen-opslag-dataaccess</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>brp-algemeen-model-model</artifactId>
+                        <groupId>nl.bzk.brp.algemeen.model</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.kern</groupId>
+                <artifactId>brp-algemeen-kern-stappen</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>brp-algemeen-model-model</artifactId>
+                        <groupId>nl.bzk.brp.algemeen.model</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.kern</groupId>
+                <artifactId>brp-algemeen-kern-regels</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>brp-algemeen-model-model</artifactId>
+                        <groupId>nl.bzk.brp.algemeen.model</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.util</groupId>
+                <artifactId>brp-algemeen-util-locking</artifactId>
+                <version>${project.version}</version>
+                <exclusions>
+                    <exclusion>
+                        <artifactId>brp-algemeen-model-model</artifactId>
+                        <groupId>nl.bzk.brp.algemeen.model</groupId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen</groupId>
+                <artifactId>brp-algemeen-koppelvlak</artifactId>
+                <version>${project.version}</version>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.util</groupId>
+            <artifactId>brp-algemeen-util-logging</artifactId>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+			<scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- ermul: Toegevoegd om makkelijker te kunnen debuggen. Kan verwijderd worden indien niet meer nodig
+                of ongewenst ivm performance / obfuscation. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.5.1</version>
+                    <configuration>
+                        <optimize>true</optimize>
+                        <showWarnings>true</showWarnings>
+                        <encoding>UTF-8</encoding>
+                        <debug>true</debug>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=1024m -XX:PermSize=256m</argLine>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

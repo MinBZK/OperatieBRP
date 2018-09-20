@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"  xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+	   	http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+	   	http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+	<beans profile="!memoryDS">
+  	    <context:property-placeholder location="classpath:datasource.properties,classpath:alp.properties" />
+    </beans>
+  	<beans profile="memoryDS">
+  		<context:property-placeholder location="classpath:inmemory.properties,classpath:alp.properties" />
+  	</beans>
+
+	<beans>
+	    <!-- data access -->
+	    <import resource="classpath:alleenlezen-emf-bean.xml"/>
+
+	    <context:component-scan base-package="nl.bzk.brp.levering.dataaccess"/>
+
+	    <!-- business -->
+	    <import resource="classpath:gba-algemeen-beans.xml" />
+	    <import resource="classpath:lo3-conversie-beans.xml" />
+
+		<import resource="classpath:blobifier-beans.xml" />
+	</beans>
+</beans>

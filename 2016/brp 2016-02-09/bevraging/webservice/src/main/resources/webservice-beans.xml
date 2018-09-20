@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+
+
+    <context:property-placeholder system-properties-mode="OVERRIDE"
+                                  location="classpath*:brp-*.properties"
+                                  ignore-resource-not-found="true"/>
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+
+    <import resource="classpath:datasource-beans.xml"/>
+    <import resource="classpath:business-beans.xml"/>
+    <import resource="classpath:webservice-basis-beans.xml"/>
+    <import resource="classpath:jmx-management-beans.xml"/>
+
+    <context:component-scan base-package="nl.bzk.brp.web"/>
+
+    <bean id="jibxDatabindingBean" class="org.apache.cxf.jibx.JibxDataBinding"/>
+
+    <bean id="wss4jOutInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="action" value="Timestamp Signature"/>
+                <entry key="user" value="${security.privatekey.alias}"/>
+                <entry key="signaturePropRefId" value="signatureProperties"/>
+                <entry key="signatureProperties">
+                    <props>
+                        <prop key="org.apache.ws.security.crypto.provider">org.apache.ws.security.components.crypto.Merlin</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.type">jks</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.password">${security.keystore.private.password}</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.keystore.alias">${security.privatekey.alias}</prop>
+                        <prop key="org.apache.ws.security.crypto.merlin.file">${security.keystore.private.file}</prop>
+                    </props>
+                </entry>
+                <entry key="signatureKeyIdentifier" value="DirectReference"/>
+                <!--<entry key="signatureParts" value="{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp;{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body"/>-->
+                <entry key="signatureParts" value="{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body;{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp"/>
+                <entry key="passwordCallbackRef">
+                    <bean class="nl.bzk.brp.webservice.kern.interceptor.helper.ServerPasswordCallback">
+                        <property name="password" value="${security.privatekey.password}"/>
+                    </bean>
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="bijhoudingBevragingService" class="nl.bzk.brp.web.service.BijhoudingBevragingServiceImpl" />
+    <jaxws:endpoint id="BevragingService" implementor="#bijhoudingBevragingService"
+                    address="/bhgBevraging" xmlns:s="http://www.bzk.nl/brp/bijhouding/bevraging/service"
+                    serviceName="s:BijhoudingBevragingService" endpointName="s:bhgBevraging">
+
+        <jaxws:dataBinding>
+            <ref bean="jibxDatabindingBean" />
+        </jaxws:dataBinding>
+
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="true" />
+            <entry key="faultStackTraceEnabled" value="false" />
+            <entry key="exceptionMessageCauseEnabled" value="false" />
+        </jaxws:properties>
+
+        <jaxws:inInterceptors>
+            <ref bean="archiveringInInterceptor"/>
+            <ref bean="schemaInValidator"/>
+        </jaxws:inInterceptors>
+
+        <jaxws:outInterceptors>
+            <ref bean="archiveringOutInterceptor"/>
+        </jaxws:outInterceptors>
+
+        <jaxws:inFaultInterceptors>
+            <ref bean="archiveringInInterceptor"/>
+        </jaxws:inFaultInterceptors>
+
+        <jaxws:outFaultInterceptors>
+            <ref bean="archiveringOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+
+    <bean id="leveringBevragingService" class="nl.bzk.brp.web.service.LeveringBevragingServiceImpl" />
+    <jaxws:endpoint id="LeveringBevragingService" implementor="#leveringBevragingService"
+                    address="/lvgBevraging" xmlns:s="http://www.bzk.nl/brp/levering/bevraging/service"
+                    serviceName="s:LeveringBevragingService" endpointName="s:lvgBevraging">
+
+        <jaxws:dataBinding>
+            <ref bean="jibxDatabindingBean" />
+        </jaxws:dataBinding>
+
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="true" />
+            <entry key="faultStackTraceEnabled" value="false" />
+            <entry key="exceptionMessageCauseEnabled" value="false" />
+        </jaxws:properties>
+
+        <jaxws:inInterceptors>
+            <ref bean="archiveringInInterceptor"/>
+            <ref bean="schemaInValidator"/>
+        </jaxws:inInterceptors>
+
+        <jaxws:inFaultInterceptors>
+            <ref bean="archiveringInInterceptor"/>
+        </jaxws:inFaultInterceptors>
+
+        <jaxws:outInterceptors>
+            <ref bean="wss4jOutInterceptor" />
+            <ref bean="archiveringOutInterceptor"/>
+        </jaxws:outInterceptors>
+        <jaxws:outFaultInterceptors>
+            <ref bean="wss4jOutInterceptor" />
+            <ref bean="archiveringOutInterceptor"/>
+        </jaxws:outFaultInterceptors>
+    </jaxws:endpoint>
+</beans>

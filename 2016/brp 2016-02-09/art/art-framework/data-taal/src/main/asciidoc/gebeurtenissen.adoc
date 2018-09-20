@@ -1,0 +1,78 @@
+
+== Gebeurtenissen
+
+[.lead]
+Gebeurtenissen beschrijven hoe een persoon tot zijn huidige toestand is gekomen.
+Bijvoorbeeld: een persoon wordt geboren, verhuist in zijn 8e levensjaar naar een
+andere woonplaats, gaat op zijn 18e op kamers, huwt op de leeftijd van 24 met Marie
+en verhuist dan na 2 jaar naar een eensgezinswoning. Na 19 maanden wordt er een
+zoon geboren.
+
+:numbered!:
+
+=== Administratieve handeling
+Deze gebeurtenissen kunnen in de Persoon DSL worden beschreven. Gebeurtenissen zijn
+de vertaling naar _Administratieve handelingen_ in het BRP domein. Daarnaast wordt
+bij een gebeurtenis op de persoon een voorkomen van de groep _afgeleid administratief_ geregistreerd. +
+Bij een gebeurtenis kunnen een aantal attributen worden meegegeven:
+
+partij::
+de partij die de administratieve handeling vastgelegd. Dit mag een partijcode of
+een partij naam zijn.
+aanvang::
+de datum aanvang van de handeling en onderliggende acties. Dit mag een getal zijn, met
+als opmaak `JJJJMMDD` of een datum string `'JJJJ/MM/DD'`.
+toelichting::
+de toelichting bij de handeling en/of acties.
+
+Indien een attribuut niet wordt meegegeven, wordt er een willekeurige waarde ingevuld.
+Voor partij wordt er een code uit een vaste selectie gekozen, de aanvang
+wordt standaard op `vandaag - 10d` gezet en toelichting wordt een string van willekeurige
+karakters.
+
+[source,groovy]
+----
+piet = Persoon.uitGebeurtenissen {
+  geboorte(partij: 'Almere', aanvang: 19781023, toelichting: 'ooievaar') {} <1>
+  verhuizing(partij: 36101, aanvang: '2014/03/31') {} <2>
+  huwelijk() {} <3>
+}
+----
+<1> Alle opties
+<2> enkele opties
+<3> geen opties, alles wordt willekeurig ingevuld. De `()` mogen worden weggelaten
+
+
+====
+[IMPORTANT]
+.Het gebruik van Groovy
+Houdt in gedachten dat gezien de flexibiliteit van de Groovy programmeertaal je
+in de voorbeelden verschillende notaties ziet, die tot hetzelfde resultaat kunnen leiden.
+====
+
+:numbered:
+
+include::gebeurtenis/geboorte.adoc[]
+include::gebeurtenis/erkenning.adoc[]
+include::gebeurtenis/adoptie.adoc[]
+include::gebeurtenis/verbetering-geboorteakte.adoc[]
+include::gebeurtenis/vaderVastgesteld.adoc[]
+
+include::gebeurtenis/verhuizing.adoc[]
+include::gebeurtenis/huwelijk.adoc[]
+include::gebeurtenis/scheiding.adoc[]
+include::gebeurtenis/nietig-verklaring-huwelijk.adoc[]
+include::gebeurtenis/naamswijziging.adoc[]
+include::gebeurtenis/geslachtswijziging.adoc[]
+include::gebeurtenis/overlijden.adoc[]
+include::gebeurtenis/vestigingInNederland.adoc[]
+include::gebeurtenis/onderzoek.adoc[]
+include::gebeurtenis/overig.adoc[]
+
+// indicaties op een persoon
+include::gebeurtenis/verstrekkingsbeperking.adoc[]
+include::gebeurtenis/curatele.adoc[]
+include::gebeurtenis/wijzigingGezag.adoc[]
+
+// afnemerindicaties: speciale indicaties
+include::gebeurtenis/afnemerindicaties.adoc[]

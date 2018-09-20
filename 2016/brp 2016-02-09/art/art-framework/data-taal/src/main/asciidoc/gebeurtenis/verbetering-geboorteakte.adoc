@@ -1,0 +1,33 @@
+
+=== Verbetering geboorteakte
+Deze administratieve handeling wordt gebruikt om de geboorteakte te kunnen aanpassen.
+
+==== Voorbeeld
+Een voorbeeld om de datum aan te passen:
+
+[source,groovy, numbered]
+----
+def willem = Persoon.uitDatabase(bsn: 123455678)
+Persoon.nieuweGebeurtenissenVoor(willem) {
+    verbeteringGeboorteakte(partij: 54101, aanvang: 20101010, toelichting:'rijmelarij'){
+        op '1978/10/22' te 'Monster' gemeente 'Westland'
+    }
+}
+
+Persoon.slaOp(willem)
+----
+
+De waardes voor `te` en `gemeente` zijn optioneel maar dienen wel altijd opgegeven te worden. Indien deze leeg mogen zijn dienen ze opgegeven te worden door middel van `()`, dus:
+
+[source,groovy, numbered]
+----
+def willem = Persoon.uitDatabase(bsn: 123455678)
+Persoon.nieuweGebeurtenissenVoor(willem) {
+    verbeteringGeboorteakte(partij: 54101, aanvang: 20101010, toelichting:'rijmelarij'){
+        op '1978/10/22' te() gemeente()
+    }
+}
+
+Persoon.slaOp(willem)
+----
+Dit zal alleen de geboorte datum aanpassen naar 1978/10/22 en de plaats en gemeente overnemen van het actuele record.

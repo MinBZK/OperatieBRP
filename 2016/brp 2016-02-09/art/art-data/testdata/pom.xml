@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp.art.data</groupId>
+        <artifactId>brp-art-data</artifactId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>brp-art-data-testdata</artifactId>
+    <packaging>jar</packaging>
+    <name>BRP ART Data - Testdata</name>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/art/art-data/testdata</connection>
+    </scm>
+
+    <!--
+         | Testdata project kent 2 profiles: convert-xls, fill-db (en staan bij default aan)
+         | 		Om uit te zetten gebruik -P !<profile1>,!<profile2> (Let op tussen P en de 1e zit een spatie en tussen profiles GEEN spatie)
+         |		bv. mvn install -P !convert-xls -Ddburl=jdbc:postgresql://localhost/brp
+         |
+         |
+         | let op: dburl, dbuser en dbpassword is in de parent gedefinieerd
+         |         de locatie van de sql bestand wordt ook gerefereerd in de assembly.xml
+         -->
+
+    <properties>
+        <!-- Properties die overschreven worden vanuit Jenkins/command-line -->
+        <dbhost>localhost</dbhost>
+        <dbprefix>art-</dbprefix>
+        <dbusername>brp</dbusername>
+        <dbpassword>brp</dbpassword>
+        <dbdriver>org.postgresql.Driver</dbdriver>
+
+        <xlsdir>${basedir}/src/main/resources/brp-testdata</xlsdir>
+        <sqlfile>${basedir}/target/brp-testdata/art-testdata.sql</sqlfile>
+        <project.brp.sql-zip.filename>art-testdata</project.brp.sql-zip.filename>
+
+
+        <!-- DB Properties -->
+        <db.kern.driver>${dbdriver}</db.kern.driver>
+        <db.kern.url>jdbc:postgresql://${dbhost}/${dbprefix}brp</db.kern.url>
+        <db.kern.username>${dbusername}</db.kern.username>
+        <db.kern.password>${dbpassword}</db.kern.password>
+
+
+        <docker.build.finalName>brp/database-met-testdata</docker.build.finalName>
+
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.art.data</groupId>
+            <artifactId>brp-art-data-testdata-generator</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.zcore.maven</groupId>
+                <artifactId>merge-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>merge</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                    </execution>
+                </executions>
+                <configuration>
+                    <mergers>
+                        <merger>
+                            <target>target/classes/brp-testdata/art-testdata.sql</target>
+                            <sources>
+                                <source>src/main/resources/brp-testdata/truncate.sql</source>
+                                <source>src/main/resources/brp-testdata/test-tables.sql</source>
+
+                                <source>src/main/resources/brp-testdata/referentie-puc700-verhuizing.sql</source>
+                                <source>src/main/resources/brp-testdata/referentie-overlijden.sql</source>
+                                <source>src/main/resources/brp-testdata/referentie-opvbpersopadres.sql</source>
+                                <source>src/main/resources/brp-testdata/referentie-kuc055.sql</source>
+                                <source>src/main/resources/brp-testdata/referentie-hp.sql</source>
+                                <source>src/main/resources/brp-testdata/referentie.sql</source>
+
+                                <source>src/main/resources/brp-testdata/testdata-persoononderzoek.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc042-huwelijkbuitenland.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc053-verhuizingbuitenland.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-persoonmetontbrekendeouders.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc008-actualiseerafstamming.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc054-opschorting.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-puc501-opvb.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc002-erkenningnageboorte.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc001-eersteinschrijving.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc042-partnerbuitenland.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc091-overlijdenbuitenland.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc002-eersteinschrijvingmeterkenning.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-persoonmetonbekendedatumgeboorte.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc055-correctieadres.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc042-hp.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-persoonmetonbekendedatums.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-verantwoording.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-persoonmetontbrekendeenonbekendeouder.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc042-partnernederland.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc033-mededelingverzoek.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc021-naamgeslacht.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-persoonmetontbrekendeenbekendeouder.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-persoonverificatie.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-sortering-vr00092.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc003-registratieadoptie.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-puc700-eersteinschrijving.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-vr00093.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc062-nationaliteit.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-bezemwagen.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-kuc091-overlijden.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-puc501-kv.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-puc501-odper.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-documenthistorie.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-registreerreisdocumenten.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-persoonmetonbrekendeouders.sql</source>
+                                <source>src/main/resources/brp-testdata/testdata-persoonmetonbekendeenbekendeouder.sql</source>
+
+                                <source>src/main/resources/brp-testdata/specials.sql</source>
+                            </sources>
+                        </merger>
+                    </mergers>
+                </configuration>
+            </plugin>
+            <!-- zip de sql statements -->
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <inherited>false</inherited>
+                <executions>
+                    <execution>
+                        <id>zip-sql</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <finalName>${project.brp.sql-zip.filename}</finalName>
+                            <descriptors>
+                                <descriptor>${basedir}/src/assembly/brp-testdata.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                    <!-- artefact dat gebruikt wordt door oa brp-test-art-omgeving -->
+                    <execution>
+                        <id>zip</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>${basedir}/src/assembly/brp-testdata.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+    <profiles>
+        <!--
+         | a) zet de cascading delete aan.
+         |    gebeurt in de generate-test-sources fase (dus voor test)
+         | b) run de sql statement om de database te vullen met testdata
+         |    gebeurt in de process-test-resources fase (dus voor test)
+         | c) run een backup
+         |    gebeurt in de test fase
+         +-->
+        <!-- Door het lostrekken van het test-data project, moet dit verplaatst worden naar de ART's -->
+        <profile>
+            <id>fill-db</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+                <property>
+                    <name>fill-db</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>sql-maven-plugin</artifactId>
+                        <version>1.5</version>
+                        <configuration>
+                            <driver>${db.kern.driver}</driver>
+                            <url>${db.kern.url}</url>
+                            <username>${db.kern.username}</username>
+                            <password>${db.kern.password}</password>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>fill-data</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>execute</goal>
+                                </goals>
+                                <configuration>
+                                    <autocommit>true</autocommit>
+                                    <srcFiles>
+                                        <srcFile>${sqlfile}</srcFile>
+                                    </srcFiles>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>backup-db</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <!--<skip>${skipTests}</skip>-->
+                                    <arguments>
+                                        <argument>-b</argument>
+                                        <argument>-d</argument>
+                                        <argument>${db.kern.url}</argument>
+                                        <argument>-u</argument>
+                                        <argument>${db.kern.username}</argument>
+                                        <argument>-p</argument>
+                                        <argument>${db.kern.password}</argument>
+                                    </arguments>
+                                    <mainClass>nl.bzk.brp.art.util.main.UtilRunner</mainClass>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-assembly</id>
+                                <phase>pre-integration-test</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <!-- Pak de dependencies uit met daarin alle SQL bestanden voor de database en de vulling -->
+                            <execution>
+                                <id>unpack-brp-algemeen-opslag-database</id>
+                                <phase>generate-resources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                                            <artifactId>brp-algemeen-opslag-database</artifactId>
+                                            <version>${project.version}</version>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}/brp-algemeen-opslag-database</outputDirectory>
+                                            <includes>**/*.sql,**/*.xml</includes>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-build</id>
+                                <phase>install</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker-publish</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-tag-image</id>
+                                <phase>install</phase>
+                            </execution>
+                            <execution>
+                                <id>docker-push-tag</id>
+                                <phase>deploy</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-tag-image</id>
+                                <phase>install</phase>
+                            </execution>
+                            <execution>
+                                <id>docker-push-tag</id>
+                                <phase>deploy</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

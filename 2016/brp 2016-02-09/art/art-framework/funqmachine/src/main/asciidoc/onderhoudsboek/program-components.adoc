@@ -1,0 +1,77 @@
+
+## Componenten
+De FunqMachinator bestaat uit verschillende functionele componenten die te samen het hart van de testtool vormen. Sommige compoenenten zijn speciaal gemaakt om beter te zijn dan de voorgaande testtools. Andere zijn overgenomen uit de oude tools of juist uit de BRP code. Dit hergebruik is gedaan om het wiel niet nogmaals uit te vinden.
+
+
+### Datalezers
+In het package `nl.bzk.brp.funqmachine.datalezers` zijn `DataLezer` implementaties om verschillende soorten bronen te kunnen lezen. Ze geven allen een `Map<String, Object>` terug. Hierbij kan Object ook weer een map zijn of een object met attributen. Er zijn lezers voor:
+
+- CSV, `CsvDataLezer`
+- YAML, `YamlDataLezer`
+- Excel,`ExcelDataLezer`
+
+De `ExcelDataLezer` is de meest in het oog springende datalezer. Het gebruikt de Apache POI bibliotheek en de abstractie `DataSheet`. Deze abstractie is overgenomen uit de oude _ARTEngine_, en geeft de mogelijkheid om uit een excel bestand een op basis van een testgevalnaam een kolom te vinden die die naam als header (eerste rij) heeft. +
+Zulke excel bestanden hebben tabbladen die als eerste kolom sleutels hebben. De overige kolommen dienen als waardes. Deze key-value paren kunnen worden opgehaald op basis van de eerste regel van de waarde kolommen. Deze horen bij een testgeval en worden ook zodanig opgevraagd.
+
+
+### BerichtenMapper
+De `BerichtenMapper` is een belangrijke informatiebron in de FunqMachinator. Het leest een configuratie (`nl/bzk/brp/funqmachine/mapper/endpoints-berichten.yml`) die de beschrijving is van het informatie landschap van de BRP. Het bevat de mapping van administratieve handelingen naar berichttemplates en ook endpoints, namespaces waar de berichten heen gestuurd moeten worden.
+
+
+### Processors
+Er zijn meerdere processors die belangrijke delen van de functionaliteit van de FunqMachinator onder hun hoede hebben. Ze zijn samen met de verstuurders en leveringontvanger de kern van het systeem.
+
+#### DataProcessor
+De hoofd verantwoordelijkheid van de `DataProcessor` is het lezen van data en samenvoegen daarvan in bestaande data. Hij gebruikt voor het lezen de ``DataLezer``s en kan daarna het resultaat invoegen in een bestaande `Map`. Hierbij worden bestaande sleutels, ook dieper in de hierarchie, overschreven. Deze techniek ligt ten grond slag aan het link:handleiding.html#berichten_maken[_principe van het stapelmechanisme voor data voor berichttemplates_].
+
+#### SqlProcessor
+De `SqlProcessor` is een wrapper rond om `groovy.sql.Sql`. Het biedt de operaties die nodig zijn voor de FunqMachinator. Hierbij moet rekening gehouden worden met het feit dat de meeste operaties de sql verbindingen afsluiten na gebruik. Praktisch betekent dit dat een SqlProcessor instantie maar voor een operatie te gebruiken is.
+
+#### TemplateProcessor
+De `TemplateProcessor` zorgt voor het invullen van data in een template. Hiervoor wordt FreeMarker gebruikt, omdat het objectnotatie ondersteunt, strikt is in het gebruik en aanwezigheid van sleutels en eenvoudige logica (loops, if) ondersteunt in de templates. Freemarker geeft standaard een exceptie als een key wordt gebruikt die niet in de data aanwezig is. De TemplateProcessor heeft extra functionaliteit om sugesties te doen uit de wel beschikbare sleutels.
+
+Er zijn ``TemplateMethod``s en ``TemplateDirective``s toegevoegd om extra's te bieden voor de templates. Voor het berekenen van een valide
+_ObjectSleutel_ voor in een bijhoudingsbericht is er de `ObjectsleutelDirective`. Tevens zijn er verschillende ``DatumFormattingMethod``s voor het formatteren en aanpassen van datums. Daarmee is het mogelijk om bv `${vandaag()}` functies in templates te laten evalueren. Templates worden *twee* keer geevalueerd vanwege deze functies, zodat je deze ook in testdata kan invullen.
+
+[NOTE]
+====
+Niet alleen xml berichten zijn templates. Ook bv. sql queries kunnen als template worden behandeld.
+====
+
+
+#### XmlProcessor
+De `XmlProcessor` heeft twee hoofdtaken: het aanpassen van xml voordat het door de FunqMachinator wordt verstuurd en het maken van xml van resultaten uit een database resultaat (van de SqlProcessor). Daarnaast is er eenvoudige validatie mogelijk door middel van http://xmlunit.org[XMLUnit]. Voor meer complexe xml zaken is er ook `XmlUtils` dat gebruik maakt van `javax.xml`.
+
+[WARNING]
+.XML Vergelijken
+====
+De methode `vergelijk()` vergelijkt XML zoals SoapUI dat doet.
+====
+
+##### XML aanpassen
+Een potentieel requestbericht ontdoen van xml elementen die zijn gemarkeerd. Dit gebeurt door middel van `[-1]` placeholders die in de testdata zijn geplaatst. De XmlProcessor verwijdert dan (parent) elementen zodat een bericht zonder lege xml elementen overblijft.
+
+
+### Verstuurders
+In het package `nl.bzk.brp.funqmachine.verstuurder` zijn `Verstuurder` implementaties. Momenteel zijn er twee verstuurders: voor SOAP en JMS. Deze geven de FunqMachinator de mogelijkheid om berichten te versturen. De `SoapVerstuurder` heeft een bericht en `SoapParameters` nodig om iets te versturen.
+
+De JmsVerstuurder heeft de mogelijkheid om een simulatie van de _bijhouding_ te toen. Het zet een administratieve handeling-id op een queue. Daarna blijft hij in de database kijken of deze handeling als verwerkt wordt gemarkeerd.
+
+
+### LeveringOntvanger
+De `LeveringOntvanger` kan de (asynchrone) berichten verstuurd door de leveringcomponenten ontvangen. Hiertoe worden vier dingen gedaan:
+
+. Een `HttpServer` gestart
+. Data in het _AutAut schema_ aangepast. De URL in de tabel `AutAut.toeganglevsautorisatie` wordt aangepast aan de locatie waarop de ontvanger de
+httpserver heeft gestart.
+. Synchronisatieberichten worden ontvangen. Hierbij worden *geen* SOAP specifieke dingen gedaan. Dus de HTTP `POST` die wordt gedaan met het bericht wordt beantwoord met een correct HTTP response. Daarna is het volledige SOAP bericht beschikbaar.
+. Het BRP specifieke deel wordt uit het ontvangen gehaald en is voor verdere evaluatie beschikbaar.
+
+
+### `nl.bzk.brp.funqmachine.wachttijd`
+De `Wait` interface en implementaties zijn gekopieerd uit http://docs.seleniumhq.org/[Selenium]. Dit geeft de FunqMachinator de mogelijkheid om (met een timeout) te wachten op een verwacht resultaat. Het wordt gebruikt om te wachten op een aantal verwachte berichten, op een mogelijk database resultaat.
+
+
+### `nl.bzk.brp.funqmachine.schrijvers`
+Resultaten van een test worden weggeschreven. Dit gebeurt door de klasses is dit package. De `FileWriter` krijgt een `ScenarioResult` dat een lijst van `StepResult` heeft. Een step result heeft voor een mogelijke step een verzoek, antwoord, of verwacht antwoord.
+

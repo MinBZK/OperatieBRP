@@ -1,0 +1,390 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<!-- Generated 23-jul-2012 10:25:38 by Hibernate Tools 3.2.4.GA -->
+<hibernate-mapping>
+    <class name="nl.bzk.brp.metaregister.model.GeneriekElement" table="ELEMENT">
+        <id name="id" type="int">
+            <column name="ID" />
+            <generator class="assigned" />
+        </id>
+        <!-- Er is meer dan 1 waarde van soort die leidt tot het type 'Tuple'; daarom gebruiken we een discriminator formula -->
+        <discriminator formula="CASE WHEN soort IN ('T', 'BS', 'AC', 'H', 'CD') THEN 'T' ELSE soort END" type="string" />
+        <many-to-one name="elementByLaag" class="nl.bzk.brp.metaregister.model.GeneriekElement" fetch="select">
+            <column name="LAAG" />
+        </many-to-one>
+        <many-to-one name="database" class="nl.bzk.brp.metaregister.model.Database" fetch="select">
+            <column name="DATABASE_" />
+        </many-to-one>
+        <many-to-one name="schema" class="nl.bzk.brp.metaregister.model.Schema" fetch="select">
+            <column name="SCHEMA_" />
+        </many-to-one>
+        <many-to-one name="platform" class="nl.bzk.brp.metaregister.model.Platform" fetch="select">
+            <column name="PLATFORM" />
+        </many-to-one>
+        <many-to-one name="soortElement" class="nl.bzk.brp.metaregister.model.SoortElement" fetch="select" insert="false" update="false">
+            <column name="SOORT" length="2" not-null="true" />
+        </many-to-one>
+        <property name="syncid" type="java.lang.Integer">
+            <column name="SYNCID" />
+        </property>
+        <property name="orgSyncid" type="java.lang.Integer">
+            <column name="ORG_SYNCID" />
+        </property>
+        <property name="naam" type="java.lang.String">
+          	<meta attribute="use-in-tostring">true</meta>
+            <column name="NAAM" length="80" not-null="true" />
+        </property>
+        <property name="volgnummer" type="java.lang.Integer">
+            <column name="VOLGNUMMER" />
+        </property>
+        <property name="naamTbvGeneratie" type="java.lang.String">
+            <column name="NAAM_TBV_GENERATIE" length="80" />
+        </property>
+        <property name="volgnummerG" type="java.lang.Integer">
+            <column name="VOLGNUMMERG" />
+        </property>
+        <property name="volgnummerT" type="java.lang.Integer">
+            <column name="VOLGNUMMERT" />
+        </property>
+        <property name="identDbActie" type="java.lang.String">
+            <column name="IDENT_DB_ACTIE" length="80" />
+        </property>
+        <property name="identDb" type="java.lang.String">
+            <column name="IDENT_DB" length="30" />
+        </property>
+        <property name="identCode" type="java.lang.String">
+            <column name="IDENT_CODE" length="80" />
+        </property>
+        <property name="aantalBytes" type="java.lang.Integer">
+            <column name="AANTAL_BYTES" />
+        </property>
+        <property name="afleidbaar" type="java.lang.Character">
+            <column name="AFLEIDBAAR" length="1" />
+        </property>
+        <property name="historieVastleggen" type="java.lang.Character">
+            <column name="HISTORIE_VASTLEGGEN" length="1" />
+        </property>
+        <property name="historiePatroon" type="java.lang.String">
+            <column name="HISTORIE_PATROON" length="5" />
+        </property>
+        <property name="code" type="java.lang.String">
+            <column name="CODE" length="80" />
+        </property>
+        <property name="beschrijving" type="java.lang.String">
+            <column name="BESCHRIJVING"  />
+        </property>
+        <property name="patrooncode" type="java.lang.String">
+            <column name="PATROONCODE" length="10" />
+        </property>
+        <property name="momentCreatie" type="timestamp">
+            <column name="MOMENT_CREATIE" length="19" />
+        </property>
+        <property name="momentLaatsteWijziging" type="timestamp">
+            <column name="MOMENT_LAATSTE_WIJZIGING" length="19" />
+        </property>
+        <property name="gebruikerLaatsteWijziging" type="java.lang.Integer">
+            <column name="GEBRUIKER_LAATSTE_WIJZIGING" />
+        </property>
+        <property name="meervoudsnaam" type="java.lang.String">
+            <column name="MEERVOUDSNAAM" length="80" />
+        </property>
+        <property name="export" type="java.lang.Character">
+            <column name="EXPORT" length="1" />
+        </property>
+        <property name="inSet" type="java.lang.Character">
+            <column name="IN_SET" length="1" />
+        </property>
+        <property name="inLgm" type="java.lang.Character">
+            <column name="IN_LGM" length="1" />
+        </property>
+        <property name="inOgm" type="java.lang.Character">
+            <column name="IN_OGM" length="1" />
+        </property>
+        <property name="inCode" type="java.lang.Character">
+            <column name="IN_CODE" length="1" />
+        </property>
+        <property name="genSleutel" type="java.lang.Character">
+            <column name="GEN_SLEUTEL" length="1" />
+        </property>
+        <property name="inBericht" type="java.lang.Character">
+            <column name="IN_BERICHT" length="1" />
+        </property>
+        <property name="xsdCodeFragment" type="java.lang.String">
+            <column name="XSD_CODE_FRAGMENT" />
+        </property>
+        <property name="xsdVerplicht" type="java.lang.Character">
+            <column name="XSD_VERPLICHT" length="1" />
+        </property>
+        <property name="xsdIdentificatie" type="java.lang.String">
+            <column name="XSD_IDENT" />
+        </property>
+        <property name="historieLaag" type="java.lang.Character">
+            <column name="HISTORIE_LAAG" length="1" />
+        </property>
+        <property name="xsdViewsPerDiscriminatorWaarde" type="java.lang.Character">
+            <column name="XSD_VIEWS_PER_DISCR_WAARDE" length="1" />
+        </property>
+        <property name="xsdInverseAssociatieViewsPerDiscriminatorWaardeOnderdrukken" type="java.lang.Character">
+            <column name="XSD_INV_ASS_VIEWS_ONDERDRUKKEN" length="1" />
+        </property>
+        <property name="xsdPatroon" type="java.lang.String">
+            <column name="XSD_PATROON" />
+        </property>
+        <property name="xsdSortering" type="java.lang.String">
+            <column name="XSD_SORTERING" />
+        </property>
+        <property name="xsdType" type="java.lang.String">
+            <column name="XSD_TYPE" length="30" />
+        </property>
+        <property name="xsdViewPrefix" type="java.lang.String">
+            <column name="XSD_VIEW_PREFIX" length="30" />
+        </property>
+        <property name="xsdOndersteuntNoValue" type="java.lang.Character">
+            <column name="XSD_ONDERSTEUNT_NOVALUE" length="1" />
+        </property>
+        <property name="xsdStatischStamgegevenUitschrijven" type="java.lang.Character">
+            <column name="XSD_STATISCH_STAMGEGEVEN_UITSCH" length="1" />
+        </property>
+        <property name="xsdInverseAssociatieNaam" type="java.lang.String">
+            <column name="XSD_INVERSE_ASSOCIATIE_NAAM" length="80" />
+        </property>
+        <property name="xsdInverseAssociatieIdentCode" type="java.lang.String">
+            <column name="XSD_INVERSE_ASSOCIATIE_IDENT_CD" length="80" />
+        </property>
+        <property name="discriminatorAttribuut" type="java.lang.String">
+            <column name="DISCR_ATTRIBUUT" length="30" />
+        </property>
+        <property name="verplicht" type="java.lang.Character">
+            <column name="VERPLICHT" length="1" />
+        </property>
+        <property name="koppeling" type="java.lang.Character">
+            <column name="KOPPELING" length="1" />
+        </property>
+        <property name="soortInhoud" type="java.lang.Character">
+            <column name="SOORT_INHOUD" length="1" />
+        </property>
+        <property name="waarde" type="java.lang.String">
+            <column name="WAARDE" length="80" />
+        </property>
+        <property name="weergave" type="java.lang.String">
+            <column name="WEERGAVE" length="80" />
+        </property>
+        <property name="inverseAssociatieNaam" type="java.lang.String">
+            <column name="INVERSE_ASSOCIATIE_NAAM" length="80" />
+        </property>
+        <property name="inverseAssociatieIdentCode" type="java.lang.String">
+            <column name="INVERSE_ASSOCIATIE_IDENT_CODE" length="80" />
+        </property>
+        <property name="voorkomenLengte" type="java.lang.Character">
+            <column name="VOORKOMEN_LENGTE" length="1" />
+        </property>
+        <property name="voorkomenAantalBytes" type="java.lang.Character">
+            <column name="VOORKOMEN_AANTAL_BYTES" length="1" />
+        </property>
+        <property name="voorkomenAantalDecimalen" type="java.lang.Character">
+            <column name="VOORKOMEN_AANTAL_DECIMALEN" length="1" />
+        </property>
+        <property name="minimumLengte" type="java.lang.Integer">
+            <column name="MINIMUM_LENGTE" />
+        </property>
+        <property name="maximumLengte" type="java.lang.Integer">
+            <column name="MAXIMUM_LENGTE" />
+        </property>
+        <property name="aantalDecimalen" type="java.lang.Integer">
+            <column name="AANTAL_DECIMALEN" />
+        </property>
+        <property name="verantwoordingCategorie" type="java.lang.Character">
+            <column name="VERANTWOORDING_CATEGORIE" length="1" />
+        </property>
+        <many-to-one name="generiekElementOuder" class="nl.bzk.brp.metaregister.model.GeneriekElement" fetch="select" insert="false" update="false">
+            <column name="OUDER" />
+        </many-to-one>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="elementsForSchema" inverse="true" lazy="true" table="ELEMENT" fetch="select">
+            <key>
+                <column name="SCHEMA_" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.GeneriekElement" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="elementsForVersie" inverse="true" lazy="true" table="ELEMENT" fetch="select">
+            <key>
+                <column name="VERSIE" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.GeneriekElement" />
+        </set>
+        <!-- gebruik Dao want die filtert op insom
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="elementsForGroep" inverse="true" lazy="true" table="ELEMENT" fetch="select">
+            <key>
+                <column name="GROEP" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.GeneriekElement" />
+        </set>-->
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="elementsForFinaalSupertype" inverse="true" lazy="true" table="ELEMENT" fetch="select">
+            <key>
+                <column name="FINAAL_SUPERTYPE" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.GeneriekElement" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="elementsForKernSchema" inverse="true" lazy="true" table="ELEMENT" fetch="select">
+            <key>
+                <column name="KERN_SCHEMA" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.GeneriekElement" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="bronattribuuts" inverse="true" lazy="true" table="BRONATTRIBUUT" fetch="select">
+            <key>
+                <column name="ATTRIBUUT" not-null="true" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.Bronattribuut" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="framevelds" inverse="true" lazy="true" table="FRAMEVELD" fetch="select">
+            <key>
+                <column name="ATTRIBUUT" not-null="true" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.Frameveld" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="teksts" inverse="true" lazy="true" table="TEKST" fetch="select">
+            <key>
+                <column name="ELEMENT" not-null="true" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.Tekst" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="elementsForLaag" inverse="true" lazy="true" table="ELEMENT" fetch="select">
+            <key>
+                <column name="LAAG" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.GeneriekElement" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="bronsForObjecttype" inverse="true" lazy="true" table="BRON" fetch="select">
+            <key>
+                <column name="OBJECTTYPE" not-null="true" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.Bron" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="bronsForLink" inverse="true" lazy="true" table="BRON" fetch="select">
+            <key>
+                <column name="LINK" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.Bron" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="controles" inverse="true" lazy="true" table="CONTROLE" fetch="select">
+            <key>
+                <column name="ELEMENT" not-null="true" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.Controle" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="regelattribuutsForRegel" inverse="true" lazy="true" table="REGELATTRIBUUT" fetch="select">
+            <key>
+                <column name="BEDRIJFSREGEL" not-null="true" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.Regelattribuut" />
+        </set>
+        <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="regelattribuutsForAttribuut" inverse="true" lazy="true" table="REGELATTRIBUUT" fetch="select">
+            <key>
+                <column name="ATTRIBUUT" not-null="true" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.Regelattribuut" />
+        </set>
+        <set name="extraWaarden" inverse="true" lazy="true" table="EXTRA_WAARDE" fetch="select">
+            <key>
+                <column name="ELEMENT" not-null="true" />
+            </key>
+            <one-to-many class="nl.bzk.brp.metaregister.model.ExtraWaarde" />
+        </set>
+        <subclass name="nl.bzk.brp.metaregister.model.Attribuut" discriminator-value="A" >
+            <many-to-one name="groep" class="nl.bzk.brp.metaregister.model.Groep" fetch="select">
+                <column name="GROEP" />
+            </many-to-one>
+            <many-to-one name="type" class="nl.bzk.brp.metaregister.model.GeneriekElement" fetch="select">
+                <column name="TYPE_" />
+            </many-to-one>
+            <many-to-one name="objectType" class="nl.bzk.brp.metaregister.model.ObjectType" fetch="select">
+                <column name="OUDER" />
+            </many-to-one>
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.AttribuutType" discriminator-value="AT">
+            <many-to-one name="ouder" class="nl.bzk.brp.metaregister.model.GeneriekElement" fetch="select">
+                <column name="OUDER" />
+            </many-to-one>
+            <many-to-one name="basisType" class="nl.bzk.brp.metaregister.model.BasisType" fetch="select">
+                <column name="TYPE_" />
+            </many-to-one>
+            <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="regels" inverse="true" lazy="true" table="ELEMENT" fetch="select" where="soort = 'R'">
+                <key>
+                    <column name="OUDER" />
+                </key>
+                <one-to-many class="nl.bzk.brp.metaregister.model.Regel" />
+            </set>
+            <!-- Geen sortering, want geen logische volgorde van toepassing op instanties. -->
+            <set name="instanties" inverse="true" lazy="true" table="ELEMENT" fetch="select" where="soort = 'A'">
+                <key>
+                    <column name="TYPE_" />
+                </key>
+                <one-to-many class="nl.bzk.brp.metaregister.model.Attribuut" />
+            </set>
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.Regel" discriminator-value="R">
+            <many-to-one name="soortRegel" class="nl.bzk.brp.metaregister.model.SoortRegel" fetch="select">
+                <column name="SOORT_REGEL" length="10" />
+            </many-to-one>
+            <many-to-one name="elementByOuder" class="nl.bzk.brp.metaregister.model.GeneriekElement" fetch="select">
+                <column name="OUDER" />
+            </many-to-one>
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.Berichtsjabloon" discriminator-value="BS">
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.BasisType" discriminator-value="BT">
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.Domein" discriminator-value="D">
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.Groep" discriminator-value="G">
+            <many-to-one name="objectType" class="nl.bzk.brp.metaregister.model.ObjectType" fetch="select">
+                <column name="OUDER" />
+            </many-to-one>
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.ObjectType" discriminator-value="OT">
+            <many-to-one name="finaalSupertype" class="nl.bzk.brp.metaregister.model.ObjectType" fetch="select">
+                <column name="FINAAL_SUPERTYPE" />
+            </many-to-one>
+            <many-to-one name="superType" class="nl.bzk.brp.metaregister.model.ObjectType" fetch="select">
+                <column name="TYPE_" />
+            </many-to-one>
+            <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="subtypen" inverse="true" lazy="true" table="ELEMENT" fetch="select" where="soort = 'OT'">
+                <key>
+                    <column name="TYPE_" />
+                </key>
+                <one-to-many class="nl.bzk.brp.metaregister.model.ObjectType" />
+            </set>
+            <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="regels" inverse="true" lazy="true" table="ELEMENT" fetch="select" where="soort = 'R'">
+                <key>
+                    <column name="OUDER" />
+                </key>
+                <one-to-many class="nl.bzk.brp.metaregister.model.Regel" />
+            </set>
+            <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="tuples" inverse="true" lazy="true" table="ELEMENT" fetch="select" where="soort in ('T', 'BS', 'H', 'AC', 'CD')">
+                <key>
+                    <column name="OUDER" />
+                </key>
+                <one-to-many class="nl.bzk.brp.metaregister.model.Tuple" />
+            </set>
+            <set sort="nl.bzk.brp.metaregister.helper.Vergelijker" name="instanties" inverse="true" lazy="true" table="ELEMENT" fetch="select" where="soort = 'A'">
+                <key>
+                    <column name="TYPE_" />
+                </key>
+                <one-to-many class="nl.bzk.brp.metaregister.model.Attribuut" />
+            </set>
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.Schema" discriminator-value="S">
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.WaarderegelWaarde" discriminator-value="W">
+            <many-to-one name="regel" class="nl.bzk.brp.metaregister.model.Regel" fetch="select">
+                <column name="OUDER" />
+            </many-to-one>
+        </subclass>
+        <subclass name="nl.bzk.brp.metaregister.model.Tuple" discriminator-value="T">
+            <many-to-one name="objectType" class="nl.bzk.brp.metaregister.model.ObjectType" fetch="select">
+                <column name="OUDER" />
+            </many-to-one>
+        </subclass>
+    </class>
+</hibernate-mapping>

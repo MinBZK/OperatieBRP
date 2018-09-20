@@ -1,0 +1,104 @@
+
+=== Adoptie
+
+
+==== Ouders
+Als de `ouders()` functie wordt aangeroepen wordt er voor de persoon die wordt 'geadopteerd'
+de bestaande _ouder betrokkenheden_ vervallen en ouderschap beeindigd.
+De _familierechtelijke betrekking_ blijft bestaan en krijgt de nieuwe ouders als betrokkenheden.
+
+Het is toegestaan om `null` als waarde voor een ouder op te geven of de `moeder` of `vader` niet
+op te geven. Indien de moeder `null` is, wordt daarvoor wel een ouderbetrokkenheid aangemaakt (dus met onbekende ouder).
+Als de vader `null` is wordt er ook een betrokkenheid vastgelegd. Door het niet omschrijven
+van de vader, is het mogelijk om <<gebeurtenis/erkenning.adoc#erkenning,erkenning>> te laten gebeuren. Zie ook het
+gebruik van <<gebeurtenis/geboorte.adoc#ouders,Ouders bij geboorte>>.
+
+[source,groovy]
+----
+geadopteerd() {
+  ouders([moeder:marie, vader:piet])
+  ouders vader:marie, moeder:piet <1>
+}
+----
+<1> ouders als map
+
+
+==== Namen
+Een persoon heeft _voornamen_, _geslachtsnaam_.
+De namen van de persoon worden geregistreerd in een `namen() {}` blok. In het blok
+kunnen de voornamen, geslachtsnamen worden vastgelegd. Aan het einde van de uitvoer van dit
+blok wordt de samengestelde naam afgeleid, alsmede een voorkomen van de groep _naamgebruik_.
+
+[source,groovy]
+.Het namen blok
+----
+geadopteerd() {
+  namen {
+    //... <1>
+  }
+}
+----
+<1> voornamen etc. komen hier
+
+===== Voornamen
+Een of meer voornamen worden opgegeven. De voornamen krijgen een volgnummer (vanaf *1*) in de
+volgorde waarin ze zijn opgesomd. Indien er al voornamen waren vastgelegd, worden de voorkomens
+daarvan beeindigd.
+
+[source,groovy]
+----
+  namen {
+    voornamen 'Jan', 'Piet', 'Klaas'
+    //...
+  }
+----
+
+===== Geslachtsnaamcomponenten
+Geslachtsnaamcomponent kan in verschillende vormen worden vastgelegd. Ook hier geldt dat
+een bestaand voorkomen wordt beeindigd. Indien er slechts
+een is met uitsluitend een _stam_ kan de volgende verkorte versie worden gebruikt:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam 'Jansen'
+  }
+----
+
+Het is ook mogelijk om een geslachtsnaam uitgebreider vast te leggen:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam(
+      [stam: 'Jansen', voorvoegsel: 'van', scheidingsteken:'-', adellijkeTitel: 'P', predicaat: 'H'] <1>
+    )
+  }
+----
+<1> volledige opties voor een geslachtsnaamcomponent
+
+
+==== Nationaliteiten
+Extra nationaliteiten kunnen worden toegevoegd als dat nodig is.
+
+[source,groovy]
+----
+geadopteerd() {
+  nationaliteiten('Canadese', 'Turkse')
+}
+----
+
+
+==== Indicaties
+Een persoon kan één of meerdere indicaties hebben. Deze kunnen bij adoptie alleen
+worden aangezet.
+
+[source,groovy]
+----
+geadopteerd() {
+  behandeldAlsNederlander(true)
+  staatloos(true)
+}
+----

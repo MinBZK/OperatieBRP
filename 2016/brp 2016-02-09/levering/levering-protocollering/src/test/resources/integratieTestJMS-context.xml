@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <import resource="classpath:protocollering-verwerking-context.xml"/>
+    <context:property-placeholder location="classpath:brp-*.properties"/>
+
+    <!-- Zet een test broker op -->
+    <amq:broker id="testProtocolleringVerwerkingBroker" persistent="false" useJmx="false" brokerName="localhost">
+        <amq:transportConnectors>
+            <amq:transportConnector uri="${berichtencentrale.url}" />
+        </amq:transportConnectors>
+        <amq:systemUsage>
+            <amq:systemUsage>
+                <amq:tempUsage>
+                    <amq:tempUsage limit="32mb" />
+                </amq:tempUsage>
+            </amq:systemUsage>
+        </amq:systemUsage>
+    </amq:broker>
+
+    <!--  ActiveMQ Destination  -->
+    <amq:queue id="protocolleringQueue" physicalName="${protocollering.jms.queue}"/>
+
+    <!-- JMS ConnectionFactory to use, configuring the embedded broker using XML -->
+    <amq:connectionFactory id="connectionFactory" brokerURL="${protocollering.jms.url}"/>
+
+    <!-- JMS Producer Configuration -->
+    <bean id="jmsProducerConnectionFactory"
+          class="org.apache.activemq.pool.PooledConnectionFactory" destroy-method="stop"
+          p:connectionFactory-ref="connectionFactory"/>
+
+    <bean id="publiceerProtocolleringTemplate" class="org.springframework.jms.core.JmsTemplate"
+          p:connectionFactory-ref="jmsProducerConnectionFactory"
+          p:defaultDestination-ref="protocolleringQueue"/>
+
+</beans>

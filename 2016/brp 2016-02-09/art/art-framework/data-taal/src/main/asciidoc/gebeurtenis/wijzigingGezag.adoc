@@ -1,0 +1,43 @@
+
+=== Wijziging gezag
+Het is mogelijk dat door (externe) redenen de partijen of personen die gezag hebben
+over een persoon veranderen. Dit wordt aangeduid door de gebeurtenis _wijziging gezag_.
+
+Er zijn twee mogelijkheden: het plaatsen van een indicatie op de persoon, de indicatie _derdeHeeftGezag_.
+Daarnaast kan de indicatie van oudelijkgezag op de ouderbetrokkenheden van een persoon veranderen.
+
+==== Indicatie Derde heeft gezag
+De indicatie derde heeft gezag is een indicatie op de persoon zelf.
+
+[source,groovy]
+.indicatie derde heeft gezag wijzigen
+----
+wijzigingGezag() {
+    derdeHeeftGezag ja <1>
+    derdeHeeftGezag nee <2>
+}
+----
+<1> indicatie toevoegen indien deze nog niet aanwezig is
+<2> indicatie verwijderen indien deze aanwezig is
+
+
+==== Indicatie Ouderlijkgezag
+De indicatie ouderlijkgezag komt voor op de ouderbetrokkenheid van een
+persoon, die met de ouderbetrokkenheid in de familierechtelijkebetrekking deelneemt.
+De indicatie op dit object kan op `ja` of `nee` gezet worden.
+
+[source,groovy]
+.indicatie ouderlijkgezag wijzigen
+----
+def vader = Persoon.metBsn 12345678
+...
+wijzigingGezag() {
+    ouderlijkGezag vader, ja <1>
+    ouderlijkGezag 98765432, nee <2>
+}
+----
+<1> indicatie op `ja` zetten. De juiste (ouder) betrokkenheid wordt gezocht o.b.v. de opgegeven persoon.
+<2> indicatie op `nee` zetten. De juiste (ouder) betrokkenheid wordt gezocht o.b.v. persoon met de opgegeven BSN.
+
+De parameters voor derdeHeeftGezag zijn optioneel.
+

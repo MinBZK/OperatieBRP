@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+    ">
+
+    <tx:annotation-driven/>
+
+
+    <bean id="templateDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+          abstract="true">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.pool.maxActive:100}"/>
+        <property name="minIdle" value="${jdbc.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.pool.maxIdle:5}"/>
+        <property name="maxWait" value="30000"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+    </bean>
+
+    <!--
+       Data sources voor de default connectie van de applicatie (slaves die read-only zijn) en voor speciale functies zoals archivering/logging en protocollering (master) database connectie.
+   -->
+    <bean id="alleenLezenDataSource" parent="templateDataSource">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.pool.maxActive:100}"/>
+        <property name="minIdle" value="${jdbc.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.pool.maxIdle:5}"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultReadOnly" value="${jdbc.readonly:false}"/>
+        <property name="defaultTransactionIsolation" value="${jdbc.transactionisolation:2}"/>
+        <!-- default TRANSACTION_READ_COMMITTED, voor read-only: TRANSACTION_NONE = 0) -->
+    </bean>
+
+    <bean id="alpDataSource" parent="templateDataSource">
+        <property name="url" value="${jdbc.archivering.url}"/>
+        <property name="username" value="${jdbc.archivering.username}"/>
+        <property name="password" value="${jdbc.archivering.password}"/>
+        <property name="initialSize" value="${jdbc.archivering.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.archivering.pool.maxActive:100}"/>
+        <property name="minIdle" value="${jdbc.archivering.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.archivering.pool.maxIdle:5}"/>
+    </bean>
+
+    <bean id="lezenSchrijvenDataSource" parent="templateDataSource">
+        <property name="url" value="${jdbc.master.url}"/>
+        <property name="username" value="${jdbc.master.username}"/>
+        <property name="password" value="${jdbc.master.password}"/>
+        <property name="initialSize" value="${jdbc.master.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.master.pool.maxActive:100}"/>
+        <property name="minIdle" value="${jdbc.master.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.master.pool.maxIdle:5}"/>
+    </bean>
+</beans>

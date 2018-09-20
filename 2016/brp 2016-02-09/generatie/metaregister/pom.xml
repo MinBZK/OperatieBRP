@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>brp-parent</artifactId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../../brp-parent</relativePath>
+    </parent>
+    <groupId>nl.bzk.brp.generatie</groupId>
+    <artifactId>brp-generatie-metaregister</artifactId>
+  <version>96-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>BRP Generatie Metaregister</name>
+    <description>Metaregister projecten die het metaregister uitlezen, opnieuw genereren als HSQL database en een DAO laag maken
+        om het BMR te ontsluiten voor code generatie</description>
+
+    <modules>
+        <module>database</module>
+        <module>metamodel</module>
+        <module>dataaccess</module>
+        <module>consistency</module>
+    </modules>
+
+    <properties>
+        <!-- Een recentere hibernate.version is in de parent pom gedefinieerd. De submodules 'dataaccess' en 'consistency' moeten onderstaande versie van
+        hibernate gebruiken. De hibernate version upgraden resulteert in de warning:
+        "WARN LocalXmlResourceResolver:70 - HHH000223: Recognized obsolete hibernate namespace http://hibernate.sourceforge.net/hibernate-mapping.
+            Use namespace http://www.hibernate.org/dtd/hibernate-mapping instead. Refer to Hibernate 3.6 Migration Guide!"
+        en in unittest failures: "Could not roll back JPA transaction".
+        Deze property wordt niet geupdate door de versions-plugin, omdat deze hoofdpom er geen gebruik van maakt.-->
+        <hibernate.version>3.5.6-Final</hibernate.version>
+
+        <db.lokaal.pad>${project.build.directory}/database</db.lokaal.pad>
+        <db.lokaal.file.naam>brp-metaregister.db</db.lokaal.file.naam>
+
+        <skipTestsGeneratoren>${skipTests}</skipTestsGeneratoren>
+    </properties>
+
+    <dependencies>
+        <!-- ONderstaande dependency wordt ge-exclude in BRP-Parent maar is hier toch nodig voor de unit tests.-->
+        <!-- Andere projecten krijgen de dependency binnen via brp-model -> bean-utils -->
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <preparationGoals>clean</preparationGoals>
+                    <tagNameFormat>metaregister-v@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <configuration>
+                    <check />
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipTestsGeneratoren}</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>skipTestsGeneratoren</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <skipTestsGeneratoren>true</skipTestsGeneratoren>
+            </properties>
+        </profile>
+    </profiles>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister</developerConnection>
+        <url>https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister</url>
+    </scm>
+
+</project>

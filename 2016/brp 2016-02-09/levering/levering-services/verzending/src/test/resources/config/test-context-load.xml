@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+       http://camel.apache.org/schema/spring http://camel.apache.org/schema/spring/camel-spring.xsd
+       http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+    <aop:aspectj-autoproxy>
+        <aop:include name="timingAspect"/>
+    </aop:aspectj-autoproxy>
+
+    <bean id="timingAspect" class="org.perf4j.slf4j.aop.TimingAspect"/>
+
+    <camelContext xmlns="http://camel.apache.org/schema/spring" useMDCLogging="true" id="brp-verzending"
+                  autoStartup="true" threadNamePattern="VerzendingThread ##counter#" shutdownRoute="Default"
+                  shutdownRunningTask="CompleteCurrentTaskOnly">
+        <propertyPlaceholder location="classpath:brp-verzending.properties" id="properties" cache="true"
+                             ignoreMissingLocation="false" />
+
+        <!--<threadPool id="verzendingThreadPoolProfile" threadName="testthread" poolSize="1" maxPoolSize="1" maxQueueSize="1"/>-->
+        <!--<threadPoolProfile id="verzendingThreadPoolProfile" poolSize="1" maxPoolSize="1" maxQueueSize="1" defaultProfile="true"/>-->
+
+        <!-- Default JMX connector url: "service:jmx:rmi:///jndi/rmi://localhost:1099/jmxrmi/camel" -->
+        <!--<jmxAgent id="brp-verzending-jmx" createConnector="true" statisticsLevel="RoutesOnly" registryPort="10991" connectorPort="1399" />-->
+    </camelContext>
+
+    <context:property-placeholder ignore-resource-not-found="false" location="classpath*:brp-*.properties" />
+
+    <context:component-scan base-package="nl.bzk.brp.levering.verzending" scoped-proxy="targetClass"/>
+
+    <!--<import resource="classpath:datasource-beans.xml" />-->
+    <import resource="classpath:brp-verzending-context.xml" />
+    <import resource="classpath:broker.xml" />
+
+    <bean id="dataSourceMasterLockTest" parent="templateDataSource">
+        <property name="url" value="${jdbc.master.url}"/>
+        <property name="username" value="${jdbc.master.username}"/>
+        <property name="password" value="${jdbc.master.password}"/>
+    </bean>
+
+    <!-- Uitgaande berichten queue, nodig voor integratietests-->
+    <bean id="afnemersJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cachedConnectionFactoryAfnemers"/>
+    </bean>
+
+    <bean id="jmsConnectionFactoryAfnemers" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${jms.broker.afnemers.url}"/>
+    </bean>
+
+    <bean id="cachedConnectionFactoryAfnemers"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsConnectionFactoryAfnemers"/>
+        <!-- ivm 1500 afnemers de sessionCacheSize voor nu op 10 gezet (default = 1), is een waarde waarmee we nog
+        moeten spelen -->
+        <property name="sessionCacheSize" value="10"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+    <bean id="jmsTransactionManagerAfnemers" class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="cachedConnectionFactoryAfnemers"/>
+    </bean>
+
+    <import resource="classpath:ws.xml" />
+    <import resource="classpath:datasource-beans.xml" />
+    <import resource="classpath:dataaccess-beans.xml" />
+    <import resource="classpath*:/protocollering-publicatie-context.xml"/>
+    <import resource="classpath:mutaties-kern-algemeen.xml" />
+    <import resource="classpath:jms-beans.xml" />
+    <import resource="classpath:jmx-management-beans.xml" />
+
+</beans>

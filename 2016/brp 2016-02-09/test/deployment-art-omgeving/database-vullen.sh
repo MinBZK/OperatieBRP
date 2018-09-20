@@ -1,0 +1,1 @@
+mvn install -Pcreate-test-db,nieuwste -Ddbprefix=art-

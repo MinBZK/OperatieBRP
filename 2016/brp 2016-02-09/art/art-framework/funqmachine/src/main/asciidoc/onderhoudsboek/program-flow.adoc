@@ -1,0 +1,57 @@
+
+## De flow van de FunqMachinator
+
+### Starten
+Het uitvoeren van testen begint bij de `AbstractSpringJBehaveStories`. Deze klasse vormt de integratie
+tussen JBehave, JUnit en Spring Framework. Het zorgt voor het opzoeken van `.story` bestanden, het opstarten
+van het JBehave framework en door middel van Spring injectie van beans in steps klassen. De klassen worden
+uitgevoerd door JUnit met behulp van de `SpringJUnit4ClassRunner`, voor de Spring integratie.
+
+Klasses die `AbstractSpringJBehaveStories` extenden kunnen extra filters of specifieke zoekpaden voor stories
+invullen, zodat ze een specifieke (deel)set van stories kunnen uitvoeren.
+
+#### Voorbeeld
+
+[source, groovy]
+.FunqMachineFeaturesTest.groovy
+----
+@AcceptanceTest <1>
+class FunqMachineFeaturesTest extends AbstractSpringJBehaveStories { <2>
+    @Override
+    List<String> metaFilters() {
+        ["groovy: status == 'Onderhanden'"] <3>
+    }
+}
+----
+<1> Markeer de test als een acceptatietest, benodigd voor de Spring integratie
+<2> extend `AbstractSpringJBehaveStories` voor JBehave
+<3> override methode voor specifieke filtering van de story bestanden
+
+
+### Validatie
+Story bestanden die zijn gevonden worden eerst gevalideerd. Dit is een technische validatie om ervoor te zorgen
+dat de story bestanden niet te groot worden en aan bepaalde (opmaak) standaarden voldoen. Implementatie van deze
+validatie is in het package `nl.bzk.brp.funqmachine.jbehave.validatie`. De klasse `StoryFileValidator` is de
+specifieke validator voor story bestanden. Alleen valide story bestanden worden uitgevoerd door de FunqMachinator.
+
+[NOTE]
+====
+Legacy testen worden niet gevalideerd. Deze uitzondering wordt gemaakt op basis van het pad waarin een story wordt gevonden.
+====
+
+### Uitvoeren
+De valide story bestanden worden dan uitgevoerd. JBehave zorgt voor de mapping van de story regels naar methodes
+in klasses geannoteerd met JBehave annotaties (`@Given`, `@When`, `@Then`). Alleen de klasses met de Spring (meta)
+annotatie `@Steps` worden hierin meegenomen, omdat dit de enige componenten zijn die door Spring zijn geinstantieerd.
+
+Het component `OmgevingConfiguratieValidator` geeft informatie over de omgeving waarin de FunqMachinator draait. Dit door
+middel van een `@PostConstruct` annotatie om zo snel mogelijk die informatie te tonen. Omgevingsinformatie wordt geladen
+in de klasse `Environment` in het package `nl.bzk.brp.funqmachine.configuratie`. Deze gebruik een groovy `ConfigSlurper` om
+de config te lezen uit het bestand `landscape.groovy`. Om een specifieke omgeving aan te wijzen bij het uitvoeren van
+de tests is een omgevingsvariable `omgeving` voldoende.
+
+[source, bash]
+.voorbeeld omgevingsvariable
+----
+mvn clean install -Domgeving=test1
+----

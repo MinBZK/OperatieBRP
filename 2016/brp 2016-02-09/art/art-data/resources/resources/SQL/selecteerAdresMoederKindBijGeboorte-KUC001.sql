@@ -1,0 +1,4 @@
+SELECT p.bsn, hpa.dataanvgel, hpa.dateindegel, hpa.actieinh, hpa.rdnwijz, hpa.aangadresh, hpa.dataanvadresh, hpa.identcodeadresseerbaarobject, hpa.identcodenraand, hpa.gem, hpa.nor, hpa.afgekortenor, hpa.gemdeel, hpa.huisnr, hpa. huisnrtoevoeging, hpa.postcode, hpa.wplnaam, hpa.loctenopzichtevanadres, hpa.locoms, hpa.landgebied, hpa.indpersaangetroffenopadres 
+FROM kern.his_persadres hpa, kern.persadres pa, kern.pers p 
+where hpa.persadres = pa.id and pa.pers = p.id and p.bsn in (${DataSource Values#burgerservicenummer_B00}, ${DataSource Values#|objectid.burgerservicenummer_ipo_B01|}) 
+and hpa.dateindegel is null and hpa.tsverval is null order by p.id 

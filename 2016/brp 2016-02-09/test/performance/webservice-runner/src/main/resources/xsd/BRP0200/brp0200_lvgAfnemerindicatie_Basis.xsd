@@ -1,0 +1,172 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 04-06-2014 -->
+<!-- ... -->
+<!-- Wijzigingen: -->
+<!-- 1) Per bericht kan maar één afnemerindicatie worden geplaatst cq. verwijderd -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020002">
+	<include schemaLocation="brp0200_brpBijhouding_Basis.xsd"/>
+	<!-- ... -->
+	<!-- Container Acties Plaatsing afnemerindicatie -->
+	<complexType name="Container_Handeling_Acties_PlaatsingAfnemerindicatie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_PlaatsingAfnemerindicatie">
+				<sequence>
+					<element name="registratieAfnemerindicatie" type="brp:Actie_RegistratieAfnemerindicatie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Actie Registratie Afnemerindicatie -->
+	<complexType name="Actie_RegistratieAfnemerindicatie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieAfnemerindicatie">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_PlaatsingAfnemerindicatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Details Persoon tbv het volgen van een persoon -->
+	<complexType name="Objecttype_Persoon_PlaatsingAfnemerindicatie">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="identificatienummers" type="brp:Groep_PersoonIdentificatienummers_BijhoudingAfnemerindicatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="afnemerindicaties" type="brp:Container_PersoonAfnemerindicaties_PlaatsingAfnemerindicatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="optional"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonIdentificatienummers_BijhoudingAfnemerindicatie">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonIdentificatienummers">
+				<sequence>
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<complexType name="Container_PersoonAfnemerindicaties_PlaatsingAfnemerindicatie">
+		<complexContent>
+			<restriction base="brp:Container_PersoonAfnemerindicaties">
+				<sequence>
+					<element name="afnemerindicatie" type="brp:Objecttype_PersoonAfnemerindicatie_PlaatsingAfnemerindicatie" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonAfnemerindicatie_PlaatsingAfnemerindicatie">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonAfnemerindicatie">
+				<sequence>
+					<element name="afnemerCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="abonnementNaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="datumAanvangMaterielePeriode" type="brp:Datum" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="datumTijdEindeVolgen" type="brp:DatumTijd" nillable="false" minOccurs="0" maxOccurs="1" />					
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonAfnemerindicatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Plaatsing afnemerindicatie -->
+	<complexType name="Container_Handeling_Acties_VerwijderingAfnemerindicatie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_VerwijderingAfnemerindicatie">
+				<sequence>
+					<element name="vervalAfnemerindicatie" type="brp:Actie_VervalAfnemerindicatie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Actie Verval Afnemerindicatie -->
+	<complexType name="Actie_VervalAfnemerindicatie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_VervalAfnemerindicatie">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_VerwijderingAfnemerindicatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Details Persoon tbv het niet meer volgen van een persoon -->
+	<complexType name="Objecttype_Persoon_VerwijderingAfnemerindicatie">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="identificatienummers" type="brp:Groep_PersoonIdentificatienummers_BijhoudingAfnemerindicatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="afnemerindicaties" type="brp:Container_PersoonAfnemerindicaties_VerwijderingAfnemerindicatie" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="optional"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<complexType name="Container_PersoonAfnemerindicaties_VerwijderingAfnemerindicatie">
+		<complexContent>
+			<restriction base="brp:Container_PersoonAfnemerindicaties">
+				<sequence>
+					<element name="afnemerindicatie" type="brp:Objecttype_PersoonAfnemerindicatie_VerwijderingAfnemerindicatie" nillable="false" minOccurs="1" maxOccurs="unbounded" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonAfnemerindicatie_VerwijderingAfnemerindicatie">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonAfnemerindicatie">
+				<sequence>
+					<element name="afnemerCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="abonnementNaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="datumAanvangMaterielePeriode" type="brp:Datum" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="datumTijdEindeVolgen" type="brp:DatumTijd" nillable="false" minOccurs="0" maxOccurs="1" />				
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonAfnemerindicatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>brp-parent</artifactId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../../brp-parent</relativePath>
+    </parent>
+    <groupId>nl.bzk.brp.generatie</groupId>
+    <artifactId>brp-generatie-generatoren</artifactId>
+    <packaging>pom</packaging>
+    <name>BRP Generatie Generatoren</name>
+    <description>Parent project voor de Generatoren die vanuit het BMR (Metaregister) de artifacten genereren die nodig
+        zijn om de BRP te bouwen.</description>
+    <modules>
+        <module>algemeen</module>
+        <module>java-generatoren</module>
+        <module>xsd-generatoren</module>
+        <module>jibx-generatoren</module>
+        <module>generatoren-mojo</module>
+    </modules>
+
+    <properties>
+        <sonar.jira.project.key>TEAMBRP</sonar.jira.project.key>
+        <skipTestsGeneratoren>${skipTests}</skipTestsGeneratoren>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- ermul: Toegevoegd om makkelijker te kunnen debuggen. Kan verwijderd worden indien niet meer nodig
+      of ongewenst ivm performance / obfuscation. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <preparationGoals>clean</preparationGoals>
+                    <tagNameFormat>generatoren-v@{project.version}</tagNameFormat>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <timestampFormat>yyyy-MM-dd HH:mm:ss</timestampFormat>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create-timestamp</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <skipTests>${skipTestsGeneratoren}</skipTests>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>skipTestsGeneratoren</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <properties>
+                <skipTestsGeneratoren>true</skipTestsGeneratoren>
+            </properties>
+        </profile>
+    </profiles>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/generatoren</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/generatoren</developerConnection>
+    </scm>
+
+</project>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+    "
+       default-lazy-init="true">
+
+    <!-- Forceer hibernate JbossLogging om slf4j te gebruiken i.v.m. ondersteuning Log4j 2.
+         https://issues.apache.org/jira/browse/LOG4J2-172 -->
+    <bean id="hibernateLoggingPropInitializer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" value="#{@systemProperties}"/>
+        <property name="targetMethod" value="putAll"/>
+        <property name="arguments">
+            <util:properties>
+                <prop key="org.jboss.logging.provider">slf4j</prop>
+            </util:properties>
+        </property>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="lezenSchrijvenTransactionManager" order="1"/>
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <property name="database" value="POSTGRESQL"/>
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQL82Dialect"/>
+    </bean>
+
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+    <bean id="lezenSchrijvenEntityManagerFactory" name="nl.bzk.brp.lezenschrijven"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          depends-on="hibernateLoggingPropInitializer">
+        <property name="persistenceUnitName" value="nl.bzk.brp.lezenschrijven"/>
+        <property name="packagesToScan" value="nl.bzk.brp.model"/>
+        <property name="dataSource" ref="lezenSchrijvenDataSource"/>
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.cache.use_second_level_cache">${hibernate.use.second.level.cache:false}</prop>
+                <prop key="hibernate.cache.use_query_cache">${hibernate.use.query.cache:false}</prop>
+                <prop key="hibernate.generate_statistics">${hibernate.generate.statistics:false}</prop>
+                <prop key="hibernate.ejb.entitymanager_factory_name">nl.bzk.brp.lezenschrijven</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="lezenSchrijvenTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="lezenSchrijvenEntityManagerFactory"/>
+        <property name="jpaDialect" ref="jpaDialect"/>
+        <!-- not implemented by PostgreSQL JDBC :(
+            <property elementNaam="defaultTimeout" value="15" />
+        -->
+    </bean>
+    <alias name="lezenSchrijvenTransactionManager" alias="transactionManager"/>
+</beans>

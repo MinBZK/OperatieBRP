@@ -1,0 +1,2 @@
+select ${DataSource Values#selectItem} from kern.actie where srt= ${DataSource Values#srtActie} and admhnd in (select admhnd from kern.pers where bsn = ${DataSource Values#bsn})order by id desc
+limit 1;

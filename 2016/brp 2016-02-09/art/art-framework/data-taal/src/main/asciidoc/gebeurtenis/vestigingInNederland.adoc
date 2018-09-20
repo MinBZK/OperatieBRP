@@ -1,0 +1,149 @@
+
+=== Vestiging in Nederland
+Een niet ingeschrevene kan zich in Nederland vestigen. Hierdoor krijgt deze een
+relatie met de Nederlandse overheid. Het gevolg in de BRP is dat een persoon
+met de soort _Niet ingeschrevene_ komt te vervallen en dat er een nieuwe persoon
+wordt geregistreerd als _ingeschrevene_.
+
+Door het vestigen in Nederland krijgt de nieuwe persoon in de BRP automatisch
+voorkomens van verschillende groepen: _bijhouding_, _migratie_. Ook worden gegevens
+van _geboorte_ en _geslachtsaanduiding_ van de niet ingeschrevene overgenomen. Of
+de groep _samengesteldenaam_ wordt overgenomen hangt af van de beschrijving van
+de gebeurtenis.
+
+
+==== Een inschrevene krijgt identificatienummers
+De ingeschrevene krijgt een _Burgerservicenummer_ en _Administratienummer_.
+
+[source, groovy]
+----
+vestigingInNederland() {
+  identificatienummers bsn: 123456789, anummer: 98765431
+  identificatienummers([bsn: 123456789, anummer: 98765431])
+}
+----
+
+==== Namen
+Van de nieuw ingeschrevene kunnen de  _voornamen_, _geslachtsnaam_ worden vastgelegd.
+Indien dit wordt gedaan wordt ook de afleiding van _samengestelde naam_ en _naamgebruik_
+van deze gegevens gedaan. Indien er geen namen worden beschreven, wordt de samengestelde
+naam van de niet ingeschrevene overgenomen en het naamgebruik daarvan afgeleid.
+
+De namen van de persoon worden geregistreerd in een `namen() {}` blok. In het blok
+kunnen de voornamen, geslachtsnamen worden vastgelegd. Aan het einde van de uitvoer van dit
+blok wordt de samengestelde naam afgeleid, alsmede een voorkomen van de groep _naamgebruik_.
+
+[source,groovy]
+.Het namen blok
+----
+vestigingInNederland() {
+  namen {
+    //... <1>
+  }
+}
+----
+<1> voornamen etc. komen hier
+
+===== Voornamen
+Een of meer voornamen worden opgegeven. De voornamen krijgen een volgnummer (vanaf *1*) in de
+volgorde waarin ze zijn opgesomd. Indien er al voornamen waren vastgelegd, worden de voorkomens
+daarvan beeindigd.
+
+[source,groovy]
+----
+  namen {
+    voornamen 'Jan', 'Piet', 'Klaas'
+    //...
+  }
+----
+
+===== Geslachtsnaamcomponent
+Geslachtsnaamcomponent kan in verschillende vormen worden vastgelegd. Ook hier geldt dat
+een bestaand voorkomen wordt beeindigd. Indien er slechts
+een is met uitsluitend een _stam_ kan de volgende verkorte versie worden gebruikt:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam 'Jansen'
+  }
+----
+
+Het is ook mogelijk om een geslachtsnaam uitgebreider vast te leggen:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam(
+      [stam: 'Jansen', voorvoegsel: 'van', scheidingsteken:'-', adellijkeTitel: 'P', predicaat: 'H'] <1>
+    )
+  }
+----
+<1> volledige opties voor een geslachtsnaamcomponent
+
+
+==== Nationaliteiten
+Van de ingeschreven persoon worden de nationaliteiten vastgelegd, want ondanks
+vestiging in Nederland, krijgt deze persoon niet automatisch de Nederlandse
+nationaliteit.
+
+[source,groovy]
+----
+erkvestigingInNederlandend() {
+  nationaliteiten('Canadese', 'Turkse')
+}
+----
+
+
+==== Relaties
+De niet ingeschreven persoon kan relaties hebben met wel ingeschreven personen
+in de BRP. Daarom is het mogelijk om van de persoon die zich vestigt te beschrijven
+met wie er relaties zijn. De betrokkenheden van de niet ingeschreven persoon
+komen te vervallen en worden vervangen door betrokkenheden van de (nieuw) ingeschreven
+persoon.
+
+===== Ouder betrokkenheid
+Van de opgegeven kinderen wordt gekeken welke ouder betrokkenheden er zijn, en welke
+wijzen naar de niet ingeschrevene. Alleen als deze is gevonden komt de betrokkenheid te
+vervallen en wordt een nieuwe betrokkenheid met de ingeschreven persoon aangemaakt.
+
+[source, groovy]
+----
+vestigingInNederland() {
+  ouderVan(kees, ingrid) <1>
+}
+----
+<1> Een of meerdere 'kinderen' kunnen worden opgegeven
+
+===== Partner betrokkenheid
+Van de opgegeven partner wordt gekeken welke andere partnerbetrokkenheden er zijn, en welke
+wijzen naar de niet ingeschrevene. Alleen als deze is gevonden komt de betrokkenheid te
+vervallen en wordt een nieuwe betrokkenheid met de ingeschreven persoon aangemaakt.
+
+[source, groovy]
+----
+vestigingInNederland() {
+  partnerVan(kees) <1>
+}
+----
+<1> Een partner kan worden opgegeven
+
+
+==== Compleet voorbeeld
+
+[source, groovy]
+voorbeeld.groovy
+----
+vestigingInNederland(partij: 36101, aanvang: '2015/03/23', toelichting: 'Komt naar nederland') {
+  identificatienummers(bsn: 123456789, anummer: 98765431)
+  namen {
+    voornamen('Inigo')
+    geslachtsnaam('Montoya')
+  }
+  nationaliteiten 'Spaanse'
+  ouderVan(kees, ingrid)
+  partnerVan(partner)
+}
+----

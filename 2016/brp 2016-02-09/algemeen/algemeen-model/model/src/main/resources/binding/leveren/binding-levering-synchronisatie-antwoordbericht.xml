@@ -1,0 +1,72 @@
+<binding package="nl.bzk.brp" direction="output">
+
+    <namespace uri="http://www.bzk.nl/brp/brp0200" default="all" prefix="brp"/>
+
+    <include path="classpath:/binding/basis/binding-brpxml.xml" precompiled="false"/>
+    <include path="classpath:/binding/bijhouden/binding-objecttypen-bericht.xml" precompiled="false"/>
+    <include path="classpath:/binding/leveren/binding-levering-groepen.xml" precompiled="false"/>
+
+    <mapping name="lvg_synGeefSynchronisatiePersoon_R"
+             class="nl.bzk.brp.model.synchronisatie.GeefSynchronisatiePersoonAntwoordBericht">
+        <structure name="stuurgegevens" map-as="Stuurgegevens_SynchroonResultaat" get-method="getStuurgegevens"/>
+        <structure name="resultaat" map-as="Groep_BerichtResultaat_Bevraging" get-method="getResultaat"/>
+        <structure name="meldingen" map-as="Container_BerichtMeldingen_Synchronisatie" get-method="getMeldingen"
+                   usage="optional"/>
+    </mapping>
+
+    <mapping name="lvg_synGeefSynchronisatieStamgegeven_R"
+             class="nl.bzk.brp.model.synchronisatie.GeefSynchronisatieStamgegevenAntwoordBericht">
+        <structure name="stuurgegevens" map-as="Stuurgegevens_SynchroonResultaat" get-method="getStuurgegevens"/>
+        <structure name="resultaat" map-as="Groep_BerichtResultaat_Bevraging" get-method="getResultaat"/>
+        <structure name="meldingen" map-as="Container_BerichtMeldingen_Synchronisatie" get-method="getMeldingen"
+                   usage="optional"/>
+        <structure name="stamgegevens">
+            <structure field="synchronisatieStamgegevens"
+                       marshaller="nl.bzk.brp.model.binding.SynchronisatieStamgegevensMarshaller"/>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="Groep_BerichtResultaat_Bevraging"
+             class="nl.bzk.brp.model.bericht.ber.BerichtResultaatGroepBericht">
+        <value name="communicatieID" constant="Resultaat" style="attribute" usage="optional"/>
+        <structure get-method="getVerwerking" set-method="setVerwerking">
+            <value name="verwerking" get-method="getWaarde" set-method="setWaarde" enum-value-method="getNaam"/>
+        </structure>
+        <structure get-method="getHoogsteMeldingsniveau" set-method="setHoogsteMeldingsniveau" usage="optional">
+            <value name="hoogsteMeldingsniveau" get-method="getWaarde" set-method="setWaarde"
+                   enum-value-method="getNaam"/>
+        </structure>
+    </mapping>
+
+
+    <!-- ##### Container_BerichtMeldingen_Synchronisatie #####
+            Toegevoegd voor synchronisatie, maar ook leveringen dient deze uiteindelijk te gebruiken
+    -->
+    <mapping class="java.util.List" abstract="true" type-name="Container_BerichtMeldingen_Synchronisatie">
+        <collection usage="optional">
+            <structure map-as="AbstractBerichtMeldingBerichtResultaat_Synchronisatie" name="melding"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.AbstractBerichtMeldingBericht" abstract="true"
+             type-name="AbstractBerichtMeldingBerichtResultaat_Synchronisatie">
+        <structure map-as="Objecttype_Melding_Synchronisatie" field="melding" usage="optional"/>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.AbstractMeldingBericht" abstract="true"
+             type-name="Objecttype_Melding_Synchronisatie">
+        <value name="objecttype" constant="Melding" style="attribute"/>
+        <value name="referentieID" get-method="getReferentieID" style="attribute" usage="optional"/>
+        <structure field="regel">
+            <value name="regelCode" get-method="getWaarde" enum-value-method="getCode"/>
+        </structure>
+        <structure field="soort" usage="optional">
+            <value name="soortNaam" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+        <structure name="melding" field="melding" map-as="MeldingtekstAttribuut"/>
+        <!--<structure field="element" usage="optional">
+            <value name="elementNaam" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>-->
+    </mapping>
+
+</binding>

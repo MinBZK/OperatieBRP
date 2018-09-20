@@ -1,0 +1,49 @@
+18 september 2014 - BRP Release 15
+
+Deze release is gebaseerd op BMR versie 34, database versie 0.9.14 en koppelvlak versie 17.4.0.
+
+PROPERTIES
+Er is een nieuw properties-bestand: 'levering-jms-afnemerindicatie.properties'. Maak deze aan met de volgende inhoud:
+    # Broker url waar de queue voor afnemerindicaties zich bevindt
+    jms.broker.afnemerindicaties.url=tcp://pt-links-ap02.modernodam.nl:61616
+
+In brp-protocollering.properties zijn database-properties (jdbc.protocollering.xxx) toegevoegd. Deze moeten verwijzen naar de protocollering-database.
+
+In alle property-bestanden moet jdbc.alp.xxx vervangen worden voor jdbc.archivering.xxx, zoals in de aangeleverde properties het geval is. Deze
+properties moeten verwijzen naar de archivering-database.
+
+In de bezemwagen.properties is soort.administratieve.handelingen.overslaan toegevoegd. Deze kan 1 op 1 worden overgenomen.
+
+De volgende 2 properties-bestanden zijn nieuw. Deze zijn zo veel mogelijk voor-ingevuld, maar zullen nog gecontroleerd/aangevuld moeten worden.
+afnemerindicaties.properties
+synchronisatie.properties
+
+De volgende properties zijn nieuw in het bestand brp-route-configuratie.properties:
+    # Afnemerindicaties queues, de queues die gebruikt worden voor het plaatsen/verwijderen van afnemerindicaties.
+    afnemerindicaties.migratie.queue.name=AfnemerindicatiesMigratie
+    afnemerindicaties.migratie.antwoord.queue.name=AfnemerindicatiesMigratieAntwoord
+
+
+VERIFICATIE
+    - Verifieer dat de tomcat instanties alle contexts hebben opgestart en er geen errors zijn in de logging.
+    - Verfificatie urls voor de versies:
+        * Bijhouding: https://APPSERVER:8080/bijhouding/BijhoudingService/versie.html
+        * Bevraging:  https://APPSERVER:8080/bevraging/BijhoudingBevragingService/versie.html
+        * Levering Mutatielevering:  https://APPSERVER:8080/mutatielevering/versie.html
+        * Levering Verzending:  https://APPSERVER:8080/verzending/versie.html
+        * Levering Protocollering:  https://APPSERVER:8080/protocollering/versie.html
+        * Levering Onderhoud Afnemerindicaties:  https://APPSERVER:8080/afnemerindicaties/versie.html
+        * Levering Synchronisatie:  https://APPSERVER:8080/synchronisatie/versie.html
+        * Levering Routeringcentrale: https://APPSERVER:8080/routering-centrale/versie.html
+        (Voor het verifieren van de levering applicaties, dient de appserver ook bereikbaar te zijn, dat was tot nu toe niet zo!)
+
+Qua logging zijn we over gegaan van Log4J naar Log4J2. Dit betekent dat het bestand log4j.xml is vervangen voor
+log4j2.xml.
+
+CENTRALE LOGGING
+De centrale logging faciliteiten zijn van Graylog verhuist naar de ELK stack, dat is ElasticSearch, Logstash en Kibana. Hiervoor
+dient een aparte server te worden ingericht voor ElasticSearch, een aparte server voor Kibana, wat de beheer tool is. Daarnaast
+zal op elke server waar BRP software wordt geinstalleerd Logstash geinstalleerd moeten worden en moeten een aantal poorten in de
+firewall opengezet worden. Dit staat beschreven in de installatie handleiding.
+Voor verdere instructies, zie de handleiding voor de installatie van deze logging-applicaties kan gevonden worden
+in "docs/Installatie handleiding BRP Logging.docx/pdf".

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<binding direction="output">
+    <include path="classpath:/binding/basis/binding-handmatige-extras.xml" precompiled="false"/>
+    <include path="classpath:/binding/basis/binding-attribuuttypen.xml" precompiled="false"/>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.AbstractBerichtParametersGroepBericht" abstract="true"
+             type-name="Groep_BerichtParameters_Synchronisatie">
+        <structure field="soortSynchronisatie">
+            <value name="soortSynchronisatie" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+        <value name="leveringsautorisatieIdentificatie" field="leveringsautorisatieID" usage="optional" />
+        <structure>
+            <value name="dienstIdentificatie" field="dienstID" usage="optional" />
+        </structure>
+        <structure field="effectAfnemerindicatie" usage="optional">
+            <value name="effectAfnemerindicatie" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+    </mapping>
+
+    <mapping class="java.util.List" abstract="true" type-name="Container_BerichtMeldingen_Levering"
+             create-type="java.util.ArrayList">
+        <collection usage="optional">
+            <structure map-as="Objecttype_Melding_Levering" name="melding"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.AbstractMeldingBericht"
+             create-type="nl.bzk.brp.model.bericht.ber.MeldingBericht" abstract="true"
+             type-name="Objecttype_Melding_Levering">
+        <value name="objecttype" constant="Melding" style="attribute"/>
+        <value style="attribute" name="referentieID" get-method="getReferentieID" usage="optional"/>
+        <value style="attribute" name="communicatieID" get-method="getCommunicatieID" usage="optional"/>
+        <structure field="regel">
+            <value name="regelCode" get-method="getWaarde" enum-value-method="getCode"/>
+        </structure>
+        <structure field="soort">
+            <value name="soortNaam" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+        <structure name="melding" field="melding" map-as="MeldingtekstAttribuut"/>
+    </mapping>
+
+</binding>

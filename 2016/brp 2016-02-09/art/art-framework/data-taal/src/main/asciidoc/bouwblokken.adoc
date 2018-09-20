@@ -1,0 +1,138 @@
+
+== Bouwblokken
+De Persoon DSL bestaat uit een aantal basis 'bouwblokken'. Deze vormen de basis van
+het beschrijven van de gebeurtenissen die voor een persoon hebben plaatsgevonden.
+
+
+=== Persoon uit database
+Een persoon kan worden opgehaald uit een database. Zo een persoon kan bijvoorbeeld
+nodig zijn als ouder of partner van een nieuwe persoon, maar ook kunnen er gebeurtenissen
+aan de persoon uit de database worden toegevoegd. Je kunt een persoon op halen op
+basis van _Burgerservicenummer_ of _ID_.
+
+[source,groovy]
+----
+piet = Persoon.uitDatabase(persoon: 1) <1>
+klaas = Persoon.uitDatabase(bsn: 123456789) <2>
+
+marie = uitDatabase bsn: 987654321 <3>
+----
+<1> een persoon uit de database op basis van ID
+<2> een persoon uit de database op basis van Burgerservicenummer
+<3> alternatieve _Groovy_ notatie
+
+
+=== Persoon met Bsn of Id
+Een verkorte versie van het bovenstaande kan worden bereikt door gebruik te maken van het
+verkorte alternatief.
+
+[source,groovy]
+----
+piet = Persoon.metId(1) <1>
+klaas = Persoon.metBsn(123456789) <2>
+----
+<1> een persoon uit de database op basis van ID
+<2> een persoon uit de database op basis van Burgerservicenummer
+
+
+=== Gebeurtenis toevoegen
+Aan een bestaande persoon kunnen gebeurtenissen worden toegevoegd. Bijvoorbeeld
+extra verhuizingen, een huwelijke of overlijden kan worden vastgelegd voordat
+er gebruik gemaakt wordt van de persoon in een testgeval.
+
+[source,groovy]
+----
+piet = Persoon.uitDatabase(persoon: 1) <1>
+
+Persoon.nieuweGebeurtenissenVoor(piet) { <2>
+  // gebeurtenissen
+}
+
+marie = uitGebeurtenissen marie, {} <3>
+----
+<1> een persoon (`piet`) wordt opgehaald uit de database
+<2> aan `piet` worden nieuwe gebeurtenissen toegevoegd
+<3> alternatieve _Groovy_ notatie
+
+
+=== Een nieuwe persoon
+Het is ook mogelijk om een nieuwe persoon te beginnen. Deze heeft dan nog geen
+vastgelegde gebeurtenissen. Logischer wijze beginnen de gebeurtenissen van deze
+persoon met een <<gebeurtenis/geboorte.adoc#geboorte, geboorte>>.
+
+[source,groovy]
+----
+klaas = Persoon.uitGebeurtenissen { <1>
+  // gebeurtenissen
+}
+----
+<1> een persoon uit gebeurtenissen maar zonder een bestaande persoon, dus wordt
+een nieuwe persoon gemaakt
+
+
+=== Een persoon opslaan
+Na het beschrijven van een persoon, wil je deze waarschijnlijk opslaan in een database.
+De DSL zorgt dat dit correct gebeurt, maar je moet het nog wel beschrijven.
+
+[source,groovy]
+----
+piet = Persoon.uitGebeurtenissen { }
+Persoon.slaOp(piet) <1>
+----
+<1> Het opslaan van een persoon
+
+
+=== De BLOB van een persoon maken
+Na het opslaan van een persoon met de DSL is er geen blob meer in de database
+aanwezig voor deze persoon. De leveringsoftware kan hiermee omgaan, maar het kan
+nuttig zijn om toch de blob voor de persoon te maken. De DSL gebruikt hiervoor
+*dezelfde code* als de _blobifier_.
+
+[source,groovy]
+----
+piet = Persoon.uitGebeurtenissen { }
+Persoon.slaOp(piet) <1>
+Persoon.maakBlobVoor(piet) <2>
+----
+<1> Het opslaan van een persoon
+<2> Maak een blob voor de opgeslagen persoon
+
+
+=== Niet ingeschreven personen
+Er worden ook personen in de BRP geregistreerd die niet in Nederland zijn
+ingeschreven. Daarom kunnen deze ook in de DSL worden beschreven. Van een
+niet ingeschrevene zijn slechts drie groepen gevuld: geboorte, samengesteldenaam
+en geslachtsaanduiding. De opties voor de informatie die kan worden opgegeven
+zijn bijna hetzelfde als bij <<gebeurtenis/geboorte.adoc#geboorte,geboorte>>. Het enige verschil is dat
+geboorte een apart blok is.
+
+[source,groovy]
+----
+nietIngeschrevene = Persoon.nietIngeschrevene(aanvang: 19670401, registratieDatum: 19670401) {
+  geboorte { <1>
+    op '1967/04/01' te 'Barcelona' land 'Spanje'
+  }
+  samengesteldeNaam(
+    stam: 'Montoya',
+    voornamen: 'Inigo'
+  )
+  geslacht('MAN')
+}
+----
+<1> Anders dan bij de gebeurtenis geboorte
+
+
+Een niet ingeschrevene kan worden "omgezet" naar een ingeschreven persoon door
+de specifieke gebeurtenis <<gebeurtenis/vestigingInNederland.adoc#vestiging_in_nederland,Vestiging in Nederland>>.
+[source,groovy]
+----
+def ingeschrevene = Persoon.ingeschreveneVan(nietIngeschrevene) {
+  vestigingInNederland() { ... } <1>
+
+  verhuizing() { ... } <2>
+  huwelijk() { ... } <2>
+}
+[source,groovy]
+----
+<1> gebeurtenis die ervoor zorgt dat de persoon een ingeschrevene wordt
+<2> optioneel andere gebeurtenissen nadat de persoon een ingeschrevene is geworden

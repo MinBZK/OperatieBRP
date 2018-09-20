@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.generatie</groupId>
+        <artifactId>brp-generatie-metaregister</artifactId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+    <artifactId>brp-generatie-metaregister-metamodel</artifactId>
+  <version>96-SNAPSHOT</version>
+    <name>BRP Generatie Metaregister - Metamodel</name>
+    <description>Metamodel laag generator voor toegang tot de metamodel database waaruit code generatie plaatsvindt.</description>
+
+    <build>
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                        <phase>initialize</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>hibernate3-maven-plugin</artifactId>
+                <version>3.0</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                        <!-- moet versie 3.3.2.GA zijn of ouder i.v.m. compatibiliteit met Hibernate Tools 3.2.3 -->
+                        <version>3.3.2.GA</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.hsqldb</groupId>
+                        <artifactId>hsqldb</artifactId>
+                        <version>${hsqldb.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>cglib</groupId>
+                        <artifactId>cglib-nodep</artifactId>
+                        <version>2.2.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>${project.groupId}</groupId>
+                        <artifactId>brp-generatie-metaregister-database</artifactId>
+                        <version>${project.version}</version>
+                        <classifier>bmr-database</classifier>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>hibernate-mapping-generation</id>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <hibernatetool destdir="target/classes">
+                                <jdbcconfiguration packagename="nl.bzk.brp.metaregister.model" propertyfile="${project.build.outputDirectory}/database.properties" revengfile="src/main/buildconfig/hibernate.reveng.xml" />
+                                <hbm2hbmxml />
+
+                                <classpath>
+                                    <path location="target/classes" />
+                                </classpath>
+
+                                <hbm2java destdir="target/generated-sources" ejb3="false" jdk5="true">
+                                    <configuration configurationfile="src/main/buildconfig/hibernate.cfg.xml" />
+                                </hbm2java>
+                            </hibernatetool>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated-sources</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>fixes</id>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <replacements>
+                                <replacement>
+                                    <token>length="0"</token>
+                                    <value />
+                                </replacement>
+                                <replacement>
+                                    <token>string</token>
+                                    <value>java.lang.String</value>
+                                </replacement>
+                            </replacements>
+                            <filesToInclude>target/classes/**/*.hbm.xml</filesToInclude>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>sortedset</id>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <phase>process-sources</phase>
+                        <configuration>
+                            <replacements>
+                                <replacement>
+                                    <token><![CDATA[<set]]></token>
+                                    <value><![CDATA[<set sort="nl.bzk.brp.metaregister.helper.Vergelijker"]]></value>
+                                </replacement>
+                            </replacements>
+                            <excludes>
+                                <exclude>target/classes/**/GeneriekElement.hbm.xml</exclude>
+                            </excludes>
+                            <filesToInclude>target/classes/**/*.hbm.xml</filesToInclude>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister/metamodel</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister/brp-generatie-metaregister-metamodel</developerConnection>
+    <url>https://www.modernodam.nl/svn/brp-code/trunk/generatie/metaregister/brp-generatie-metaregister-metamodel</url>
+  </scm>
+</project>

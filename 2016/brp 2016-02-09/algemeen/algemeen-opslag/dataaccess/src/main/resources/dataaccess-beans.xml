@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:util="http://www.springframework.org/schema/util"
+
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+    ">
+
+    <!-- Forceer hibernate JbossLogging om slf4j te gebruiken i.v.m. ondersteuning Log4j 2.
+         https://issues.apache.org/jira/browse/LOG4J2-172 -->
+    <bean id="hibernateLoggingPropInitializer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" value="#{@systemProperties}"/>
+        <property name="targetMethod" value="putAll"/>
+        <property name="arguments">
+            <util:properties>
+                <prop key="org.jboss.logging.provider">slf4j</prop>
+            </util:properties>
+        </property>
+    </bean>
+
+    <context:annotation-config />
+
+    <tx:annotation-driven transaction-manager="alleenLezenTransactionManager" order="1"/>
+    <tx:annotation-driven transaction-manager="lezenSchrijvenTransactionManager" order="2"/>
+    <tx:annotation-driven transaction-manager="archiveringTransactionManager" order="10" />
+
+    <context:component-scan base-package="nl.bzk.brp.dataaccess.repository.jpa" />
+
+    <jpa:repositories base-package="nl.bzk.brp.dataaccess.repository" entity-manager-factory-ref="lezenSchrijvenEntityManagerFactory" transaction-manager-ref="lezenSchrijvenTransactionManager"/>
+    <jpa:repositories base-package="nl.bzk.brp.dataaccess.repository.archivering" entity-manager-factory-ref="archiveringEntityManagerFactory" transaction-manager-ref="archiveringTransactionManager"/>
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+        <property name="database" value="POSTGRESQL" />
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQL82Dialect" />
+    </bean>
+
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+
+    <bean id="lezenSchrijvenEntityManagerFactory" name="nl.bzk.brp.lezenschrijven" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          depends-on="hibernateLoggingPropInitializer">
+        <property name="persistenceUnitName" value="nl.bzk.brp.lezenschrijven"/>
+        <property name="packagesToScan" value="nl.bzk.brp.model" />
+        <property name="dataSource" ref="lezenSchrijvenDataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                <prop key="hibernate.ejb.entitymanager_factory_name">nl.bzk.brp.lezenschrijven</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="lezenSchrijvenTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="lezenSchrijvenEntityManagerFactory" />
+        <property name="jpaDialect" ref="jpaDialect" />
+        <!-- not implemented by PostgreSQL JDBC :(
+            <property elementNaam="defaultTimeout" value="15" />
+        -->
+    </bean>
+
+    <bean id="alleenLezenEntityManagerFactory" name="nl.bzk.brp.alleenlezen" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          depends-on="hibernateLoggingPropInitializer">
+        <property name="persistenceUnitName" value="nl.bzk.brp.alleenlezen"/>
+        <property name="packagesToScan" value="nl.bzk.brp.model" />
+        <property name="dataSource" ref="alleenLezenDataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                <prop key="hibernate.ejb.entitymanager_factory_name">nl.bzk.brp.alleenlezen</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="alleenLezenTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="alleenLezenEntityManagerFactory" />
+        <property name="jpaDialect" ref="jpaDialect" />
+        <!-- not implemented by PostgreSQL JDBC :(
+            <property elementNaam="defaultTimeout" value="15" />
+        -->
+    </bean>
+
+    <bean id="archiveringEntityManagerFactory" name="nl.bzk.brp.archivering" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          depends-on="hibernateLoggingPropInitializer">
+        <property name="persistenceUnitName" value="nl.bzk.brp.archivering"/>
+        <property name="packagesToScan" value="nl.bzk.brp.model.operationeel.ber" />
+        <property name="dataSource" ref="archiveringDataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                <prop key="hibernate.ejb.entitymanager_factory_name">nl.bzk.brp.archivering</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="archiveringTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="archiveringEntityManagerFactory" />
+        <property name="jpaDialect" ref="jpaDialect" />
+        <!-- not implemented by PostgreSQL JDBC :(
+            <property elementNaam="defaultTimeout" value="15" />
+        -->
+    </bean>
+</beans>

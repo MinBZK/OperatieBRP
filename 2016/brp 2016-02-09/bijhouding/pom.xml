@@ -1,0 +1,210 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-parent</artifactId>
+        <groupId>nl.bzk.brp</groupId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../brp-parent</relativePath>
+    </parent>
+
+    <groupId>nl.bzk.brp.bijhouding</groupId>
+    <artifactId>brp-bijhouding</artifactId>
+    <packaging>pom</packaging>
+
+    <name>BRP Bijhouding</name>
+    <description>Parent project van de BRP Bijhouding Service.</description>
+
+    <modules>
+        <module>business</module>
+        <module>webservice</module>
+    </modules>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/bijhouding</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/bijhouding</developerConnection>
+    </scm>
+
+    <properties>
+      <!-- security -->
+        <maven.security.privatekey.alias>serverkey</maven.security.privatekey.alias>
+        <maven.security.privatekey.password>serverkeypassword</maven.security.privatekey.password>
+
+        <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.util</groupId>
+            <artifactId>brp-algemeen-util-logging</artifactId>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+			<scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- ermul: Toegevoegd om makkelijker te kunnen debuggen. Kan verwijderd worden indien niet meer nodig
+                of ongewenst ivm performance / obfuscation. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <configuration>
+                        <optimize>true</optimize>
+                        <showWarnings>true</showWarnings>
+                        <encoding>UTF-8</encoding>
+                        <debug>true</debug>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <configuration>
+                        <projectNameTemplate>${project.artifactId}</projectNameTemplate>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <argLine>-Xms512m -Xmx512m -XX:MaxPermSize=512m -XX:PermSize=256m -XX:-UseSplitVerifier</argLine>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <!--properties voor test uitpakken-->
+                    <execution>
+                        <id>unpack-test-properties</id>
+                        <phase>generate-test-resources</phase>
+                    </execution>
+                    <!--properties voor docker uitpakken-->
+                    <execution>
+                        <id>unpack-docker-properties</id>
+                        <phase>generate-test-resources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--properties voor test uitpakken filteren zodat ze gevuld worden -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>filter-test-properties</id>
+                        <phase>process-test-resources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>db.postgresql</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_bijhouding</maven.jdbc.url>
+                <maven.jdbc.username>${jenkins.postgresql.gebruiker}</maven.jdbc.username>
+                <maven.jdbc.password>${jenkins.postgresql.wachtwoord}</maven.jdbc.password>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>inmemory</id>
+            <activation>
+                <property><name>db.inmemory</name></property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.url>
+                <maven.jdbc.username>brp</maven.jdbc.username>
+                <maven.jdbc.password>brp</maven.jdbc.password>
+                <maven.jdbc.pool.maxActive>100</maven.jdbc.pool.maxActive>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

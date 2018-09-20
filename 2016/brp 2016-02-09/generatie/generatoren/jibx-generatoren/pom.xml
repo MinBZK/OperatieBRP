@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.generatie</groupId>
+        <artifactId>brp-generatie-generatoren</artifactId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>brp-generatie-generatoren-jibx</artifactId>
+    <name>BRP Generatie Generatoren - Generatoren JiBX</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>brp-generatie-generatoren-algemeen</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>brp-generatie-generatoren-algemeen</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>brp-generatie-generatoren-java</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>brp-generatie-generatoren-xsd</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.google.code.findbugs</groupId>
+            <artifactId>annotations</artifactId>
+            <version>2.0.2</version>
+            <!--<scope>compile</scope>-->
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jibx</groupId>
+                <artifactId>maven-jibx-plugin</artifactId>
+                <version>${jibx.version}</version>
+                <executions>
+                    <!-- Uitgangspunt is binding.xsd, die de definitie van de binding files bevat.
+                    Hier genereren we de Java classes die deze binding representeren.
+                    Tevens wordt de daadwerkelijke binding gedaan op de gegenereerde classes.
+                    De JiBX generatoren gebruiken deze bindings voor de generatie van binding.xml files.
+                    We genereren naar target/generated-test-sources, omdat de binding classes alleen tijdens
+                    het genereren nodig zijn (en dat in de test fase is). De binding Java files komen zo
+                    niet in de artifact van gegenereerde code terecht. -->
+                    <execution>
+                        <id>jibx-meta-gen-and-bind</id>
+                        <goals>
+                            <goal>schema-codegen</goal>
+                            <goal>bind</goal>
+                        </goals>
+                        <configuration>
+                            <multimodule>true</multimodule>
+                            <schemaLocation>src/main/resources</schemaLocation>
+                            <schemaBindingDirectory>target/generated-test-sources</schemaBindingDirectory>
+                            <defaultPackage>nl.bzk.brp.generatoren.jibx.model</defaultPackage>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/generatoren/jibx-generatoren</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/generatie/generatoren/brp-generatie-generatoren-jibx</developerConnection>
+  </scm>
+
+</project>

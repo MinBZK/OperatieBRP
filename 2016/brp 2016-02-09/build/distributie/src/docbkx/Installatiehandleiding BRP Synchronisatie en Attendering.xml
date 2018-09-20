@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="utf-8"?>
+<book xmlns="http://docbook.org/ns/docbook" xml:lang="nl">
+    <title>Installatiehandleiding BRP Synchronisatie en Attendering software</title>
+
+    <titleabbrev>Versie 1.1</titleabbrev>
+
+    <chapter>
+        <title>Inleiding</title>
+
+        <para>
+            Dit document beschrijft de installatie van de BRP Synchronisatie en Attendering software.
+        </para>
+
+        <section>
+            <title>Doel</title>
+            <para>
+                Operationeel beheer ondersteunen bij het installeren van de BRP Synchronisatie en Attendering software.
+            </para>
+        </section>
+
+        <section>
+            <title>Scope</title>
+            <para>
+                Handleiding voor het installeren en configureren van de BRP Synchronisatie en Attendering software componenten.
+            </para>
+        </section>
+
+        <section>
+            <title>Doelgroep</title>
+            <para>Dit document is bedoeld voor operationeel beheerders van de BRP software
+                met gedegen kennis van Linux, PostgreSQL, Apache Tomcat en Docker</para>
+        </section>
+
+        <section>
+            <title>Deployment</title>
+            <para>In deze installatiehandleiding wordt getracht zo veel mogelijk onafhankelijk te zijn van de deployment inrichting.
+                Deze inrichting dient afgestemd te worden op het doel waarvoor de omgeving wordt gebruikt,
+                en kan worden bepaald op basis van het BRP Software Architectuur Document.
+                N.B. Nog niet alle informatie is in het huidige stadium voorhanden voor het exact
+                invullen van alle deployment parameters.
+           </para>
+        </section>
+    </chapter>
+    <chapter>
+        <title>Precondities</title>
+        <para>Aan de volgende precondities moet worden voldaan om tot een correcte installatie van de software te komen.</para>
+        <section>
+            <title>Apache Tomcat installatie</title>
+
+            <itemizedlist mark='opencircle'>
+                <listitem><para>Tomcat versie 7.0.47 is geïnstalleerd in [TOMCAT_HOME].</para></listitem>
+                <listitem><para>Tomcat moet JMX enabled zijn</para></listitem>
+                <listitem><para>De OS user voor het draaien van Tomcat is arbitrair. De user dient wel voldoende lees- en schrijfrechten te hebben
+                    voor externe filepaden welke configureerd worden in de properties. Deze opmerking wordt nog extra benadrukt in de desbetreffende
+                    properties.
+                </para></listitem>
+                <listitem><para>Als alle services op één enkele Tomcat Node/Server draaien wordt de volgende minimale geheugeninstelling geadviseerd:
+                    minimaal 3GB (Xms), maximaal 12GB (Xmx), permsize 1GB (XX:MaxPermSize)
+                </para></listitem>
+                <listitem><para>Als er een Tomcat Node/Server per service bestaat wordt de volgende minimale geheugeninstelling geadviseerd:
+                    minimaal 3GB (Xms), maximaal 4GB (Xmx), permsize 1GB (XX:MaxPermSize)
+                </para></listitem>
+            </itemizedlist>
+
+        </section>
+        <section>
+            <title>BRP Database installatie</title>
+            <para>
+                Middels het document 'Installatiehandleiding BRP Database' is een BRP Postgres database geïnstalleerd.
+                Preconditie: Tomcat kan de database benaderen (host+poort) met een geautoriseerde database user.
+            </para>
+        </section>
+
+    </chapter>
+
+    <chapter>
+        <title>Software</title>
+
+        <section>
+            <title>Deployables</title>
+            <para>"09 Software Package]/artefacten/levering" bevat onderstaande deployables. Plaats deze in
+                [TOMCAT_HOME]/webapps.</para>
+            <para>
+                <itemizedlist mark='opencircle'>
+                    <listitem><para><emphasis>brp-message-broker.war</emphasis></para></listitem>
+                    <listitem><para><emphasis>afnemerindicaties.war</emphasis></para></listitem>
+                    <listitem><para><emphasis>mutatielevering.war</emphasis></para></listitem>
+                    <listitem><para><emphasis>protocollering.war</emphasis></para></listitem>
+                    <listitem><para><emphasis>synchronisatie.war</emphasis></para></listitem>
+                    <listitem><para><emphasis>verzending.war</emphasis></para></listitem>
+                </itemizedlist>
+            </para>
+            <para>
+                De brp-message-broker moet als eerste gestart geworden. De andere WARs zijn hier van afhankelijk. Indien alle
+                WARs op dezelfde Tomcat instantie geinstalleerd worden is de volgorde niet af te dwingen. De software lost dit
+                probleem zelf op, maar er verschijnen mogelijk wel errors in [TOMCAT_HOME]/logs/brp-systeem.log.</para>
+        </section>
+        <section>
+            <title>Logging</title>
+            <para>
+                Plaats het bestand "09 Software Package/log4j/log4j2.xml" in [TOMCAT_HOME]/lib
+            </para>
+        </section>
+
+        <section>
+            <title>Java keystores</title>
+
+            <para>
+                In [TOMCAT_HOME]/lib/ directory dienen onderstaande Java keystores (van het type JKS) aanwezig te zijn.
+                De keystores worden NIET meegeleverd in het softwarepackage. Ze dienen zelf aangemaakt en gevuld te
+                worden met sleutels en certificaten die van toepassing zijn op de deploymentomgeving.
+                De naamgeving van de keystores is indicatief, maar dient in de configuratiebestanden consequent
+                doorgevoerd te worden:
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem>
+                        <para>
+                            <emphasis>privatestore.jks</emphasis>: Deze keystore bevat het servercertificaat en de privésleutel.
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>
+                            <emphasis>truststore.jks</emphasis>: Deze keystore moet de afnemer certificaten bevatten.
+                        </para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section>
+            <title>PostgreSQL JDBC driver</title>
+            <para>
+                Plaats het bestand "09 Software Package/drivers/postgresql-9.2-1004.jdbc41.jar" in [TOMCAT_HOME]/lib
+            </para>
+        </section>
+        <section>
+            <title>Applicatie properties</title>
+
+                <para>
+                    Plaats het bestand "09 Software Package/brp properties/brp-alles.properties" in [TOMCAT_HOME]/lib
+                    (LET OP: [TOMCAT_HOME]/conf lijkt een logischer plek, maar dit werkt niet!)
+                </para>
+                <!--<para>
+
+                    <table title="Overzicht benodigde properties bestanden per WAR"
+                           label="Overzicht benodigde properties bestanden per WAR">
+                        <tgroup cols='2' align='left'>
+                            <thead style="">
+                                <row>
+                                    <entry>War</entry>
+                                    <entry>Properties bestand(en)</entry>
+                                </row>
+                            </thead>
+                            <tbody>
+                                <row>
+                                    <entry>
+                                        <itemizedlist>
+                                            <listitem><para>Afnemerindicaties (afnemerindicaties.war)</para></listitem>
+                                            <listitem><para>Mutatielevering (mutatielevering.war)</para></listitem>
+                                            <listitem><para>Protocollering (protocollering.war)</para></listitem>
+                                            <listitem><para>Synchronisatie (synchronisatie.war)</para></listitem>
+                                            <listitem><para>Verzending (verzending.war)</para></listitem>
+                                            <listitem><para>BRP Message Broker (brp-message-broker.war)</para></listitem>
+                                        </itemizedlist>
+                                    </entry>
+                                    <entry>
+                                        <itemizedlist>
+                                            <listitem><para>brp-alles.properties</para></listitem>
+                                        </itemizedlist>
+                                    </entry>
+                                </row>
+                            </tbody>
+                        </tgroup>
+                    </table>
+                </para>-->
+
+                <para>
+                    In brp-alles.properties moeten nog een aantal waarden aangepast worden. De waarden staan tussen &lt;vishaakjes&gt;
+
+                    <table title="Overzicht te vervangen waarden"
+                           label="Overzicht te vervangen waarden">
+                    <tgroup cols='2' align='left'>
+                    <thead style="">
+                        <row>
+                            <entry>Waarde</entry>
+                            <entry>Te vervangen door</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                    <row>
+                        <entry><![CDATA[<database hostname>]]></entry>
+                        <entry>De hostname van de database</entry>
+                    </row>
+                        <row>
+                            <entry><![CDATA[<database port>]]></entry>
+                            <entry>De poort waarop de database draait</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<database username>]]></entry>
+                            <entry>De database user welke door de applicatie gebruikt wordt</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<database password>]]></entry>
+                            <entry>Het database wachtwoord welke door de applicatie gebruikt wordt</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<brp routering centrale host>]]></entry>
+                            <entry>De hostnaam van waar ActiveMQ draait (brp-message-broker.war)</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<brp routering centrale poort>]]></entry>
+                            <entry>De poort waarop de ActiveMQ draait (brp-message-broker.war)</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<directory 1>]]></entry>
+                            <entry>De data directory waar ActiveMQ naar schrijft. Dit vindt plaats onder de OS user waar Tomcat
+                            mee draait. Zorg ervoor dat voldoende lees en schrijfrechten toegekend zijn.
+                            </entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<directory 2>]]></entry>
+                            <entry>De data directory waar ActiveMQ naar schrijft. Dit vindt plaats onder de OS user waar Tomcat
+                                mee draait. Zorg ervoor dat voldoende lees en schrijfrechten toegekend zijn.</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<publicstore 1>]]></entry>
+                            <entry>De filenaam van de Java Keystore dat client certificaten bevat ter verificatie van inkomende berichten</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<publicstore password 1>]]></entry>
+                            <entry>Het wachtwoord van de Java Keystore dat client certificaten bevat ter verificatie van inkomende berichten</entry>
+                        </row>
+
+                        <row>
+                            <entry><![CDATA[<privatestore 1>]]></entry>
+                            <entry>De filenaam van de Java Keystore dat het server certificaat en private key bevat</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<privatestore password 1>]]></entry>
+                            <entry>Het wachtwoord van de Java Keystore dat het server certificaat en private key bevat</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<privatestore keypair alias 1>]]></entry>
+                            <entry>De alias van het private en public key paar van de server</entry>
+                        </row>
+                        <row>
+                            <entry><![CDATA[<privatestore key password 1>]]></entry>
+                            <entry>Het wachtwoord van de server private key</entry>
+                        </row>
+                    </tbody>
+                    </tgroup>
+                    </table>
+                </para>
+        </section>
+        <section>
+            <title>Extra controle op integratie BRP en Migratie componenten</title>
+            <para>
+                BRP en Migratie componenten communiceren middels queues. Het is van essentieel belang dat deze queuenamen hetzelfde zijn.
+                Controleer dat de waarden van onderstaande properties overeenkomen met de installatie van Migratie.
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem><para># GBA queues, die gebruikt worden voor het plaatsen/verwijderen van afnemerindicaties.
+                        afnemerindicaties.migratie.queue.name=GbaAfnemerindicaties
+                        afnemerindicaties.migratie.antwoord.queue.name=GbaAfnemerindicatiesAntwoorden</para></listitem>
+                </itemizedlist>
+                <itemizedlist>
+                    <listitem><para># GBA queue, waarop archivering verzoeken vanuit migratie worden geplaatst.
+                        archief.migratie.queue.name=GbaArchief</para></listitem>
+                </itemizedlist>
+                <itemizedlist>
+                    <listitem><para># GBA queue, waarop bijhoudingen vanuit migratie op worden genotificeerd.
+                        bijhouding.gba.admhnd.publicatie.queue.name=GbaBijhoudingen</para></listitem>
+                </itemizedlist>
+                <itemizedlist>
+                    <listitem><para># GBA queue, waarop de module Verzending LO3 berichten plaatst.
+                        jms.broker.lo3.leveringen.queue=GbaLeveringen
+                    </para></listitem>
+                </itemizedlist>
+                <itemizedlist>
+                    <listitem><para># GBA queues, die gebruikt worden voor het verwerken van toevallige gebeurtenissen.
+                        toevalligegebeurtenis.migratie.queue.name=GbaToevalligeGebeurtenissen
+                        toevalligegebeurtenis.migratie.antwoord.queue.name=GbaToevalligeGebeurtenissenAntwoorden
+                    </para></listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section>
+            <title>Verificatie installatie</title>
+            <para>
+                Tomcat kan nu gestart worden.
+            </para>
+            <para>
+                Controleer na het starten van Tomcat dat alle deployables correct zijn gestart; De console toont als laatste melding "INFO: Server
+                startup in XXX ms"
+                en de bevat géén enkele error. De logbestanden in [TOMCAT_HOME]/logs/catalina.out en [TOMCAT_HOME]/logs/brp-systeem.log
+                mogen, met uitzondering van volgordelijkheidsproblemen géén ERROR regels bevatten.
+            </para>
+            <para>
+                Controleeer tevens dat onderstaande verificatie URLs op te vragen zijn. De weergave van een HTML pagina met daarin een versie geeft aan
+                dat de WAR succesvol gestart is.
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem><para>BRP Mutatielevering: http://&lt;tomcat hostname&gt;:&lt;tomcat port&gt;/mutatielevering/versie.html</para></listitem>
+                    <listitem><para>BRP Onderhoud Afnemerindicaties: http://&lt;tomcat hostname&gt;:&lt;tomcat port&gt;/afnemerindicaties/versie.html</para></listitem>
+                    <listitem><para>BRP Protocollering: http://&lt;tomcat hostname&gt;:&lt;tomcat port&gt;/protocollering/versie.html</para></listitem>
+                    <listitem><para>BRP Synchronisatie: http://&lt;tomcat hostname&gt;:&lt;tomcat port&gt;/synchronisatie/versie.html</para></listitem>
+                    <listitem><para>BRP Verzending: http://&lt;tomcat hostname&gt;:&lt;tomcat port&gt;/verzending/versie.html</para></listitem>
+                    <listitem><para>BRP Message Broker: http://&lt;tomcat hostname&gt;:&lt;tomcat port&gt;/brp-message-broker/versie.html</para></listitem>
+                </itemizedlist>
+            </para>
+
+        </section>
+
+        <section>
+            <title>Opmerkingen</title>
+            <section>
+                <title>BRP Message Broker</title>
+                <para>
+                    De project dient als message broker tussen de services onderling. Ten behoeve van
+                    deze functionaliteit en het persisteren van de door de broker en services aangemaakte queues, dienen er
+                    tabellen te worden aangemaakt in de ActiveMQ-database. Dit gebeurt automatisch bij het opstarten van de
+                    brp-message-broker. Bij een 2e keer opstarten zal ActiveMQ
+                    opnieuw proberen deze tabellen aan te maken. Aangezien ze dan al bestaan, zullen
+                    warnings in de log verschijnen. Deze warnings lijken erg op errors, maar zijn het in
+                    feite niet:
+                </para>
+                <programlisting>
+15 aug 201309:10:25 WARN (JDBCPersistenceAdapter:582) Failure details:
+ERROR: current transaction is aborted, commandsignoreduntil end of
+transaction block
+org.postgresql.util.PSQLException: ERROR: current transaction is
+aborted, commandsignoreduntil end of transaction block
+                </programlisting>
+                <para>Om verwarring op dit punt te voorkomen is in het log4j2.xml-bestand (zie
+                    voorgaand hoofdstuk) het loglevel van org.apache.activemq.store.jdbc op
+                    ERROR gezet.</para>
+            </section>
+        </section>
+    </chapter>
+
+    <chapter>
+        <title>Bijlage A: Docker</title>
+        <para>
+            Deze bijlage beschrijft de installatie van de BRP software middels Docker.
+        </para>
+        <section>
+            <title>Precondities</title>
+            <para>Aan de volgende precondities moet worden voldaan om tot een correcte installatie van de software te komen.</para>
+            <section>
+                <title>Docker installatie</title>
+                <para>
+                    <itemizedlist mark='opencircle'>
+                        <listitem> <para> <emphasis>Docker versie 1.7.x is geinstalleerd</emphasis> </para> </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+            <section>
+                <title>Docker Compose installatie</title>
+                <para>
+                    <itemizedlist mark='opencircle'>
+                        <listitem> <para> <emphasis>Docker Compose versie 1.4.x is geinstalleerd</emphasis> </para> </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+        </section>
+
+        <section>
+            <title>Inhoud Software Package</title>
+            <para>Het software package bevat de volgende componenten:</para>
+            <para>
+                <itemizedlist mark='opencircle'>
+                    <listitem>
+                        <para><emphasis>"09 Software Package]/artefacten/brp-docker-repository.tar"</emphasis></para>
+                        <para>Een Docker Repository. Dit is een TAR bestand welke alle benodigde images bevat.</para>
+                    </listitem>
+                </itemizedlist>
+            </para>
+        </section>
+
+        <section>
+            <title>Docker Repository herstellen en verifiëren</title>
+            <para>Herstel de Docker Repository met het volgende commando:</para>
+            <programlisting>docker load --input brp-docker-repository.tar</programlisting>
+
+            <para>Verifieer alle images in de repository dmv onderstaand commando:</para>
+            <programlisting>docker images</programlisting>
+            <para>De output moet onderstaande images bevatten met tag <emphasis>&lt;releaseversie&gt;</emphasis>:</para>
+            <para>
+                <itemizedlist mark='opencircle'>
+                    <listitem> <para> <emphasis>brp/database</emphasis> </para> </listitem>
+                    <listitem> <para> <emphasis>sleutel</emphasis> </para> </listitem>
+                    <listitem> <para> <emphasis>brp/brp-message-broker</emphasis> </para> </listitem>
+                    <listitem> <para> <emphasis>brp/mutatielevering</emphasis> </para> </listitem>
+                    <listitem> <para> <emphasis>brp/synchronisatie</emphasis> </para> </listitem>
+                    <listitem> <para> <emphasis>brp/verzending</emphasis> </para> </listitem>
+                    <listitem> <para> <emphasis>brp/onderhoud-afnemerindicaties</emphasis> </para> </listitem>
+                    <listitem> <para> <emphasis>brp/protocollering</emphasis> </para> </listitem>
+                    <!--<listitem> <para> <emphasis>brp/beheer</emphasis> </para> </listitem>-->
+                </itemizedlist>
+            </para>
+        </section>
+
+        <section>
+            <title>Docker Images</title>
+
+            <para>De volgende paragrafen beschrijven specifieke container instellingen welke geconfigureerd kunnen worden
+                binnen de Docker Compose file.</para>
+
+            <section>
+                <title>brp/database</title>
+                <para>De BRP database. Bevat kern / autaut / lev schema's</para>
+                <para><emphasis role="bold"><emphasis role="bold">EXPOSE POORTEN: </emphasis></emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>5432</emphasis></para><para>De database luistert intern op deze poort</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">LINKS: - </emphasis></para>
+                <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                <para><emphasis role="bold">ENV: - </emphasis></para>
+            </section>
+            <!--
+                    <section>
+                        <title>brp/brp-levering-routering-db</title>
+                        <para><emphasis role="bold">EXPOSE POORTEN: </emphasis></para>
+                        <para>
+                            <itemizedlist>
+                                <listitem> <para ><emphasis>5432</emphasis></para><para>De database luistert intern op deze poort</para> </listitem>
+                            </itemizedlist>
+                        </para>
+                        <para><emphasis role="bold">LINKS: - </emphasis></para>
+                        <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                        <para><emphasis role="bold">ENV: - </emphasis></para>
+                    </section>
+            -->
+            <section>
+                <title>sleutel</title>
+                <para><emphasis role="bold"><emphasis role="bold">EXPOSE POORTEN: </emphasis>-</emphasis></para>
+                <para><emphasis role="bold">LINKS: - </emphasis></para>
+                <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                <para><emphasis role="bold">ENV: - </emphasis></para>
+            </section>
+
+            <section>
+                <title>brp/brp-message-broker</title>
+                <para><emphasis role="bold">EXPOSE POORTEN: </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>61616</emphasis></para><para>De broker luistert intern op deze poort</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">LINKS: - </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>brpdb</emphasis></para><para>De brp database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>archiveringdb</emphasis></para><para>De database voor archivering (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>lockingdb</emphasis></para><para>De master database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>activemqdb</emphasis></para><para>De master database (image: brp/database)</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                <para><emphasis role="bold">ENV:</emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>JMX_PORT</emphasis></para><para>JMX poort (default 1099)</para> </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+
+<!--            <section>
+                <title>brp/beheer</title>
+                <para><emphasis role="bold">EXPOSE POORTEN: </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>8080</emphasis></para><para>Webinterface poort</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">LINKS: - </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>brpdb</emphasis></para><para>De brp database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>archiveringdb</emphasis></para><para>De database voor archivering (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>lockingdb</emphasis></para><para>De master database (image: brp/database)</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                <para><emphasis role="bold">ENV: -</emphasis></para>
+            </section>-->
+
+
+            <section>
+                <title>brp/mutatielevering</title>
+                <para><emphasis role="bold">EXPOSE POORTEN: </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>8080</emphasis></para><para>Webinterface poort</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">LINKS: - </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>brpdb</emphasis></para><para>De brp database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>archiveringdb</emphasis></para><para>De database voor archivering (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>lockingdb</emphasis></para><para>De master database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>routeringcentrale</emphasis></para><para>De BRP routering (image:brp/brp-message-broker)</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                <para><emphasis role="bold">ENV:</emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>JMX_PORT</emphasis></para><para>JMX poort (default 1099)</para> </listitem>
+                        <listitem> <para ><emphasis>mutatielevering.concurrent.listeners</emphasis></para><para>Definieert het aantal parallele threads in het mutatielevering
+                            process. (default 10)</para> </listitem>
+
+                    </itemizedlist>
+                </para>
+            </section>
+
+            <section>
+                <title>brp/synchronisatie</title>
+                <para><emphasis role="bold">EXPOSE POORTEN: </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>8080</emphasis></para><para>Webinterface poort</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">LINKS: - </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>brpdb</emphasis></para><para>De brp database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>archiveringdb</emphasis></para><para>De database voor archivering (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>routeringcentrale</emphasis></para><para>De BRP routeringcentrale (image:brp/brp-message-broker)</para> </listitem>
+                        <listitem> <para ><emphasis>sleutelbos</emphasis></para><para>De keystores (image: sleutel)</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                <para><emphasis role="bold">ENV:</emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>JMX_PORT</emphasis></para><para>JMX poort (default 1099)</para> </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+
+
+            <section>
+                <title>brp/onderhoud-afnemerindicaties</title>
+                <para><emphasis role="bold">EXPOSE POORTEN: </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>8080</emphasis></para><para>Webinterface poort</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">LINKS: - </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>brpdb</emphasis></para><para>De brp database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>archiveringdb</emphasis></para><para>De database voor archivering (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>routeringcentrale</emphasis></para><para>De BRP routeringcentrale (image:brp/brp-message-broker)</para> </listitem>
+                        <listitem> <para ><emphasis>lockingdb</emphasis></para><para>De master database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>sleutelbos</emphasis></para><para>De keystores (image: sleutel)</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                <para><emphasis role="bold">ENV:</emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>JMX_PORT</emphasis></para><para>JMX poort (default 1099)</para> </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+
+            <section>
+                <title>brp/verzending</title>
+                <para><emphasis role="bold">EXPOSE POORTEN: </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>8080</emphasis></para><para>Webinterface poort</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">LINKS: - </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>brpdb</emphasis></para><para>De brp database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>archiveringdb</emphasis></para><para>De database voor archivering (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>lockingdb</emphasis></para><para>De master database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>protocolleringdb</emphasis></para><para>De protocollering database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>routeringcentrale</emphasis></para><para>De BRP routeringcentrale (image:brp/brp-message-broker)</para> </listitem>
+                        <listitem> <para ><emphasis>sleutelbos</emphasis></para><para>De keystores (image: sleutel)</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para><emphasis role="bold">VOLUME: - </emphasis></para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>sleutelbos</emphasis></para><para>De keystores (sleutel)</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para>ENV:</para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>JMX_PORT</emphasis></para><para>JMX poort (default 1099)</para> </listitem>
+                        <listitem> <para ><emphasis>verzending.aantal.threads</emphasis></para><para>Het aantal threads dat parallel actief is om afnemerqueues uit lezen (default 20)</para> </listitem>
+                        <listitem> <para ><emphasis>verzending.aantal.berichten.periteratie</emphasis></para><para>Het maximaal aantal berichten dat een per queue uitgelezen en verwerkt wordt door een thread. Deze waarde wordt gelijk gesteld aan de prefetch instelling op de JMS connectie. Een hogere waarde resulteert in efficienter gebruik van connecties en sessies (minder overhead), maar als keerzijde moeten andere queues langer wachten voordat ze uitgelezen worden. (default 25)</para> </listitem>
+                        <listitem> <para ><emphasis>verzending.wachttijd.bericht.ontvangen</emphasis></para><para>De initiele wachttijd (msec) die gehanteerd wordt vóórdat de queue uitgelezen wordt. Dit hangt samen met de prefetch instelling die iets tijd# nodig heeft om berichten voor verwerking aan te leveren. Meer tijd is een grotere kans op het beschikbaar zijn van berichten (receiveNoWait()) geeft soms geen berichten terug terwijl er wel berichten op de queue staan. (default 250)</para> </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+
+            <section>
+                <title>brp/protocollering</title>
+                <para>LINKS:</para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>protocolleringdb</emphasis></para><para>De brp database (image: brp/database)</para> </listitem>
+                        <listitem> <para ><emphasis>routeringcentrale</emphasis></para><para>De BRP routeringcentrale (image:brp/brp-message-broker)</para> </listitem>
+                    </itemizedlist>
+                </para>
+                <para>VOLUME: - </para>
+                <para>ENV:</para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para ><emphasis>JMX_PORT</emphasis></para><para>JMX poort (default 1099)</para> </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+        </section>
+
+        <section>
+            <title>Omgeving starten</title>
+
+            <!--<section>
+                <title>Met Docker Client</title>
+                <para>
+                    Voer onderstaande commando's uit. Vervang hierbij $TAG variabele door de versie zoals opgeleverd in
+                    de distributie.
+                </para>
+                <para>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name brpdb brp/database:$TAG
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name sleutelbos sleutel:latest
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name brp-message-broker
+                        &#45;&#45;link brpdb:brpdb
+                        &#45;&#45;link brpdb:archiveringdb
+                        &#45;&#45;link brpdb:lockingdb
+                        &#45;&#45;link brpdb:activemqdb
+                        -p 8080:8080
+                        -p 1099:1099
+                        -e ROUTERINGCENTRALE_PORT_61616_TCP_PORT=61616
+                        -e JMX_PORT=1099
+                        brp/brp-message-broker:$TAG
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name mutatielevering
+                        &#45;&#45;link brpdb:brpdb
+                        &#45;&#45;link brpdb:archiveringdb
+                        &#45;&#45;link brpdb:lockingdb
+                        &#45;&#45;link brp-message-broker:routeringcentrale
+                        -p 8180:8080
+                        -p 1199:1199
+                        -e JMX_PORT=1199
+                        brp/mutatielevering:$TAG
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name synchronisatie
+                        &#45;&#45;link brpdb:brpdb
+                        &#45;&#45;link brpdb:archiveringdb
+                        &#45;&#45;link brpdb:lockingdb
+                        &#45;&#45;link brp-message-broker:routeringcentrale
+                        &#45;&#45;link sleutelbos:sleutelbos
+                        &#45;&#45;volumes-from sleutelbos
+                        -p 8280:8080
+                        -p 1299:1299
+                        -e JMX_PORT=1299
+                        brp/synchronisatie:$TAG
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name afnemerindicatie
+                        &#45;&#45;link brpdb:brpdb
+                        &#45;&#45;link brpdb:archiveringdb
+                        &#45;&#45;link brpdb:lockingdb
+                        &#45;&#45;link brp-message-broker:routeringcentrale
+                        &#45;&#45;link sleutelbos:sleutelbos
+                        &#45;&#45;volumes-from sleutelbos
+                        -p 8380:8080
+                        -p 1399:1399
+                        -e JMX_PORT=1399
+                        brp/onderhoud-afnemerindicaties:$TAG
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name verzending
+                        &#45;&#45;link brpdb:brpdb
+                        &#45;&#45;link brpdb:archiveringdb
+                        &#45;&#45;link brpdb:lockingdb
+                        &#45;&#45;link brp-message-broker:routeringcentrale
+                        &#45;&#45;link sleutelbos:sleutelbos
+                        &#45;&#45;volumes-from sleutelbos
+                        -p 8480:8080
+                        -p 1499:1499
+                        -e JMX_PORT=1499
+                        brp/verzending:$TAG
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name protocollering
+                        &#45;&#45;link brpdb:protocolleringdb
+                        &#45;&#45;link brp-message-broker:routeringcentrale
+                        -p 8580:8080
+                        -p 1599:1599
+                        -e JMX_PORT=1599
+                        brp/protocollering:$TAG
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name iscbrug
+                        &#45;&#45;link brp-message-broker:routeringcentrale
+                        -p 8680:8080
+                        -p 1699:1699
+                        -e isc-poort=61616
+                        -e JMX_PORT=1699
+                        &#45;&#45;add-host isc-host:$ISC-HOST
+                        brp/isc-brug:$TAG
+                    </programlisting>
+                    <programlisting>
+                        docker run -d
+                        &#45;&#45;name beheer
+                        &#45;&#45;link brpdb:brpdb
+                        &#45;&#45;link brpdb:archiveringdb
+                        &#45;&#45;link brpdb:lockingdb
+                        -p 8780:8080
+                        &#45;&#45;add-host isc-host:$ISC-HOST
+                        brp/beheer:$TAG
+                    </programlisting>
+                </para>
+
+            </section>-->
+
+            <section>
+                <title>Met Docker Compose</title>
+                <para>
+                    Voor het starten van de omgeving met Docker Compose wordt verwezen naar de installatiehandleiding van migratie.
+                </para>
+            </section>
+
+            <section>
+                <title>Omgeving verifieren</title>
+                <para>
+                    Controleer na het starten van de omgeving middels onderstaand commando of de containers
+                    goed gestart zijn.
+                </para>
+                <programlisting>docker logs &lt;containerId&gt;</programlisting>
+
+                <para>
+                    Voor meer logging kan de applicatie logging bekeken worden, welke te vinden is
+                    op onderstaande locaties binnen de container:</para>
+                <para>
+                    <itemizedlist>
+                        <listitem> <para>/opt/appserver/logs/brp-systeem.log</para> </listitem>
+                        <listitem> <para>/opt/appserver/logs/brp-functioneel.log</para> </listitem>
+                    </itemizedlist>
+                </para>
+            </section>
+
+
+        </section>
+
+    </chapter>
+
+
+
+
+</book>

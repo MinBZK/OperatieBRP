@@ -1,0 +1,588 @@
+<!-- Voorbeeldbericht BRPXML bijhouding vanuit ISC - "Sluiting Huwelijk/geregistreerd partnerschap" - versie 2.1 dd. 2015-10-13 -->
+<!-- ... -->
+<!-- Casus: -->
+<!-- -  Voor Maria da Silva; bsn: 238651974 wordt Tb02-bericht ontvangen; zij is de BezienVanuitPersoon -->
+<!-- -	Treedt in het huwelijk met Willy dos Santos da Victória (niet ingeschreven Braziliaan) … -->
+<!-- -	Huwelijkssluiting op 13 juni 2015 ... -->
+<!-- -	Maria is niet-Nederlander en wenst wijziging van haar geslachtsnaam naar Santos da Silva -->
+<!-- ... -->
+<!-- Aannames/uitgangspunten: -->
+<!-- 1) Bij eerste registratie van Huwelijk/Gps is de parameter 'bezienVanuitpersoon' niet nodig; personen worden meegegeven in bericht -->
+<!-- 2) Registratie van Relatie wordt asymmetrisch aangeboden; de Cat01/51-persoon uit het Tb-bericht (de hoofdpersoon) is hierbij leidend; de Cat05-partner wordt als soort Persoon 'G' doorgegeven -->
+<!--    Codematig afdwingen dat de eerste partner binnen Huwelijk/Gps altijd een ingeschrevene is; geen vulling van de identificerende groepen. En voor de 2e partner de identificerende groepen -->
+<!--    wel worden doorgegeven; soortPersoon is 'G' of 'N'. Kan niet via XSD's; er is één element 'partner' dat beide situaties aan kan en binnen Huwelijk/Gps twee keer voor komt -->
+<!-- 3) De naamsgegevens van de hoofdpersoon kunnen evt. worden gewijzigd; die van de partner niet; aanname later definitief vast te stellen -->
+<!-- 3) In geval van een naamswijzing van de hoofdpersoon kan dit via aprte actie 'registratieNaamVoornaam'; hiervoor geldt: -->
+<!--    - algemene werking acties; dus DAG en bronverwijizng mogelijk -->
+<!--    - verwijzing via versleutelde objectSleutel; deze is altijd gelijk aan de BZVU-persoon (indien via objectSleutelPersoon) en één van de Partner-Personen! -->
+<!--    - voor nu even volledige vulling SamengesteldeNaam mogelijk; hiervoor specs Conversie even nalopen -->
+<!--    - wijziging voronamen mogelijk; ifso dan alle voornamen met volgnummer opnemen (niet alleen de gewijzigde); dit ivm 'stapelverwerking in BRP -->
+<!--    - wijziging geslachtsnaamcomponent mogelijk; zonder opgave volgnummer; met huidige wetgeving maar één geslachtsnaamcomponent mogelijk -->
+<!--    - In geval van voorvoegsels wordt elemnt 'scheidjingsteken' gevuyld met spatie -->
+<!-- 4) Het naamgebruik kan via Tb02 NIET worden aangepast -->
+<!-- 5) In geval van Naamswijziging ook tweede bron mogelijk; nog even nalopen welke dit normaal gesproken kunnen (zie ook 4) -->
+<!-- 6) In BRP zijn soortNaam en identificatie bij OT 'Document' verplicht. Hiervoor specificaties Conversie bezien. Mogelijk voor 'identificatie' samenstelling o.b.v. partij en aktenummer' -->
+
+<!-- ... -->
+<!-- Wijzigingen t.o.v. v2.0: -->
+<!-- 1) Parameter BezienVanuitPersoon is komen te vervallen; is niet nodig bij eerste registratie huwelijk/gps -->
+<!-- 2) Relatie wordt asymmetrisch aangeboden -->
+<!-- 3) Verbeteringen bij gegevens actie 'registratieNaamVoornaam'; alleen mogelijk igv hoofdpersoon -->
+<!-- -->
+<brp:isc_migRegistreerHuwelijkGeregistreerdPartnerschap xmlns:brp="http://www.bzk.nl/brp/brp0200" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.bzk.nl/brp/brp0200 ../brp0200_iscMigratievoorziening_Berichten.xsd">
+    <brp:stuurgegevens brp:communicatieID="identificatie00B">
+        <brp:zendendePartij>${stuurgegevens.zendendePartij}</brp:zendendePartij>
+        <brp:zendendeSysteem>${stuurgegevens.zendendeSysteem}</brp:zendendeSysteem>
+        <brp:referentienummer>${stuurgegevens.referentienummer}</brp:referentienummer>
+        <brp:tijdstipVerzending>${stuurgegevens.tijdstipVerzending}</brp:tijdstipVerzending>
+    </brp:stuurgegevens>
+    <brp:parameters brp:communicatieID="identificatie01B">
+        <brp:verwerkingswijze>Bijhouding</brp:verwerkingswijze> <!-- Constante -->
+    </brp:parameters>
+    <!--Optional:-->
+    <brp:gBASluitingHuwelijkGeregistreerdPartnerschap brp:objecttype="AdministratieveHandeling" brp:communicatieID="identificatie02B">
+        <brp:partijCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.partijCode}</brp:partijCode> <!-- Gemeente waar het Tb02 bericht vandaan komt -->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list gBASluitingHuwelijkGeregistreerdPartnerschap.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron"><!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            <brp:registratieAanvangHuwelijkGeregistreerdPartnerschap brp:objecttype="Actie" brp:communicatieID="identificatie06B">
+                <brp:datumAanvangGeldigheid>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid> <!-- 05.85.10 (Ingangsdatum geldigheid) -->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}" />
+                    [/#list]
+                </brp:bronnen>
+                <!--You have a CHOICE of the next 2 items at this level -->
+                <brp:huwelijk brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.communicatieID}" brp:objecttype="Relatie">
+                    <brp:relatie brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.communicatieID}">
+                        <brp:datumAanvang>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.datumAanvang}</brp:datumAanvang>
+                        <brp:gemeenteAanvangCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.gemeenteAanvangCode}</brp:gemeenteAanvangCode>
+                        <!--Optional:-->
+                        <brp:buitenlandsePlaatsAanvang>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.buitenlandsePlaatsAanvang}</brp:buitenlandsePlaatsAanvang>
+                        <!--Optional:-->
+                        <brp:landGebiedAanvangCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.landGebiedAanvangCode}</brp:landGebiedAanvangCode>
+                    </brp:relatie>
+                    <brp:betrokkenheden>
+                        <brp:partner brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.communicatieID}" brp:objectSleutel="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.objectSleutel}" brp:objecttype="Betrokkenheid">
+                            <brp:persoon brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                                <!--Optional:-->
+                                <brp:soortCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.soortCode}</brp:soortCode>
+                                <!--Optional:-->
+                                <brp:identificatienummers brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.identificatienummers.communicatieID}">
+                                    <!--Optional:-->
+                                    <brp:burgerservicenummer>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.identificatienummers.burgerservicenummer}</brp:burgerservicenummer>
+                                    <!--Optional:-->
+                                    <brp:administratienummer>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.identificatienummers.administratienummer}</brp:administratienummer>
+                                </brp:identificatienummers>
+                                <!--Optional: -->
+                                <brp:samengesteldeNaam
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.samengesteldeNaam.communicatieID}">
+                                    <brp:indicatieNamenreeks>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.samengesteldeNaam.indicatieNamenreeks}</brp:indicatieNamenreeks>
+                                    <!--Optional:-->
+                                    <brp:predicaatCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.samengesteldeNaam.predicaatCode}</brp:predicaatCode>
+                                    <!--Optional: -->
+                                    <brp:voornamen>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.samengesteldeNaam.voornamen}</brp:voornamen>
+                                    <!--Optional: -->
+                                    <brp:adellijkeTitelCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.samengesteldeNaam.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                                    <!--Optional: -->
+                                    <brp:voorvoegsel>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.samengesteldeNaam.voorvoegsel}</brp:voorvoegsel>
+                                    <!--Optional: -->
+                                    <brp:scheidingsteken>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.samengesteldeNaam.scheidingsteken}</brp:scheidingsteken>
+                                    <brp:geslachtsnaamstam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.samengesteldeNaam.geslachtsnaamstam}</brp:geslachtsnaamstam>
+                                </brp:samengesteldeNaam>
+                                <!--Optional:-->
+                                <brp:geboorte
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geboorte.communicatieID}">
+                                    <brp:datum>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geboorte.datum}</brp:datum>
+                                    <!--Optional:-->
+                                    <brp:gemeenteCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geboorte.gemeenteCode}</brp:gemeenteCode>
+                                    <!--Optional:-->
+                                    <brp:woonplaatsnaam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geboorte.woonplaatsnaam}</brp:woonplaatsnaam>
+                                    <!--Optional: -->
+                                    <brp:buitenlandsePlaats>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geboorte.buitenlandsePlaats}</brp:buitenlandsePlaats>
+                                    <!--Optional:-->
+                                    <brp:buitenlandseRegio>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geboorte.buitenlandseRegio}</brp:buitenlandseRegio>
+                                    <!--Optional:-->
+                                    <brp:omschrijvingLocatie>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geboorte.omschrijvingLocatie}</brp:omschrijvingLocatie>
+                                    <brp:landGebiedCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geboorte.landGebiedCode}</brp:landGebiedCode>
+                                </brp:geboorte>
+                                <!--Optional:-->
+                                <brp:geslachtsaanduiding brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geslachtsaanduiding.communicatieID}">
+                                    <brp:code>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.geslachtsaanduiding.code}</brp:code>
+                                </brp:geslachtsaanduiding>
+                            </brp:persoon>
+                        </brp:partner>
+                        <brp:partner brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.communicatieID}" brp:objectSleutel="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.objectSleutel}" brp:objecttype="Betrokkenheid">
+                            <brp:persoon brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.communicatieID}" brp:objectSleutel="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.objectSleutel}" brp:objecttype="Persoon">
+                                <!--Optional:-->
+                                <brp:soortCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.soortCode}</brp:soortCode>
+                                <!--Optional:-->
+                                <brp:identificatienummers brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.identificatienummers.communicatieID}">
+                                    <!--Optional: -->
+                                    <brp:burgerservicenummer>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.identificatienummers.burgerservicenummer}</brp:burgerservicenummer>
+                                    <!--Optional: -->
+                                    <brp:administratienummer>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.identificatienummers.administratienummer}</brp:administratienummer>
+                                </brp:identificatienummers>
+                                <!--Optional:   -->
+                                <brp:samengesteldeNaam brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.samengesteldeNaam.communicatieID}">
+                                    <brp:indicatieNamenreeks>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.samengesteldeNaam.indicatieNamenreeks}</brp:indicatieNamenreeks>
+                                    <!--Optional:   -->
+                                    <brp:predicaatCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.samengesteldeNaam.predicaatCode}</brp:predicaatCode>
+                                    <!--Optional: -->
+                                    <brp:voornamen>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.samengesteldeNaam.voornamen}</brp:voornamen>
+                                    <!--Optional: -->
+                                    <brp:adellijkeTitelCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.samengesteldeNaam.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                                    <!--Optional: -->
+                                    <brp:voorvoegsel>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.samengesteldeNaam.voorvoegsel}</brp:voorvoegsel>
+                                    <!--Optional:
+                                     -->
+                                    <brp:scheidingsteken>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.samengesteldeNaam.scheidingsteken}</brp:scheidingsteken>
+                                    <brp:geslachtsnaamstam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.samengesteldeNaam.geslachtsnaamstam}</brp:geslachtsnaamstam>
+                                </brp:samengesteldeNaam>
+                                <!--Optional: -->
+                                <brp:geboorte brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geboorte.communicatieID}">
+                                    <brp:datum>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geboorte.datum}</brp:datum>
+                                    <!--Optional:-->
+                                    <brp:gemeenteCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geboorte.gemeenteCode}</brp:gemeenteCode>
+                                    <!--Optional: -->
+                                    <brp:woonplaatsnaam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geboorte.woonplaatsnaam}</brp:woonplaatsnaam>
+                                    <!--Optional: -->
+                                    <brp:buitenlandsePlaats>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geboorte.buitenlandsePlaats}</brp:buitenlandsePlaats>
+                                    <!--Optional: -->
+                                    <brp:buitenlandseRegio>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geboorte.buitenlandseRegio}</brp:buitenlandseRegio>
+                                    <!--Optional: -->
+                                    <brp:omschrijvingLocatie>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geboorte.omschrijvingLocatie}</brp:omschrijvingLocatie>
+                                    <brp:landGebiedCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geboorte.landGebiedCode}</brp:landGebiedCode>
+                                </brp:geboorte>
+                                <!--Optional:-->
+                                <brp:geslachtsaanduiding brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geslachtsaanduiding.communicatieID}">
+                                    <brp:code>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner2.persoon.geslachtsaanduiding.code}</brp:code>
+                                </brp:geslachtsaanduiding>
+                            </brp:persoon>
+                        </brp:partner>
+                    </brp:betrokkenheden>
+                </brp:huwelijk>
+                <brp:geregistreerdPartnerschap brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.communicatieID}" brp:objecttype="Relatie">
+                    <brp:relatie brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.communicatieID}">
+                        <brp:datumAanvang>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.datumAanvang}</brp:datumAanvang>
+                        <brp:gemeenteAanvangCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.gemeenteAanvangCode}</brp:gemeenteAanvangCode>
+                        <!--Optional:                         -->
+                        <brp:buitenlandsePlaatsAanvang>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.buitenlandsePlaatsAanvang}</brp:buitenlandsePlaatsAanvang>
+                        <!--Optional:                         -->
+                        <brp:landGebiedAanvangCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.landGebiedAanvangCode}</brp:landGebiedAanvangCode>
+                    </brp:relatie>
+                    <brp:betrokkenheden>
+                        <brp:partner brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.communicatieID}" brp:objectSleutel="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.objectSleutel}" brp:objecttype="Betrokkenheid">
+                            <brp:persoon
+                                    brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                                <!--Optional:                                 -->
+                                <brp:soortCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.soortCode}</brp:soortCode>
+                                <!--Optional:                                 -->
+                                <brp:identificatienummers
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.identificatienummers.communicatieID}">
+                                    <!--Optional:                                     -->
+                                    <brp:burgerservicenummer>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.identificatienummers.burgerservicenummer}</brp:burgerservicenummer>
+                                    <!--Optional:                                     -->
+                                    <brp:administratienummer>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.identificatienummers.administratienummer}</brp:administratienummer>
+                                </brp:identificatienummers>
+                                <!--Optional:                                 -->
+                                <brp:samengesteldeNaam
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.samengesteldeNaam.communicatieID}">
+                                    <brp:indicatieNamenreeks>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.samengesteldeNaam.indicatieNamenreeks}</brp:indicatieNamenreeks>
+                                    <!--Optional:                                     -->
+                                    <brp:predicaatCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.samengesteldeNaam.predicaatCode}</brp:predicaatCode>
+                                    <!--Optional:                                     -->
+                                    <brp:voornamen>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.samengesteldeNaam.voornamen}</brp:voornamen>
+                                    <!--Optional:                                     -->
+                                    <brp:adellijkeTitelCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.samengesteldeNaam.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                                    <!--Optional:                                     -->
+                                    <brp:voorvoegsel>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.samengesteldeNaam.voorvoegsel}</brp:voorvoegsel>
+                                    <!--Optional:                                     -->
+                                    <brp:scheidingsteken>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.samengesteldeNaam.scheidingsteken}</brp:scheidingsteken>
+                                    <brp:geslachtsnaamstam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.samengesteldeNaam.geslachtsnaamstam}</brp:geslachtsnaamstam>
+                                </brp:samengesteldeNaam>
+                                <!--Optional:                                 -->
+                                <brp:geboorte
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geboorte.communicatieID}">
+                                    <brp:datum>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geboorte.datum}</brp:datum>
+                                    <!--Optional:                                     -->
+                                    <brp:gemeenteCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geboorte.gemeenteCode}</brp:gemeenteCode>
+                                    <!--Optional:                                     -->
+                                    <brp:woonplaatsnaam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geboorte.woonplaatsnaam}</brp:woonplaatsnaam>
+                                    <!--Optional:                                     -->
+                                    <brp:buitenlandsePlaats>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geboorte.buitenlandsePlaats}</brp:buitenlandsePlaats>
+                                    <!--Optional:                                     -->
+                                    <brp:buitenlandseRegio>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geboorte.buitenlandseRegio}</brp:buitenlandseRegio>
+                                    <!--Optional:                                     -->
+                                    <brp:omschrijvingLocatie>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geboorte.omschrijvingLocatie}</brp:omschrijvingLocatie>
+                                    <brp:landGebiedCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geboorte.landGebiedCode}</brp:landGebiedCode>
+                                </brp:geboorte>
+                                <!--Optional:                                 -->
+                                <brp:geslachtsaanduiding
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geslachtsaanduiding.communicatieID}">
+                                    <brp:code>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner1.persoon.geslachtsaanduiding.code}</brp:code>
+                                </brp:geslachtsaanduiding>
+                            </brp:persoon>
+                        </brp:partner>
+                        <brp:partner
+                                brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.communicatieID}" brp:objectSleutel="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.objectSleutel}" brp:objecttype="Betrokkenheid">
+                            <brp:persoon
+                                    brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.communicatieID}" brp:objectSleutel="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.objectSleutel}" brp:objecttype="Persoon">
+                                <!--Optional:                                 -->
+                                <brp:soortCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.soortCode}</brp:soortCode>
+                                <!--Optional:                                 -->
+                                <brp:identificatienummers
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.identificatienummers.communicatieID}">
+                                    <!--Optional:                                     -->
+                                    <brp:burgerservicenummer>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.identificatienummers.burgerservicenummer}</brp:burgerservicenummer>
+                                    <!--Optional:                                     -->
+                                    <brp:administratienummer>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.identificatienummers.administratienummer}</brp:administratienummer>
+                                </brp:identificatienummers>
+                                <!--Optional:                                 -->
+                                <brp:samengesteldeNaam
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.samengesteldeNaam.communicatieID}">
+                                    <brp:indicatieNamenreeks>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.samengesteldeNaam.indicatieNamenreeks}</brp:indicatieNamenreeks>
+                                    <!--Optional:                                     -->
+                                    <brp:predicaatCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.samengesteldeNaam.predicaatCode}</brp:predicaatCode>
+                                    <!--Optional:                                     -->
+                                    <brp:voornamen>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.samengesteldeNaam.voornamen}</brp:voornamen>
+                                    <!--Optional:                                     -->
+                                    <brp:adellijkeTitelCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.samengesteldeNaam.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                                    <!--Optional:                                     -->
+                                    <brp:voorvoegsel>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.samengesteldeNaam.voorvoegsel}</brp:voorvoegsel>
+                                    <!--Optional:                                     -->
+                                    <brp:scheidingsteken>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.samengesteldeNaam.scheidingsteken}</brp:scheidingsteken>
+                                    <brp:geslachtsnaamstam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.samengesteldeNaam.geslachtsnaamstam}</brp:geslachtsnaamstam>
+                                </brp:samengesteldeNaam>
+                                <!--Optional:                                 -->
+                                <brp:geboorte
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geboorte.communicatieID}">
+                                    <brp:datum>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geboorte.datum}</brp:datum>
+                                    <!--Optional:                                     -->
+                                    <brp:gemeenteCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geboorte.gemeenteCode}</brp:gemeenteCode>
+                                    <!--Optional:                                     -->
+                                    <brp:woonplaatsnaam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geboorte.woonplaatsnaam}</brp:woonplaatsnaam>
+                                    <!--Optional:                                     -->
+                                    <brp:buitenlandsePlaats>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geboorte.buitenlandsePlaats}</brp:buitenlandsePlaats>
+                                    <!--Optional:                                     -->
+                                    <brp:buitenlandseRegio>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geboorte.buitenlandseRegio}</brp:buitenlandseRegio>
+                                    <!--Optional:                                     -->
+                                    <brp:omschrijvingLocatie>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geboorte.omschrijvingLocatie}</brp:omschrijvingLocatie>
+                                    <brp:landGebiedCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geboorte.landGebiedCode}</brp:landGebiedCode>
+                                </brp:geboorte>
+                                <!--Optional:                                 -->
+                                <brp:geslachtsaanduiding
+                                        brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geslachtsaanduiding.communicatieID}">
+                                    <brp:code>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.betrokkenheden.partner2.persoon.geslachtsaanduiding.code}</brp:code>
+                                </brp:geslachtsaanduiding>
+                            </brp:persoon>
+                        </brp:partner>
+                    </brp:betrokkenheden>
+                </brp:geregistreerdPartnerschap>
+            </brp:registratieAanvangHuwelijkGeregistreerdPartnerschap>
+            <!--Optional:  -->
+            <brp:registratieNaamVoornaam brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:  -->
+                <brp:bronnen>
+                    <!--1 or more repetitions: -->
+                    [#list gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieAanvangHuwelijkGeregistreerdPartnerschap.huwelijk.betrokkenheden.partner1.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <!--Optional:  -->
+                    <brp:samengesteldeNaam brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.communicatieID}">
+                        <!--Optional: -->
+                        <brp:indicatieAfgeleid>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.indicatieAfgeleid}</brp:indicatieAfgeleid>
+                        <brp:indicatieNamenreeks>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.indicatieNamenreeks}</brp:indicatieNamenreeks>
+                        <!--Optional: -->
+                        <brp:predicaatCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.predicaatCode}</brp:predicaatCode>
+                        <!--Optional:   -->
+                        <brp:voornamen>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.voornamen}</brp:voornamen>
+                        <!--Optional:  -->
+                        <brp:adellijkeTitelCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                        <!--Optional:    -->
+                        <brp:voorvoegsel>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.voorvoegsel}</brp:voorvoegsel>
+                        <!--Optional:   -->
+                        <brp:scheidingsteken>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.scheidingsteken}</brp:scheidingsteken>
+                        <!--Optional:   -->
+                        <brp:geslachtsnaamstam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.geslachtsnaamstam}</brp:geslachtsnaamstam>
+                    </brp:samengesteldeNaam>
+                    <!--Optional:  -->
+                    <brp:voornamen>
+                        <!--1 or more repetitions: -->
+                        [#list gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.voornamen as voornaam]
+                        <brp:voornaam brp:communicatieID="${voornaam.communicatieID}" brp:objecttype="PersoonVoornaam">
+                            <brp:volgnummer>${voornaam.volgnummer}</brp:volgnummer>
+                            <brp:naam>${voornaam.naam}</brp:naam>
+                        </brp:voornaam>
+                        [/#list]
+                    </brp:voornamen>
+                    <!--Optional: -->
+                    <brp:geslachtsnaamcomponenten>
+                        <brp:geslachtsnaamcomponent brp:communicatieID="${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.communicatieID}" brp:objecttype="PersoonGeslachtsnaamcomponent">
+                            <!--Optional: -->
+                            <brp:predicaatCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.predicaatCode}</brp:predicaatCode>
+                            <!--Optional:  -->
+                            <brp:adellijkeTitelCode>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                            <!--Optional: -->
+                            <brp:voorvoegsel>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.voorvoegsel}</brp:voorvoegsel>
+                            <!--Optional: -->
+                            <brp:scheidingsteken>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.scheidingsteken}</brp:scheidingsteken>
+                            <brp:stam>${gBASluitingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.stam}</brp:stam>
+                        </brp:geslachtsnaamcomponent>
+                    </brp:geslachtsnaamcomponenten>
+                </brp:persoon>
+            </brp:registratieNaamVoornaam>
+        </brp:acties>
+    </brp:gBASluitingHuwelijkGeregistreerdPartnerschap>
+    <!--Optional:-->
+    <brp:gBAOntbindingHuwelijkGeregistreerdPartnerschap brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list gBAOntbindingHuwelijkGeregistreerdPartnerschap.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--1 or more repetitions:-->
+            [#list gBAOntbindingHuwelijkGeregistreerdPartnerschap.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            <brp:registratieEindeHuwelijkGeregistreerdPartnerschap brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    <brp:bron brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.bronnen.bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.bronnen.bron.referentieID}"/>
+                </brp:bronnen>
+                <!--You have a CHOICE of the next 2 items at this level-->
+                <brp:huwelijk brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.huwelijk.communicatieID}" brp:objectSleutel="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.huwelijk.objectSleutel}" brp:objecttype="Relatie">
+                    <brp:relatie brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.communicatieID}">
+                        <brp:redenEindeCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.redenEindeCode}</brp:redenEindeCode>
+                        <brp:datumEinde>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.datumEinde}</brp:datumEinde>
+                        <brp:gemeenteEindeCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.gemeenteEindeCode}</brp:gemeenteEindeCode>
+                        <!--Optional:-->
+                        <brp:buitenlandsePlaatsEinde>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.buitenlandsePlaatsEinde}</brp:buitenlandsePlaatsEinde>
+                        <!--Optional:-->
+                        <brp:landGebiedEindeCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.huwelijk.relatie.landGebiedEindeCode}</brp:landGebiedEindeCode>
+                    </brp:relatie>
+                </brp:huwelijk>
+                <!--Optional:-->
+                <brp:geregistreerdPartnerschap brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.communicatieID}" brp:objectSleutel="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.objectSleutel}" brp:objecttype="Relatie">
+                    <brp:relatie brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.communicatieID}">
+                        <brp:redenEindeCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.redenEindeCode}</brp:redenEindeCode>
+                        <brp:datumEinde>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.datumEinde}</brp:datumEinde>
+                        <brp:gemeenteEindeCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.gemeenteEindeCode}</brp:gemeenteEindeCode>
+                        <!--Optional:-->
+                        <brp:buitenlandsePlaatsEinde>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.buitenlandsePlaatsEinde}</brp:buitenlandsePlaatsEinde>
+                        <!--Optional:-->
+                        <brp:landGebiedEindeCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.landGebiedEindeCode}</brp:landGebiedEindeCode>
+                    </brp:relatie>
+                </brp:geregistreerdPartnerschap>
+            </brp:registratieEindeHuwelijkGeregistreerdPartnerschap>
+            <!--Optional:-->
+            <brp:registratieNaamVoornaam brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    <brp:bron brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.bronnen.bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.bronnen.bron.referentieID}"/>
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.communicatieID}" brp:objectSleutel="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.objectSleutel}" brp:objecttype="Persoon">
+                    <!--Optional:-->
+                    <brp:samengesteldeNaam brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.communicatieID}">
+                        <!--Optional:-->
+                        <brp:indicatieAfgeleid>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.indicatieAfgeleid}</brp:indicatieAfgeleid>
+                        <brp:indicatieNamenreeks>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.indicatieNamenreeks}</brp:indicatieNamenreeks>
+                        <!--Optional:-->
+                        <brp:predicaatCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.predicaatCode}</brp:predicaatCode>
+                        <!--Optional:-->
+                        <brp:voornamen>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.voornamen}</brp:voornamen>
+                        <!--Optional:-->
+                        <brp:adellijkeTitelCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                        <!--Optional:-->
+                        <brp:voorvoegsel>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.voorvoegsel}</brp:voorvoegsel>
+                        <!--Optional:-->
+                        <brp:scheidingsteken>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.scheidingsteken}</brp:scheidingsteken>
+                        <!--Optional:-->
+                        <brp:geslachtsnaamstam>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.geslachtsnaamstam}</brp:geslachtsnaamstam>
+                    </brp:samengesteldeNaam>
+                    <!--Optional:-->
+                    <brp:voornamen>
+                        <!--1 or more repetitions:-->
+                        <brp:voornaam brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.voornamen.voornaam.communicatieID}" brp:objecttype="PersoonVoornaam">
+                            <brp:volgnummer>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.voornamen.voornaam.volgnummer}</brp:volgnummer>
+                            <brp:naam>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.voornamen.voornaam.naam}</brp:naam>
+                        </brp:voornaam>
+                    </brp:voornamen>
+                    <!--Optional:-->
+                    <brp:geslachtsnaamcomponenten>
+                        <brp:geslachtsnaamcomponent brp:communicatieID="${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.communicatieID}" brp:objecttype="PersoonGeslachtsnaamcomponent">
+                            <!--Optional:-->
+                            <brp:predicaatCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.predicaatCode}</brp:predicaatCode>
+                            <!--Optional:-->
+                            <brp:adellijkeTitelCode>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                            <!--Optional:-->
+                            <brp:voorvoegsel>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.voorvoegsel}</brp:voorvoegsel>
+                            <!--Optional:-->
+                            <brp:scheidingsteken>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.scheidingsteken}</brp:scheidingsteken>
+                            <brp:stam>${gBAOntbindingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.stam}</brp:stam>
+                        </brp:geslachtsnaamcomponent>
+                    </brp:geslachtsnaamcomponenten>
+                </brp:persoon>
+            </brp:registratieNaamVoornaam>
+        </brp:acties>
+    </brp:gBAOntbindingHuwelijkGeregistreerdPartnerschap>
+    <!--Optional:-->
+    <brp:gBAOmzettingHuwelijkGeregistreerdPartnerschap brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list gBAOmzettingHuwelijkGeregistreerdPartnerschap.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+             <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--1 or more repetitions:-->
+            [#list gBAOmzettingHuwelijkGeregistreerdPartnerschap.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            <brp:registratieEindeHuwelijkGeregistreerdPartnerschap brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:geregistreerdPartnerschap brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.communicatieID}" brp:objectSleutel="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.objectSleutel}" brp:objecttype="Relatie">
+                    <brp:relatie brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.communicatieID}">
+                        <brp:redenEindeCode>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.redenEindeCode}</brp:redenEindeCode>
+                        <brp:datumEinde>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.datumEinde}</brp:datumEinde>
+                        <brp:gemeenteEindeCode>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.gemeenteEindeCode}</brp:gemeenteEindeCode>
+                        <!--Optional:-->
+                        <brp:buitenlandsePlaatsEinde>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.buitenlandsePlaatsEinde}</brp:buitenlandsePlaatsEinde>
+                        <!--Optional:-->
+                        <brp:landGebiedEindeCode>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieEindeHuwelijkGeregistreerdPartnerschap.geregistreerdPartnerschap.relatie.landGebiedEindeCode}</brp:landGebiedEindeCode>
+                    </brp:relatie>
+                </brp:geregistreerdPartnerschap>
+            </brp:registratieEindeHuwelijkGeregistreerdPartnerschap>
+            <!--Optional:-->
+            <brp:registratieNaamVoornaam brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.communicatieID}" brp:objectSleutel="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.objectSleutel}" brp:objecttype="Persoon">
+                    <!--Optional:-->
+                    <brp:samengesteldeNaam brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.communicatieID}">
+                        <!--Optional:-->
+                        <brp:indicatieAfgeleid>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.indicatieAfgeleid}</brp:indicatieAfgeleid>
+                        <brp:indicatieNamenreeks>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.indicatieNamenreeks}</brp:indicatieNamenreeks>
+                        <!--Optional:-->
+                        <brp:predicaatCode>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.predicaatCode}</brp:predicaatCode>
+                        <!--Optional:-->
+                        <brp:voornamen>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.voornamen}</brp:voornamen>
+                        <!--Optional:-->
+                        <brp:adellijkeTitelCode>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                        <!--Optional:-->
+                        <brp:voorvoegsel>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.voorvoegsel}</brp:voorvoegsel>
+                        <!--Optional:-->
+                        <brp:scheidingsteken>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.scheidingsteken}</brp:scheidingsteken>
+                        <!--Optional:-->
+                        <brp:geslachtsnaamstam>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.samengesteldeNaam.geslachtsnaamstam}</brp:geslachtsnaamstam>
+                    </brp:samengesteldeNaam>
+                    <!--Optional:-->
+                    <brp:voornamen>
+                        <!--1 or more repetitions:-->
+                        <brp:voornaam brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.voornamen.voornaam.communicatieID}" brp:objecttype="PersoonVoornaam">
+                            <brp:volgnummer>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.voornamen.voornaam.volgnummer}</brp:volgnummer>
+                            <brp:naam>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.voornamen.voornaam.naam}</brp:naam>
+                        </brp:voornaam>
+                    </brp:voornamen>
+                    <!--Optional:-->
+                    <brp:geslachtsnaamcomponenten>
+                        <brp:geslachtsnaamcomponent brp:communicatieID="${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.communicatieID}" brp:objecttype="PersoonGeslachtsnaamcomponent">
+                            <!--Optional:-->
+                            <brp:predicaatCode>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.predicaatCode}</brp:predicaatCode>
+                            <!--Optional:-->
+                            <brp:adellijkeTitelCode>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.adellijkeTitelCode}</brp:adellijkeTitelCode>
+                            <!--Optional:-->
+                            <brp:voorvoegsel>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.voorvoegsel}</brp:voorvoegsel>
+                            <!--Optional:-->
+                            <brp:scheidingsteken>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.scheidingsteken}</brp:scheidingsteken>
+                            <brp:stam>${gBAOmzettingHuwelijkGeregistreerdPartnerschap.acties.registratieNaamVoornaam.persoon.geslachtsnaamcomponenten.geslachtsnaamcomponent.stam}</brp:stam>
+                        </brp:geslachtsnaamcomponent>
+                    </brp:geslachtsnaamcomponenten>
+                </brp:persoon>
+            </brp:registratieNaamVoornaam>
+        </brp:acties>
+    </brp:gBAOmzettingHuwelijkGeregistreerdPartnerschap>
+</brp:isc_migRegistreerHuwelijkGeregistreerdPartnerschap>

@@ -1,0 +1,57 @@
+
+:sourcedir: ../../../test/asciidoc/naamswijziging
+
+=== Naamswijziging
+Het wijzigen van een van de namen van een persoon.
+
+==== Geslachtsnaam
+Een Persoon kan zijn geslachtsnaam laten wijzigen. Hierbij kan je aangeven welk
+_geslachtsnaamcomponent_ er wordt gewijzigd. Een persoon kan er namelijk meerdere
+hebben.
+
+Een geslachtsnaamcomponent kan worden opgezocht op basis van de attributen van
+het actuele voorkomen van dit component. Hierbij wordt het component geselecteerd
+dat aan *alle* gegeven attributen voldoet. Indien er meerdere componenten aan de
+gegeven attributen kunnen voldoen, zal de eerste worden gekozen door de DSL.
+
+[source,groovy]
+.Zoek geslachtsnaam op basis van attributen
+----
+naamswijziging() {
+  document grond:'Blabla'
+  geslachtsnaam([stam:'Vries', voorvoegsel:'de', scheidingsteken:'-']).wordt([stam:'Zonnig', voorvoegsel:'het'])
+}
+----
+
+Bij dit voorbeeld geldt dus dat als er twee componenten zijn met dezelfde _stam_,
+_voorvoegsel_ en _scheidingsteken_, maar waarvan de andere attributen ontbreken of verschillen,
+het eerste component zal worden gewijzigd. +
+Merk op dat de `()` en `[]` in dit voorbeeld optioneel zijn en dus weggelaten kunnen worden.
+
+
+Een geslachtsnaamcomponent kan ook worden aangewezen op basis van de index (beginnend
+bij nummer *1*). Hierbij kan het dus niet gebeuren dat er meerdere componenten mogelijk
+zijn.
+
+[source,groovy]
+.Zoek geslachtsnaam op basis van index
+----
+naamswijziging() {
+  document grond:'Blabla'
+  geslachtsnaam(1) wordt stam:'Zonnig', voorvoegsel:'het'
+}
+----
+
+Na het wijzigen van een naam, worden de samengestelde naam en naamgebruik afgeleid
+door de DSL. Ook wordt bij de gerelateerde personen een afgeleid administratief voorkomen
+geregistreerd, omdat voor deze mensen ook de persoonslijst wordt gewijzigd.
+
+
+==== Voorbeeld
+Een voorbeeld van de gebeurtenis naamswijziging met alle opties getoond:
+
+[source,groovy, numbered]
+.naamswijziging-voorbeeld.groovy
+----
+include::{sourcedir}/volledig.groovy[lines=3..-1]
+----

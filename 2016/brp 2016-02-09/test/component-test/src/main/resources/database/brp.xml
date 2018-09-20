@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:util="http://www.springframework.org/schema/util"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+       default-lazy-init="false">
+
+
+    <context:annotation-config />
+    <context:component-scan base-package="nl.bzk.brp.testrunner.component.services.datatoegang, nl.bzk.brp.testrunner.component.services.dsl, nl.bzk.brp.datataal, nl.bzk.brp.dataaccess.repository.jpa">
+        <context:exclude-filter type="assignable" expression="org.springframework.data.jpa.repository.JpaRepository"/>
+        <context:exclude-filter type="regex" expression=".*VerantwoordingRepository.*" />
+        <context:exclude-filter type="regex" expression=".*ToegangLeveringsautorisatieRepositoryImpl.*" />
+    </context:component-scan>
+
+
+    <bean id="templateDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+          abstract="true">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.pool.initialSize:5}"/>
+        <property name="maxActive" value="${jdbc.pool.maxActive:20}"/>
+        <property name="minIdle" value="${jdbc.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.pool.maxIdle:5}"/>
+        <property name="maxWait" value="30000"/>
+        <property name="testOnBorrow" value="false"/>
+        <property name="testWhileIdle" value="false"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+    </bean>
+
+    <!--
+       Data sources voor de default connectie van de applicatie (slaves die read-only zijn) en voor speciale functies zoals archivering/logging en protocollering (master) database connectie.
+   -->
+    <bean id="alleenlezenDataSource" parent="templateDataSource">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.pool.maxActive:100}"/>
+        <property name="minIdle" value="${jdbc.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.pool.maxIdle:5}"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultReadOnly" value="true"/>
+        <property name="defaultTransactionIsolation" value="0"/>
+    </bean>
+
+    <bean id="lezenSchrijvenDataSource" parent="templateDataSource">
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.username}"/>
+        <property name="password" value="${jdbc.password}"/>
+        <property name="initialSize" value="${jdbc.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.pool.maxActive:100}"/>
+        <property name="minIdle" value="${jdbc.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.pool.maxIdle:5}"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultReadOnly" value="false"/>
+        <property name="defaultTransactionIsolation" value="2"/> <!-- default TRANSACTION_READ_COMMITTED, voor read-only: TRANSACTION_NONE = 0) -->
+    </bean>
+
+    <bean id="persoonHisVolledigSerializer" class="nl.bzk.brp.serialisatie.persoon.PersoonHisVolledigStringSerializer"/>
+    <bean id="afnemerIndicatieSerializer" class="nl.bzk.brp.serialisatie.afnemerindicatie.AfnemerIndicatieStringSerializer" />
+    <context:component-scan base-package="nl.bzk.brp.blobifier" />
+
+    <!-- Forceer hibernate JbossLogging om slf4j te gebruiken i.v.nums. ondersteuning Log4j 2.
+     https://issues.apache.org/jira/browse/LOG4J2-172 -->
+    <bean id="hibernateLoggingPropInitializer" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+        <property name="targetObject" value="#{@systemProperties}"/>
+        <property name="targetMethod" value="putAll"/>
+        <property name="arguments">
+            <util:properties>
+                <prop key="org.jboss.logging.provider">slf4j</prop>
+            </util:properties>
+        </property>
+    </bean>
+
+    <tx:annotation-driven transaction-manager="lezenSchrijvenTransactionManager"/>
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+        <property name="database" value="POSTGRESQL" />
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQL82Dialect" />
+    </bean>
+
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+
+    <util:properties id="jpaProperties">
+        <prop key="hibernate.cache.use_second_level_cache">false</prop>
+        <prop key="hibernate.cache.use_query_cache">false</prop>
+        <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+    </util:properties>
+
+    <bean id="lezenSchrijvenEntityManagerFactory" name="nl.bzk.brp.lezenschrijven" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          depends-on="hibernateLoggingPropInitializer">
+        <property name="persistenceUnitName" value="nl.bzk.brp"/>
+        <property name="packagesToScan" value="nl.bzk.brp.model" />
+        <property name="dataSource" ref="lezenSchrijvenDataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaProperties" ref="jpaProperties"/>
+    </bean>
+
+    <bean id="lezenSchrijvenTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="lezenSchrijvenEntityManagerFactory" />
+        <property name="jpaDialect" ref="jpaDialect" />
+    </bean>
+
+    <alias name="lezenSchrijvenEntityManagerFactory" alias="alleenLezenEntityManagerFactory"/>
+    <alias name="lezenSchrijvenEntityManagerFactory" alias="nl.bzk.brp.alleenlezen"/>
+    <alias name="lezenSchrijvenTransactionManager" alias="alleenLezenTransactionManager"/>
+
+<!--    <bean id="alleenLezenEntityManagerFactory" name="nl.bzk.brp.alleenlezen" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          depends-on="hibernateLoggingPropInitializer">
+        <property name="persistenceUnitName" value="nl.bzk.brp.alleenlezen"/>
+        <property name="packagesToScan" value="nl.bzk.brp.model" />
+        <property name="dataSource" ref="lezenSchrijvenDataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaProperties" ref="jpaProperties"/>
+    </bean>
+
+    <bean id="alleenLezenTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="alleenLezenEntityManagerFactory" />
+        <property name="jpaDialect" ref="jpaDialect" />
+    </bean>-->
+</beans>

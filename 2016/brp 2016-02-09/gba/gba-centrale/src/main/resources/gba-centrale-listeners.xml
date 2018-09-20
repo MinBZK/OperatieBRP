@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+  	<!--  JMS Container and handler voor afnemerindicatie opdrachten vanuit de migratievoorzieningen -->
+    <bean name="gbaAfnemerindicatiesMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+        
+        <property name="connectionFactory" ref="gbaQueueConnectionFactory"/>
+        <property name="destination" ref="gbaQueueAfnemerindicaties" />
+        
+        <property name="messageListener">
+        	<bean class="nl.bzk.brp.gba.centrale.GbaMessageListener">
+           		<property name="service">
+           			<bean class="nl.bzk.brp.gba.centrale.services.AfnemerindicatiesService">
+		        		<property name="verzendingTemplate">
+		 					<bean class="org.springframework.jms.core.JmsTemplate">
+		        				<property name="connectionFactory" ref="gbaQueueConnectionFactory"/>
+		        				<property name="sessionTransacted" value="true"/>
+		    				</bean>
+		           		</property>
+		           	</bean>
+           		</property>
+        		<property name="antwoordTemplate">
+ 					<bean class="org.springframework.jms.core.JmsTemplate">
+        				<property name="connectionFactory" ref="gbaQueueConnectionFactory"/>
+        				<property name="sessionTransacted" value="true"/>
+        				<property name="defaultDestination" ref="gbaQueueAfnemerindicatiesAntwoorden" />
+    				</bean>
+           		</property>
+        	</bean>
+        </property>
+    </bean>
+
+    <!--  JMS Container and handler voor archivering verzoeken vanuit de migratievoorzieningen -->
+    <bean name="gbaArchiefMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+        
+        <property name="connectionFactory" ref="gbaQueueConnectionFactory"/>
+        <property name="destination" ref="gbaQueueArchief" />
+        
+        <property name="messageListener">
+        	<bean class="nl.bzk.brp.gba.centrale.GbaMessageListener">
+           		<property name="service">
+           			<bean class="nl.bzk.brp.gba.centrale.services.ArchiefService" />
+           		</property>
+        	</bean>
+        </property>
+    </bean>
+    
+	<!--  JMS Container and handler voor bijhouding notificaties vanuit de migratievoorzieningen -->
+    <bean name="gbaBijhoudingenMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+        
+        <property name="connectionFactory" ref="gbaQueueConnectionFactory"/>
+        <property name="destination" ref="gbaQueueBijhoudingen" />
+        
+        <property name="messageListener">
+        	<bean class="nl.bzk.brp.gba.centrale.GbaMessageListener">
+           		<property name="service">
+           			<bean class="nl.bzk.brp.gba.centrale.services.BijhoudingService" />
+           		</property>
+        		<property name="antwoordTemplate">
+ 					<bean class="org.springframework.jms.core.JmsTemplate">
+        				<property name="connectionFactory" ref="gbaQueueConnectionFactory"/>
+        				<property name="sessionTransacted" value="true"/>
+        				<property name="defaultDestination" ref="brpQueueAdministratieveHandelingen" />
+    				</bean>
+           		</property>
+        	</bean>
+        </property>
+    </bean>
+    
+	<!--  JMS Container and handler voor toevallige gebeurtenissen vanuit de migratievoorzieningen -->
+    <bean name="gbaToevalligeGebeurtenissenMessageListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+        
+        <property name="connectionFactory" ref="gbaQueueConnectionFactory"/>
+        <property name="destination" ref="gbaQueueToevalligeGebeurtenissen" />
+        
+        <property name="messageListener">
+        	<bean class="nl.bzk.brp.gba.centrale.GbaMessageListener">
+           		<property name="service">
+           			<bean class="nl.bzk.brp.gba.centrale.services.ToevalligeGebeurtenisService" />
+           		</property>
+        		<property name="antwoordTemplate">
+ 					<bean class="org.springframework.jms.core.JmsTemplate">
+        				<property name="connectionFactory" ref="gbaQueueConnectionFactory"/>
+        				<property name="sessionTransacted" value="true"/>
+        				<property name="defaultDestination" ref="gbaQueueToevalligeGebeurtenissenAntwoorden" />
+    				</bean>
+           		</property>
+        	</bean>
+        </property>
+    </bean>    
+        
+</beans>

@@ -1,0 +1,23 @@
+INSTALLATIE CA EN/OF SERVER CERTIFICAAT
+---------------------------------------
+
+Dit is de handleiding voor het aanmaken van een server root CA certificaat, en een server certificaat met bijbehorende private key.
+Dit zal enkel nodig zijn bij het installeren van een nieuwe omgeving.
+
+Aanmaken CA
+-----------
+ - Wijzig 'req_distinguished_name' in CA certificaat configuratie in /opt/ca/etc/ca-ssl.conf
+ - Wijzig eventueel de alias van het CA certificaat in het script /opt/ca/bin/ca-setup.sh,
+   wijzig hierin 'staat_der_mgba_root_ca' in het gewenste alias.
+ - Maak CA certificaat aan door nu het 'ca-setup' script uit te voeren met 'ca' als argument
+   /opt/ca/bin/ca-setup.sh ca
+ - In /opt/ca/var vind je nu het CA key materiaal.
+
+Aanmaken Server
+---------------
+ - Wijzig 'req_distinguished_name' in server SSL certificaat configuratie in /opt/ca/etc/server-ssl.conf
+ - Maak Server certificaat aan door nu het 'ca-setup' script uit te voeren met 'server' als argument
+   /opt/ca/bin/ca-setup.sh server
+ - Run het 'privatestore' script om aan de hand van het server certificaat een private keystore te maken:
+   /opt/va/bin/privatestore.sh
+ - In /opt/ca/var vind je nu het server key materiaal.

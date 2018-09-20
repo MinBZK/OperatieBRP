@@ -1,0 +1,120 @@
+brpdb:
+    image: brp/database:93
+    ports:
+        - "54321:5432"
+sleutelbos:
+    image: sleutel
+routeringcentrale:
+    image: brp/routeringcentrale:93
+    links:
+        - brpdb
+        - brpdb:archiveringdb
+        - brpdb:lockingdb
+        - brpdb:activemqdb
+    ports:
+        - "61616:61616"
+        - "1099:1099"
+    environment:
+        JAVA_OPTS: -Xms128M -Xmx1G
+        JMX_PORT: 1099
+mutatielevering:
+    image: brp/mutatielevering:93
+    links:
+        - brpdb
+        - brpdb:archiveringdb
+        - brpdb:lockingdb
+        - routeringcentrale
+    ports:
+        - "8080:8080"
+        - "1199:1199"
+    environment:
+        JAVA_OPTS: -Xms128M -Xmx1G
+        JMX_PORT: 1199
+synchronisatie:
+    image: brp/synchronisatie:93
+    links:
+        - brpdb
+        - brpdb:archiveringdb
+        - routeringcentrale
+        - sleutelbos
+    volumes_from:
+        - sleutelbos
+    ports:
+        - "8180:8080"
+        - "1299:1299"
+    environment:
+        JAVA_OPTS: -Xms64M -Xmx512M
+        JMX_PORT: 1299
+afnemerindicatie:
+    image: brp/onderhoud-afnemerindicaties:93
+    links:
+        - brpdb:brpdb
+        - brpdb:archiveringdb
+        - brpdb:lockingdb
+        - routeringcentrale:routeringcentrale
+        - sleutelbos:sleutelbos
+    volumes_from:
+        - sleutelbos
+    ports:
+        - "8280:8080"
+        - "1399:1399"
+    environment:
+        JAVA_OPTS: -Xms64M -Xmx512M
+        JMX_PORT: 1399
+verzending:
+    image: brp/verzending:93
+    links:
+        - brpdb:brpdb
+        - brpdb:archiveringdb
+        - brpdb:lockingdb
+        - brpdb:protocolleringdb
+        - routeringcentrale
+    ports:
+        - "8380:8080"
+        - "1499:1499"
+    environment:
+        JAVA_OPTS: -Xms128M -Xmx1G
+        JMX_PORT: 1499
+protocollering:
+    image: brp/protocollering:93
+    links:
+        - brpdb:protocolleringdb
+        - routeringcentrale
+    ports:
+        - "1599:1599"
+    environment:
+        JAVA_OPTS: -Xms32M -Xmx256M
+        JMX_PORT: 1599
+brp-isc-route:
+    image: brp/isc-brug:93
+    links:
+        - routeringcentrale
+    ports:
+        - "1699:1699"
+    environment:
+        JAVA_OPTS: -Xms64M -Xmx512M
+        isc-poort: 61617
+        JMX_PORT: 1699
+    extra_hosts:
+         - "isc-host:162.242.195.82"
+beheer:
+    image: brp/beheer:93
+    links:
+        - brpdb
+        - brpdb:archiveringdb
+        - brpdb:lockingdb
+    ports:
+        - "8580:8080"
+    environment:
+        JAVA_OPTS: -Xms128M -Xmx1G
+bijhouding:
+    image: brp/bijhouding:93
+    links:
+        - brpdb
+        - brpdb:archiveringdb
+        - brpdb:lockingdb
+        - routeringcentrale
+    ports:
+        - "8680:8080"
+    environment:
+        JAVA_OPTS: -Xms128M -Xmx1G

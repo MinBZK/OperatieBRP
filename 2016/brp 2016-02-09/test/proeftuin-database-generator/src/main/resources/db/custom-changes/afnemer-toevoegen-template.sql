@@ -1,0 +1,114 @@
+-- Abonnement voor de diensten doelbinding en synchroniseer persoon toevoegen
+INSERT INTO autaut.abonnement (naam,populatiebeperking,protocolleringsniveau,datingang,dateinde,toestand) VALUES(concat('Automatisch synchroniseren populatie ', lpad('${afnemer.partijCode}', 6, '0'), ''), concat('persoon.bijhouding.bijhoudingspartij = ', '${afnemer.partijCode}'),'1','20130101',null,'4');
+INSERT INTO autaut.his_abonnement
+(abonnement,tsreg,tsverval,actieinh,actieverval,nadereaandverval,populatiebeperking,protocolleringsniveau,datingang,dateinde,toestand,indaliassrtadmhndleveren) VALUES((select currval('autaut.seq_abonnement')),'20130101',null,null,null,null,concat('persoon.bijhouding.bijhoudingspartij = ', '${afnemer.partijCode}'),'1','20130101',null,'4',false);
+
+-- ToegangAbonnement voor de diensten doelbinding en synchroniseer persoon toevoegen
+INSERT INTO autaut.toegangabonnement (partij,authenticatiemiddel,intermediair,abonnement,datingang,dateinde) VALUES((select id from kern.partij where code = '${afnemer.partijCode}'),null,null,(select currval('autaut.seq_abonnement')),'20130101',null);
+INSERT INTO autaut.his_toegangabonnement (toegangabonnement,tsreg,tsverval,actieinh,actieverval,nadereaandverval,datingang,dateinde) VALUES((select currval('autaut.seq_toegangabonnement')),'20130101',null,null,null,null,'20130101',null);
+
+-- Diensten doelbinding en synchroniseer persoon voor het eerste abonnement
+-- Mutatielevering op basis van doelbinding
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('1',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Geef details persoon
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('9',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Synchroniseer persoon
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('10',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Synchroniseer stamgegeven
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('11',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Afleverwijze voor het eerste abonnement
+INSERT INTO autaut.afleverwijze (toegangabonnement,kanaal,uri,datingang,dateinde) VALUES((select currval('autaut.seq_toegangabonnement')),'2','${afnemer.uri}','20130101',null);
+INSERT INTO autaut.his_afleverwijze (afleverwijze,tsreg,tsverval,actieinh,actieverval,nadereaandverval,datingang,dateinde) VALUES((select currval('autaut.seq_afleverwijze')),'20130101',null,null,null,null,'20130101',null);
+
+--Gegevensfilter open zetten
+INSERT INTO autaut.abonnementattribuut (abonnement, attribuut, indactief) SELECT  a.id, e.id, TRUE from autaut.abonnement a, kern.element e where a.id = (select currval('autaut.seq_abonnement')) and e.expressie is not null and e.srt = 3 and e.elementnaam NOT IN ('Datum einde geldigheid', 'Datum/tijd registratie', 'Datum/tijd verval', 'BRP Actie inhoud', 'BRP Actie verval', 'BRP Actie Aanpassing Geldigheid') and e.naam NOT IN ('ErkenningOngeborenVrucht.SoortCode', 'FamilierechtelijkeBetrekking.SoortCode', 'GeregistreerdPartnerschap.SoortCode', 'Huwelijk.SoortCode', 'HuwelijkGeregistreerdPartnerschap.SoortCode', 'NaamskeuzeOngeborenVrucht.SoortCode') and e.autorisatie NOT IN (2,7);
+
+--Groepenfilter open zetten
+INSERT INTO autaut.abonnementgroep (abonnement, groep, indnadereverantwoording, inddoc, indmaterielehistorie, indformelehistorie) SELECT a.id, e.id, TRUE, TRUE, TRUE, TRUE from  autaut.abonnement a, kern.element e where a.id = (select currval('autaut.seq_abonnement')) and e.srt = 2;
+
+-- Nog eenzelfde abonnement...
+-- Doelbinding: alle personen die de partij NIET als bijhoudingspartij hebben
+INSERT INTO autaut.abonnement (naam,populatiebeperking,protocolleringsniveau,datingang,dateinde,toestand) VALUES(concat('Automatisch synchroniseren populatie NIET ', lpad('${afnemer.partijCode}', 6, '0'), ''), concat('persoon.bijhouding.bijhoudingspartij <> ', '${afnemer.partijCode}'),'1','20130101',null,'4');
+INSERT INTO autaut.his_abonnement (abonnement,tsreg,tsverval,actieinh,actieverval,nadereaandverval,populatiebeperking,protocolleringsniveau,datingang,dateinde,toestand,indaliassrtadmhndleveren) VALUES((select currval('autaut.seq_abonnement')),'20130101',null,null,null,null,concat('persoon.bijhouding.bijhoudingspartij = ', '${afnemer.partijCode}'),'1','20130101',null,'4',false);
+
+-- ToegangAbonnement voor de diensten doelbinding en synchroniseer persoon toevoegen
+INSERT INTO autaut.toegangabonnement (partij,authenticatiemiddel,intermediair,abonnement,datingang,dateinde) VALUES((select id from kern.partij where code = '${afnemer.partijCode}'),null,null,(select currval('autaut.seq_abonnement')),'20130101',null);
+INSERT INTO autaut.his_toegangabonnement (toegangabonnement,tsreg,tsverval,actieinh,actieverval,nadereaandverval,datingang,dateinde) VALUES((select currval('autaut.seq_toegangabonnement')),'20130101',null,null,null,null,'20130101',null);
+
+-- Diensten doelbinding en synchroniseer persoon voor het eerste abonnement
+-- Mutatielevering op basis van doelbinding
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('1',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Geef details persoon
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('9',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Synchroniseer persoon
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('10',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Synchroniseer stamgegeven
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('11',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Afleverwijze voor het inverse abonnement
+INSERT INTO autaut.afleverwijze (toegangabonnement,kanaal,uri,datingang,dateinde) VALUES((select currval('autaut.seq_toegangabonnement')),'2','${afnemer.uri}','20130101',null);
+INSERT INTO autaut.his_afleverwijze (afleverwijze,tsreg,tsverval,actieinh,actieverval,nadereaandverval,datingang,dateinde) VALUES((select currval('autaut.seq_afleverwijze')),'20130101',null,null,null,null,'20130101',null);
+
+--Gegevensfilter open zetten
+INSERT INTO autaut.abonnementattribuut (abonnement, attribuut, indactief) SELECT  a.id, e.id, TRUE from autaut.abonnement a, kern.element e where a.id = (select currval('autaut.seq_abonnement')) and e.expressie is not null and e.srt = 3 and e.elementnaam NOT IN ('Datum einde geldigheid', 'Datum/tijd registratie', 'Datum/tijd verval', 'BRP Actie inhoud', 'BRP Actie verval', 'BRP Actie Aanpassing Geldigheid') and e.naam NOT IN ('ErkenningOngeborenVrucht.SoortCode', 'FamilierechtelijkeBetrekking.SoortCode', 'GeregistreerdPartnerschap.SoortCode', 'Huwelijk.SoortCode', 'HuwelijkGeregistreerdPartnerschap.SoortCode', 'NaamskeuzeOngeborenVrucht.SoortCode') and e.autorisatie NOT IN (2,7);
+
+--Groepenfilter open zetten
+INSERT INTO autaut.abonnementgroep (abonnement, groep, indnadereverantwoording, inddoc, indmaterielehistorie, indformelehistorie) SELECT a.id, e.id, TRUE, TRUE, TRUE, TRUE from  autaut.abonnement a, kern.element e where a.id = (select currval('autaut.seq_abonnement')) and e.srt = 2;
+
+--Abonnement waarmee afnemerindicaties beheerd kunnen worden
+--Abonnement voor de diensten afnemerindicatie en synchroniseer persoon toevoegen
+INSERT INTO autaut.abonnement (naam,populatiebeperking,protocolleringsniveau,datingang,dateinde,toestand) VALUES(concat('Synchroniseren via indicatie voor partij ', lpad('${afnemer.partijCode}', 6, '0'), ''),'WAAR','1','20130101',null,'4');
+INSERT INTO autaut.his_abonnement
+(abonnement,tsreg,tsverval,actieinh,actieverval,nadereaandverval,populatiebeperking,protocolleringsniveau,datingang,dateinde,toestand,indaliassrtadmhndleveren) VALUES((select currval('autaut.seq_abonnement')),'20130101',null,null,null,null,'WAAR','1','20130101',null,'4',false);
+
+--ToegangAbonnement voor de diensten afnemerindicatie en synchroniseer persoon toevoegen
+INSERT INTO autaut.toegangabonnement (partij,authenticatiemiddel,intermediair,abonnement,datingang,dateinde) VALUES((select id from kern.partij where code = '${afnemer.partijCode}'),null,null,(select currval('autaut.seq_abonnement')),'20130101',null);
+INSERT INTO autaut.his_toegangabonnement (toegangabonnement,tsreg,tsverval,actieinh,actieverval,nadereaandverval,datingang,dateinde)
+VALUES((select currval('autaut.seq_toegangabonnement')),'20130101',null,null,null,null,'20130101',null);
+
+--Diensten afnemerindicatie en synchroniseer persoon voor het tweede abonnement
+--Mutatielevering op basis van afnemerindicatie
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('2',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Beheren afnemerindicaties
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('3',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Geef details persoon
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('9',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Synchroniseer persoon
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('10',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Synchroniseer stamgegeven
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,dateinde,toestand) VALUES('11',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden) VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Afleverwijze voor het afnemerindicaties abonnement
+INSERT INTO autaut.afleverwijze (toegangabonnement,kanaal,uri,datingang,dateinde) VALUES((select currval('autaut.seq_toegangabonnement')),'2','${afnemer.uri}','20130101',null);
+INSERT INTO autaut.his_afleverwijze (afleverwijze,tsreg,tsverval,actieinh,actieverval,nadereaandverval,datingang,dateinde) VALUES((select currval('autaut.seq_afleverwijze')),'20130101',null,null,null,null,'20130101',null);
+
+--Gegevensfilter open zetten
+INSERT INTO autaut.abonnementattribuut (abonnement, attribuut, indactief) SELECT  a.id, e.id, TRUE from autaut.abonnement a, kern.element e where a.id = (select currval('autaut.seq_abonnement')) and e.expressie is not null and e.srt = 3 and e.elementnaam NOT IN ('Datum einde geldigheid', 'Datum/tijd registratie', 'Datum/tijd verval', 'BRP Actie inhoud', 'BRP Actie verval', 'BRP Actie Aanpassing Geldigheid') and e.naam NOT IN ('ErkenningOngeborenVrucht.SoortCode', 'FamilierechtelijkeBetrekking.SoortCode', 'GeregistreerdPartnerschap.SoortCode', 'Huwelijk.SoortCode', 'HuwelijkGeregistreerdPartnerschap.SoortCode', 'NaamskeuzeOngeborenVrucht.SoortCode') and e.autorisatie NOT IN (2,7);
+
+--Groepenfilter open zetten
+INSERT INTO autaut.abonnementgroep (abonnement, groep, indnadereverantwoording, inddoc, indmaterielehistorie, indformelehistorie) SELECT a.id, e.id, TRUE, TRUE, TRUE, TRUE from  autaut.abonnement a, kern.element e where a.id = (select currval('autaut.seq_abonnement')) and e.srt = 2;
+

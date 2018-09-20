@@ -1,0 +1,1 @@
+select * from kern.relatie where id in (select relatie from kern.betr where pers in (select id from kern.pers where bsn = ${DataSource Values#|objectid.persoon0|}));

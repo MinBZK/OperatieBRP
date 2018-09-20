@@ -1,0 +1,322 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp.art.framework</groupId>
+        <artifactId>brp-art-framework</artifactId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../art-framework</relativePath>
+    </parent>
+
+    <groupId>nl.bzk.brp.art</groupId>
+    <artifactId>brp-art-basis</artifactId>
+    <packaging>pom</packaging>
+
+    <name>BRP ART Basis</name>
+    <description>Dit project bevat de standaard instellingen en properties
+                 die nodig zijn voor de ART projecten van de BRP.</description>
+
+    <properties>
+        <art-afhankelijkheden.directory>${project.basedir}/afhankelijkheden</art-afhankelijkheden.directory>
+
+        <!-- THIRD PARTY PROPERTIES-->
+        <soapui.plugin.version>4.6.3</soapui.plugin.version>
+
+        <!--
+         | generieke definities, te gebruiken over meerdere ART-projecten en testdata-project
+         | Indien je gebruik wilt maken van een database in het netwerk, kan je gebruik maken van de profielen:
+         | mvn clean install -P LEVERING -Drun-ART
+         | gebruikt voor de levering ART's of voor bijhouding:
+         | mvn clean install -P BIJHOUDING -Drun-ART
+         |
+
+         De dburl kan meegegeven worden en dan wordt deze overschreven in de ART engine.
+
+         De properties 'startRow' en 'endRow' kunnen gedefinieerd worden om een subset van testgevallen te testen,
+         zoals testcase 5 tm 10 (startRow 5, endRow 10) of alleen 12 (startRow 12, endRow 12).
+         Voeg daarvoor de properties toe aan de ART die je gaat draaien.
+         -->
+        <dburl />
+        <endRow />
+        <startRow />
+
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <buildnumber>${env.BUILD_NUMBER}</buildnumber>
+        <svnrevision>${env.SVN_REVISION}</svnrevision>
+        <timestamp>${maven.build.timestamp}</timestamp>
+        <maven.build.timestamp.format>dd-MM-yyyy HH:mm.ss</maven.build.timestamp.format>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- test -->
+            <dependency>
+                <groupId>commons-dbutils</groupId>
+                <artifactId>commons-dbutils</artifactId>
+                <version>1.4</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>log4j-core</artifactId>
+                <version>${log4j.version}</version>
+            </dependency>
+
+            <!-- logging -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.logging.log4j</groupId>
+                <artifactId>slf4j-impl</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.art.framework</groupId>
+            <artifactId>brp-art-framework-engine</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.art.data</groupId>
+            <artifactId>brp-art-data-resources</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <filtering>false</filtering>
+                <directory>./</directory>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+                <excludes>
+                    <exclude>ART/ActualResults/**/*</exclude>
+                    <exclude>output/**/*</exclude>
+                    <exclude>cte/**/*</exclude>
+                    <exclude>review records/**/*</exclude>
+                    <exclude>target/**/*</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.smartbear.soapui</groupId>
+                    <artifactId>soapui-maven-plugin</artifactId>
+                    <version>${soapui.plugin.version}</version>
+                    <configuration>
+                        <testFailIgnore>true</testFailIgnore>
+                        <globalProperties>
+                            <value>projectEnv=${projectEnv}</value>
+                            <value>dataSetNaam=${dataSetNaam}</value>
+                            <value>testScript=${testScript}</value>
+                            <value>dburl=${dburl}</value>
+                            <value>startRow=${startRow}</value>
+                            <value>endRow=${endRow}</value>
+                        </globalProperties>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>junit</groupId>
+                            <artifactId>junit</artifactId>
+                            <version>${junit.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>net.sourceforge.jexcelapi</groupId>
+                            <artifactId>jxl</artifactId>
+                            <version>2.6.12</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.apache.poi</groupId>
+                            <artifactId>poi-ooxml</artifactId>
+                            <version>${poi.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.postgresql</groupId>
+                            <artifactId>postgresql</artifactId>
+                            <version>${postgres.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>jp.skypencil.java-diff-utils</groupId>
+                            <artifactId>diffutils</artifactId>
+                            <version>${diffutils.version}</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.perf4j</groupId>
+                            <artifactId>perf4j</artifactId>
+                            <version>0.9.16</version>
+                        </dependency>
+                    </dependencies>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>test</goal>
+                            </goals>
+                            <phase>test</phase>
+                            <configuration>
+                                <projectFile>${project.build.directory}/engine/${projectName}-soapui-project.xml</projectFile>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+                <!-- Assembly actual results -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.3</version>
+                    <configuration>
+                        <descriptor>art.xml</descriptor>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                            <phase>package</phase>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>extract-ARTengine</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.art.framework</groupId>
+                                    <artifactId>brp-art-framework-engine</artifactId>
+                                    <version>${project.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <includes>**/*</includes>
+                                    <excludes>default.properties,Voorbeeld*/**/*</excludes>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/engine</outputDirectory>
+                        </configuration>
+                    </execution>
+
+                    <execution>
+                        <id>unpack-templates</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.art.data</groupId>
+                                    <artifactId>brp-art-data-resources</artifactId>
+                                    <version>${project.version}</version>
+                                    <overWrite>true</overWrite>
+                                    <outputDirectory>${art-afhankelijkheden.directory}</outputDirectory>
+                                    <includes>RequestTemplates/**.xml, SQL/**.sql</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+
+                </executions>
+            </plugin>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.5</version>
+                <configuration>
+                    <filesets>
+                        <fileset>
+                            <directory>${art-afhankelijkheden.directory}</directory>
+                        </fileset>
+                        <fileset>
+                            <directory>${project.basedir}</directory>
+                            <includes>
+                                <include>**/*.log*</include>
+                            </includes>
+                        </fileset>
+                    </filesets>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>mock-run</id>
+                        <goals>
+                            <goal>test</goal>
+                        </goals>
+                        <phase>package</phase>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-result-xml</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>prepare-package</phase>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/surefire-reports</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${project.build.outputDirectory}/ART/ActualResults/report</directory>
+                                    <filtering>false</filtering>
+                                    <includes>
+                                        <include>**/*.xml</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+    <url>https://www.modernodam.nl/confluence/display/mGBA/ART+Componenten</url>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/art/art-basis</connection>
+    </scm>
+
+</project>

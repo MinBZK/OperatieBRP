@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- This creates an embedded ActiveMQ Broker -->
+    <amq:broker id="brpMessageBrokert"
+                brokerName="BrpMessageBroker" useShutdownHook="true"
+                useJmx="true" persistent="true" dataDirectory="${berichtencentrale.data.directory}"
+                schedulerSupport="true" schedulerDirectory="${berichtencentrale.scheduler.directory}"
+                brokerId="brpMessageBroker" enableStatistics="true" networkConnectorStartAsync="true"
+                startAsync="true" dedicatedTaskRunner="false" advisorySupport="false">
+        <amq:transportConnectors>
+            <amq:transportConnector uri="${berichtencentrale.url}"/>
+        </amq:transportConnectors>
+
+        <amq:persistenceAdapter>
+            <!--<amq:kahaDB brokerName="BRPRouteringCentrale" id="routeringPersistence"  directory="${berichtencentrale.data.directory}"-->
+                        <!--journalMaxFileLength="32mb"/>-->
+            <amq:jdbcPersistenceAdapter dataSource="#dataSourceActiveMQ" createTablesOnStartup="true"
+                                        brokerName="BrpMessageBroker" id="routeringPersistence"
+                                        useDatabaseLock="false"/>
+        </amq:persistenceAdapter>
+
+        <amq:destinationPolicy>
+            <amq:policyMap>
+                <amq:policyEntries>
+                    <amq:policyEntry queue=">" producerFlowControl="true" memoryLimit="2mb">
+
+						<amq:pendingQueuePolicy>
+                          <amq:fileQueueCursor/>
+                        </amq:pendingQueuePolicy>
+
+						<!-- DeadLetterStrategy, zorgt voor DLQ voor iedere queue,
+						bijvoorbeeld: AFNEMER-10101 krijgt DLQ.AFNEMER-10101 -->
+						<amq:deadLetterStrategy>
+							<amq:individualDeadLetterStrategy queuePrefix="DLQ." useQueueForQueueMessages="true" />
+						</amq:deadLetterStrategy>
+
+                    </amq:policyEntry>
+                </amq:policyEntries>
+            </amq:policyMap>
+        </amq:destinationPolicy>
+
+        <amq:managementContext>
+            <amq:managementContext jmxDomainName="nl.bzk.brp" brokerName="BrpMessageBroker" id="brpMessageBroker"
+            createMBeanServer="false" createConnector="false"  />
+        </amq:managementContext>
+
+        <amq:systemUsage>
+            <amq:systemUsage>
+                <amq:memoryUsage>
+                    <amq:memoryUsage limit="${berichtencentrale.memory.usage:512 mb}"/>
+                </amq:memoryUsage>
+                <amq:storeUsage>
+                    <amq:storeUsage limit="${berichtencentrale.store.usage:2 gb}"/>
+                </amq:storeUsage>
+                <amq:tempUsage>
+                    <amq:tempUsage limit="${berichtencentrale.temp.usage:1 gb}"/>
+                </amq:tempUsage>
+            </amq:systemUsage>
+        </amq:systemUsage>
+
+        <!-- destroy the spring context on shutdown -->
+        <amq:shutdownHooks>
+            <bean xmlns="http://www.springframework.org/schema/beans"
+                  class="org.apache.activemq.hooks.SpringContextHook"/>
+        </amq:shutdownHooks>
+
+		<amq:plugins>
+			<amq:redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
+				<amq:redeliveryPolicyMap>
+					<amq:redeliveryPolicyMap>
+						<amq:redeliveryPolicyEntries>
+							<!-- a destination specific policy -->
+							<amq:redeliveryPolicy queue="SpecialQueue" maximumRedeliveries="2" redeliveryDelay="10000" />
+						</amq:redeliveryPolicyEntries>
+						<!-- the fallback policy for all other destinations -->
+						<amq:defaultEntry>
+							<amq:redeliveryPolicy maximumRedeliveries="2" initialRedeliveryDelay="5000"
+												  redeliveryDelay="10000" />
+						</amq:defaultEntry>
+					</amq:redeliveryPolicyMap>
+				</amq:redeliveryPolicyMap>
+			</amq:redeliveryPlugin>
+		</amq:plugins>
+    </amq:broker>
+
+</beans>

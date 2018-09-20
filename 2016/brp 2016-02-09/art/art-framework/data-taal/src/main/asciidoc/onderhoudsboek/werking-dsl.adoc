@@ -1,0 +1,54 @@
+
+== Uitvoeren script met DSL
+Het beginpunt voor het uitvoeren van een script met een data-taal DSL is de klasse `DSLExecutor`.
+Deze abstracte klasse heeft twee implementaties, namelijk die voor Persoon DSL en Autorisatie DSL.
+Deze klasse zorgt ervoor dat er een `GroovyShell` instantie is die het script kan parsen en
+uitvoeren.
+
+Dit gebeurt in de volgende stappen:
+
+. Een compiler configuratie maken, die specifieke zaken regelt rondom imports voor het script
+. Een instantie maken van `GroovyShell` met de compiler configuratie
+. Het script parsen, wat een `Script` oplevert
+. Delegatie voor missende attributen en methodes in het script regelen
+. Het geparsde script uitvoeren in een transactie door Spring beheerd
+. Variabelen uit het script teruggeven
+
+In de FunqMachinator is een JBehave step voor het uitvoeren van een DSL script
+door middel van de ``DSLExecutor``s.
+
+
+=== Compiler configuratie
+Groovy maakt het mogelijk om te definieren wat de grenzen zijn voor het parsen / compileren
+van een script, waardoor een veilige omgeving voor het uitvoeren van scripts wordt
+gecreeerd. Denk hierbij aan het bepreken van de ``import``s, of methodes/variabelen gedefinieerd mogen
+worden in een script etc.
+
+
+=== Delegatie voor missende attributen en methodes
+Het is mogelijk om aan de `execute()` methodes van `DSLExecutor` een _delegate_ op te geven.
+De executor zorgt er dan voor dat als de DSL een methode of attribuut gebruik dat niet in
+die context bestaat, wordt opgezocht op de gegeven delegate. Dit gebeurt via het Groovy
+mechanisme van _methodMissing_ en _attributeMissing_.
+
+De Persoon DSL en ook de Autorisatie DSL gebruiken een "model" klasse die de ingang is voor alle
+functionaliteit van de DSL's. Hierdoor doet deze stap voor onze DSL's weinig, de execute() methodes
+worden door de FunqMachinator zonder delegate aangeroepen, maar biedt het een uitbreidings mogelijkheid
+voor de toekomst.
+
+
+=== Transactie rond het script
+Omdat de DSL's gegevens moeten ophalen en wegschrijven naar de BRP Kern database, zorgt de data-taal
+ervoor dat de uitvoer in een transactie wordt uitgevoerd. Deze transactie wordt opgezet en beheerd
+door middel van een Spring `TransactionTemplate`, zodat de complexe zaken rond transacties niet door
+de data-taal hoeven worden afgehandeld.
+
+
+=== Opslaan van een persoon
+Een persoon wordt opgeslagen door de `PersoonHibernatePersister`. Deze doet de afleiding van de A-laag
+van een persoon. Het gebruikt de methode PersoonHisVolledigImpl.``voorkomens()`` dat door metaprogramming
+is toegevoegd aan die klasse. *Deze methode geeft alle voorkomens van een persoon, maar ook die van de
+overige betrokken personen, die mogelijk moeten worden opgeslagen.* Dit is nodig om alle relevante
+gegevens te kunnen opslaan. De PersoonHibernatePersister heeft ook de kennis om de acties en administratieve
+handelingen goed op te slaan en aan de juiste voorkomens te koppelen, zodat de persoon juist wordt
+opgeslagen.

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-parent</artifactId>
+        <groupId>nl.bzk.brp</groupId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../../brp-parent</relativePath>
+    </parent>
+
+    <groupId>nl.bzk.brp.levering.kern</groupId>
+    <artifactId>brp-levering-kern</artifactId>
+    <packaging>pom</packaging>
+
+    <name>BRP Levering Kern</name>
+
+    <modules>
+        <module>algemeen</module>
+        <module>afnemerindicaties</module>
+    </modules>
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/levering/levering-kern</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/levering/levering-kern</developerConnection>
+    </scm>
+
+    <properties>
+        <!-- De default JDBC properties bedoeld voor lokaal ontwikkelen met een lokale PostgreSQL database. Voor Unit Testen
+                  in de Continuous Integration omgeving is er een "ci" profile. -->
+        <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+        <maven.jdbc.password>brp</maven.jdbc.password>
+        <maven.jdbc.url>jdbc:postgresql://localhost/brpjunit</maven.jdbc.url>
+        <maven.jdbc.username>brp</maven.jdbc.username>
+    </properties>
+
+    <dependencies>
+
+        <!-- dependency voor de reactor om te forceren dat dit gebuild is voor het gebruikt wordt in een multithreaded build -->
+        <dependency>
+            <groupId>nl.bzk.brp.properties</groupId>
+            <artifactId>brp-test-properties</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <!--properties voor test uitpakken-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>unpack-test-properties</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-test-resources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.properties</groupId>
+                                    <artifactId>brp-test-properties</artifactId>
+                                    <version>${project.version}</version>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/test-resources/template</outputDirectory>
+                                    <includes>brp-test.properties</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--properties voor test uitpakken filteren zodat ze gevuld worden -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>filter-test-properties</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                        <configuration>
+
+                            <resources>
+
+                                <resource>
+                                    <directory>${project.build.directory}/test-resources/template</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>*.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>db.postgresql</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- overridden properties -->
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://fac-db09.modernodam.nl/brp_levering_kern</maven.jdbc.url>
+                <maven.jdbc.username>jenkins</maven.jdbc.username>
+                <maven.jdbc.password>95thvef288ckf43re</maven.jdbc.password>
+            </properties>
+        </profile>
+    </profiles>
+
+</project>

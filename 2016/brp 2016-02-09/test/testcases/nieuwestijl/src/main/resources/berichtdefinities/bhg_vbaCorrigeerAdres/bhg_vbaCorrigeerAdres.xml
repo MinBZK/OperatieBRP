@@ -1,0 +1,77 @@
+<brp:bhg_vbaCorrigeerAdres xmlns:brp="http://www.bzk.nl/brp/brp0200">
+ <brp:stuurgegevens brp:communicatieID="${stuurgegevens.communicatieID}">
+         <brp:zendendePartij>${stuurgegevens.zendendePartij}</brp:zendendePartij>
+         <brp:zendendeSysteem>${stuurgegevens.zendendeSysteem}</brp:zendendeSysteem>
+         <brp:referentienummer>${stuurgegevens.referentienummer}</brp:referentienummer>
+         <brp:tijdstipVerzending>${stuurgegevens.tijdstipVerzending}</brp:tijdstipVerzending>
+     </brp:stuurgegevens>
+ <brp:parameters brp:communicatieID="${parameters.communicatieID}">
+     <brp:verwerkingswijze>${parameters.verwerkingswijze}</brp:verwerkingswijze>
+ </brp:parameters>
+ <brp:correctieAdres brp:objecttype="AdministratieveHandeling"
+                     brp:communicatieID="${correctieAdresAH.communicatieID}">
+    <brp:partijCode>${correctieAdresAH.partijCode}</brp:partijCode>
+    <brp:gedeblokkeerdeMeldingen>
+        <!--1 or more repetitions:-->
+        [#list correctieAdresAH.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+        <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding"
+         brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+            <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+        </brp:gedeblokkeerdeMelding>
+        [/#list]
+    </brp:gedeblokkeerdeMeldingen>
+     <brp:bronnen>
+          <!--Zero or more repetitions:-->
+          [#list correctieAdresAH.bronnen as bron]
+          <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+              <!--Optional:-->
+              <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                  <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                  <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                  <!--Optional:-->
+                  <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                  <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+              </brp:document>
+              <!--Optional:-->
+              <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+              <!--Optional:-->
+              <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+          </brp:bron>
+          [/#list]
+      </brp:bronnen>
+    <brp:acties>
+       [#assign correctieAdres = correctieAdresAH.acties.correctieAdres]
+       <brp:correctieAdres brp:objecttype="Actie" brp:communicatieID="${correctieAdres.communicatieID}">
+          <brp:datumAanvangGeldigheid>${correctieAdres.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+          <brp:datumEindeGeldigheid>${correctieAdres.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+          <brp:bronnen>
+             <!--1 or more repetitions:-->
+               [#list correctieAdres.bronnen as bron]
+               <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+               [/#list]
+          </brp:bronnen>
+          <brp:persoon brp:objectSleutel="[@objectsleutel var=correctieAdres.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon"
+                       brp:communicatieID="${correctieAdres.persoon.communicatieID}">
+             <brp:adressen>
+                <brp:adres brp:objecttype="PersoonAdres" brp:communicatieID="comid.regadressen_rOO0">
+                   <brp:soortCode>${correctieAdres.persoon.adressen.adres.soortCode}</brp:soortCode>
+                   <brp:redenWijzigingCode>${correctieAdres.persoon.adressen.adres.redenWijzigingCode}</brp:redenWijzigingCode>
+                   <brp:aangeverAdreshoudingCode>${correctieAdres.persoon.adressen.adres.aangeverAdreshoudingCode}</brp:aangeverAdreshoudingCode>
+                   <brp:datumAanvangAdreshouding>${correctieAdres.persoon.adressen.adres.datumAanvangAdreshouding}</brp:datumAanvangAdreshouding>
+                   <brp:identificatiecodeAdresseerbaarObject>${correctieAdres.persoon.adressen.adres.identificatiecodeAdresseerbaarObject}</brp:identificatiecodeAdresseerbaarObject>
+                   <brp:identificatiecodeNummeraanduiding>${correctieAdres.persoon.adressen.adres.identificatiecodeNummeraanduiding}</brp:identificatiecodeNummeraanduiding>
+                   <brp:gemeenteCode>${correctieAdres.persoon.adressen.adres.gemeenteCode}</brp:gemeenteCode>
+                   <brp:naamOpenbareRuimte>${correctieAdres.persoon.adressen.adres.naamOpenbareRuimte}</brp:naamOpenbareRuimte>
+                   <brp:afgekorteNaamOpenbareRuimte>${correctieAdres.persoon.adressen.adres.afgekorteNaamOpenbareRuimte}</brp:afgekorteNaamOpenbareRuimte>
+                   <brp:huisnummer>${correctieAdres.persoon.adressen.adres.huisnummer}</brp:huisnummer>
+                   <brp:postcode>${correctieAdres.persoon.adressen.adres.postcode}</brp:postcode>
+                   <brp:woonplaatsnaam>${correctieAdres.persoon.adressen.adres.woonplaatsnaam}</brp:woonplaatsnaam>
+                   <brp:landGebiedCode>${correctieAdres.persoon.adressen.adres.landGebiedCode}</brp:landGebiedCode>
+                </brp:adres>
+             </brp:adressen>
+          </brp:persoon>
+       </brp:correctieAdres>
+    </brp:acties>
+ </brp:correctieAdres>
+</brp:bhg_vbaCorrigeerAdres>
+

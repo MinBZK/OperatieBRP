@@ -1,0 +1,30 @@
+
+== Implementatie van de DSL's
+Het beginpunt voor het maken van een persoon met de DSL is de klasse `Persoon`.
+Deze heeft meerdere static methodes om een persoon te kunnen creeeren. Deze
+methodes hebben een `Closure` als argument. Deze closures krijgen een delegate
+toegewezen. Deze delegates bevatten de werkelijke implementatie van de functionaliteit
+die wordt aangeroepen. In het geval van de Persoon DSL wordt in eerste instantie
+gedelegeerd naar de `GebeurtenisDispatcher`.
+
+De GebeurtenisDispatcher heeft de methodes die een gebeurtenis van een persoon
+een functionele naam geven. Deze methodes delegereren op hun beurt weer aan een `AbstractGebeurtenisHandler`
+implementatie. De handlers voor persoon staan in het package `nl.bzk.brp.datataal.handlers.persoon`.
+
+Sommige handlers vormen een hierarchie om code duplicatie te beperken. Een andere vorm
+van beperking van duplicatie is het gebruik van link:http://www.groovy-lang.org/objectorientation.html#_traits[Groovy Traits],
+zie `WijzigNamenAbility` of `WijzigOudersAbility`.
+
+
+=== AbstractGebeurtenisHandler
+`AbstractGebeurtenisHandler` is de basis klasse voor alle gebeurtenishandlers. De
+klasse valideert of een handeling wel voor een ingeschreven persoon is. Verder
+heeft het twee methodes, `startGebeurtenis()` en 'eindeGebeurtenis()`, waarvan de
+eerste in subklasses moet worden geimplementeerd. Doorgaans wordt hierin een _afgeleid
+administratief_ voorkomen voor een persoon aangemaakt. Daarnaast kunnen hier
+groepen worden aangemaakt die niet expliciet in de DSL beschreven hoeven worden,
+bijvoorbeeld een bijhouding voorkomen bij een intergemeentelijke verhuizing.
+
+De `eindeGebeurtenis()` methode kan worden gebruikt om afleiding van gegevens te
+doen, die na de gebeurtenis pas kan. Bijvoorbeeld het afleiden van de samengestelde
+naam van een persoon na het beschrijven van de geboorte.

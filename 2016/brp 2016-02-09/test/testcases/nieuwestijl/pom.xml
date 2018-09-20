@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp.art</groupId>
+        <artifactId>brp-art-testcases-parent</artifactId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>brp-art-testcases-nieuwestijl</artifactId>
+    <name>BRP ART Testcases - Nieuwe stijl</name>
+    <packaging>jar</packaging>
+
+    <properties>
+        <omgeving>localhost</omgeving>
+    </properties>
+
+    <build>
+        <!-- LET OP: src/main/resources zijn voor maven testresources!! -->
+        <testResources>
+            <testResource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*</include>
+                </includes>
+            </testResource>
+        </testResources>
+        <!-- LET OP: src/main/resources zijn voor maven geen resources!! -->
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+<!--                <excludes>
+                    <exclude>**/*</exclude>
+                </excludes>-->
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <systemProperties>
+                        <omgeving>${omgeving}</omgeving>
+                    </systemProperties>
+                    <includes>
+                        <include>**/jenkins/*.java</include>
+                    </includes>
+                    <testFailureIgnore>true</testFailureIgnore>
+                    <disableXmlReport>true</disableXmlReport>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>/src/main/assembly/test-resultaten-zip.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>deltabepaling</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-scm-plugin</artifactId>
+                        <version>1.9.2</version>
+                        <executions>
+
+                            <execution>
+                                <id>checkout-migratie-testgevallen</id>
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>export</goal>
+                                </goals>
+                                <configuration>
+                                    <connectionUrl>scm:svn:https://www.modernodam.nl/svn/isc-code/trunk/migr-test-persoon-database/deltabepaling/</connectionUrl>
+                                    <exportDirectory>${project.build.testOutputDirectory}/deltabepaling</exportDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+</project>

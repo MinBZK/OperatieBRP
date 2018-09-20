@@ -1,0 +1,301 @@
+<?xml version="1.0" encoding="utf-8"?>
+<book xmlns="http://docbook.org/ns/docbook">
+    <title>Beheerhandleiding BRP Synchronisatie en Attendering software</title>
+    <titleabbrev>Versie 1.1</titleabbrev>
+
+    <chapter>
+        <title>Inleiding</title>
+
+        <para>
+            Dit document beschrijft de beheeraspecten van de BRP Synchronisatie en Attendering software.
+        </para>
+
+        <section>
+            <title>Doel</title>
+            <para>
+                Operationeel beheer ondersteunen bij het beheren van de BRP Synchronisatie en Attendering software.
+            </para>
+        </section>
+
+        <section>
+            <title>Scope</title>
+            <para>
+                Handleiding voor het beheren van de BRP Synchronisatie en Attendering software op een nieuwe omgeving op een bestaande omgeving.
+                Dit document is bedoeld voor operationeel beheerders van de BRP Synchronisatie en Attendering software.
+            </para>
+        </section>
+
+        <section>
+            <title>Doelgroep</title>
+            <para>Operationeel beheerders met gedegen kennis van PostgreSQL en Apache Tomcat.</para>
+        </section>
+
+        <section>
+            <title>Precondities</title>
+            <para>Aan de volgende precondities moet worden voldaan om tot een correcte installatie van de software te komen.</para>
+            <section>
+                <title>Database</title>
+                <para>Er is een BRP database geïnstalleerd en toegankelijk op een bekende hostname + port (zie handleiding database installatie).
+                </para>
+            </section>
+        </section>
+    </chapter>
+
+    <chapter>
+        <title>Abonnementen</title>
+
+        <para>
+            Hier volgt een beschrijving van afnemer abonnementen binnen het BRP systeem, te vinden in het 'autaut' schema.
+            Waar wordt gesproken over 'afnemer', moet elke rol die aanwezig is in de 'rol' tabel van het 'kern' schema gelezen worden.
+        </para>
+
+        <section>
+            <title>Tabellen</title>
+            <para>Deze tabellen binnen het 'autaut' schema zijn belangrijk voor het configureren van een abonnement:</para>
+            <itemizedlist>
+                <listitem><para>toegangabonnement</para></listitem>
+                <listitem><para>abonnement</para></listitem>
+                <listitem><para>dienst</para></listitem>
+                <listitem><para>abonnementgroep</para></listitem>
+                <listitem><para>abonnementattribuut</para></listitem>
+                <listitem><para>afleverwijze</para></listitem>
+                <listitem><para>authenticatiemiddel</para></listitem>
+            </itemizedlist>
+            <para>
+                De volgende paragrafen beschrijven deze tabellen en hun functie en inrichting.
+                Voor alle tabellen welke een 'datingang' en 'dateinde' bevatten, geldt dat, om de regel te activeren, het veld 'datingang'
+                (voor) vandaag moet liggen en 'dateinde' leeg moet zijn. Ook dient het veld 'indactief', waar aanwezig, op 'true' te staan.
+            </para>
+            <para>
+                Let op: Wijzigingen in deze tabellen worden niet direct opgepakt als het systeem draait. Dit komt doordat het
+                systeem de abonnementen cached voor performanceredenen. Op dit moment wordt de cache elke nacht (0:00) ververst.
+                Als noodoplossing kan het systeem herstart worden, in dat geval wordt de cache direct opnieuw opgebouwd.
+            </para>
+
+            <section>
+                <title>Toegangabonnement</title>
+                <para>Deze tabel kan gezien worden als de ingang van een abonnement. In deze tabel wordt de partij gerefereerd (uit 'kern.partij')
+                    en is de referentie naar het abonnement en het authenticatiemiddel opgenomen.
+                </para>
+            </section>
+
+            <section>
+                <title>Abonnement</title>
+                <para>Het abonnement dient als schakel tussen het toegangabonnement en de dienst, abonnementgroep en abonnementattribuut. Ook
+                    bevindt zich hier de populatiebeperking, welke de expressie bevat voor het bepalen of iemand binnen of buiten de doelbinding valt.
+                </para>
+            </section>
+
+            <section>
+                <title>Dienst</title>
+                <para>Deze tabel koppelt abonnementen aan diensten via de catalogusoptie kolom. Elke dienst heeft één catalogusoptie en er kunnen
+                    meerdere diensten aan een abonnement verbonden worden. De catalogusopties staan in de catalogusoptie tabel, welke refereert aan
+                    de categoriedienst. Deze twee tabellen zijn stamtabellen en vereisen geen aanpassingen.
+                    Dienst bevat ook het attenderingscriterium, welke de expressie bevat die gebruikt wordt voor de diensten Attendering en
+                    Attendering met plaatsing afnemerindicatie. Ook kan er een nadere populatiebeperking worden opgegeven in de dienst tabel.
+                </para>
+            </section>
+
+            <section>
+                <title>AbonnementGroep</title>
+                <para>
+                    De abonnementgroep tabel bevat de groepen waarin het gekoppelde abonnement geïnteresseerd is. De groep kolom refereert aan de
+                    element tabel in het kern schema. Ook geef je in de abonnementgroep tabel aan, of het abonnement formele en/of materiele
+                    historie attributen van de groep wenst te ontvangen, mist beschikbaar voor de betreffende groep.
+                </para>
+            </section>
+
+            <section>
+                <title>AbonnementAttribuut</title>
+                <para>
+                    In abonnementattribuut wordt een abonnement gekoppeld aan attributen binnen een groep. De gewenste attributen kunnen op deze manier
+                    worden toegevoegd aan de abonnementattribuut tabel. De groepen waartoe de attributen behoren dienen dan opgenomen te zijn in de
+                    abonnementgroep tabel.
+                </para>
+            </section>
+
+            <section>
+                <title>Afleverwijze</title>
+                <para>
+                    De afleverwijze tabel bepaalt hoe berichten voor een toegangabonnement worden afgeleverd bij de afnemer. Hierbij wordt het
+                    kanaal aangegeven, bijvoorbeeld 'BRP' of 'LO3 netwerk', alsmede de URI van het endpoint van de afnemer.
+                </para>
+            </section>
+
+            <section>
+                <title>Authenticatiemiddel</title>
+                <para>
+                    Het authenticatiemiddel koppelt partijen aan rollen en certificaten. De rollen bevinden zich in de 'rol' tabel in het 'kern' schema.
+                    De certificaten kunnen worden toegevoegd aan de certificaat tabel. Hoe de certificaten aan te maken en toe te voegen, wordt apart
+                    beschreven.
+                </para>
+            </section>
+        </section>
+
+        <section>
+            <title>Voorbeeld configuratie</title>
+            <para>Deze paragraaf dient als voorbeeld en uitgangspunt voor het creëren van aangepaste abonnementen.</para>
+            <programlisting language="sql"><?db-font-size 75% ?>
+                <!--<![CDATA[-->
+-- Abonnement voor de diensten mutatielevering obv doelbinding en synchroniseer persoon toevoegen
+INSERT INTO autaut.abonnement (naam,populatiebeperking,protocolleringsniveau,datingang,dateinde,toestand)
+VALUES(concat('Automatisch synchroniseren populatie 036101'), ''),
+concat('persoon.bijhouding.bijhoudingspartij = ', '36101'),'1','20130101',null,'4');
+INSERT INTO autaut.his_abonnement(abonnement,tsreg,tsverval,actieinh,actieverval,nadereaandverval,populatiebeperking,
+protocolleringsniveau, datingang,dateinde,toestand,indaliassrtadmhndleveren)
+VALUES((select currval('autaut.seq_abonnement')),'20130101',null,null,null,null,
+concat('persoon.bijhouding.bijhoudingspartij = ', '36101'),'1','20130101',null,'4',false);
+
+-- ToegangAbonnement voor de diensten mutatielevering obv doelbinding en synchroniseer persoon toevoegen
+INSERT INTO autaut.toegangabonnement (partij,authenticatiemiddel,intermediair,abonnement,datingang,dateinde)
+VALUES((select id from kern.partij where code = '36101'),null,null,
+(select currval('autaut.seq_abonnement')),'20130101',null);
+INSERT INTO autaut.his_toegangabonnement (toegangabonnement,tsreg,tsverval,actieinh,actieverval,nadereaandverval,
+datingang,dateinde)
+VALUES((select currval('autaut.seq_toegangabonnement')),'20130101',null,null,null,null,'20130101',null);
+
+-- Diensten doelbinding en synchroniseer persoon voor het eerste abonnement
+-- Mutatielevering op basis van doelbinding
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,
+dateinde,toestand)
+VALUES('1',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,
+datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden)
+VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Geef details persoon
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,
+dateinde,toestand)
+VALUES('9',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,
+datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden)
+VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Synchroniseer persoon
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,
+dateinde,toestand)
+VALUES('10',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,
+datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden)
+VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Synchroniseer stamgegeven
+INSERT INTO autaut.dienst (catalogusoptie,abonnement,naderepopulatiebeperking,attenderingscriterium,datingang,
+dateinde,toestand)
+VALUES('11',(select currval('autaut.seq_abonnement')),null,null,'20130101',null,'4');
+INSERT INTO autaut.his_dienst (dienst,tsreg,tsverval,actieinh,actieverval,nadereaandverval,naderepopulatiebeperking,
+                datingang,dateinde,toestand,eersteselectiedat,selectieperiodeinmaanden)
+VALUES((select currval('autaut.seq_dienst')),'20130101',null,null,null,null,null,'20130101',null,'4',null,null);
+
+--Afleverwijze voor het eerste abonnement
+INSERT INTO autaut.afleverwijze (toegangabonnement,kanaal,uri,datingang,dateinde)
+VALUES((select currval('autaut.seq_toegangabonnement')),'2','http://afnemer.nl/endpoint','20130101',null);
+INSERT INTO autaut.his_afleverwijze (afleverwijze,tsreg,tsverval,actieinh,actieverval,nadereaandverval,datingang,
+dateinde)
+VALUES((select currval('autaut.seq_afleverwijze')),'20130101',null,null,null,null,'20130101',null);
+
+--Alle attributen autoriseren
+INSERT INTO autaut.abonnementattribuut (abonnement, attribuut, indactief)
+SELECT a.id, e.id, TRUE
+FROM autaut.abonnement a, kern.element e
+WHERE a.id = (select currval('autaut.seq_abonnement'))
+and e.expressie is not null and e.srt = 3 and e.elementnaam NOT IN ('Datum einde geldigheid',
+'Datum/tijd registratie', 'Datum/tijd verval', 'BRP Actie inhoud', 'BRP Actie verval',
+'BRP Actie Aanpassing Geldigheid') and e.naam NOT IN ('ErkenningOngeborenVrucht.SoortCode',
+'FamilierechtelijkeBetrekking.SoortCode', 'GeregistreerdPartnerschap.SoortCode', 'Huwelijk.SoortCode',
+'HuwelijkGeregistreerdPartnerschap.SoortCode', 'NaamskeuzeOngeborenVrucht.SoortCode')
+and e.autorisatie NOT IN (2,7);
+
+--Alle groepen authoriseren
+INSERT INTO autaut.abonnementgroep (abonnement, groep, indnadereverantwoording, inddoc, indmaterielehistorie,
+indformelehistorie)
+SELECT a.id, e.id, TRUE, TRUE, TRUE, TRUE
+FROM  autaut.abonnement a, kern.element e
+WHERE a.id = (select currval('autaut.seq_abonnement')) and e.srt = 2;
+            <!--]]>-->
+            </programlisting>
+        </section>
+    </chapter>
+
+    <chapter>
+        <title>Certificaten</title>
+
+        <para>Certificaten worden binnen het BRP-systeem gebruikt voor de volgende drie doeleinden:
+            <itemizedlist>
+                <listitem>
+                    <para>Encryptie en Authenticatie - SSL over TLS met Client Authentication</para>
+                </listitem>
+                <listitem>
+                    <para>Autorisatie - Autorisatie van de partij waarmee gecommuniceerd wordt</para>
+                </listitem>
+                <listitem>
+                    <para>Verificatie - Controle van de integriteit van berichten</para>
+                </listitem>
+            </itemizedlist>
+
+            De volgende paragrafen beschrijven deze doeleinden in meer detail en geven aan wat er moet gebeuren om het systeem correct te configureren.
+
+            Voor server- en clientcertificaten van partijen zijn Certificate Signing Requests (CSR) nodig. Deze zullen self-signed zijn en daarom
+            moeten worden toegevoegd aan de trust store van de ontvangende partij worden toegevoegd.
+
+            Als er niet gebruik wordt gemaakt van SSL offloading middels een webserver, dient Tomcat zelf de SSL verbinding te verzorgen en als
+            zodanig te worden geconfigureerd.
+        </para>
+
+        <section>
+            <title>Encryptie</title>
+            <section>
+                <title>BRP als server</title>
+                <para>
+                    Encryptie van de communicatie en authenticatie van de client wordt verzorgd door de webserver. Het is de bedoeling dat er
+                    een webserver voor de applicatieserver komt te draaien, die de SSL verbinding opzet. Hierbij wordt gebruik gemaakt van SSL met client
+                    authentication. Creëer een CSR en signeer deze. Voeg het certificaat en private key toe aan de private store van de webserver.
+                    Verstrek het gesigneerde certificaat aan de client en voeg het toe aan de trust store van de client.
+                    Vanwege de Client Authentication heeft elke client een clientcertificaat nodig, welke gebruikt zal worden tijdens
+                    de SSL handshake. Voeg het clientcertificaat toe aan de trust store van de webserver. Het clientcertificaat en private key
+                    zullen moeten worden toegevoegd aan de private store van de client.
+                    Deze vorm van communicatie wordt gebruikt voor de Synchronisatie en Onderhouden Afnemerindicatie services.
+                </para>
+            </section>
+            <section>
+                <title>BRP als client</title>
+                <para>
+                    In het geval BRP als client fungeert, zoals bij communicatie richting afnemers, is het noodzakelijk dat het gesigneerde
+                    certificaat en private key aanwezig zijn in de private store van de webserver. Voeg het gesigneerde
+                    servercertificaat toe aan de trust store van de client. Hiervoor zijn properties aanwezig in brp-verzending.properties,
+                    welke ervan uit gaan dat de applicatie zelf direct als client fungeert.
+                    In het geval dat bij communicatie met afnemers ook Client Authentication vereist is, is er een clientcertificaat nodig binnen
+                    het BRP systeem. Creëer in dit geval een CSR met een gegenereerde private key en signeer deze. Verstrek het gesigneerde
+                    clientcertificaat aan de server en voeg het toe aan de trust store van de server. Voeg het gesigneerde certificaat en private
+                    key toe aan de private store van de client.
+                </para>
+            </section>
+        </section>
+
+        <section>
+            <title>Autorisatie</title>
+            <para>
+                Om clients te kunnen autoriseren moet er een gesigneerd certificaat aan de client verstrekt zijn. Dit is hetzelfde certificaat dat
+                wordt gebruikt voor de SSL encryptie. De subject, serial en signature van het certificaat dient aanwezig te zijn in de certificaat
+                tabel van het autaut database schema. Deze gegevens worden bij een request uit de SOAP header gehaald en geverifieerd tegen de
+                gegevens uit de genoemde database tabel. Op die manier weten we met wie we te maken hebben en of de partij ook is wie het
+                pretendeert te zijn.
+                De client dient de certificaatgegevens mee te sturen in de WS-Security headers van uitgaande berichten.
+            </para>
+        </section>
+
+        <section>
+            <title>Verificatie</title>
+            <para>
+                Inkomende (request) berichten worden geverifieerd op integriteit door een signature te decrypten met de public key uit het certificaat
+                van de client. Het client certificaat dient daarom aanwezig te zijn in de public store van de applicatieserver. Voor bijvoorbeeld
+                Synchronisatie is er een security.keystore.public.file property opgenomen in het synchronisatie.properties bestand.
+                Uitgaande (response) berichten worden voorzien van een signature. De BRP private en public key dienen daarom aanwezig te zijn de
+                private store van de applicatieserver. Voor bijvoorbeeld Synchronisatie is er een security.keystore.private.file property opgenomen
+                in het synchronisatie.properties bestand.
+                Verificatie is vooralsnog alleen van toepassing in het geval dat BRP als server fungeert (Synchronisatie en Onderhouden
+                Afnemerindicaties) en niet in het geval BRP de client is (vertrekkingen naar afnemers).
+            </para>
+        </section>
+    </chapter>
+</book>

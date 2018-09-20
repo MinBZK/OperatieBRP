@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 11-11-2015 -->
+<!-- -->
+<!-- Wijzigingen: -->
+<!-- 1) Initiële versie -->  
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020001">
+	<include schemaLocation="brp0200_iscMigratievoorziening_Basis.xsd"/>
+	<element name="isc_migRegistreerGeboorte" type="brp:Migratievoorziening_RegistreerGeboorte_Bijhouding"/>
+	<element name="isc_migRegistreerGeboorte_R" type="brp:Migratievoorziening_RegistreerGeboorte_BijhoudingResultaat"/>
+	<element name="isc_migRegistreerOuderschap" type="brp:Migratievoorziening_RegistreerOuderschap_Bijhouding"/>
+	<element name="isc_migRegistreerOuderschap_R" type="brp:Migratievoorziening_RegistreerOuderschap_BijhoudingResultaat"/>
+	<element name="isc_migRegistreerNaamGeslacht" type="brp:Migratievoorziening_RegistreerNaamGeslacht_Bijhouding"/>
+	<element name="isc_migRegistreerNamGeslacht_R" type="brp:Migratievoorziening_RegistreerNaamGeslacht_BijhoudingResultaat"/>
+	<element name="isc_migRegistreerHuwelijkGeregistreerdPartnerschap" type="brp:Migratievoorziening_RegistreerHuwelijkGeregistreerdPartnerschap_Bijhouding"/>
+	<element name="isc_migRegistreerHuwelijkGeregistreerdPartnerschap_R" type="brp:Migratievoorziening_RegistreerHuwelijkGeregistreerdPartnerschap_BijhoudingResultaat"/>
+	<element name="isc_migRegistreerOverlijden" type="brp:Migratievoorziening_RegistreerOverlijden_Bijhouding"/>
+	<element name="isc_migRegistreerOverlijden_R" type="brp:Migratievoorziening_RegistreerOverlijden_BijhoudingResultaat"/>
+	<!-- -->
+	<!-- Bericht RegistreerGeboorteGBA -->
+	<complexType name="Migratievoorziening_RegistreerGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<!-- <element name="gBAGeboorte" type="brp:Handeling_GBAGeboorte_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" /> -->
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Bericht RegistreerOuderschapGBA -->
+	<complexType name="Migratievoorziening_RegistreerOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<!-- <element name="gBARegistratieOuderschap" type="brp:Handeling_GBARegistratieOuderschap_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" /> -->
+						<!-- <element name="gBAOntkeningOuderschap" type="brp:Handeling_GBAOntkenningOuderschap_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" /> -->
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType><!-- -->
+	<!-- Bericht RegistreerNaamGeslachtGBA -->
+	<complexType name="Migratievoorziening_RegistreerNaamGeslacht_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="gBAWijzigingNaamGeslacht" type="brp:Handeling_GBAWijzigingNaamGeslacht_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling GBA - Wijziging NaamGeslacht -->
+	<complexType name="Handeling_GBAWijzigingNaamGeslacht_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_GBAWijzigingNaamGeslacht">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_GBAWijzigingNaamGeslacht_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Bericht RegistreerHuwelijkPartnerschapGBA -->
+	<complexType name="Migratievoorziening_RegistreerHuwelijkGeregistreerdPartnerschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="gBASluitingHuwelijkGeregistreerdPartnerschap" type="brp:Handeling_GBASluitingHuwelijkGeregistreerdPartnerschap_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+						<element name="gBAOntbindingHuwelijkGeregistreerdPartnerschap" type="brp:Handeling_GBAOntbindingHuwelijkGeregistreerdPartnerschap_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+						<element name="gBAOmzettingHuwelijkGeregistreerdPartnerschap" type="brp:Handeling_GBAOmzettingHuwelijkGeregistreerdPartnerschap_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling GBA - Sluiting Huwelijk/GeregistreerdPartnerschap -->
+	<complexType name="Handeling_GBASluitingHuwelijkGeregistreerdPartnerschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_GBASluitingHuwelijkGeregistreerdPartnerschap">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_GBASluitingHuwelijkGeregistreerdPartnerschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Administratieve handeling GBA - Ontbinding Huwelijk/GeregistreerdPartnerschap -->
+	<complexType name="Handeling_GBAOntbindingHuwelijkGeregistreerdPartnerschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_GBAOntbindingHuwelijkGeregistreerdPartnerschap">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_GBAOntbindingHuwelijkGeregistreerdPartnerschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling GBA - Omzetting Huwelijk / Geregistreerd partnerschap -->
+	<complexType name="Handeling_GBAOmzettingHuwelijkGeregistreerdPartnerschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_GBAOmzettingHuwelijkGeregistreerdPartnerschap">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_GBAOmzettingHuwelijkGeregistreerdPartnerschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Bericht OverlijdenGBA -->
+	<complexType name="Migratievoorziening_RegistreerOverlijden_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="gBAOverlijden" type="brp:Handeling_GBAOverlijden_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling GBA - Overlijden -->
+	<complexType name="Handeling_GBAOverlijden_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_GBAOverlijden">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_AdministratieveHandelingBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_GBAOverlijden_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- BijhoudingResultaten Administratieve handelingen GBA -->
+	<complexType name="Migratievoorziening_RegistreerGeboorte_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="gBAGeboorte" type="brp:Handeling_GBAGeboorte_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<complexType name="Migratievoorziening_RegistreerOuderschap_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="gBARegistratieOuderschap" type="brp:Handeling_GBARegistratieOuderschap_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+						<element name="gBAOntkenningOuderschap" type="brp:Handeling_GBAOntkenningOuderschap_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<complexType name="Migratievoorziening_RegistreerNaamGeslacht_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="gBAWijzigingNaamGeslacht" type="brp:Handeling_GBAWijzigingNaamGeslacht_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<complexType name="Migratievoorziening_RegistreerHuwelijkGeregistreerdPartnerschap_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="gBASluitingHuwelijkGeregistreerdPartnerschap" type="brp:Handeling_GBASluitingHuwelijkGeregistreerdPartnerschap_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+						<element name="gBAOntbindingHuwelijkGeregistreerdPartnerschap" type="brp:Handeling_GBAOntbindingHuwelijkGeregistreerdPartnerschap_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+						<element name="gBAOmzettingHuwelijkGeregistreerdPartnerschap" type="brp:Handeling_GBAOmzettingHuwelijkGeregistreerdPartnerschap_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Migratievoorziening_RegistreerOverlijden_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="gBAOverlijden" type="brp:Handeling_GBAOverlijden_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+</schema>

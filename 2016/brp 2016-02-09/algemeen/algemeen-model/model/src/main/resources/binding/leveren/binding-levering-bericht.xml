@@ -1,0 +1,40 @@
+<binding direction="output" package="nl.bzk.brp">
+    <namespace uri="http://www.bzk.nl/brp/brp0200" default="all" prefix="brp"/>
+
+    <include path="classpath:/binding/leveren/binding-levering-objecttypen-historie.xml" precompiled="false"/>
+    <include path="classpath:/binding/leveren/binding-levering-betrokkenheden.xml" precompiled="false"/>
+    <include path="classpath:/binding/leveren/binding-levering-onderzoek.xml" precompiled="false"/>
+    <include path="classpath:/binding/leveren/binding-levering-verantwoording.xml" precompiled="false"/>
+    <include path="classpath:/binding/leveren/binding-levering-objecttypen.xml" precompiled="false"/>
+    <include path="classpath:/binding/leveren/binding-levering-groepen.xml" precompiled="false"/>
+
+    <include path="classpath:/binding/basis/binding-brpxml.xml" precompiled="false"/>
+
+    <mapping name="lvg_synVerwerkPersoon" class="nl.bzk.brp.model.levering.AbstractSynchronisatieBericht">
+        <structure name="stuurgegevens" field="stuurgegevens" map-as="Stuurgegevens_AsynchroonResultaat"/>
+        <structure name="parameters" field="berichtParameters" map-as="Groep_BerichtParameters_Synchronisatie"/>
+        <!-- DELTA-1626 & DELTA-1627 -->
+        <structure name="meldingen" map-as="Container_BerichtMeldingen_Levering" get-method="getMeldingen"
+                   usage="optional" test-method="heeftMeldingenVoorLeveren"/>
+        <structure name="synchronisatie" field="administratieveHandeling"
+                   map-as="Objecttype_AdministratieveHandeling_Synchronisatie" usage="optional"/>
+    </mapping>
+
+    <mapping type-name="Objecttype_AdministratieveHandeling_Synchronisatie" abstract="true"
+             class="nl.bzk.brp.model.levering.AdministratieveHandelingSynchronisatie">
+        <value name="objecttype" constant="AdministratieveHandeling" style="attribute"/>
+        <value get-method="getVerwerkingssoort" style="attribute" name="verwerkingssoort"
+               enum-value-method="getVasteWaarde" usage="optional"/>
+        <structure field="soort">
+            <value name="code" field="code"/>
+            <value name="naam" field="naam"/>
+            <value name="categorie" field="categorieAdministratieveHandeling" enum-value-method="getNaam"/>
+        </structure>
+        <structure name="partijCode" field="partij" map-as="Partij"/>
+        <structure name="tijdstipRegistratie" field="tijdstipRegistratie" map-as="DatumTijdAttribuut"/>
+        <collection name="bijgehoudenPersonen" get-method="getBijgehoudenPersonen" usage="optional" test-method="heeftBijgehoudenPersonen">
+            <structure name="persoon" map-as="Objecttype_DetailsPersoon_Synchronisatie"/>
+        </collection>
+    </mapping>
+
+</binding>

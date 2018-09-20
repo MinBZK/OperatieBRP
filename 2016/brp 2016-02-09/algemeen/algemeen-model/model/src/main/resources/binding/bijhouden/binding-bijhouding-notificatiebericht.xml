@@ -1,0 +1,30 @@
+<binding package="nl.bzk.brp" direction="output">
+
+    <namespace uri="http://www.bzk.nl/brp/brp0200" default="all" prefix="brp"/>
+
+    <include path="classpath:/binding/basis/binding-brpxml.xml" precompiled="false"/>
+    <include path="classpath:/binding/bijhouden/binding-groepen-bericht.xml" precompiled="false"/>
+    <include path="classpath:/binding/bijhouden/binding-objecttypen-bericht.xml" precompiled="false"/>
+
+    <!-- bhg_fiaNotificeerBijhoudingsplan -->
+    <mapping name="bhg_fiaNotificeerBijhoudingsplan"
+             class="nl.bzk.brp.model.bijhouding.NotificeerBijhoudingsplanBericht">
+        <structure name="stuurgegevens" field="stuurgegevens" map-as="Stuurgegevens_AsynchroonResultaat"/>
+        <structure name="parameters" field="parameters" map-as="Groep_BerichtParameters"/>
+        <structure name="administratieveHandelingPlan" field="administratieveHandelingPlan" map-as="Objecttype_AdministratieveHandeling_NotificatieBijhoudingsplan"/>
+    </mapping>
+
+    <mapping abstract="true" class="nl.bzk.brp.model.bericht.kern.HandelingNotificatieBijhoudingsplanBericht"
+             type-name="Objecttype_AdministratieveHandeling_NotificatieBijhoudingsplan">
+        <value constant="AdministratieveHandeling" style="attribute" name="objecttype"/>
+        <value name="code" field="code"/>
+        <value name="naam" field="naam"/>
+        <value name="categorie" field="categorie"/>
+        <structure map-as="AbstractHandeling_NotificatieBijhoudingsplanBericht"/>
+        <structure name="bijhoudingsplan" field="bijhoudingsplan">
+            <value constant="Bijhoudingsplan" style="attribute" name="objecttype"/>
+            <structure map-as="Objecttype_Bijhoudingsplan"/>
+        </structure>
+    </mapping>
+
+</binding>

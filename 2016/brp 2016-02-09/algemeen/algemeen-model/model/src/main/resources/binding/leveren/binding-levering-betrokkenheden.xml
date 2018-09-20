@@ -1,0 +1,260 @@
+<binding direction="output">
+
+    <mapping class="java.util.Set" abstract="true" type-name="Container_PersoonBetrokkenheden_DetailsPersoon_Levering"
+             create-type="java.util.HashSet">
+        <collection usage="optional">
+            <structure type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.BetrokkenheidHisVolledigView" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <!-- Objecttype_Kind_DetailsPersoon_Levering -->
+    <mapping name="kind" class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.KindHisVolledigView">
+        <value constant="Betrokkenheid" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="voorkomenSleutel" usage="optional" get-method="getID" />
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getBetrokkenheidHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="FormeleHistorieEntiteitMetVerantwoording" />
+            </collection>
+        </structure>
+        <structure name="familierechtelijkeBetrekking" get-method="getRelatieVoorLeveren"
+                   map-as="Objecttype_FamilierechtelijkeBetrekking_DetailsOuder_Levering"
+                   type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.FamilierechtelijkeBetrekkingHisVolledigView" usage="optional"/>
+    </mapping>
+
+    <!-- Objecttype_Ouder_DetailsPersoon_Levering -->
+    <mapping name="ouder" class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.OuderHisVolledigView">
+        <value constant="Betrokkenheid" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="voorkomenSleutel" usage="optional" get-method="getID" />
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getBetrokkenheidHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="FormeleHistorieEntiteitMetVerantwoording" />
+            </collection>
+        </structure>
+        <structure name="familierechtelijkeBetrekking" get-method="getRelatieVoorLeveren"
+                   map-as="Objecttype_FamilierechtelijkeBetrekking_DetailsKind_Levering"
+                   type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.FamilierechtelijkeBetrekkingHisVolledigView" usage="optional"/>
+    </mapping>
+
+    <!-- Objecttype_Partner_DetailsPersoon_Levering -->
+    <mapping name="partner" class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PartnerHisVolledigView">
+        <value constant="Betrokkenheid" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="voorkomenSleutel" usage="optional" get-method="getID" />
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getBetrokkenheidHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="FormeleHistorieEntiteitMetVerantwoording" />
+            </collection>
+        </structure>
+        <structure get-method="getRelatieVoorLeveren"
+                   type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.HuwelijkGeregistreerdPartnerschapHisVolledigView" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_FamilierechtelijkeBetrekking_DetailsOuder_Levering"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.FamilierechtelijkeBetrekkingHisVolledigView">
+        <value constant="Relatie" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <!--<value style="attribute" name="voorkomenSleutel" usage="optional" get-method="getID" />-->
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getRelatieHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_Relatie_Levering" usage="optional"/>
+            </collection>
+        </structure>
+        <collection name="betrokkenheden" get-method="getBetrokkenhedenVoorLeveren" usage="optional" test-method="heeftBetrokkenhedenVoorLeveren">
+            <structure name="ouder" type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.OuderHisVolledigView" usage="optional">
+                <structure map-as="Objecttype_Ouder_DetailsOuder_Levering"  usage="optional" />
+            </structure>
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_FamilierechtelijkeBetrekking_DetailsKind_Levering"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.FamilierechtelijkeBetrekkingHisVolledigView">
+        <value constant="Relatie" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getRelatieHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_Relatie_Levering" usage="optional"/>
+            </collection>
+        </structure>
+
+        <collection name="betrokkenheden" get-method="getBetrokkenhedenVoorLeveren" usage="optional" test-method="heeftBetrokkenhedenVoorLeveren">
+            <structure name="kind" type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.KindHisVolledigView" usage="optional">
+                <structure map-as="Objecttype_Ouder_DetailsKind_Levering" usage="optional" />
+            </structure>
+        </collection>
+    </mapping>
+
+    <!-- Objecttype_Huwelijk_DetailsPersoon_Levering -->
+    <mapping name="huwelijk" class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.HuwelijkHisVolledigView">
+        <structure map-as="HuwelijkGeregistreerdPartnerschap"/>
+    </mapping>
+
+    <!-- Objecttype_GeregistreerdPartnerschap_DetailsPersoon_Levering -->
+    <mapping name="geregistreerdPartnerschap" class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.GeregistreerdPartnerschapHisVolledigView">
+        <structure map-as="HuwelijkGeregistreerdPartnerschap"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="HuwelijkGeregistreerdPartnerschap"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.HuwelijkGeregistreerdPartnerschapHisVolledigView">
+        <value constant="Relatie" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getRelatieHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_Relatie_Levering" usage="optional"/>
+            </collection>
+        </structure>
+        <collection name="betrokkenheden" get-method="getBetrokkenhedenVoorLeveren" usage="optional" test-method="heeftBetrokkenhedenVoorLeveren">
+            <structure name="partner" type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PartnerHisVolledigView">
+                <structure map-as="Objecttype_Partner_DetailsPartner_Levering" usage="optional" />
+            </structure>
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_Ouder_DetailsOuder_Levering"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.OuderHisVolledigView">
+        <value constant="Betrokkenheid" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="voorkomenSleutel" usage="optional" get-method="getID" />
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getBetrokkenheidHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="FormeleHistorieEntiteitMetVerantwoording" />
+            </collection>
+        </structure>
+        <structure get-method="getPersoon"
+                   type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView" usage="optional">
+            <structure map-as="Objectype_PersoonBetrokkene_Levering" name="persoon" usage="optional" test-method="isMagLeveren"/>
+        </structure>
+        <structure get-method="getOuderOuderschapHistorie">
+            <collection get-method="getHistorie">
+                <structure map-as="Groep_OuderOuderschap_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getOuderOuderlijkGezagHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_OuderOuderlijkGezag_Levering" usage="optional"/>
+            </collection>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_Ouder_DetailsKind_Levering"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.KindHisVolledigView">
+        <value constant="Betrokkenheid" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="voorkomenSleutel" usage="optional" get-method="getID" />
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getBetrokkenheidHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="FormeleHistorieEntiteitMetVerantwoording" />
+            </collection>
+        </structure>
+        <structure get-method="getPersoon" type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView" usage="optional">
+            <structure map-as="Objectype_PersoonKindBetrokkene_Levering" name="persoon" usage="optional" test-method="isMagLeveren" />
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_Partner_DetailsPartner_Levering"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PartnerHisVolledigView">
+        <value constant="Betrokkenheid" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="voorkomenSleutel" usage="optional" get-method="getID" />
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure get-method="getBetrokkenheidHistorie" usage="optional">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="FormeleHistorieEntiteitMetVerantwoording" />
+            </collection>
+        </structure>
+        <structure get-method="getPersoon"
+                   type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView" usage="optional">
+            <structure map-as="Objectype_PersoonBetrokkene_Levering" name="persoon" usage="optional" test-method="isMagLeveren" />
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objectype_PersoonBetrokkene_Levering"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView">
+        <value constant="Persoon" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure usage="optional" get-method="getSoort">
+            <value name="soortCode" usage="optional" test-method="isMagGeleverdWorden" get-method="getWaarde"
+                   enum-value-method="getCode"/>
+        </structure>
+        <structure get-method="getPersoonIdentificatienummersHistorie">
+            <collection get-method="getHistorie">
+                <structure map-as="Groep_PersoonIdentificatienummers_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonSamengesteldeNaamHistorie">
+            <collection get-method="getHistorie">
+                <structure map-as="Groep_PersoonSamengesteldeNaam_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonGeboorteHistorie">
+            <collection get-method="getHistorie">
+                <structure map-as="Groep_PersoonGeboorte_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonGeslachtsaanduidingHistorie">
+            <collection get-method="getHistorie">
+                <structure map-as="Groep_PersoonGeslachtsaanduiding_Levering"/>
+            </collection>
+        </structure>
+    </mapping>
+
+    <!--Speciaal geval, voor kind betrokkenheid geen geslachtsaanduiding tonen-->
+    <mapping abstract="true" type-name="Objectype_PersoonKindBetrokkene_Levering"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView">
+        <value constant="Persoon" style="attribute" name="objecttype"/>
+        <value get-method="getVerwerkingssoort" enum-value-method="getVasteWaarde" style="attribute"
+               name="verwerkingssoort" usage="optional"/>
+        <value style="attribute" name="objectSleutel" usage="optional" get-method="getObjectSleutel" />
+        <structure usage="optional" get-method="getSoort">
+            <value name="soortCode" usage="optional" test-method="isMagGeleverdWorden" get-method="getWaarde"
+                   enum-value-method="getCode"/>
+        </structure>
+        <structure get-method="getPersoonIdentificatienummersHistorie">
+            <collection get-method="getHistorie">
+                <structure map-as="Groep_PersoonIdentificatienummers_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonSamengesteldeNaamHistorie">
+            <collection get-method="getHistorie">
+                <structure map-as="Groep_PersoonSamengesteldeNaam_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonGeboorteHistorie">
+            <collection get-method="getHistorie">
+                <structure map-as="Groep_PersoonGeboorte_Levering"/>
+            </collection>
+        </structure>
+    </mapping>
+
+    <mapping
+            class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonIndicatieVolledigeVerstrekkingsbeperkingHisVolledigView"
+            abstract="true"
+            type-name="Indicator_VolledigeVerstrekkingsbeperking_Levering">
+        <structure get-method="getPersoonIndicatieHistorie">
+            <collection get-method="getHistorie">
+                <structure marshaller="nl.bzk.brp.model.binding.HisPersoonIndicatieMapperLevering"/>
+            </collection>
+        </structure>
+    </mapping>
+
+</binding>

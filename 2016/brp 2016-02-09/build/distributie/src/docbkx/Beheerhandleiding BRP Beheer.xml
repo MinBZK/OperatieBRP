@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<book xmlns="http://docbook.org/ns/docbook">
+    <title>Beheerhandleiding BRP Beheer software</title>
+    <titleabbrev>Versie 1.0</titleabbrev>
+
+    <chapter>
+        <title>Inleiding</title>
+
+        <para>
+            Dit document beschrijft de beheeraspecten van de BRP Beheer software
+        </para>
+
+        <section>
+            <title>Doel</title>
+            <para>
+                Operationeel beheer ondersteunen bij het beheren van de BRP Beheer software.
+            </para>
+        </section>
+
+        <section>
+            <title>Scope</title>
+            <para>
+                Handleiding voor het beheren van de BRP Beheer software op een nieuwe omgeving op een bestaande omgeving.
+                Dit document is bedoeld voor operationeel beheerders van de BRP Beheer software.
+            </para>
+        </section>
+
+        <section>
+            <title>Doelgroep</title>
+            <para>Operationeel beheerders met gedegen kennis van PostgreSQL en Apache Tomcat.</para>
+        </section>
+
+        <section>
+            <title>Precondities</title>
+            <para>Aan de volgende precondities moet worden voldaan om tot een correcte installatie van de software te komen.</para>
+            <section>
+                <title>Database</title>
+                <para>Er is een BRP database geïnstalleerd en toegankelijk op een bekende hostname + port (zie handleiding database installatie).
+                </para>
+            </section>
+        </section>
+
+    </chapter>
+
+    <chapter>
+        <title>Aandachtspunten met betrekking tot gegevens in de database</title>
+
+        <para>
+            Het rechtstreeks invoegen of muteren van data in de database buiten de daarvoor bedoelde
+            interfaces om (systeem interfaces, beheertooling, testtooling) wordt niet ondersteund.
+            De applicatie verwacht dat de data in een consistente staat in de database staat,
+            de daarvoor bedoelde interfaces dwingen dit af. De applicatie kan niet overweg met inconsistente
+            data als gevolg van het omzeilen van deze interfaces. De applicatie is niet getest op dit vlak.
+            Concrete voorbeelden van issues die kunnen ontstaan:
+
+            <itemizedlist>
+                <listitem>
+                    <para>De applicatie verwacht dat datumvelden in de database door de applicatie worden gevuld met de juiste context (tijdzone).
+                        Deze context kan onbedoeld verschillen als buiten de reguliere interface om gebruik wordt gemaakt van default global variables
+                        (current_timestamp, now(), etc) in combinatie met een verschil in tijdzone tussen het Operating System en de database.
+                        Zie voor meer informatie: http://www.postgresql.org/docs/current/static/release-9-2.html
+                        Gevolg kunnen afwijkingen zijn in tijdstippen tussen logging, berichten, database inhoud, etc.</para>
+                </listitem>
+                <listitem>
+                    <para>Het aanwezig zijn van meer dan 1 record dat voldoet aan bepaalde criteria, waar er maar 1 zou mogen zijn
+                        (bijv. op het gebied van BRP afleverwijze). In deze gevallen kan de applicatie onverwacht gedrag vertonen
+                        (willekeur in welk record wordt gebruikt, crashes, niet gedocumenteerde of aspecifieke foutmeldingen, etc.).</para>
+                </listitem>
+            </itemizedlist>
+
+        </para>
+    </chapter>
+
+</book>

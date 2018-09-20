@@ -1,0 +1,36 @@
+package nl.bzk.brp.datataal
+
+import nl.bzk.brp.datataal.model.Acties
+
+/**
+ *
+ */
+
+def persoonCtx = context(ctype: 'nl.bzk.brp.datataal.model.Persoon', scope: closureScope(isArg:true))
+contributor(persoonCtx) {
+    def call = enclosingCall('uitGebeurtenissen') ?: enclosingCall('nieuweGebeurtenissenVoor')
+    if (call) {
+        findClass('nl.bzk.brp.datataal.handlers.GebeurtenisBuilder')?.methods?.each { m ->
+            method name: m.name, type: Acties, params: [map: Map, closure: Closure]
+        }
+    }
+}
+
+def handelingContext = context(scope: closureScope(isArg:true))
+contributor(handelingContext) {
+    def verhuizing = enclosingCall('verhuizing')
+    if (verhuizing) {
+        findClass('nl.bzk.brp.datataal.handlers.persoon.VerhuizingHandler')?.methods?.each { m ->
+            method name: m.name, type: 'void', params: []
+        }
+    }
+
+    def geboorte = enclosingCall('geboorte')
+    if (geboorte) {
+        findClass('nl.bzk.brp.datataal.handlers.persoon.afstamming.GeboorteHandler')?.methods?.each { m ->
+            method name: m.name, type: 'void', params: []
+        }
+    }
+
+
+}

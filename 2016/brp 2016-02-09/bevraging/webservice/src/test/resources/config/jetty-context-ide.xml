@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="jettyServer" class="org.mortbay.jetty.Server" init-method="start" destroy-method="stop">
+        <!-- Poort wordt hard gezet, anders krijgt de IDE hem niet vertaald naar integer -->
+        <constructor-arg value="8382" />
+
+        <property name="handler">
+            <bean id="handlers" class="org.mortbay.jetty.handler.HandlerCollection">
+                <property name="handlers">
+                    <list>
+                        <bean id="contexts" class="org.mortbay.jetty.handler.ContextHandlerCollection">
+                            <property name="handlers">
+                                <list>
+                                    <bean class="org.mortbay.jetty.webapp.WebAppContext">
+                                        <property name="contextPath" value="/brp" />
+                                        <property name="war" value="webservice/src/main/webapp" />
+                                    </bean>
+                                </list>
+                            </property>
+                        </bean>
+                    </list>
+                </property>
+            </bean>
+        </property>
+
+    </bean>
+
+</beans>

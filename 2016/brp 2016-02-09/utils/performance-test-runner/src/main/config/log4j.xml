@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out"/>
+        <param name="Threshold" value="DEBUG"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} [%t] %-5p (%C{4}:%-3L) %X{administratieveHandeling} %X{abonnement} %X{afnemer} %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="FUNCTIONAL_FILE" class="org.apache.log4j.RollingFileAppender">
+        <param name="Append" value="true"/>
+        <param name="File" value="report/levering-functioneel.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} [%t] %-5p (%C{4}:%-3L) %m%n" />
+        </layout>
+    </appender>
+
+    <!-- Perf4J appenders -->
+    <appender name="CoalescingStatistics"
+              class="org.perf4j.log4j.AsyncCoalescingStatisticsAppender">
+        <param name="TimeSlice" value="60000"/> <!-- 60000 = 60sec -->
+        <appender-ref ref="STATS_FILE"/>
+        <appender-ref ref="CONSOLE"/>
+    </appender>
+
+    <!-- This file appender is used to output aggregated performance statistics -->
+    <appender name="STATS_FILE" class="org.apache.log4j.FileAppender">
+        <param name="File" value="report/perfStats.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%m%n"/>
+        </layout>
+    </appender>
+
+    <!-- Loggers -->
+    <logger name="org.perf4j.TimingLogger" additivity="false">
+        <level value="INFO"/>
+        <appender-ref ref="CoalescingStatistics"/>
+    </logger>
+
+    <category name="FUNCTIONELE_LOG">
+        <priority value="INFO"/>
+        <appender-ref ref="FUNCTIONAL_FILE"/>
+    </category>
+
+
+    <category name="org.mortbay.jetty"/>
+    <category name="org.hibernate"><priority value="ERROR"/></category>
+    <category name="org.jboss"/>
+
+    <category name="org.springframework.orm.jpa"/>
+    <category name="org.springframework.test.context.transaction"/>
+    <category name="org.springframework"><priority value="WARN"/></category>
+
+    <category name="nl.bzk.brp.bevraging.dataaccess"><priority value="INFO"/></category>
+    <category name="nl.bzk.brp"><priority value="DEBUG"/></category>
+    <logger name="nl.moderniseringgba.brp">
+        <level value="INFO" />
+    </logger>
+
+    <logger name="org.apache.activemq.store.jdbc">
+        <level value="ERROR" />
+    </logger>
+    <logger name="org.apache.activemq">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.apache.camel">
+        <level value="INFO"/>
+    </logger>
+
+    <category name="net.sf.log4jdbc" additivity="false">
+        <priority value="WARN"/>
+    </category>
+
+    <root>
+        <priority value="INFO" />
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</log4j:configuration>

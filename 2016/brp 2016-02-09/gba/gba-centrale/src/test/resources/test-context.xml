@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+    <context:property-placeholder location="classpath:brp-test.properties"/>
+
+	<!-- Database (lezenSchrijvenDataSource vanwege AbstractDBUnitIntegratieTest) -->
+    <bean name="lezenSchrijvenDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}"/>
+        <property name="url" value="${jdbc.master.url}"/>
+        <property name="username" value="${jdbc.master.username}"/>
+        <property name="password" value="${jdbc.master.password}"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive" value="200"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxIdle" value="5"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+    </bean>
+    
+    <bean id="lezenSchrijvenTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    	<property name="dataSource" ref="lezenSchrijvenDataSource" />
+    </bean>
+    
+
+	<!-- Queues -->
+    <bean id="gbaQueueConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+		<property name="brokerURL" value="failover:(${berichtcentrale.consumer-producer.url})?maxReconnectAttempts=3"/>
+	</bean>
+	
+    <bean id="gbaJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+    	<property name="connectionFactory" ref="gbaQueueConnectionFactory" />
+    </bean>
+
+  	<amq:queue id="gbaQueueAfnemerindicaties" physicalName="${afnemerindicaties.migratie.queue.name:GbaAfnemerindicaties}" />
+  	<amq:queue id="gbaQueueAfnemerindicatiesAntwoorden" physicalName="${afnemerindicaties.migratie.antwoord.queue.name:GbaAfnemerindicatiesAntwoorden}" />
+  	<amq:queue id="gbaQueueArchief" physicalName="${archief.migratie.queue.name:GbaArchief}" />
+  	<amq:queue id="gbaQueueBijhoudingen" physicalName="${bijhouding.gba.admhnd.publicatie.queue.name:GbaAdministratieveHandelingen}" />
+  	<amq:queue id="gbaQueueLeveringen" physicalName="${jms.broker.lo3.leveringen.queue:lo3Queue}" />
+  	<amq:queue id="gbaQueueToevalligeGebeurtenissen" physicalName="${toevalligegebeurtenis.migratie.queue.name:GbaToevalligeGebeurtenissen}" />
+  	<amq:queue id="gbaQueueToevalligeGebeurtenissenAntwoorden" physicalName="${toevalligegebeurtenis.migratie.antwoord.queue.name:GbaToevalligeGebeurtenissenAntwoorden}" />
+
+	<amq:queue id="brpQueueAdministratieveHandelingen" physicalName="${jms.broker.ah.queue:AdministratieveHandelingen}" />
+
+
+</beans>

@@ -1,0 +1,1 @@
+select * from kern.his_persvoornaam where persvoornaam in (select id from kern.persvoornaam where pers in( select id from kern.pers where bsn=${DataSource Values#|objectid.persoon22|})) order by tsverval desc, persvoornaam asc, naam asc, dataanvgel asc;

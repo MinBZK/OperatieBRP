@@ -1,0 +1,66 @@
+29 mei 2013 - BRP Release 7
+
+Database BMR v 10.0
+    De laatse oplevering werd geleverd met BMR 8 en het is besloten om in deze versie geen nieuwe database (whitebox) op te leveren, maar een upgrade naar v10 met de bestaande data.
+    Run daarom de sql statements in de db directory op de database te updaten.
+        - db/brp-9.0.sql
+        - db/brp-10.0.sql
+        
+        
+
+BIJHOUDING v 4.24
+    De standaard installatie voor BRP is van toepassing; er zijn geen enkel configuratie wijzigingen.Alle wijzigingen in deze versie zijn functionele wijzigingen.
+        - stop de BRP server, 
+        - verwijder de BRP direcotory,
+        - vervang de BRP war file met de nieuwe versie
+        - start de BRP server
+        
+        
+
+LEVERING v0.3.2
+
+Bij deze release moeten de volgende installatie instructies worden gevolgd voor de levering services:
+1. Wijzig de levering-service.properties met de volgende properties, waarbij de waardes moeten worden veranderd uiteraard voor de operationele omgeving:
+
+   # Redelivery
+   # Selectie van queues (zie http://activemq.apache.org/wildcards.html)
+   jms.broker.redelivery.queue=>
+   # Wachttijd voor hersturing na eerste poging
+   jms.broker.redelivery.initial.delay=30000
+   # Wachttijd voor hersturing
+   jms.broker.redelivery.delay=30000
+   # Aantal pogingen van hersturen
+   jms.broker.redelivery.max.redeliveries=4
+
+2. Wijzig de broker.properties met de volgende properties, waarbij de waardes moeten worden veranderd uiteraard voor de operationele omgeving:
+
+    # Data opslag
+    broker.data.directory=/tmp/activemq-data
+    broker.scheduler.directory=/tmp/activemq-data/scheduler-data
+
+    # Connectie naar de database voor de JMS Broker (ActiveMQ)
+    jdbc.activemq.driverClassName=org.postgresql.Driver
+    jdbc.activemq.url=jdbc:postgresql://databaseserver/activemqschema
+    jdbc.activemq.username=
+    jdbc.activemq.password=
+
+3. De afnemer-broker persisteert zijn queues in deze versie naar een database. Bij elke herstart wordt gepoogd om
+tabellen voor deze functionaliteit aan te maken. Dit mechanisme zorgt ervoor dat wanneer de tabellen al bestaan, er een
+aantal excepties optreden van het niveau "warning". Om deze waarschuwende excepties niet in de log te laten verschijnen
+kan daarom het log-niveau voor de specifieke package gewijzigd worden, voor log4j kan dat bijvoorbeeld via de volgende
+code:
+
+    <logger name="org.apache.activemq.store.jdbc">
+        <level value="error" />
+    </logger>
+
+4. Zorg ervoor dat er schrijfrechten zijn voor de user die de Tomcat server draait om te schrijven naar de directory
+die ingesteld staat in het configuratiebestand voor de AfnemerBroker: 'broker.properties'. De specifieke properties die
+verwijzen naar de schrijfbare directories zijn:
+    'broker.data.directory'
+    'broker.scheduler.directory'
+
+5. Creeer op de database server een nieuwe database met een naam naar keuze (bijvoorbeeld 'activemq'). In de
+broker.properties configuratie in het punt hierboven wordt verwezen via de property 'jdbc.activemq.url'.
+
+6. Deploy de war's uit de levering folder en start de server.

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="brpBerichtVerwerker"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:brp="http://www.bzk.nl/brp/brp0200"
+                  xmlns:tns="http://www.bzk.nl/brp/levering/berichtverwerking/service"
+                  targetNamespace="http://www.bzk.nl/brp/levering/berichtverwerking/service">
+
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://www.bzk.nl/brp/brp0200">
+            <xsd:include schemaLocation="../xsd/BRP0200/brp0200_lvgSynchronisatie_Berichten.xsd" />
+            <xsd:include schemaLocation="../xsd/BRP0200/brp0200_bhgFiattering_Berichten.xsd" />
+        </xsd:schema>
+    </wsdl:types>
+
+    <!-- Synchronisatie bericht (volledigbericht of mutatiebericht) over een persoon -->
+    <wsdl:message name="lvg_synVerwerkMutatiePersoon">
+        <wsdl:part element="brp:lvg_synVerwerkPersoon" name="synVerwerkMutatiePersoon" />
+    </wsdl:message>
+
+    <!-- Notificatiebericht -->
+    <wsdl:message name="bhg_fiaNotificatieBijhoudingsplan">
+        <wsdl:part element="brp:bhg_fiaNotificeerBijhoudingsplan" name="fiaVerwerkNotificatiePersoon" />
+    </wsdl:message>
+
+    <wsdl:portType name="lvgSynchronisatieVerwerking">
+        <!-- VolledigBericht of mutatiebericht verwerken -->
+        <wsdl:operation name="verwerkPersoon">
+            <wsdl:input message="tns:lvg_synVerwerkMutatiePersoon" />
+        </wsdl:operation>
+        <wsdl:operation name="verwerkBijhoudingsplan">
+            <wsdl:input message="tns:bhg_fiaNotificatieBijhoudingsplan" />
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <!-- TODO POC-Bijhouding relevante naam kiezen -->
+    <wsdl:binding name="SynchronisatieBinding" type="tns:lvgSynchronisatieVerwerking">
+        <soap:binding style="document"
+                      transport="http://schemas.xmlsoap.org/soap/http" />
+        <wsdl:operation name="verwerkPersoon">
+            <soap:operation soapAction="verwerkSynchronisatiePersoon" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+        </wsdl:operation>
+        <wsdl:operation name="verwerkBijhoudingsplan">
+            <soap:operation soapAction="verwerkNotificatieBijhoudingsplan" />
+            <wsdl:input>
+                <soap:body use="literal" />
+            </wsdl:input>
+        </wsdl:operation>
+
+    </wsdl:binding>
+
+	<!-- Let op: wijzig de soap:address location attributen naar de juiste URLs -->
+    <wsdl:service name="BrpBerichtVerwerkingService">
+        <wsdl:port binding="tns:SynchronisatieBinding" name="lvgSynchronisatieVerwerking">
+            <soap:address location="http://localhost:8080/brp-kennisgeving-ontvanger/BrpBerichtVerwerkingService" />
+        </wsdl:port>
+        <wsdl:port binding="tns:SynchronisatieBinding" name="bhgNotificatieVerwerking">
+            <soap:address location="http://localhost:8080/brp-kennisgeving-ontvanger/BrpBerichtVerwerkingService" />
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

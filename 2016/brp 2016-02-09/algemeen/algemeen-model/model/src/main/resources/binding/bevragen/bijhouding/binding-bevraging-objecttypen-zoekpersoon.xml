@@ -1,0 +1,79 @@
+<binding package="nl.bzk.brp" direction="output">
+
+    <include path="classpath:/binding/bevragen/bijhouding/binding-bevraging-groepen-zoekpersoon.xml"
+             precompiled="false"/>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonZoekPersoon_Levering"
+             class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView">
+        <value name="objecttype" constant="Persoon" style="attribute"/>
+        <value name="objectSleutel" get-method="getObjectSleutel" style="attribute"/>
+        <structure get-method="getSoort">
+            <value name="soortCode" get-method="getWaarde" enum-value-method="getCode"/>
+        </structure>
+        <structure get-method="getPersoonAfgeleidAdministratiefHistorie">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_PersoonAfgeleidAdministratief_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonIdentificatienummersHistorie">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_PersoonIdentificatienummers_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonSamengesteldeNaamHistorie">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_PersoonSamengesteldeNaamZoekPersoon_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonGeboorteHistorie">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_PersoonGeboorte_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonGeslachtsaanduidingHistorie">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_PersoonGeslachtsaanduiding_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonBijhoudingHistorie">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_PersoonBijhouding_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonOverlijdenHistorie">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_PersoonOverlijden_Levering"/>
+            </collection>
+        </structure>
+        <structure get-method="getPersoonNaamgebruikHistorie">
+            <collection get-method="getHistorie" usage="optional">
+                <structure map-as="Groep_PersoonNaamgebruikZoekPersoon_Levering"/>
+            </collection>
+        </structure>
+        <structure map-as="Container_PersoonAdressen_ZoekPersoon_Levering" name="adressen" usage="optional"
+                   get-method="getAdressen" test-method="heeftAdressen"/>
+        <structure map-as="Indicator_VolledigeVerstrekkingsbeperking_Levering" name="indicaties" usage="optional"
+                   get-method="getIndicatieVolledigeVerstrekkingsbeperking"
+                   test-method="heeftVolledigeVerstrekkingsbeperking"/>
+        <structure map-as="Container_PersoonVerstrekkingsbeperkingen_Levering" name="verstrekkingsbeperkingen"
+                   usage="optional"
+                   test-method="heeftVerstrekkingsbeperkingen" get-method="getVerstrekkingsbeperkingen"/>
+    </mapping>
+
+    <mapping class="java.util.Set" abstract="true" type-name="Container_PersoonAdressen_ZoekPersoon_Levering">
+        <collection usage="optional">
+            <structure map-as="Objecttype_PersoonAdresZoekPersoon_Levering" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonAdresHisVolledigView" abstract="true"
+             type-name="Objecttype_PersoonAdresZoekPersoon_Levering">
+        <structure get-method="getPersoonAdresHistorie">
+            <collection get-method="getHistorie">
+                <structure name="adres" map-as="Groep_PersoonAdresZoekPersoon_Levering"/>
+            </collection>
+        </structure>
+    </mapping>
+
+
+</binding>

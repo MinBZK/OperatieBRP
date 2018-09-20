@@ -1,0 +1,1385 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 12-03-2014 -->
+<!-- ... -->
+<!-- Opmerkingen: -->
+<!-- 1)	AH-en die bestaande Familierechtelijke betrekking betreffen gaan in verwerking uit van zowel de TS van de FamilierechtelijkeBetrekking als die van betrokken Personen. --> 
+<!-- 2) Beëindig concept Betrokkenheid en Nationaliteit nog in behandeling -->
+<!-- ... -->
+<!-- Wijzigingen: -->
+<!-- 1) Consolidatie gegevensmodel BRP -->
+<!-- 2) Consolidatie berichtmodel BRP -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020001">
+	<include schemaLocation="brp0200_brpBijhouding_Basis.xsd"/>
+	<!-- -->
+	<!-- Container Acties Geboorte NL -->
+	<complexType name="Container_Handeling_Acties_GeboorteInNederland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_GeboorteInNederland">
+				<sequence>
+					<element name="registratieGeboorte" type="brp:Actie_RegistratieGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieIdentificatienummers" type="brp:Actie_RegistratieIdentificatienummersBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieNaamgebruik" type="brp:Actie_RegistratieNaamgebruikNieuw_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieNationaliteit" type="brp:Actie_RegistratieNationaliteitNieuwBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieBehandeldAlsNederlander" type="brp:Actie_RegistratieBehandeldAlsNederlanderBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieStaatloos" type="brp:Actie_RegistratieStaatloosBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieVerstrekkingsbeperking" type="brp:Actie_RegistratieVerstrekkingsbeperkingBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Geboorte NL  -->
+	<complexType name="Actie_RegistratieGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieGeboorte">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+						<element name="kind" type="brp:Objecttype_Kind_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="ouder" type="brp:Objecttype_Ouder_Bijhouding" nillable="false" minOccurs="1" maxOccurs="2"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Kind_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Kind">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_PersoonGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="samengesteldeNaam" type="brp:Groep_PersoonSamengesteldeNaam_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="geboorte" type="brp:Groep_PersoonGeboorteNL_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="geslachtsaanduiding" type="brp:Groep_PersoonGeslachtsaanduiding_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Container_PersoonVoornamen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonGeboorteNL_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonGeboorte">
+				<sequence>
+					<element name="datum" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="gemeenteCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="woonplaatsnaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Oudergegevens Actie RegistratieGeboorte -->
+	<complexType name="Objecttype_Ouder_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Ouder">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_Persoon_Identificatie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="ouderschap" type="brp:Groep_OuderOuderschap_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_OuderOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Groep_OuderOuderschap">
+				<sequence>
+					<element name="indicatieAdresgevendeOuder" type="brp:Ja" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Geboorte met Erkenning NL -->
+	<complexType name="Container_Handeling_Acties_GeboorteInNederlandMetErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_GeboorteInNederlandMetErkenning">
+				<sequence>
+					<element name="registratieGeboorte" type="brp:Actie_RegistratieGeboorteErkenning_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieIdentificatienummers" type="brp:Actie_RegistratieIdentificatienummersBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieOuder" type="brp:Actie_RegistratieOuderGeboorteMetErkenning_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieNaamgebruik" type="brp:Actie_RegistratieNaamgebruikNieuw_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieNationaliteit" type="brp:Actie_RegistratieNationaliteitWijzigBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieBehandeldAlsNederlander" type="brp:Actie_RegistratieBehandeldAlsNederlanderBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieStaatloos" type="brp:Actie_RegistratieStaatloosBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieVerstrekkingsbeperking" type="brp:Actie_RegistratieVerstrekkingsbeperkingBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Geboorte met Erkenning NL -->
+	<complexType name="Actie_RegistratieGeboorteErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieGeboorte">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingGeboorteErkenning_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingGeboorteErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingGeboorteErkenning_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingGeboorteErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+						<element name="kind" type="brp:Objecttype_Kind_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="ouder" type="brp:Objecttype_Ouder_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Registratie Erkenning igv Erkenning bij aangifte geboorte -->
+	<complexType name="Actie_RegistratieOuderGeboorteMetErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieOuder">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingGeboorteMetErkenning_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingGeboorteMetErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingGeboorteMetErkenning_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingGeboorteMetErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+						<element name="kind" type="brp:Objecttype_KindErkenning_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="ouder" type="brp:Objecttype_OuderWijziging_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_KindErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Kind">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_PersoonErkenning_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonErkenning_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="samengesteldeNaam" type="brp:Groep_PersoonSamengesteldeNaam_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Oudergegevens Acties RegistratieGeboorte, -Erkenning en -Adoptie igv Administratieve handelingen waarbij sprake kan zijn van 'ouder-wijzigingen'-->
+	<complexType name="Objecttype_OuderWijziging_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Ouder">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_Persoon_Identificatie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Erkenning na geboorte -->
+	<complexType name="Container_Handeling_Acties_ErkenningNaGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_ErkenningNaGeboorte">
+				<sequence>
+					<element name="registratieOuder" type="brp:Actie_RegistratieOuderErkenningNaGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieVoornaam" type="brp:Actie_RegistratieVoornaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieGeslachtsnaam" type="brp:Actie_RegistratieGeslachtsnaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieNationaliteit" type="brp:Actie_RegistratieNationaliteitBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieBehandeldAlsNederlander" type="brp:Actie_RegistratieBehandeldAlsNederlanderBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieStaatloos" type="brp:Actie_RegistratieStaatloosBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Erkenning na Geboorte -->
+	<complexType name="Actie_RegistratieOuderErkenningNaGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieOuder">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingErkenningNaGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingErkenningNaGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingErkenningNaGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingErkenningNaGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+					<element name="kind" type="brp:Objecttype_KindWijzigingGeslachtsnaam_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="ouder" type="brp:Objecttype_OuderWijziging_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Wijziging geslachtsnaam kind bij administratieve handelingen ErkenningNaGeboorte, VaststellingOuderschap -->
+	<complexType name="Objecttype_KindWijzigingGeslachtsnaam_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Kind">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_PersoonWijzigingGeslachtsnaam_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonWijzigingGeslachtsnaam_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="samengesteldeNaam" type="brp:Groep_PersoonSamengesteldeNaam_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Vaststelling ouderschap -->
+	<complexType name="Container_Handeling_Acties_VaststellingOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_VaststellingOuderschap">
+				<sequence>
+					<element name="registratieOuder" type="brp:Actie_RegistratieOuderVaststellingOuderschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieVoornaam" type="brp:Actie_RegistratieVoornaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieGeslachtsnaam" type="brp:Actie_RegistratieGeslachtsnaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieNationaliteit" type="brp:Actie_RegistratieNationaliteitBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="unbounded"/>	
+					<element name="registratieBehandeldAlsNederlander" type="brp:Actie_RegistratieBehandeldAlsNederlanderBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieStaatloos" type="brp:Actie_RegistratieStaatloosBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Vaststelling ouderschap -->
+	<complexType name="Actie_RegistratieOuderVaststellingOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieOuder">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingVaststellingOuderschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingVaststellingOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingVaststellingOuderschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingVaststellingOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+					<element name="kind" type="brp:Objecttype_KindWijzigingGeslachtsnaam_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="ouder" type="brp:Objecttype_OuderWijziging_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Adoptie ingezetene -->
+	<complexType name="Container_Handeling_Acties_AdoptieIngezetene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_AdoptieIngezetene">
+				<sequence>
+					<element name="registratieOuder" type="brp:Actie_RegistratieOuderAdoptieIngezetene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieVoornaam" type="brp:Actie_RegistratieVoornaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieGeslachtsnaam" type="brp:Actie_RegistratieGeslachtsnaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieNationaliteit" type="brp:Actie_RegistratieNationaliteitBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieBehandeldAlsNederlander" type="brp:Actie_RegistratieBehandeldAlsNederlanderBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieStaatloos" type="brp:Actie_RegistratieStaatloosBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Adoptie ingezetene -->
+	<complexType name="Actie_RegistratieOuderAdoptieIngezetene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieOuder">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingAdoptieIngezetene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingAdoptieIngezetene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingAdoptieIngezetene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingAdoptieIngezetene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+						<element name="kind" type="brp:Objecttype_KindAdoptieIngezetene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="ouder" type="brp:Objecttype_OuderWijziging_Bijhouding" nillable="false" minOccurs="1" maxOccurs="2"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_KindAdoptieIngezetene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Kind">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_PersoonAdoptieIngezetene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonAdoptieIngezetene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="samengesteldeNaam" type="brp:Groep_PersoonSamengesteldeNaam_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Container_PersoonVoornamen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Toevoeging geboorteakte -->
+	<complexType name="Container_Handeling_Acties_ToevoegingGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_ToevoegingGeboorteakte">
+				<sequence>
+					<element name="registratieGeboorte" type="brp:Actie_RegistratieGeboorteToevoegingGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieNationaliteit" type="brp:Actie_RegistratieNationaliteitBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieBehandeldAlsNederlander" type="brp:Actie_RegistratieBehandeldAlsNederlanderBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieStaatloos" type="brp:Actie_RegistratieStaatloosBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Toevoeging geboorteakte -->
+	<complexType name="Actie_RegistratieGeboorteToevoegingGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieGeboorte">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingToevoegingGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingToevoegingGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingToevoegingGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingToevoegingGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+					<element name="kind" type="brp:Objecttype_KindToevoegingGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="ouder" type="brp:Objecttype_OuderWijziging_Bijhouding" nillable="false" minOccurs="1" maxOccurs="2"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_KindToevoegingGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Kind">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_PersoonGeboorteToevoegingGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonGeboorteToevoegingGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="samengesteldeNaam" type="brp:Groep_PersoonSamengesteldeNaam_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="geboorte" type="brp:Groep_PersoonGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="geslachtsaanduiding" type="brp:Groep_PersoonGeslachtsaanduiding_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Container_PersoonVoornamen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonGeboorte">
+				<sequence>
+					<element name="datum" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="gemeenteCode" type="brp:GemeenteCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsnaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsePlaats" type="brp:BuitenlandsePlaats" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandseRegio" type="brp:BuitenlandseRegio" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="omschrijvingLocatie" type="brp:Locatieomschrijving" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="landGebiedCode" type="brp:LandGebiedCode" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Verbetering geboorteakte -->
+	<complexType name="Container_Handeling_Acties_VerbeteringGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_VerbeteringGeboorteakte">
+				<sequence>
+					<element name="registratieGeboorte" type="brp:Actie_RegistratieGeboorteVerbeteringGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieNationaliteit" type="brp:Actie_RegistratieNationaliteitBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieBehandeldAlsNederlander" type="brp:Actie_RegistratieBehandeldAlsNederlanderBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieStaatloos" type="brp:Actie_RegistratieStaatloosBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Verbetering geboorteakte -->
+	<complexType name="Actie_RegistratieGeboorteVerbeteringGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieGeboorte">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingVerbeteringGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingVerbeteringGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingVerbeteringGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingVerbeteringGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+					<element name="kind" type="brp:Objecttype_KindVerbeteringGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="ouder" type="brp:Objecttype_OuderWijziging_Bijhouding" nillable="false" minOccurs="0" maxOccurs="2"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_KindVerbeteringGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Kind">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_PersoonGeboorteVerbeteringGeboorteakte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonGeboorteVerbeteringGeboorteakte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="samengesteldeNaam" type="brp:Groep_PersoonSamengesteldeNaam_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geboorte" type="brp:Groep_PersoonGeboorte_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsaanduiding" type="brp:Groep_PersoonGeslachtsaanduiding_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Container_PersoonVoornamen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Correctie afstammming -->
+	<complexType name="Container_Handeling_Acties_CorrectieAfstamming_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_CorrectieAfstamming">
+				<sequence>
+					<element name="registratieOuder" type="brp:Actie_RegistratieOuderCorrectieAfstamming_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieVoornaam" type="brp:Actie_RegistratieVoornaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieGeslachtsnaam" type="brp:Actie_RegistratieGeslachtsnaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieNationaliteit" type="brp:Actie_RegistratieNationaliteitBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieBehandeldAlsNederlander" type="brp:Actie_RegistratieBehandeldAlsNederlanderBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="registratieStaatloos" type="brp:Actie_RegistratieStaatloosBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Correctie afstamming -->
+	<complexType name="Actie_RegistratieOuderCorrectieAfstamming_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieOuder">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingCorrectieAfstamming_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingCorrectieAfstamming_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenAfstammingCorrectieAfstamming_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenAfstammingCorrectieAfstamming_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+					<element name="kind" type="brp:Objecttype_KindCorrectieAfstamming_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="ouder" type="brp:Objecttype_OuderWijziging_Bijhouding" nillable="false" minOccurs="1" maxOccurs="2"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_KindCorrectieAfstamming_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Kind">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_PersoonCorrectieAfstamming_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonCorrectieAfstamming_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="samengesteldeNaam" type="brp:Groep_PersoonSamengesteldeNaam_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Container_PersoonVoornamen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Gemeenschappelijke acties module Afstamming -->
+	<!-- -->
+	<!-- Actie Registratie Identificatienummers - Nieuw bij geborene -->
+	<complexType name="Actie_RegistratieIdentificatienummersBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieIdentificatienummers">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieIdentificatienummersBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieIdentificatienummersBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="identificatienummers" type="brp:Groep_PersoonIdentificatienummersBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonIdentificatienummersBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonIdentificatienummers">
+				<sequence>
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="administratienummer" type="brp:Administratienummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Registratie Voornaam bij Ingeschrevene -->
+	<complexType name="Actie_RegistratieVoornaamBijIngeschrevene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieVoornaam">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieVoornaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieVoornaamBijIngeschrevene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="voornamen" type="brp:Container_PersoonVoornamen_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- UnderConstruction MDO -->
+	<!-- Actie Beeindiging Voornaam bij Ingeschrevene -->
+	<complexType name="Actie_BeeindigingVoornaamBijIngeschrevene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_BeeindigingVoornaam">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_BeeindigingVoornaamBijIngeschrevene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_BeeindigingVoornaamBijIngeschrevene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence/>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Registratie Geslachtsnaam bij Ingeschrevene -->
+	<complexType name="Actie_RegistratieGeslachtsnaamBijIngeschrevene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieGeslachtsnaam">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_PersoonWijzigingGeslachtsnaam_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Registratie Naamgebruik -->
+	<complexType name="Actie_RegistratieNaamgebruikNieuw_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieNaamgebruik">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieNaamgebruikNieuw_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieNaamgebruikNieuw_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="naamgebruik" type="brp:Groep_PersoonNaamgebruikNieuw_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonNaamgebruikNieuw_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonNaamgebruik">
+				<sequence>
+
+					<element name="indicatieAfgeleid" type="brp:JaNee" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="predicaatCode" type="brp:PredicaatCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Voornamen" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="adellijkeTitelCode" type="brp:AdellijkeTitelCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="voorvoegsel" type="brp:Voorvoegsel" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="scheidingsteken" type="brp:Scheidingsteken" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamstam" type="brp:Geslachtsnaamstam" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Beeindiging Ouderschap (UnderConstruction MDO) -->
+	<complexType name="Actie_BeeindigingOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_BeeindigingOuderschap">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:Objecttype_FamilierechtelijkeBetrekkingBeeindigingOuderschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_FamilierechtelijkeBetrekkingBeeindigingOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_FamilierechtelijkeBetrekking">
+				<sequence>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenhedenBeeindigingOuderschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Relatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenhedenBeeindigingOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+					<element name="ouder" type="brp:Objecttype_BeeindigingOuderschap_Bijhouding" nillable="false" minOccurs="1" maxOccurs="2"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_BeeindigingOuderschap_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Ouder">
+				<sequence/>
+				<attribute ref="brp:objecttype" use="required" fixed="Betrokkenheid"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Registratie Nationaliteit - Nieuw voor Geborene -->
+	<complexType name="Actie_RegistratieNationaliteitNieuwBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieNationaliteit">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieNationaliteitNieuwBijGeborene" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieNationaliteitNieuwBijGeborene">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="nationaliteiten" type="brp:Container_PersoonNationaliteitenNieuwBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonNationaliteitenNieuwBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_PersoonNationaliteiten">
+				<sequence>
+					<element name="nationaliteit" type="brp:Objecttype_PersoonNationaliteitNieuwBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="unbounded"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonNationaliteitNieuwBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonNationaliteit">
+				<sequence>
+					<element name="nationaliteitCode" type="brp:Nationaliteitcode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="redenVerkrijgingCode" type="brp:RedenVerkrijgingCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonNationaliteit"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Registratie Nationaliteit - Wijzig voor Geborene (verwijzing op basis van referantieID)-->
+	<complexType name="Actie_RegistratieNationaliteitWijzigBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieNationaliteit">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>					
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieNationaliteitWijzigBijGeborene" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieNationaliteitWijzigBijGeborene">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="nationaliteiten" type="brp:Container_PersoonNationaliteitenWijzigBijGeborene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonNationaliteitenWijzigBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_PersoonNationaliteiten">
+				<sequence>
+					<element name="nationaliteit" type="brp:Objecttype_PersoonNationaliteitWijzigBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="unbounded"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonNationaliteitWijzigBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonNationaliteit">
+				<sequence>
+					<element name="nationaliteitCode" type="brp:Nationaliteitcode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="redenVerkrijgingCode" type="brp:RedenVerkrijgingCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="redenVerliesCode" type="brp:RedenVerliesCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonNationaliteit"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Registratie Indicatie Behandeld als NL - Nieuw voor Geborene (verwijzing op basis van referantieID)  -->
+	<complexType name="Actie_RegistratieBehandeldAlsNederlanderBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieBehandeldAlsNederlander">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieBehandeldAlsNederlanderBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieBehandeldAlsNederlanderBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="indicaties" type="brp:Container_PersoonIndicaties_BehandeldAlsNederlanderBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonIndicaties_BehandeldAlsNederlanderBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_PersoonIndicaties">
+				<sequence>
+					<choice>
+						<element name="behandeldAlsNederlander" type="brp:Indicator_BehandeldAlsNederlanderBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Indicator_BehandeldAlsNederlanderBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Indicator_BehandeldAlsNederlander">
+				<sequence>
+					<element name="waarde" type="brp:Ja" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonIndicatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Acties Registratie Indicatie Staatloos - Nieuw voor Geborene (verwijzing op basis van refID)  -->
+	<complexType name="Actie_RegistratieStaatloosBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieStaatloos">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieStaatloosBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieStaatloosBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="indicaties" type="brp:Container_PersoonIndicaties_StaatloosBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonIndicaties_StaatloosBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_PersoonIndicaties">
+				<sequence>
+					<choice>
+						<element name="staatloos" type="brp:Indicator_StaatloosBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Indicator_StaatloosBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Indicator_Staatloos">
+				<sequence>
+					<element name="waarde" type="brp:Ja" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonIndicatie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Actie Registratie Verstrekkingsbeperking - Nieuw bij geborene; verwijzing niet op basis van TS. -->
+	<complexType name="Actie_RegistratieVerstrekkingsbeperkingBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieVerstrekkingsbeperking">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_RegistratieVerstrekkingsbeperkingBijGeborene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_RegistratieVerstrekkingsbeperkingBijGeborene_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="indicaties" type="brp:Container_PersoonIndicaties_VolledigeVerstrekkingsbeperking_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="verstrekkingsbeperkingen" type="brp:Container_PersoonVerstrekkingsbeperkingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="required"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

@@ -1,0 +1,38 @@
+17 April 2013 - BRP bijhouding versie 0.4.21
+
+De release notes van deze versie: https://www.modernodam.nl/confluence/display/mGBA/BRP+Release+4
+       
+Installatie instructie (voor details, zie "documentatie\Installatie handleiding BRP.pdf":
+0. Maak een backup van de autaut.authenticatiemiddel en autaut.certificaat (of het gehele autaut schema), zodat
+   na het opnieuw opzetten van de database deze weer kan worden teruggezet. Dit ten behoeve van het verlenen van toegang
+   aan de leveranciers (hier staan immers de certificaten in).
+1. Voor deze release is het noodzakelijk om een nieuwe database op te bouwen. Volg daarvoor de instructies zoals die in
+   "documentatie\Installatie handleiding BRP.pdf" zijn vermeld om de database aan te maken en te vullen met de
+   whitebox filler.
+2. Deze release bevat voor de bijhouding niet alleen de bijhouding server, maar ook de notificatie server.
+   Hiervoor moeten de brp.properties worden aangepast:
+   jms.administratieve.handeling.url=tcp://<notificator-host>:<notificator-poort>
+   jms.administratieve.handeling.queue= administratieveHandelingBasisQueue
+   De gekozen notificator poort moet toegankelijk zijn voor andere applicatie servers waar levering en mutatie server
+   componenten op gedeployed zijn. Advies is om hiervoor poort 61616 voor te gebruiken.
+3. Pas de logging configuratie aan, zodat ook de notificatie server logging te zien is. Voeg onderstaande logger
+   packages toe:
+
+    <logger name="org.apache.activemq">
+        <level value="info" />
+    </logger>
+    <logger name="org.apache.camel">
+        <level value="info" />
+    </logger>
+    <logger name="org.springframework.jms">
+        <level value="info" />
+    </logger>
+
+4. Wijzig de syslog appender met de volgende waardes om ervoor te zorgen dat er verschil tussen de machines die loggen zichtbaar te maken:
+       <param name="Facility" value="LOCAL0" />
+       <param name="FacilityPrinting" value="true" />
+       <layout class="org.apache.log4j.PatternLayout">
+           <param name="ConversionPattern" value="%d{dd MMM yyyyHH:mm:ss} %F [%t]  %-5p (%C{5}:%-3L) %m%n"/>
+       </layout>
+
+5. Deploy de brp.war en de notificator.war en start de server.

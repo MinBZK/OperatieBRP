@@ -1,0 +1,113 @@
+
+=== Vader vastgesteld
+Het kan zijn dat de vader van een kind later wordt vastgesteld. Hiervoor is de
+administatieve handeling _Vaststelling Ouderschap_. Bij de vaststelling is het
+mogelijk dat de namen van het kind worden aangepast.
+
+
+==== Wie is de vader?
+Eerst wordt er vastgelegd wie als vader is vastgesteld.
+
+[source, groovy]
+----
+def piet = Persoon.metBsn(98765432)
+vaderVastgesteld() {
+  ouder(piet)
+}
+----
+
+
+==== Vader is er nooit geweest
+In tegenstelling tot het vaststellen van de vader, kan ook het omgekeerde
+gebeuren, namelijk er wordt vastgesteld dat iemand nooit als vader aangemerkt
+had mogen worden. De ouder betrokkenheid wordt dan vervallen, net als de voorkomens
+van ouderschap en ouderlijkgezag die bij deze ouder waren vastgelegd.
+
+[source, groovy]
+----
+def piet = Persoon.metBsn(98765432)
+vaderVastgesteld() {
+  nooitOuderGeweest(piet)
+}
+----
+
+
+==== Namen
+Een persoon heeft _voornamen_, _geslachtsnamen_.
+De namen van de persoon worden geregistreerd in een `namen() {}` blok. In het blok
+kunnen de voornamen, geslachtsnamen worden vastgelegd. Aan het einde van de uitvoer van dit
+blok wordt de samengestelde naam afgeleid, alsmede een voorkomen van de groep _naamgebruik_.
+
+[source,groovy]
+.Het namen blok
+----
+vaderVastgesteld() {
+  namen {
+    //... <1>
+  }
+}
+----
+<1> voornamen etc. komen hier
+
+===== Voornamen
+Een of meer voornamen worden opgegeven. De voornamen krijgen een volgnummer (vanaf *1*) in de
+volgorde waarin ze zijn opgesomd. Indien er al voornamen waren vastgelegd, worden de voorkomens
+daarvan beeindigd.
+
+[source,groovy]
+----
+  namen {
+    voornamen 'Jan', 'Piet', 'Klaas'
+    //...
+  }
+----
+
+===== Geslachtsnaamcomponent
+Geslachtsnaamcomponent kan in verschillende vormen worden vastgelegd. Ook hier geldt dat
+een bestaand voorkomen wordt beeindigd. Indien er slechts
+een is met uitsluitend een _stam_ kan de volgende verkorte versie worden gebruikt:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam 'Jansen'
+  }
+----
+
+Het is ook mogelijk om een geslachtsnaam uitgebreider vast te leggen:
+
+[source,groovy]
+----
+  namen {
+    //...
+    geslachtsnaam(
+      [stam: 'Jansen', voorvoegsel: 'van', scheidingsteken:'-', adellijkeTitel: 'P', predicaat: 'H'] <1>
+    )
+  }
+----
+<1> volledige opties voor een geslachtsnaamcomponent
+
+
+==== Nationaliteiten
+Extra nationaliteiten kunnen worden toegevoegd als dat nodig is.
+
+[source,groovy]
+----
+vaderVastgesteld() {
+  nationaliteiten('Canadese', 'Turkse')
+}
+----
+
+
+==== Indicaties
+Een persoon kan één of meerdere indicaties hebben. Deze kunnen bij erkenning alleen
+worden aangezet.
+
+[source,groovy]
+----
+vaderVastgesteld() {
+  behandeldAlsNederlander(true)
+  staatloos(true)
+}
+----

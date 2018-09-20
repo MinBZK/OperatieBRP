@@ -1,0 +1,71 @@
+
+=== Partijen blokkeren
+Een persoon kan aangeven dat specifieke of alle partijen geen informatie
+van hem/haar mag of mogen ontvangen. Dit is het laten registreren van
+verstrekkingsbeperking(en) door een persoon.
+
+==== Volledige verstrekkingsbeperking plaatsen
+Een persoon kan een "Indicatie Volledige verstrekkingsbeperking" laten registreren.
+Dit houdt effectief in dat alle partijen (die beperkt mogen worden) niet zo maar gegevens ontvangen van deze persoon.
+
+[source,groovy]
+.Volledige verstrekkingsbeperking plaatsen
+----
+verstrekkingsbeperking() {
+    volledig ja
+}
+----
+
+
+==== Volledige verstrekkingsbeperking verwijderen
+Een geregistreerde indicatie volledige verstrekkingsbeperking kan door een persoon
+ook weer worden verwijderd.
+
+[source,groovy]
+.Volledige verstrekkingsbeperking verwijderen
+----
+verstrekkingsbeperking() {
+    volledig nee
+}
+----
+
+
+==== Specifieke verstrekkingsbeperking(en) registreren
+Naast een volledige verstrekkingsbeperking kan een persoon ook een of meerdere specifieke beperkingen
+laten vastleggen. Hiermee worden expliciete partijen weerhouden van het ontvangen van gegevens
+van deze persoon, danwel partijen geinformeerd over deze registraties.
+
+[source,groovy]
+.Specifieke verstrekkingsbeperking registreren
+----
+verstrekkingsbeperking() {
+    registratieBeperkingen(
+        [partij:36101], <1>
+        [omschrijving: "beperking", gemeenteVerordening: 36101] <2>
+    )
+}
+----
+<1> een specifieke partij beperken
+<2> een derde partij (een partij niet bekend in de BRP) beperken. Hierbij wordt een omschrijving
+van deze partij meegegeven, en de gemeente (`gemeenteVerordening`) die dit vastlegt.
+
+==== Specifieke verstrekkingsbeperking(en) vervallen
+Naast een volledige verstrekkingsbeperking kan een persoon ook een of meerdere specifieke beperkingen
+laten vastleggen. Hiermee worden expliciete partijen weerhouden van het ontvangen van gegevens
+van deze persoon, danwel partijen geinformeerd over deze registraties. Deze verstrekkingsbeperkingen kunnen
+ook weer vervallen worden.
+
+[source,groovy]
+.Specifieke verstrekkingsbeperking vervallen
+----
+verstrekkingsbeperking() {
+    vervalBeperkingen(
+        [partij:36101], <1>
+        [omschrijving: "beperking", gemeenteVerordening: 36101] <2>
+    )
+}
+----
+<1> een verstrekkingsbeperking op een specifieke partij vervallen
+<2> een verstrekkingsbeperking op een derde partij (een partij niet bekend in de BRP) vervallen. Hierbij wordt een omschrijving
+van deze partij meegegeven, en de gemeente (`gemeenteVerordening`) die dit vastlegt. Mocht er geen bestaande verstrekkingsbeperking
+bestaan voor de opgegeven waarden, dan wordt er een foutmelding getoond.

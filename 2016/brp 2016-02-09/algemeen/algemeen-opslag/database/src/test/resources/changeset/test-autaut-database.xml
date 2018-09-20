@@ -1,0 +1,47 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+    http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd
+">
+
+    <!-- Deze changelog test de proeftuin-autaut changesets.
+    Bij DDL updates verifieert deze changelog of dat de gegenereerde proeftuin-autaut.sql nog valide is. -->
+
+    <property name="afnemer.uri" value="http://127.0.0.1:8080/brp-kennisgeving-ontvanger/BrpBerichtVerwerkingService" />
+    <property name="afnemer.partijCode" value="51801" />
+
+    <!--&lt;!&ndash; Er staan postgres specifieke queries in deze changelog, vandaar dat we hem skippen als we geen postgres draaien. &ndash;&gt;-->
+    <!--<preConditions onFail="FAIL">-->
+        <!--<dbms type="postgresql"/>-->
+    <!--</preConditions>-->
+
+    <changeSet id="autaut-verwijderen" author="brp" >
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sqlFile path="autaut/afnemers-verwijderen.sql" stripComments="true" splitStatements="true" />
+    </changeSet>
+
+    <changeSet id="afnemer-toevoegen" author="brp" >
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sqlFile path="autaut/afnemer-toevoegen-template.sql" stripComments="true" splitStatements="true" />
+    </changeSet>
+
+    <changeSet id="afnemerindicaties-terugzetten" author="brp" >
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sqlFile path="autaut/afnemerindicaties-koppelen-aan-abonnement.sql" stripComments="true" splitStatements="true" />
+    </changeSet>
+
+    <changeSet id="koppelen-toegangabo-authmiddel" author="brp" >
+        <preConditions onFail="MARK_RAN">
+            <dbms type="postgresql"/>
+        </preConditions>
+        <sqlFile path="autaut/authenticatiemiddel-koppelen-aan-toegangabonnement.sql" stripComments="true" splitStatements="true" />
+    </changeSet>
+
+</databaseChangeLog>

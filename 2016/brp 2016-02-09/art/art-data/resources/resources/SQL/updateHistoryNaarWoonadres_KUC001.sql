@@ -1,0 +1,2 @@
+UPDATE kern.his_persadres SET srt=1 WHERE persadres in (select id from kern.persadres where pers in(select id from kern.pers where bsn=${DataSource Values#|objectid.burgerservicenummer_ipo_B01|})) AND
+(dateindegel IS NOT NULL OR tsverval IS NOT NULL);

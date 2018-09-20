@@ -1,0 +1,99 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.expressietaal.expressies.operatoren;
+
+import nl.bzk.brp.expressietaal.EvaluatieFoutCode;
+import nl.bzk.brp.expressietaal.Expressie;
+import nl.bzk.brp.expressietaal.expressies.FoutExpressie;
+import nl.bzk.brp.expressietaal.expressies.literals.BooleanLiteralExpressie;
+import nl.bzk.brp.expressietaal.expressies.literals.BrpObjectExpressie;
+import nl.bzk.brp.expressietaal.expressies.literals.DatumLiteralExpressie;
+import nl.bzk.brp.expressietaal.expressies.literals.NullValue;
+import nl.bzk.brp.expressietaal.expressies.literals.StringLiteralExpressie;
+
+/**
+ * Representeert een gelijkheidsoperatorexpressie.
+ */
+public class WildcardOperatorExpressie extends AbstractVergelijkingsoperatorExpressie {
+
+    /**
+     * Constructor.
+     *
+     * @param termLinks  Linkerterm van de operator.
+     * @param termRechts Rechterterm van de operator.
+     */
+    public WildcardOperatorExpressie(final Expressie termLinks, final Expressie termRechts)
+    {
+        super(termLinks, termRechts);
+    }
+
+    @Override
+    protected final String operatorAlsString() {
+        return "%=";
+    }
+
+    @Override
+    public final int getPrioriteit() {
+        return PRIORITEIT_GELIJKHEIDSOPERATOR;
+    }
+
+    @Override
+    protected final Expressie pasToeOpGetallen(final Expressie waardeLinks, final Expressie waardeRechts) {
+        return BooleanLiteralExpressie.getExpressie(waardeLinks.alsInteger() == waardeRechts.alsInteger());
+    }
+
+    @Override
+    protected final Expressie pasToeOpGroteGetallen(final Expressie waardeLinks, final Expressie waardeRechts) {
+        return BooleanLiteralExpressie.getExpressie(waardeLinks.alsLong() == waardeRechts.alsLong());
+    }
+
+    @Override
+    protected final Expressie pasToeOpBooleans(final Expressie waardeLinks, final Expressie waardeRechts) {
+        return BooleanLiteralExpressie.getExpressie(waardeLinks.alsBoolean() == waardeRechts.alsBoolean());
+    }
+
+    @Override
+    protected final Expressie pasToeOpStrings(final Expressie waardeLinks, final Expressie waardeRechts) {
+        boolean resultaat = false;
+        if (waardeLinks != null && waardeRechts != null) {
+            if (waardeRechts instanceof StringLiteralExpressie) {
+                resultaat = waardeLinks.alsString().matches(
+                    ((StringLiteralExpressie) waardeRechts).getStringWaardeAlsReguliereExpressie());
+
+            } else {
+                resultaat = waardeLinks.alsString().equals(waardeRechts.alsString());
+            }
+        }
+        return BooleanLiteralExpressie.getExpressie(resultaat);
+    }
+
+    @Override
+    protected final Expressie pasToeOpDatums(final DatumLiteralExpressie waardeLinks, final DatumLiteralExpressie waardeRechts)
+    {
+        final boolean jaarMatch = waardeRechts.getJaar().isOnbekend()
+            || waardeLinks.getJaar().getWaarde() == waardeRechts.getJaar().getWaarde();
+        final boolean maandMatch = waardeRechts.getMaand().isOnbekend()
+            || waardeLinks.getMaand().getWaarde() == waardeRechts.getMaand().getWaarde();
+        final boolean dagMatch = waardeRechts.getDag().isOnbekend()
+            || waardeLinks.getDag().getWaarde() == waardeRechts.getDag().getWaarde();
+        return BooleanLiteralExpressie.getExpressie(jaarMatch && maandMatch && dagMatch);
+    }
+
+    @Override
+    protected final Expressie pasToeOpLijsten(final Expressie waardeLinks, final Expressie waardeRechts) {
+        // nog niet toepasbaar op lijsten
+        return NullValue.getInstance();
+    }
+
+    @Override
+    protected final Expressie pasToeOpBrpObjecten(final BrpObjectExpressie waardeLinks,
+        final BrpObjectExpressie waardeRechts)
+    {
+        return new FoutExpressie(EvaluatieFoutCode.INCORRECTE_EXPRESSIE,
+            "Operator niet gedefinieerd voor BRP-objecten");
+    }
+}

@@ -1,0 +1,53 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    ">
+
+    <bean id="synchronisatiePersoonBerichtVerwerker"
+          class="nl.bzk.brp.levering.synchronisatie.service.SynchronisatieBerichtVerwerker">
+        <property name="stappen" ref="synchronisatiePersoonStappen"/>
+    </bean>
+
+    <bean id="synchronisatiePersoonStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.webservice.business.stappen.AbstractBerichtVerwerkingStap">
+                <!-- Stap die de berichten valideert aan de hand van de bean annotaties. -->
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.BerichtGegevensValidatieStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.HaalLeveringsautorisatieEnPartijGegevensOpStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.TransactieStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.HaalBetrokkenPersoonHisVolledigOpStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.VoorbereidVerwerkingStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.VerwerkRegelsStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.MaakMaxBerichtStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.VoegStuurgegevensToeStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.OnderzoekenFilterStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.VoorkomenFilterStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.AttributenFilterStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.BetrokkenheidBepaalMagLeverenStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.AutoriseerOnderzoekenStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.FilterVerantwoordingsinformatieStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.ZetPersoonObjectSleutelVoorOnderzoekStap" />
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.MaakUitgaandBerichtStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.persoon.ZetBerichtOpQueueStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="synchronisatieStamgegevenBerichtVerwerker"
+          class="nl.bzk.brp.levering.synchronisatie.service.SynchronisatieBerichtVerwerker">
+        <property name="stappen" ref="synchronisatieStamgegevenStappen"/>
+    </bean>
+
+    <bean id="synchronisatieStamgegevenStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.webservice.business.stappen.AbstractBerichtVerwerkingStap">
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.HaalLeveringsautorisatieEnPartijGegevensOpStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.TransactieStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.VerwerkRegelsStap"/>
+                <bean class="nl.bzk.brp.levering.synchronisatie.stappen.stamgegeven.BerichtVerwerkingsStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+</beans>

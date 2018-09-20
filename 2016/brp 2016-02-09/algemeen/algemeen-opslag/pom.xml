@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-parent</artifactId>
+        <groupId>nl.bzk.brp</groupId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../../brp-parent</relativePath>
+    </parent>
+    <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+    <artifactId>brp-algemeen-opslag</artifactId>
+    <packaging>pom</packaging>
+
+    <name>BRP Algemeen Opslag</name>
+
+    <modules>
+        <module>database</module>
+        <module>dataaccess</module>
+        <module>blobifier</module>
+    </modules>
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/scm/algemeen/algemeen-opslag/trunk/algemeen/algemeen-opslag</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-opslag</developerConnection>
+    </scm>
+
+    <build>
+        <plugins>
+            <plugin>
+                <!--properties voor test uitpakken-->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.7</version>
+                <executions>
+                    <execution>
+                        <id>unpack-test-properties</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-test-resources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.properties</groupId>
+                                    <artifactId>brp-test-properties</artifactId>
+                                    <version>${project.version}</version>
+                                    <overWrite>false</overWrite>
+                                    <outputDirectory>${project.build.directory}/test-resources/template</outputDirectory>
+                                    <includes>brp-test.properties</includes>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--properties voor test uitpakken filteren zodat ze gevuld worden -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>filter-test-properties</id>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <phase>process-test-resources</phase>
+                        <configuration>
+
+                            <resources>
+
+                                <resource>
+                                    <directory>${project.build.directory}/test-resources/template</directory>
+                                    <filtering>true</filtering>
+                                    <includes>
+                                        <include>*.properties</include>
+                                    </includes>
+                                </resource>
+                            </resources>
+
+                            <overwrite>true</overwrite>
+                            <outputDirectory>${project.build.directory}/test-classes</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+        <!-- dependency voor de reactor om te forceren dat dit gebuild is voor het gebruikt wordt in een multithreaded build -->
+        <dependency>
+            <groupId>nl.bzk.brp.properties</groupId>
+            <artifactId>brp-test-properties</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.model</groupId>
+                <artifactId>brp-algemeen-model-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.util</groupId>
+                <artifactId>brp-algemeen-util-logging</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen.model</groupId>
+                <artifactId>brp-algemeen-model-model</artifactId>
+                <version>${project.version}</version>
+                <classifier>tests</classifier>
+                <scope>test</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <profiles>
+        <profile>
+            <id>release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>attach-javadocs</id>
+                                <goals>
+                                    <goal>jar</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

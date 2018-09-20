@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+         http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+    <context:property-placeholder system-properties-mode="OVERRIDE" location="classpath*:brp-*.properties"/>
+
+	<!-- Externe beans -->
+	<!-- Afnemerindicaties (afnemerindicatiesService) -->
+    <import resource="classpath:afnemerindicaties-algemeen-beans.xml" />
+	<!-- Webservice (objectsleutelService) -->
+    <import resource="classpath:webservice-business-beans.xml" />
+    <!-- Bijhouding (bijhoudingBerichtVerwerker) -->
+    <import resource="classpath:business-beans.xml" />
+
+    <import resource="classpath:lo3-conversie-beans.xml" />
+    <import resource="classpath:gba-algemeen-beans.xml" />
+
+	<!-- Request-scope nodig voor bijhouding -->
+    <bean class="org.springframework.beans.factory.config.CustomScopeConfigurer">
+        <property name="scopes">
+            <map>
+                <entry key="request">
+                    <ref bean="gbaRequestScope" />
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+	<bean name="gbaRequestScope" class="nl.bzk.brp.gba.centrale.scope.RequestScope" />
+
+	<!-- Beans -->
+
+
+	<bean name="gbaAntwoordBerichtFactory" class="nl.bzk.brp.gba.centrale.berichten.AntwoordBerichtFactory" />
+
+	<import resource="gba-centrale-datasource.xml" />
+	<import resource="gba-centrale-jms.xml" />
+	<import resource="gba-centrale-listeners.xml" />
+	<import resource="gba-centrale-jmx.xml" />
+         
+</beans>

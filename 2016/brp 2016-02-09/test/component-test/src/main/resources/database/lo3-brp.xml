@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:annotation-config/>
+    <context:component-scan base-package="nl.bzk.brp.testrunner.component.services.gbasync"/>
+
+    <import resource="classpath:conversie-beans.xml"/>
+    <import resource="classpath:synchronisatie-dal.xml"/>
+
+    <!-- Configuratie voor beide profielen -->
+    <!-- Construct Atomikos USerTransactionService, needed to specify Atomikos settings -->
+    <bean id="atomikosUserTransactionService" class="com.atomikos.icatch.config.UserTransactionServiceImp"
+          init-method="init" destroy-method="shutdownForce">
+        <constructor-arg>
+            <!-- IMPORTANT: specify all Atomikos properties here -->
+            <props>
+                <prop key="com.atomikos.icatch.service">
+                    com.atomikos.icatch.standalone.UserTransactionServiceFactory
+                </prop>
+                <prop key="com.atomikos.icatch.tm_unique_name">transactionmanager_${uniekeNaam}_
+                </prop>
+                <prop key="com.atomikos.icatch.log_base_name">transactionlog_${uniekeNaam}_</prop>
+                <prop key="com.atomikos.icatch.log_base_dir">target/</prop>
+                <prop key="com.atomikos.icatch.output_dir">target/</prop>
+            </props>
+        </constructor-arg>
+    </bean>
+
+    <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init"
+          destroy-method="close" depends-on="atomikosUserTransactionService">
+        <!-- IMPORTANT: disable startup because the userTransactionService above does this -->
+        <property name="startupTransactionService" value="false"/>
+
+        <!--  when close is called, should we force transactions to terminate or not? -->
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+
+    <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp"
+          depends-on="atomikosUserTransactionService">
+        <property name="transactionTimeout">
+            <value>3600</value>
+        </property>
+    </bean>
+
+    <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+    <bean id="syncDalTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager"/>
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction"/>
+        </property>
+    </bean>
+
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <property name="database" value="POSTGRESQL"/>
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQLDialect"/>
+    </bean>
+
+    <bean id="syncDalEntityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="BrpEntities"/>
+        <property name="dataSource" ref="syncDalDataSource"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"/>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQL82Dialect</prop>
+                <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">synchronisatie-dal-stamtabel-ehcache.xml</prop>
+                <prop key="hibernate.generate_statistics">false</prop>
+                <prop key="hibernate.transaction.jta.platform">nl.bzk.migratiebrp.synchronisatie.dal.repository.jta.AtomikosJtaPlatform</prop>
+                <!--<prop key="hibernate.hbm2ddl.auto">validate</prop>-->
+            </props>
+        </property>
+    </bean>
+
+    <bean id="syncDalDataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.migratiebrp.util.common.UniqueName">
+                <property name="baseName" value="${uniekeNaam}"/>
+            </bean>
+        </property>
+        <property name="url" value="jdbc:postgresql://${db.ServerName}:${db.PortNumber}/brp"/>
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="user" value="brp"/>
+        <property name="password" value="brp"/>
+        <property name="maxPoolSize" value="20"/>
+        <property name="minPoolSize" value="10"/>
+    </bean>
+
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+</beans>

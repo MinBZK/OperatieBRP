@@ -1,0 +1,32 @@
+BACKUP EN RESTORE CERTIFICATEN EN AUTHENTICATIEMIDDELEN
+
+In release 9 dient de gehele database weer opnieuw uitgerold te worden, maar met behoud van de inhoud van de
+tabellen autaut.certificaat en autaut.authenticatiemiddel (zie ook paragraaf 2.1 in de installatie handleiding BRP
+en de LEESMIJ bij deze release). Normaal kan dit door een backup te maken van deze tabellen en na het draaien van
+de whiteboxfiller een restore te doen van deze tabellen, maar daar met Release 9 er een nieuwe database structuur is
+en deze ook de genoemde tabellen raakt, kan dat bij deze release helaas niet. Er zal daarom een andere procedure
+gevolgd moeten worden en deze staat in dit document beschreven.
+
+
+BACKUP TABELLEN
+Voordat de huidige database wordt verwijderd, dienen eerst de volgende punten uitgevoerd te worden:
+
+  - Kopieer de benodigde data uit de Certificaat en Authenticatiemiddel tabellen naar tijdelijke tabellen middels
+    de volgende SQL statements:
+
+    SELECT id, partij, rol, certificaattbvondertekening AS certificaat INTO autaut.bup_authenticatiemiddel from autaut.authenticatiemiddel;
+    SELECT c.id, c.subject, c.serial, c.signature, (SELECT a.partij FROM autaut.authenticatiemiddel a WHERE certificaattbvondertekening = c.id) AS partij INTO autaut.bup_certificaat FROM autaut.certificaat c;
+
+  - Maak een backup van deze tijdelijk tabellen (command line uitvoeren en zelf van credentials voorzien):
+
+    pg_dump -U <username> -h <hostname> -a --column-inserts -t autaut.bup_authenticatiemiddel -t autaut.bup_certificaat <databasename> > bup_auth_en_cert.sql
+
+
+RESTORE TABELLEN
+Als de nieuwe database is gevuld, dan dienen de volgende punten uitgevoerd te worden:
+
+  - Wijzig het backup bestand om de originele tabelnamen te gebruiken.
+
+    sed -e 's/bup_//' bup_auth_en_cert.sql > auth_en_cert.sql
+
+  - Voer het aangepaste 'auth_en_cert.sql' bestand nu uit op de nieuwe database.

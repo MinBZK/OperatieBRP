@@ -1,0 +1,116 @@
+
+=== Huwelijk en Geregistreerd partnerschap
+De feestelijke gebeurtenis het huwelijk of geregistreerd partnerschap. +
+_Huwelijk_ en _Geregistreerd partnerschap_ worden op nagenoeg dezelfde manier vastgelegd.
+Voor beiden zijn ook dezelfde gegevens benodigd, namelijk de aanvangsdatum en plaats,
+de partner(s) en hoe naamgebruik wordt overgenomen. Het verschil in het aanduiden van
+een huwelijk of partnerschap is het volgende:
+
+[source, groovy]
+----
+huwelijk() { } <1>
+partnerschap() { } <2>
+----
+<1> Het vastleggen van een huwelijk
+<2> Het vastleggen van een geregistreerd partnerschap
+
+Onderstaande voorbeelden gebruiken het vastleggen van een huwelijk, maar de inhoud
+kan dus ook gebruikt worden voor een geregistreerd partnerschap.
+
+
+==== Huwelijk / Geregistreerd partnerschap in Nederland
+De huwelijk gebeurtenis begint met het aanduiden van wanneer en waar:
+
+[source, groovy]
+----
+huwelijk() {
+  op '2010/03/24' te 'Monster' gemeente 'Westland'
+  op 19890531 te "'s-Gravenhage" gemeente 1786
+  op(20090000).te('Groningen').gemeente('Groningen')
+}
+----
+De datum is een datum zoals ook genoteerd wordt in de expressietaal. Dit mag dus ook
+een (deels)onbekende datum zijn, waarbij bijvoorbeeld dag of maand als `00` wordt
+geschreven. Daarna volgt de woonplaats, een Plaats in de BRP. Als laatste de gemeente.
+
+
+==== Huwelijk / Geregistreerd partnerschap in Buitenland
+De huwelijk gebeurtenis begint met het aanduiden van wanneer en waar, in
+tegenstelling tot een huwelijk in Nederland, wordt nu het land meegegeven.
+
+[source, groovy]
+----
+huwelijk() {
+  op '2010/03/24' te 'Caïro' land 'Egypte'
+  op(20090000).te('Antwerpen').land('België')
+}
+----
+De datum is een datum zoals ook genoteerd wordt in de expressietaal. Dit mag dus ook
+een (deels)onbekende datum zijn, waarbij bijvoorbeeld dag of maand als `00` wordt
+geschreven. Daarna volgt de woonplaats, een Plaats in de BRP. Als laatste de gemeente.
+
+
+==== De partner
+Na de huwelijksdatum en plaats wordt opgegeven met wie het huwelijk of partnerschap wordt
+aangegaan. Dit moet een persoon zijn, die ofwel uit de database wordt opgehaald, ofwel
+wordt gecreeerd in hetzelfde DSL script.
+
+[source, groovy]
+----
+def partner = Persoon.metBsn(12345678) <1>
+huwelijk() {
+  ...
+  met(partner)
+  met partner
+}
+----
+<1> Persoon opgehaald uit de database o.b.v. burgerservicenummer
+
+
+==== Naamgebruik
+Bij een huwelijk of Geregistreerd partnerschap kunnen de partners ervoor kiezen
+om het naamgebruik aan te passen. De ene partner neemt dan de naam van de andere
+partner over. Dit naamgebruik kan worden afgeleid, of met de gebeurtenis worden
+opgegeven.
+
+===== Afgeleiding naamgebruik
+Naamgebruik kan worden afgeleid door de DSL. Hierbij kunnen 2 opties worden opgegeven:
+`eigen`, `partner`. De opties mogen gecombineerd worden dus `'partner, eigen'` of als een
+ lijst worden opgegeven `'partner', 'eigen'` De afleiding moge duidelijk zijn
+uit de volgorde van de opties.
+
+[source, groovy]
+----
+def truus = Persoon.metBsn(12345678)
+huwelijk() {
+  naamgebruik('eigen, partner') <1>
+  naamgebruik(truus, 'partner') <2>
+
+  naamgebruik(truus, 'parter', 'eigen') <3>
+}
+----
+<1> Afleiding naamgebruik voor de beschreven (hoofd)persoon
+<2> `truus` neemt de naam van de beschreven (hoofd)persoon over. Vandaar de
+aanduiding `parnter`, van wie truus dus de naam overneemt.
+<3> beschreven naamgebruik mag ook een lijst (maximaal 2) van de opties zijn, dus `eigen` en `partner` los
+
+===== Opgegeven naamgebruik
+Het naamgebruik kan ook worden opgegeven bij de gebeurtenis. Ook dit kan zowel
+voor de hoofdpersoon als voor de partner. Opgegeven waardes zijn allen optioneel.
+
+[source, groovy]
+----
+def truus = Persoon.metBsn(12345678)
+huwelijk() {
+  naamgebruik([
+    voornamen: 'Piet',
+    geslachtsnaamstam: 'Vries',
+    voorvoegsel: 'de',
+    scheidingsteken: '-',
+    predicaat: 'P',
+    adellijkeTitel: 'K']) <1>
+  naamgebruik truus, [:] <2>
+}
+----
+<1> naamgebruik voor de (hoofd)persoon
+<2> naamgebruik voor de partner

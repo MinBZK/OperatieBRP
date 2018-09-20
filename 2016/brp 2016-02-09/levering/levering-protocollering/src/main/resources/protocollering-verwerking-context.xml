@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jms="http://www.springframework.org/schema/jms"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+             http://www.springframework.org/schema/jms http://www.springframework.org/schema/jms/spring-jms.xsd
+
+       ">
+
+    <context:annotation-config/>
+
+    <context:property-placeholder
+            system-properties-mode="OVERRIDE"
+            location="classpath*:brp-*.properties"/>
+
+    <import resource="classpath:protocollering-datasource.xml"/>
+
+    <context:component-scan base-package="nl.bzk.brp.protocollering"/>
+
+    <bean id="cachedConnectionFactoryBerichtenCentrale"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <property name="targetConnectionFactory" ref="jmsConnectionFactoryProtocollering"/>
+        <property name="sessionCacheSize" value="10"/>
+        <property name="reconnectOnException" value="true"/>
+    </bean>
+
+
+    <!-- Inkomende protocollering berichten queue -->
+    <bean id="jmsConnectionFactoryProtocollering" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="failover:(${protocollering.jms.url})?maxReconnectAttempts=3"/>
+        <property name="clientIDPrefix" value="protocollering"/>
+        <property name="connectionIDPrefix" value="protocollering"/>
+        <property name="nonBlockingRedelivery" value="false"/>
+    </bean>
+
+    <jms:listener-container container-type="default" connection-factory="cachedConnectionFactoryBerichtenCentrale"
+                            acknowledge="auto" destination-type="queue"
+                            concurrency="${protocollering.jms.concurrency}" transaction-manager="jmsTransactionManager"
+                            error-handler="protocolleringFoutAfhandeling">
+        <jms:listener id="ProtocolleringConsumer" destination="${protocollering.jms.queue}"
+                      ref="protocolleringBerichtVerwerker"/>
+
+    </jms:listener-container>
+
+    <bean id="jmsTransactionManager"
+          class="org.springframework.jms.connection.JmsTransactionManager">
+        <property name="connectionFactory" ref="cachedConnectionFactoryBerichtenCentrale"/>
+        <property name="validateExistingTransaction" value="true"/>
+    </bean>
+
+</beans>

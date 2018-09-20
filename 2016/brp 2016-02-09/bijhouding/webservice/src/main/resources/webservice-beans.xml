@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-extension-jaxws.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+	<import resource="classpath:datasource-beans.xml" />
+	<import resource="classpath:business-beans.xml" />
+	<import resource="classpath:dataaccess-beans.xml" />
+    <import resource="classpath:webservice-basis-beans.xml" />
+    <import resource="classpath:locking-beans.xml" />
+
+    <context:annotation-config/>
+    <context:spring-configured/>
+
+    <context:component-scan base-package="nl.bzk.brp.web" />
+
+	<context:property-placeholder system-properties-mode="OVERRIDE"
+                                  location="classpath*:brp-*.properties"
+                                  ignore-resource-not-found="true" />
+
+    <!-- Ehcache library setup -->
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager">
+        <property name="cacheManager" ref="ehcache" />
+    </bean>
+    <bean id="ehcache"
+          class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+        <!--<property name="configLocation" value="classpath:ehcache.xml" />-->
+    </bean>
+
+	<bean id="jibxDatabindingBean" class="org.apache.cxf.jibx.JibxDataBinding" />
+
+
+	<bean id="wss4jOutInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+		<constructor-arg>
+			<map>
+				<entry key="action" value="Timestamp Signature" />
+				<entry key="user" value="${security.privatekey.alias}" />
+				<entry key="signaturePropRefId" value="signatureProperties" />
+				<entry key="signatureProperties">
+					<props>
+						<prop key="org.apache.ws.security.crypto.provider">org.apache.ws.security.components.crypto.Merlin</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.type">jks</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.password">${security.keystore.private.password}</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.alias">${security.privatekey.alias}</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.file">${security.keystore.private.file}</prop>
+					</props>
+				</entry>
+				<entry key="signatureKeyIdentifier" value="DirectReference"/>
+				<!--<entry key="signatureParts" value="{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp;{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body"/>-->
+				<entry key="signatureParts" value="{Element}{http://schemas.xmlsoap.org/soap/envelope/}Body;{Element}{http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd}Timestamp"/>
+				<entry key="passwordCallbackRef">
+					<bean class="nl.bzk.brp.webservice.kern.interceptor.helper.ServerPasswordCallback">
+						<property name="password" value="${security.privatekey.password}" />
+					</bean>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="lezenSchrijvenEntityManagerFactory" name="nl.bzk.brp.lezenschrijven"
+		  class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		  depends-on="hibernateLoggingPropInitializer" primary="true">
+		<property name="persistenceUnitName" value="nl.bzk.brp.lezenschrijven"/>
+		<property name="packagesToScan" value="nl.bzk.brp.model" />
+		<property name="dataSource" ref="lezenSchrijvenDataSource" />
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+		<property name="jpaProperties">
+			<props>
+				<prop key="hibernate.cache.use_second_level_cache">false</prop>
+				<prop key="hibernate.cache.use_query_cache">false</prop>
+				<prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+				<prop key="hibernate.ejb.entitymanager_factory_name">nl.bzk.brp.lezenschrijven</prop>
+				<prop key="hibernate.ejb.interceptor">nl.bzk.brp.model.basis.ALaagAfleidingInterceptor</prop>
+			</props>
+		</property>
+	</bean>
+
+</beans>

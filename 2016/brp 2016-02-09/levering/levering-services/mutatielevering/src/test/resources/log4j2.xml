@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %marker %-5level %logger{36} - %msg%n"/>
+        </Console>
+
+        <RollingFile name="Systeem" fileName="target/logs/brp-systeem.log"
+        filePattern="target/logs/brp-systeem-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT"/>
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy />
+        </RollingFile>
+
+        <RollingFile name="Functioneel" fileName="target/logs/brp-functioneel.log"
+        filePattern="target/logs/brp-functioneel-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy />
+        </RollingFile>
+
+        <!-- Perf4J appenders -->
+        <!--
+        This AsyncCoalescingStatisticsAppender groups StopWatch log messages
+        into GroupedTimingStatistics messages which it sends on the
+        file appender defined below
+        -->
+        <appender name="CoalescingStatistics"
+                  class="org.perf4j.log4j.AsyncCoalescingStatisticsAppender">
+            <!--
+            The TimeSlice option is used to determine the time window for which
+            all received StopWatch logs are aggregated to create a single
+            GroupedTimingStatistics log. Here we set it to 10 seconds, overriding
+            the default of 30000 ms
+            -->
+            <param name="TimeSlice" value="1000000"/>
+            <appender-ref ref="fileAppender"/>
+        </appender>
+        <!-- This file appender is used to output aggregated performance statistics -->
+        <appender name="fileAppender" class="org.apache.log4j.FileAppender">
+            <param name="File" value="target/logs/perfStats.log"/>
+            <layout class="org.apache.log4j.PatternLayout">
+                <param name="ConversionPattern" value="%m%n"/>
+            </layout>
+        </appender>
+
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Systeem"/>
+            <AppenderRef ref="Functioneel"/>
+            <AppenderRef ref="fileAppender"/>
+        </Root>
+        <logger name="nl.bzk.brp" level="DEBUG"/>
+        <logger name="org.hibernate" level="INFO"/>
+        <logger name="org.springframework" level="WARN"/>
+        <logger name="org.apache" level="WARN"/>
+        <logger name="org.dbunit.dataset" level="ERROR"/>
+
+        <!-- Loggers -->
+        <!--
+          The Perf4J logger. Note that org.perf4j.TimingLogger is the value of the
+          org.perf4j.StopWatch.DEFAULT_LOGGER_NAME constant. Also, note that
+          additivity is set to false, which is usually what is desired - this means
+          that timing statements will only be sent to this logger and NOT to
+          upstream loggers.
+        -->
+        <logger name="org.perf4j.TimingLogger" additivity="false">
+            <level value="INFO"/>
+            <appender-ref ref="CoalescingStatistics"/>
+        </logger>
+
+    </Loggers>
+</Configuration>

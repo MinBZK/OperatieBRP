@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="
+           http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+    <context:property-placeholder
+            system-properties-mode="OVERRIDE"
+            location="classpath*:brp-*.properties"
+                                  ignore-resource-not-found="true"/>
+
+    <context:annotation-config/>
+    <context:component-scan base-package="nl.bzk.brp.levering.afnemervoorbeeld"/>
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+    <import resource="classpath:jmx-management-beans.xml"/>
+
+
+    <bean id="brpVoorbeeldKennisgevingOntvanger"
+          class="nl.bzk.brp.levering.afnemervoorbeeld.BrpVoorbeeldKennisgevingOntvanger"/>
+
+    <jaxws:endpoint id="brpBerichtVerwerkingService" implementor="#brpVoorbeeldKennisgevingOntvanger"
+		    address="/BrpBerichtVerwerkingService" xmlns:s="http://www.bzk.nl/brp/levering/berichtverwerking/service"
+		    serviceName="s:BrpBerichtVerwerkingService" endpointName="s:lvgSynchronisatieVerwerking">
+
+        <jaxws:properties>
+            <entry key="schema-validation-enabled" value="false"/>
+            <entry key="faultStackTraceEnabled" value="true"/>
+            <entry key="exceptionMessageCauseEnabled" value="true"/>
+        </jaxws:properties>
+
+        <jaxws:inInterceptors>
+            <bean class="nl.bzk.brp.levering.afnemervoorbeeld.LeveringBerichtArchiveringInterceptor" />
+        </jaxws:inInterceptors>
+        <jaxws:inFaultInterceptors>
+            <bean class="nl.bzk.brp.levering.afnemervoorbeeld.LeveringBerichtArchiveringInterceptor" />
+        </jaxws:inFaultInterceptors>
+
+    </jaxws:endpoint>
+
+    <bean id="afnemerDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" lazy-init="true">
+        <property name="driverClassName" value="${jdbc.driverClassName:default}"/>
+        <property name="url" value="${jdbc.url:default}"/>
+        <property name="username" value="${jdbc.username:default}"/>
+        <property name="password" value="${jdbc.password:default}"/>
+        <property name="initialSize" value="${jdbc.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.pool.maxActive:100}"/>
+        <property name="minIdle" value="${jdbc.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.pool.maxIdle:5}"/>
+        <property name="maxWait" value="30000"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate" lazy-init="true" >
+        <property name="dataSource" ref="afnemerDataSource"/>
+    </bean>
+</beans>

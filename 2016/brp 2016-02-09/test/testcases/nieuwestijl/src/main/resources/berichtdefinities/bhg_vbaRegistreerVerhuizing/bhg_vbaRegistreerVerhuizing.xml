@@ -1,0 +1,356 @@
+<brp:bhg_vbaRegistreerVerhuizing xmlns:brp="http://www.bzk.nl/brp/brp0200">
+    <brp:stuurgegevens brp:communicatieID="${stuurgegevens.communicatieID}">
+        <brp:zendendePartij>${stuurgegevens.zendendePartij}</brp:zendendePartij>
+        <brp:zendendeSysteem>${stuurgegevens.zendendeSysteem}</brp:zendendeSysteem>
+        <brp:referentienummer>${stuurgegevens.referentienummer}</brp:referentienummer>
+        <brp:tijdstipVerzending>${stuurgegevens.tijdstipVerzending}</brp:tijdstipVerzending>
+    </brp:stuurgegevens>
+    <brp:parameters brp:communicatieID="${parameters.communicatieID}">
+        <brp:verwerkingswijze>${parameters.verwerkingswijze}</brp:verwerkingswijze>
+    </brp:parameters>
+    <!--You have a CHOICE of the next 3 items at this level-->
+    <brp:verhuizingBinnengemeentelijk brp:communicatieID="${verhuizingBinnengemeentelijk.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${verhuizingBinnengemeentelijk.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${verhuizingBinnengemeentelijk.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            [#list verhuizingBinnengemeentelijk.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+                <!--Optional:-->
+                <brp:elementNaam>${gedeblokkeerdeMelding.elementNaam}</brp:elementNaam>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list verhuizingBinnengemeentelijk.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieAdres = verhuizingBinnengemeentelijk.acties.registratieAdres]
+            <brp:registratieAdres brp:communicatieID="${registratieAdres.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieAdres.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieAdres.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieAdres.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:adressen>
+                        <brp:adres brp:communicatieID="${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.communicatieID}" brp:objecttype="PersoonAdres">
+                            <brp:soortCode>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.soortCode}</brp:soortCode>
+                            <brp:redenWijzigingCode>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.redenWijzigingCode}</brp:redenWijzigingCode>
+                            <!--Optional:-->
+                            <brp:aangeverAdreshoudingCode>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.aangeverAdreshoudingCode}</brp:aangeverAdreshoudingCode>
+                            <brp:datumAanvangAdreshouding>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.datumAanvangAdreshouding}</brp:datumAanvangAdreshouding>
+                            <!--Optional:-->
+                            <brp:identificatiecodeAdresseerbaarObject>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.identificatiecodeAdresseerbaarObject}</brp:identificatiecodeAdresseerbaarObject>
+                            <!--Optional:-->
+                            <brp:identificatiecodeNummeraanduiding>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.identificatiecodeNummeraanduiding}</brp:identificatiecodeNummeraanduiding>
+                            <!--Optional:-->
+                            <brp:naamOpenbareRuimte>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.naamOpenbareRuimte}</brp:naamOpenbareRuimte>
+                            <!--Optional:-->
+                            <brp:afgekorteNaamOpenbareRuimte>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.afgekorteNaamOpenbareRuimte}</brp:afgekorteNaamOpenbareRuimte>
+                            <!--Optional:-->
+                            <brp:gemeentedeel>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.gemeentedeel}</brp:gemeentedeel>
+                            <!--Optional:-->
+                            <brp:huisnummer>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.huisnummer}</brp:huisnummer>
+                            <!--Optional:-->
+                            <brp:huisletter>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.huisletter}</brp:huisletter>
+                            <!--Optional:-->
+                            <brp:huisnummertoevoeging>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.huisnummertoevoeging}</brp:huisnummertoevoeging>
+                            <!--Optional:-->
+                            <brp:postcode>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.postcode}</brp:postcode>
+                            <!--Optional:-->
+                            <brp:woonplaatsnaam>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.woonplaatsnaam}</brp:woonplaatsnaam>
+                            <!--Optional:-->
+                            <brp:locatieTenOpzichteVanAdres>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.locatieTenOpzichteVanAdres}</brp:locatieTenOpzichteVanAdres>
+                            <!--Optional:-->
+                            <brp:locatieomschrijving>${verhuizingBinnengemeentelijk.acties.registratieAdres.persoon.adressen.adres.locatieomschrijving}</brp:locatieomschrijving>
+                        </brp:adres>
+                    </brp:adressen>
+                </brp:persoon>
+            </brp:registratieAdres>
+            <!--Optional:-->
+            <brp:registratieVerstrekkingsbeperking brp:communicatieID="${verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <!--Optional:-->
+                    <brp:indicaties>
+                        <brp:volledigeVerstrekkingsbeperking brp:communicatieID="${verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.indicaties.volledigeVerstrekkingsbeperking.communicatieID}" brp:objecttype="PersoonIndicatie">
+                            <brp:waarde>${verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.indicaties.volledigeVerstrekkingsbeperking.waarde}</brp:waarde>
+                        </brp:volledigeVerstrekkingsbeperking>
+                    </brp:indicaties>
+                    <!--Optional:-->
+                    <brp:verstrekkingsbeperkingen>
+                        <!--1 or more repetitions:-->
+                        [#list verhuizingBinnengemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.verstrekkingsbeperkingen as verstrekkingsbeperking]
+                        <brp:verstrekkingsbeperking brp:communicatieID="${verstrekkingsbeperking.communicatieID}" brp:objecttype="PersoonVerstrekkingsbeperking">
+                            <!--Optional:-->
+                            <brp:partijCode>${verstrekkingsbeperking.partijCode}</brp:partijCode>
+                            <!--Optional:-->
+                            <brp:omschrijvingDerde>${verstrekkingsbeperking.omschrijvingDerde}</brp:omschrijvingDerde>
+                            <!--Optional:-->
+                            <brp:gemeenteVerordeningPartijCode>${verstrekkingsbeperking.gemeenteVerordeningPartijCode}</brp:gemeenteVerordeningPartijCode>
+                        </brp:verstrekkingsbeperking>
+                        [/#list]
+                    </brp:verstrekkingsbeperkingen>
+                </brp:persoon>
+            </brp:registratieVerstrekkingsbeperking>
+        </brp:acties>
+    </brp:verhuizingBinnengemeentelijk>
+    <brp:verhuizingIntergemeentelijk brp:communicatieID="${verhuizingIntergemeentelijk.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${verhuizingIntergemeentelijk.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${verhuizingIntergemeentelijk.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list verhuizingIntergemeentelijk.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+                <!--Optional:-->
+                <brp:elementNaam>${gedeblokkeerdeMelding.elementNaam}</brp:elementNaam>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list verhuizingIntergemeentelijk.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+                [/#list]
+            </brp:bron>
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieAdres = verhuizingIntergemeentelijk.acties.registratieAdres]
+            <brp:registratieAdres brp:communicatieID="${registratieAdres.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieAdres.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieAdres.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieAdres.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:adressen>
+                        <brp:adres brp:communicatieID="${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.communicatieID}" brp:objecttype="PersoonAdres">
+                            <brp:soortCode>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.soortCode}</brp:soortCode>
+                            <brp:redenWijzigingCode>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.redenWijzigingCode}</brp:redenWijzigingCode>
+                            <!--Optional:-->
+                            <brp:aangeverAdreshoudingCode>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.aangeverAdreshoudingCode}</brp:aangeverAdreshoudingCode>
+                            <brp:datumAanvangAdreshouding>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.datumAanvangAdreshouding}</brp:datumAanvangAdreshouding>
+                            <!--Optional:-->
+                            <brp:identificatiecodeAdresseerbaarObject>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.identificatiecodeAdresseerbaarObject}</brp:identificatiecodeAdresseerbaarObject>
+                            <!--Optional:-->
+                            <brp:identificatiecodeNummeraanduiding>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.identificatiecodeNummeraanduiding}</brp:identificatiecodeNummeraanduiding>
+                            <brp:gemeenteCode>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.gemeenteCode}</brp:gemeenteCode>
+                            <!--Optional:-->
+                            <brp:naamOpenbareRuimte>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.naamOpenbareRuimte}</brp:naamOpenbareRuimte>
+                            <!--Optional:-->
+                            <brp:afgekorteNaamOpenbareRuimte>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.afgekorteNaamOpenbareRuimte}</brp:afgekorteNaamOpenbareRuimte>
+                            <!--Optional:-->
+                            <brp:gemeentedeel>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.gemeentedeel}</brp:gemeentedeel>
+                            <!--Optional:-->
+                            <brp:huisnummer>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.huisnummer}</brp:huisnummer>
+                            <!--Optional:-->
+                            <brp:huisletter>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.huisletter}</brp:huisletter>
+                            <!--Optional:-->
+                            <brp:huisnummertoevoeging>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.huisnummertoevoeging}</brp:huisnummertoevoeging>
+                            <!--Optional:-->
+                            <brp:postcode>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.postcode}</brp:postcode>
+                            <!--Optional:-->
+                            <brp:woonplaatsnaam>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.woonplaatsnaam}</brp:woonplaatsnaam>
+                            <!--Optional:-->
+                            <brp:locatieTenOpzichteVanAdres>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.locatieTenOpzichteVanAdres}</brp:locatieTenOpzichteVanAdres>
+                            <!--Optional:-->
+                            <brp:locatieomschrijving>${verhuizingIntergemeentelijk.acties.registratieAdres.persoon.adressen.adres.locatieomschrijving}</brp:locatieomschrijving>
+                        </brp:adres>
+                    </brp:adressen>
+                </brp:persoon>
+            </brp:registratieAdres>
+            <!--Optional:-->
+            [#assign registratieVerstrekkingsbeperking = verhuizingIntergemeentelijk.acties.registratieVerstrekkingsbeperking]
+            <brp:registratieVerstrekkingsbeperking brp:communicatieID="${registratieVerstrekkingsbeperking.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieVerstrekkingsbeperking.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${registratieVerstrekkingsbeperking.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieVerstrekkingsbeperking.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${verhuizingIntergemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.communicatieID}" brp:objectSleutel="${verhuizingIntergemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.objectSleutel}" brp:objecttype="Persoon">
+                    <!--Optional:-->
+                    <brp:indicaties>
+                        <brp:volledigeVerstrekkingsbeperking brp:communicatieID="${verhuizingIntergemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.indicaties.volledigeVerstrekkingsbeperking.communicatieID}" brp:objecttype="PersoonIndicatie">
+                            <brp:waarde>${verhuizingIntergemeentelijk.acties.registratieVerstrekkingsbeperking.persoon.indicaties.volledigeVerstrekkingsbeperking.waarde}</brp:waarde>
+                        </brp:volledigeVerstrekkingsbeperking>
+                    </brp:indicaties>
+                    <!--Optional:-->
+                    <brp:verstrekkingsbeperkingen>
+                        <!--1 or more repetitions:-->
+                        [#list registratieVerstrekkingsbeperking.persoon.verstrekkingsbeperkingen as verstrekkingsbeperking]
+                        <brp:verstrekkingsbeperking brp:communicatieID="${verstrekkingsbeperking.communicatieID}" brp:objecttype="PersoonVerstrekkingsbeperking">
+                            <!--Optional:-->
+                            <brp:partijCode>${verstrekkingsbeperking.partijCode}</brp:partijCode>
+                            <!--Optional:-->
+                            <brp:omschrijvingDerde>${verstrekkingsbeperking.omschrijvingDerde}</brp:omschrijvingDerde>
+                            <!--Optional:-->
+                            <brp:gemeenteVerordeningPartijCode>${verstrekkingsbeperking.gemeenteVerordeningPartijCode}</brp:gemeenteVerordeningPartijCode>
+                        </brp:verstrekkingsbeperking>
+                        [/#list]
+                    </brp:verstrekkingsbeperkingen>
+                </brp:persoon>
+            </brp:registratieVerstrekkingsbeperking>
+        </brp:acties>
+    </brp:verhuizingIntergemeentelijk>
+    <brp:verhuizingNaarBuitenland brp:communicatieID="${verhuizingNaarBuitenland.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${verhuizingNaarBuitenland.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${verhuizingNaarBuitenland.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list verhuizingNaarBuitenland.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+                <!--Optional:-->
+                <brp:elementNaam>${gedeblokkeerdeMelding.elementNaam}</brp:elementNaam>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list verhuizingNaarBuitenland.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieMigratie = verhuizingNaarBuitenland.acties.registratieMigratie]
+            <brp:registratieMigratie brp:communicatieID="${registratieMigratie.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieMigratie.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieMigratie.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieMigratie.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:migratie brp:communicatieID="${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.communicatieID}">
+                        <brp:redenWijzigingCode>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.redenWijzigingCode}</brp:redenWijzigingCode>
+                        <!--Optional:-->
+                        <brp:aangeverCode>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.aangeverCode}</brp:aangeverCode>
+                        <!--Optional:-->
+                        <brp:landGebiedCode>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.landGebiedCode}</brp:landGebiedCode>
+                        <!--Optional:-->
+                        <brp:buitenlandsAdresRegel1>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.buitenlandsAdresRegel1}</brp:buitenlandsAdresRegel1>
+                        <!--Optional:-->
+                        <brp:buitenlandsAdresRegel2>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.buitenlandsAdresRegel2}</brp:buitenlandsAdresRegel2>
+                        <!--Optional:-->
+                        <brp:buitenlandsAdresRegel3>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.buitenlandsAdresRegel3}</brp:buitenlandsAdresRegel3>
+                        <!--Optional:-->
+                        <brp:buitenlandsAdresRegel4>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.buitenlandsAdresRegel4}</brp:buitenlandsAdresRegel4>
+                        <!--Optional:-->
+                        <brp:buitenlandsAdresRegel5>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.buitenlandsAdresRegel5}</brp:buitenlandsAdresRegel5>
+                        <!--Optional:-->
+                        <brp:buitenlandsAdresRegel6>${verhuizingNaarBuitenland.acties.registratieMigratie.persoon.migratie.buitenlandsAdresRegel6}</brp:buitenlandsAdresRegel6>
+                    </brp:migratie>
+                </brp:persoon>
+            </brp:registratieMigratie>
+            <!--Optional:-->
+            <brp:registratieVerstrekkingsbeperking brp:communicatieID="${verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.persoon.communicatieID}" brp:objectSleutel="${verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.persoon.objectSleutel}" brp:objecttype="Persoon">
+                    <!--Optional:-->
+                    <brp:indicaties>
+                        <brp:volledigeVerstrekkingsbeperking brp:communicatieID="${verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.persoon.indicaties.volledigeVerstrekkingsbeperking.communicatieID}" brp:objecttype="PersoonIndicatie">
+                            <brp:waarde>${verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.persoon.indicaties.volledigeVerstrekkingsbeperking.waarde}</brp:waarde>
+                        </brp:volledigeVerstrekkingsbeperking>
+                    </brp:indicaties>
+                    <!--Optional:-->
+                    <brp:verstrekkingsbeperkingen>
+                        <!--1 or more repetitions:-->
+                        [#list verhuizingNaarBuitenland.acties.registratieVerstrekkingsbeperking.persoon.verstrekkingsbeperkingen as verstrekkingsbeperking]
+                        <brp:verstrekkingsbeperking brp:communicatieID="${verstrekkingsbeperking.communicatieID}" brp:objecttype="PersoonVerstrekkingsbeperking">
+                            <!--Optional:-->
+                            <brp:partijCode>${verstrekkingsbeperking.partijCode}</brp:partijCode>
+                            <!--Optional:-->
+                            <brp:omschrijvingDerde>${verstrekkingsbeperking.omschrijvingDerde}</brp:omschrijvingDerde>
+                            <!--Optional:-->
+                            <brp:gemeenteVerordeningPartijCode>${verstrekkingsbeperking.gemeenteVerordeningPartijCode}</brp:gemeenteVerordeningPartijCode>
+                        </brp:verstrekkingsbeperking>
+                        [/#list]
+                    </brp:verstrekkingsbeperkingen>
+                </brp:persoon>
+            </brp:registratieVerstrekkingsbeperking>
+        </brp:acties>
+    </brp:verhuizingNaarBuitenland>
+</brp:bhg_vbaRegistreerVerhuizing>

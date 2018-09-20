@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <context:property-placeholder location="classpath:brp-*.properties" />
+
+    <context:component-scan base-package="nl.bzk.brp.levering.verzending" >
+        <context:exclude-filter type="regex" expression="nl.bzk.brp.levering.verzending.stappen.*" />
+    </context:component-scan>
+
+    <import resource="classpath:datasource-beans.xml" />
+    <import resource="classpath:dataaccess-beans.xml" />
+    <import resource="classpath*:/protocollering-publicatie-context.xml"/>
+    <import resource="classpath:mutaties-kern-algemeen.xml" />
+    <import resource="classpath:jms-beans.xml" />
+    <import resource="classpath:jmx-management-beans.xml" />
+    <import resource="classpath:brp-verzending-starter.xml" />
+    <import resource="classpath:ws.xml" />
+
+    <import resource="classpath:broker.xml" />
+
+    <bean id="dataSourceMasterLockTest" parent="templateDataSource">
+        <property name="url" value="${jdbc.master.url}"/>
+        <property name="username" value="${jdbc.master.username}"/>
+        <property name="password" value="${jdbc.master.password}"/>
+    </bean>
+
+    <!-- mock de stappen zodat de route getest kan worden -->
+    <bean id="archiveerStap" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="nl.bzk.brp.levering.verzending.stappen.ArchiveerStap" />
+    </bean>
+    <bean id="protocolleerStap" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="nl.bzk.brp.levering.verzending.stappen.ProtocolleerStap" />
+    </bean>
+    <bean id="verrijkBerichtStap" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="nl.bzk.brp.levering.verzending.stappen.VerrijkBerichtStap" />
+    </bean>
+    <bean id="verzendBRPStap" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="nl.bzk.brp.levering.verzending.stappen.VerzendBRPStap" />
+    </bean>
+    <bean id="verzendLO3Stap" class="org.mockito.Mockito" factory-method="mock">
+        <constructor-arg value="nl.bzk.brp.levering.verzending.stappen.VerzendLO3Stap" />
+    </bean>
+
+</beans>

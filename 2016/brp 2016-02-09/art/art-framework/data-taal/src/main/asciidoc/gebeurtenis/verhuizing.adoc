@@ -1,0 +1,69 @@
+
+:sourcedir: ../../../test/asciidoc/verhuizing
+
+=== Verhuizing
+Verhuizingen zijn de meest voorkomende gebeurtenissen. Ze komen in drie smaken: binnen-gemeentelijk, intergemeentelijk en naar
+het buitenland.
+
+==== Verhuizing naar buitenland
+Bij een verhuizing naar het buitenland wordt het land opgegeven en de buitenlandseadresregels.
+Het land moet bestaan in de tabel landgebied, anders kan de verhuizing niet doorgaan.
+
+[source,groovy]
+----
+verhuizing() {
+    naarBuitenland('Belgie',
+        [adres: ['regel1', 'regel2']] <1>
+    )
+
+    naarBuitenland 'Belgie',
+        adres: ['adresregel1', 'adresregel2'] <2>
+
+    naarBuitenland('Belgie',
+        adres: 'regel1, regel2, regel3' <3>
+    )
+}
+----
+<1> Volledige notatie. `adres` heeft een lijst van adresregels, maximaal 6.
+<2> Verkorte notatie, zonder de optionele haakjes.
+<3> Alternatieve notatie, adres als String dat wordt gesplits op het `,` symbool voor de adresregels.
+
+
+==== GBABijhoudingOverig
+De adminstratieve handeling GBABijhoudingOverig is het resultaat van een wijziging in GBA waarvan een volledigbericht verstuurd wordt.
+De drie smaken verhuizing (binnen-gemeentelijk, intergemeentelijk en naar het buitenland) zijn ook beschikbaar met de adminstratieve handeling
+GBABijhoudingOverig. Om hier gebruik van te maken dien je `verhuizing()` te vervangen door `GBABijhoudingOverig()`. Tevens is er een vierde actie
+mogelijk met GBABijhoudingOverig, namelijk de conversieGBA. Deze actie simuleert een bijhouding zonder verdere wijzigingen te doen.
+[source,groovy]
+----
+GBABijhoudingOverig() {
+    ... <1>
+}
+----
+<1> De details van `GBABijhoudingOverig` zijn hetzelfde als die van `verhuizing`.
+
+
+==== Verstrekkingsbeperkingen
+Bij een verhuizing kunnen ook (volledige) verstrekkingsbeperkingen worden opgenomen of verwijderd. Dit kan door:
+
+[source,groovy]
+----
+verhuizing() {
+    naarGemeente 'Den Haag',
+        [straat:'Genestetlaan', huisnummer:123]
+    verstrekkingbeperkingen {
+        ... <1>
+    }
+}
+----
+<1> De details van verstrekkingsbeperkingen zijn hetzelfde als die van <<gebeurtenis/afnemerindicaties.adco#verstrekkingsbeperkingen,Verstrekkingsbeperkingen>>.
+
+
+==== Voorbeeld
+Een voorbeeld van de gebeurtenis verhuizing met alle opties getoond:
+
+[source,groovy, numbered]
+.verhuizing-voorbeeld.groovy
+----
+include::{sourcedir}/volledig.groovy[lines=3..-1]
+----

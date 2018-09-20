@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/" debug="false">
+
+    <appender name="CONSOLE" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out"/>
+        <param name="Threshold" value="DEBUG"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern"
+                   value="%d{HH:mm:ss.SSS} [%t] %-5p (%C{4}:%-3L) %X{administratieveHandeling} %X{leveringsautorisatie} %X{afnemer} %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="BRP" class="org.apache.log4j.RollingFileAppender">
+        <param name="Append" value="true"/>
+        <param name="MaxFileSize" value="1024MB" />
+        <param name="MaxBackupIndex" value="5" />
+        <param name="File" value="target/brp-systeem.log"/>
+        <param name="Threshold" value="DEBUG"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} [%t] %-5p (%C{5}:%-3L) %X{administratieveHandeling} %X{leveringsautorisatie} %X{afnemer} %m%n"/>
+        </layout>
+    </appender>
+
+    <appender name="FUNCTIONAL_FILE" class="org.apache.log4j.RollingFileAppender">
+        <param name="Append" value="true"/>
+        <param name="File" value="target/levering-functioneel.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} [%t] %-5p (%C{4}:%-3L) %m%n" />
+        </layout>
+    </appender>
+
+    <!-- Perf4J appenders -->
+    <!--
+       This AsyncCoalescingStatisticsAppender groups StopWatch log messages
+       into GroupedTimingStatistics messages which it sends on the
+       file appender defined below
+    -->
+    <appender name="CoalescingStatistics"
+              class="org.perf4j.log4j.AsyncCoalescingStatisticsAppender">
+        <!--
+          The TimeSlice option is used to determine the time window for which
+          all received StopWatch logs are aggregated to create a single
+          GroupedTimingStatistics log. Here we set it to 10 seconds, overriding
+          the default of 30000 ms
+        -->
+        <param name="TimeSlice" value="10000"/>
+        <appender-ref ref="STATS_FILE"/>
+    </appender>
+
+    <!-- This file appender is used to output aggregated performance statistics -->
+    <appender name="STATS_FILE" class="org.apache.log4j.FileAppender">
+        <param name="File" value="target/perfStats.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%m%n"/>
+        </layout>
+    </appender>
+
+    <!-- Loggers -->
+    <!--
+      The Perf4J logger. Note that org.perf4j.TimingLogger is the value of the
+      org.perf4j.StopWatch.DEFAULT_LOGGER_NAME constant. Also, note that
+      additivity is set to false, which is usually what is desired - this means
+      that timing statements will only be sent to this logger and NOT to
+      upstream loggers.
+    -->
+    <logger name="org.perf4j.TimingLogger" additivity="false">
+        <level value="INFO"/>
+        <appender-ref ref="CoalescingStatistics"/>
+    </logger>
+
+    <category name="FUNCTIONELE_LOG">
+        <priority value="INFO"/>
+        <appender-ref ref="FUNCTIONAL_FILE"/>
+    </category>
+
+    <category name="org.mortbay.jetty"/>
+    <category name="org.hibernate"><priority value="WARN"/></category>
+    <category name="org.jboss"/>
+
+    <category name="org.springframework.orm.jpa"/>
+    <category name="org.springframework.test.context.transaction"/>
+    <category name="org.springframework"><priority value="WARN"/></category>
+
+    <category name="nl.bzk.brp"><priority value="DEBUG"/></category>
+    <logger name="nl.moderniseringgba.brp">
+        <level value="INFO" />
+    </logger>
+
+    <logger name="org.apache.activemq.store.jdbc">
+        <level value="ERROR" />
+    </logger>
+    <logger name="org.apache.activemq">
+        <level value="INFO"/>
+    </logger>
+    <logger name="org.apache.camel">
+        <level value="INFO"/>
+    </logger>
+
+    <root>
+        <priority value="INFO" />
+        <appender-ref ref="BRP" />
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</log4j:configuration>

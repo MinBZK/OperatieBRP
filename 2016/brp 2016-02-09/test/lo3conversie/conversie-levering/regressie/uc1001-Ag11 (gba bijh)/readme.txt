@@ -1,0 +1,1 @@
+Het testen van het maken van een bericht voor het handmatig plaatsen van een afnemersindicatie is te bereiken door geen bijhouding (gbaBijhouding.xsl of bzmBijhouding.xml) toe te voegen aan de test.

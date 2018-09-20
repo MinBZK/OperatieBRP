@@ -1,0 +1,99 @@
+<brp:lvg_synRegistreerAfnemerindicatie xmlns:brp="http://www.bzk.nl/brp/brp0200">
+    <brp:stuurgegevens brp:communicatieID="${stuurgegevens.communicatieID}">
+        <brp:zendendePartij>${stuurgegevens.zendendePartij}</brp:zendendePartij>
+        <brp:zendendeSysteem>${stuurgegevens.zendendeSysteem}</brp:zendendeSysteem>
+        <brp:referentienummer>${stuurgegevens.referentienummer}</brp:referentienummer>
+        <brp:tijdstipVerzending>${stuurgegevens.tijdstipVerzending}</brp:tijdstipVerzending>
+    </brp:stuurgegevens>
+    <!--You have a CHOICE of the next 2 items at this level-->
+    <brp:plaatsingAfnemerindicatie brp:communicatieID="${plaatsingAfnemerindicatie.communicatieID}"
+                                   brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${plaatsingAfnemerindicatie.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list plaatsingAfnemerindicatie.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}"
+                                       brp:objecttype="GedeblokkeerdeMelding"
+                                       brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+                <!--Optional:-->
+                <brp:elementNaam>${gedeblokkeerdeMelding.elementNaam}</brp:elementNaam>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <brp:acties>
+            [#assign registratieAfnemerindicatie = plaatsingAfnemerindicatie.acties.registratieAfnemerindicatie]
+            <brp:registratieAfnemerindicatie
+                    brp:communicatieID="${registratieAfnemerindicatie.communicatieID}"
+                    brp:objecttype="Actie">
+                <brp:persoon
+                        brp:communicatieID="${registratieAfnemerindicatie.persoon.communicatieID}"
+                        brp:objectSleutel="[@objectsleutel var=registratieAfnemerindicatie.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]"
+                        brp:objecttype="Persoon">
+                    <brp:identificatienummers
+                            brp:communicatieID="${registratieAfnemerindicatie.persoon.identificatienummers.communicatieID}">
+                        <brp:burgerservicenummer>${registratieAfnemerindicatie.persoon.identificatienummers.burgerservicenummer}</brp:burgerservicenummer>
+                    </brp:identificatienummers>
+                    <brp:afnemerindicaties>
+                        [#list registratieAfnemerindicatie.persoon.afnemerindicaties as afnemerindicatie]
+                        <brp:afnemerindicatie brp:communicatieID="${afnemerindicatie.communicatieID}"
+                                              brp:objecttype="PersoonAfnemerindicatie">
+                            <brp:afnemerCode>${afnemerindicatie.afnemerCode}</brp:afnemerCode>
+                            <brp:abonnementNaam>${afnemerindicatie.abonnementNaam}</brp:abonnementNaam>
+                            <!--Optional:-->
+                            <brp:datumAanvangMaterielePeriode>${afnemerindicatie.datumAanvangMaterielePeriode}</brp:datumAanvangMaterielePeriode>
+                            <!--Optional:-->
+                            <brp:datumEindeVolgen>${afnemerindicatie.datumEindeVolgen}</brp:datumEindeVolgen>
+                        </brp:afnemerindicatie>
+                        [/#list]
+                    </brp:afnemerindicaties>
+                </brp:persoon>
+            </brp:registratieAfnemerindicatie>
+        </brp:acties>
+    </brp:plaatsingAfnemerindicatie>
+    <brp:verwijderingAfnemerindicatie brp:communicatieID="${verwijderingAfnemerindicatie.communicatieID}"
+                                      brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${verwijderingAfnemerindicatie.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${verwijderingAfnemerindicatie.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            [#list verwijderingAfnemerindicatie.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}"
+                                       brp:objecttype="GedeblokkeerdeMelding"
+                                       brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+                <!--Optional:-->
+                <brp:elementNaam>${gedeblokkeerdeMelding.elementNaam}</brp:elementNaam>
+                [/#list]
+            </brp:gedeblokkeerdeMelding>
+         </brp:gedeblokkeerdeMeldingen>
+        <brp:acties>
+            <brp:vervalAfnemerindicatie
+                    brp:communicatieID="${verwijderingAfnemerindicatie.acties.vervalAfnemerindicatie.communicatieID}"
+                    brp:objecttype="Actie">
+                <brp:persoon
+                        brp:communicatieID="${verwijderingAfnemerindicatie.acties.vervalAfnemerindicatie.persoon.communicatieID}"
+                        brp:objectSleutel="[@objectsleutel var=verwijderingAfnemerindicatie.acties.vervalAfnemerindicatie.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]"
+                        brp:objecttype="Persoon">
+                    <brp:identificatienummers
+                            brp:communicatieID="${verwijderingAfnemerindicatie.acties.vervalAfnemerindicatie.persoon.identificatienummers.communicatieID}">
+                        <brp:burgerservicenummer>${verwijderingAfnemerindicatie.acties.vervalAfnemerindicatie.persoon.identificatienummers.burgerservicenummer}</brp:burgerservicenummer>
+                    </brp:identificatienummers>
+                    <brp:afnemerindicaties>[#assign afnemerindicatie = verwijderingAfnemerindicatie.acties.vervalAfnemerindicatie.persoon.afnemerindicaties[0]]
+                        <brp:afnemerindicatie brp:communicatieID="${afnemerindicatie.communicatieID}"
+                                              brp:objecttype="PersoonAfnemerindicatie">
+                            <brp:afnemerCode>${afnemerindicatie.afnemerCode}</brp:afnemerCode>
+                            <brp:abonnementNaam>${afnemerindicatie.abonnementNaam}</brp:abonnementNaam>
+                            <!--Optional:-->
+                            <brp:datumAanvangMaterielePeriode>${afnemerindicatie.datumAanvangMaterielePeriode}</brp:datumAanvangMaterielePeriode>
+                            <!--Optional:-->
+                            <brp:datumEindeVolgen>${afnemerindicatie.datumEindeVolgen}</brp:datumEindeVolgen>
+                        </brp:afnemerindicatie>
+                    </brp:afnemerindicaties>
+                </brp:persoon>
+            </brp:vervalAfnemerindicatie>
+        </brp:acties>
+    </brp:verwijderingAfnemerindicatie>
+</brp:lvg_synRegistreerAfnemerindicatie>

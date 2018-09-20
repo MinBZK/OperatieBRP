@@ -1,0 +1,63 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <bean id="lo3AfnemerStappenVerwerker"
+          class="nl.bzk.brp.levering.mutatielevering.stappen.AfnemerStappenVerwerker">
+        <property name="stappen" ref="lo3AfnemerVerwerkingStappen"/>
+    </bean>
+
+    <util:list id="lo3AfnemerVerwerkingStappen"
+               value-type="nl.bzk.brp.levering.business.stappen.populatie.AbstractAfnemerVerwerkingStap">
+        <bean id="lo3_maakBerichtenStap"
+              class="nl.bzk.brp.levering.mutatielevering.stappen.lo3.MaakBerichtenStap"/>
+
+        <!-- Hergebruik  van BRP stap:
+             input:
+                onderwerp.getLeveringinformatie()
+                context.getLeveringBerichten()
+        -->
+        <bean id="lo3_voegStuurgegevensToeStap"
+              class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.VoegStuurgegevensToeStap"/>
+
+        <bean id="lo3_converteerNaarLo3PlStap"
+              class="nl.bzk.brp.levering.mutatielevering.stappen.lo3.ConverteerNaarLo3Stap"/>
+        <bean id="lo3_filterRubriekenStap"
+              class="nl.bzk.brp.levering.mutatielevering.stappen.lo3.FilterRubriekenStap"/>
+        <bean id="lo3_maakUitgaandBerichtStap"
+              class="nl.bzk.brp.levering.mutatielevering.stappen.lo3.MaakUitgaandBerichtStap"/>
+
+        <!-- Hergebruik van BRP stap:
+             input:
+                context.getAdministratieveHandelingContext().getHuidigeAdministratieveHandeling().getID()
+                context.getTeLeverenPersoonsIds().keySet()
+                onderwerp.getLeveringinformatie().getToegangLeveringsautorisatie().getID()
+
+                context.getUitgaandePlatteTekstBerichten().get(i)
+                context.getLeveringBerichten().get(i).getStuurgegevens()
+         -->
+        <bean id="lo3_zetBerichtOpQueueStap"
+              class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.ZetBerichtOpQueueStap"/>
+
+		<!-- Hergebruik van BRP stap:
+			input: 
+				onderwerp.getLeveringinformatie().getDienst().getCatalogusOptie().getWaarde()
+				onderwerp.getLeveringinformatie().getToegangLeveringsautorisatie().getAbonnement().getWaarde().getNaam()
+				onderwerp.getLeveringinformatie().getToegangLeveringsautorisatie().getPartij().getWaarde().getCode()
+				onderwerp.getLeveringinformatie().getDienst().getID()
+		
+				context.getLeveringBerichten().iterator() {
+					((VulBericht) leveringBericht).getAdministratieveHandeling().getBijgehoudenPersonen()
+				}
+		
+		 -->
+		<bean id="lo3_plaatsAfnemerindicatieStap"
+		      class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.PlaatsAfnemerindicatieStap" />
+    </util:list>
+
+    <import resource="gba-algemeen-beans.xml"/>
+    <import resource="lo3-conversie-beans.xml"/>
+
+</beans>

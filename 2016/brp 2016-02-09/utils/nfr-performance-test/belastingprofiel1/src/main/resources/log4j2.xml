@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %msg%n"/>
+        </Console>
+
+        <RollingFile name="Systeem" fileName="target/logs/brp-systeem.log"
+                     filePattern="${sys:catalina.base}/logs/brp-systeem-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT"/>
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
+            </PatternLayout>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="1 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+    </Appenders>
+
+    <Loggers>
+
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Systeem"/>
+
+        </Root>
+
+        <logger name="nl.bzk.brp.performance.profiel1" level="DEBUG"/>
+        <logger name="nl.bzk.brp" level="ERROR"/>
+        <logger name="org.hibernate" level="ERROR"/>
+        <logger name="org.springframework" level="INFO"/>
+
+
+    </Loggers>
+</Configuration>

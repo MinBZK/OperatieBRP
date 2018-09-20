@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-algemeen-kern</artifactId>
+        <groupId>nl.bzk.brp.algemeen.kern</groupId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>brp-algemeen-kern-stappen</artifactId>
+    <packaging>jar</packaging>
+
+    <name>BRP Algemeen Kern - Stappen</name>
+    <description>BRP stappen mechanisme basis klasses die door diverse stappen en modules gebruikt worden.</description>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/algemeen/algemeen-kern/trunk/algemeen-kern/trunk/stappen</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-kern/brp-algemeen-kern-stappen</developerConnection>
+  </scm>
+
+    <properties>
+        <project.brp.locking.version>${project.version}</project.brp.locking.version>
+
+        <!-- security -->
+        <maven.security.privatekey.alias>serverkey</maven.security.privatekey.alias>
+        <maven.security.privatekey.password>serverkeypassword</maven.security.privatekey.password>
+    </properties>
+
+    <dependencies>
+
+        <!-- BRP dependencies -->
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <version>${project.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.util</groupId>
+            <artifactId>brp-algemeen-util-logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.util</groupId>
+            <artifactId>brp-algemeen-util-locking</artifactId>
+            <version>${project.version}</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>brp-algemeen-model-model</artifactId>
+                    <groupId>nl.bzk.brp.algemeen.model</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Java / JEE -->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+
+        <!-- Commons -->
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <filtering>true</filtering>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>ci.build</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.archivering.junit.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_kern_stappen</maven.jdbc.archivering.junit.url>
+                <maven.jdbc.archivering.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_kern_stappen</maven.jdbc.archivering.url>
+                <maven.jdbc.junit.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_kern_stappen</maven.jdbc.junit.url>
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_kern_stappen</maven.jdbc.url>
+            </properties>
+        </profile>
+    </profiles>
+</project>

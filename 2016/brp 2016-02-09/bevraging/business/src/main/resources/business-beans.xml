@@ -1,0 +1,112 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <import resource="classpath:blobifier-beans.xml"/>
+    <import resource="classpath:mutaties-kern-algemeen.xml"/>
+
+    <context:annotation-config/>
+    <context:spring-configured/>
+    <task:annotation-driven/>
+
+    <context:component-scan base-package="nl.bzk.brp.configuratie"/>
+    <context:component-scan base-package="nl.bzk.brp.business"/>
+    <context:component-scan base-package="nl.bzk.brp.levering.dataaccess.repository.alleenlezen"/>
+
+    <import resource="classpath*:/protocollering-publicatie-context.xml"/>
+
+    <!-- De BedrijfsregelManager, die de configuratie van alle bedrijfsregels bevat. -->
+    <bean id="bedrijfsregelManager" class="nl.bzk.brp.business.regels.BedrijfsregelManagerImpl">
+        <constructor-arg name="propertiesBestandRegelsVoorBericht" value="regels-voor-bericht.properties"/>
+        <constructor-arg name="propertiesBestandRegelsVoorVerwerking" value="regels-voor-verwerking.properties"/>
+        <constructor-arg name="propertiesBestandRegelsNaVerwerking" value="regels-na-verwerking.properties"/>
+    </bean>
+
+    <bean id="bijhoudingBevragingsBerichtVerwerker" class="nl.bzk.brp.business.service.BevragingBerichtVerwerkerImpl">
+        <property name="stappen" ref="bijhoudingBevragingsStappen"/>
+    </bean>
+
+    <bean id="berichtVerwerkingssoortToevoeger"
+          class="nl.bzk.brp.levering.business.bepalers.impl.BerichtVerwerkingssoortZetterImpl">
+        <constructor-arg ref="berichtVerwerkingssoortBepalerImpl"/>
+    </bean>
+    <bean id="berichtVerwerkingssoortVerwijderaar"
+          class="nl.bzk.brp.levering.business.bepalers.impl.BerichtVerwerkingssoortZetterImpl">
+        <constructor-arg ref="nullVerwerkingssoortBepaler"/>
+    </bean>
+
+    <bean id="bijhoudingBevragingsStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.webservice.business.stappen.AbstractBerichtVerwerkingStap">
+                <!-- Stap die de voor-bericht regels uitvoert. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.VoorBerichtRegelsStap"/>
+
+                <!-- Stap die de eventueel benodigde bericht verrijking uitvoert (zoals de zendende partij). -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.bijhouding.BerichtVerrijkingsStap"/>
+
+                <!-- Stap die de berichten valideert aan de hand van de bean annotaties. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.BevragingGegevensValidatieStap"/>
+
+                <!-- Stap die de database (read only) transactie start. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.BevragingTransactieStap"/>
+
+                <!-- Stap die de daadwerkelijke bevraging uitvoert. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.bijhouding.BijhoudingBevragingUitvoerStap"/>
+
+                <!-- Stap die de verantwoordingsinformatie filtert op relevante verantwoordingsinformatie. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.FilterVerantwoordingsinformatieStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="leveringBevragingsBerichtVerwerker" class="nl.bzk.brp.business.service.BevragingBerichtVerwerkerImpl">
+        <property name="stappen" ref="leveringBevragingsStappen"/>
+    </bean>
+
+    <bean id="leveringBevragingsStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.webservice.business.stappen.AbstractBerichtVerwerkingStap">
+                <!-- Stap die de voor-bericht regels uitvoert. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.VoorBerichtRegelsStap"/>
+
+                <!-- Stap die de eventueel benodigde bericht verrijking uitvoert (zoals de leveringsautorisatie). -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.levering.BerichtVerrijkingsStap"/>
+
+                <!-- Stap die de berichten valideert aan de hand van de bean annotaties. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.BevragingGegevensValidatieStap"/>
+
+                <!-- Stap die de database (read only) transactie start. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.BevragingTransactieStap"/>
+
+                <!-- Stap die de voor-verwerking regels uitvoert. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.levering.VoorVerwerkingRegelsStap"/>
+
+                <!-- Stap die de daadwerkelijke bevraging uitvoert. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.levering.LeveringBevragingUitvoerStap"/>
+
+                <!-- Stap die de na-verwerking regels uitvoert. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.levering.NaVerwerkingRegelsStap"/>
+
+                <!-- Stap die het voorkomenfilter toepast. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.levering.VoorkomenFilterStap"/>
+
+                <!-- Stap die het attributenfilter toepast, VRLV0001. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.levering.AttributenFilterStap"/>
+
+                <!-- Stap die bepaalt of een betrokken persoon / betrokkenheid / relatie geleverd mag worden -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.levering.BetrokkenheidBepaalMagLeverenStap"/>
+
+                <!-- Stap die de verantwoordingsinformatie filtert op relevante verantwoordingsinformatie. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.FilterVerantwoordingsinformatieStap"/>
+
+                <!-- Protocollering stap. -->
+                <bean class="nl.bzk.brp.business.stappen.bevraging.levering.ProtocolleringStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+</beans>

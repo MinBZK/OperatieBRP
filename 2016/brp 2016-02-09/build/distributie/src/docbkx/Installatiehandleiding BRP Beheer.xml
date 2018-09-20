@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+<book xmlns="http://docbook.org/ns/docbook" xml:lang="nl">
+    <title>Installatiehandleiding BRP Beheer software</title>
+    <titleabbrev>Versie 1.0</titleabbrev>
+
+    <chapter>
+        <title>Inleiding</title>
+
+        <para>
+            Dit document beschrijft de installatie van de BRP Beheer software.
+        </para>
+
+        <section>
+            <title>Doel</title>
+            <para>
+                Operationeel beheer ondersteunen bij het installeren van de BRP Beheer software.
+            </para>
+        </section>
+
+        <section>
+            <title>Scope</title>
+            <para>
+                Handleiding voor het installeren en configureren van de BRP Beheer software componenten.
+            </para>
+        </section>
+
+        <section>
+            <title>Doelgroep</title>
+            <para>Dit document is bedoeld voor operationeel beheerders van de BRP software
+                met gedegen kennis van Linux, PostgreSQL en Apache Tomcat.</para>
+        </section>
+
+        <section>
+            <title>Deployment</title>
+            <para>In deze installatiehandleiding wordt getracht zo veel mogelijk onafhankelijk te zijn van de deployment inrichting.
+                Deze inrichting dient afgestemd te worden op het doel waarvoor de omgeving wordt gebruikt,
+                en kan worden bepaald op basis van het BRP Software Architectuur Document.
+                N.B. Nog niet alle informatie is in het huidige stadium voorhanden voor het exact
+                invullen van alle deployment parameters.
+           </para>
+        </section>
+    </chapter>
+    <chapter>
+        <title>Precondities</title>
+        <para>Aan de volgende precondities moet worden voldaan om tot een correcte installatie van de software te komen.</para>
+        <section>
+            <title>Apache Tomcat installatie</title>
+
+            <itemizedlist mark='opencircle'>
+                <listitem><para>Tomcat versie 7.0.47 is geïnstalleerd in [TOMCAT_HOME].</para></listitem>
+                <listitem><para>Tomcat is JMX enabled</para></listitem>
+                <listitem><para>De OS user voor het draaien van Tomcat is arbitrair. De user dient wel voldoende lees- en schrijfrechten te hebben
+                    voor externe filepaden welke configureerd worden in de properties. Deze opmerking wordt nog extra benadrukt in de desbetreffende
+                    properties.
+                </para></listitem>
+                <listitem><para>Als alle services op één enkele Tomcat Node/Server draaien wordt de volgende minimale geheugeninstelling geadviseerd:
+                    minimaal 3GB (Xms), maximaal 12GB (Xmx), permsize 1GB (XX:MaxPermSize)
+                </para></listitem>
+                <listitem><para>Als er een Tomcat Node/Server per service bestaat wordt de volgende minimale geheugeninstelling geadviseerd:
+                    minimaal 3GB (Xms), maximaal 4GB (Xmx), permsize 1GB (XX:MaxPermSize)
+                </para></listitem>
+            </itemizedlist>
+
+        </section>
+        <section>
+            <title>Extra Tomcat libraries</title>
+            <para>De volgende drivers dienen in de [TOMCAT_HOME]/lib directory te worden geplaatst:
+
+                <itemizedlist mark='opencircle'>
+                    <listitem><para><emphasis>PostgreSQL JDBC driver versie 9.2-1004-jdbc41 (downloadbaar via
+                    https://jdbc.postgresql.org/download.html#others)</emphasis></para></listitem>
+                </itemizedlist>
+            </para>
+        </section>
+    </chapter>
+
+    <chapter>
+        <title>Software</title>
+
+        <section>
+            <title>Deployables</title>
+            <para>Plaats onderstaande deployables uit "09 Software Package]/artefacten/beheer" in [TOMCAT_HOME]/webapps.</para>
+            <para>
+                <itemizedlist mark='opencircle'>
+                    <listitem><para><emphasis>beheer.war</emphasis></para></listitem>
+                </itemizedlist>
+            </para>
+        </section>
+        <section>
+            <title>Applicatie properties</title>
+
+            <table title="Overzicht benodigde properties bestanden per BRP service/deployable"
+                   label="Overzicht benodigde properties bestanden per BRP service/deployable">
+                <tgroup cols='2' align='left'>
+                    <thead style="">
+                        <row>
+                            <entry>Service (war)</entry>
+                            <entry>Properties bestand(en)</entry>
+                        </row>
+                    </thead>
+                    <tbody>
+                        <row>
+                            <entry>Beheer (beheer.war)</entry>
+                            <entry>
+                                <itemizedlist>
+                                    <listitem><para>beheer.properties</para></listitem>
+                                </itemizedlist>
+                            </entry>
+                        </row>
+                    </tbody>
+                </tgroup>
+            </table>
+
+            <para>
+                Vervang onderstaand properties. Niet genoemde properties hebben
+                reeds een correcte default waarde.
+
+
+                <table title="Overzicht te vervangen properties"
+                       label="Overzicht te vervangen properties">
+                    <tgroup cols='2' align='left'>
+                        <thead style="">
+                            <row>
+                                <entry>Zoekterm</entry>
+                                <entry>Te vervangen door</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry><![CDATA[<database hostname>]]></entry>
+                                <entry>De hostname waar de database draait</entry>
+                            </row>
+                            <row>
+                                <entry><![CDATA[<database port>]]></entry>
+                                <entry>De poort waarop de database draait</entry>
+                            </row>
+                            <row>
+                                <entry><![CDATA[<database username>]]></entry>
+                                <entry>De database user welke door de applicatie gebruikt wordt</entry>
+                            </row>
+                            <row>
+                                <entry><![CDATA[<database password>]]></entry>
+                                <entry>Het database wachtwoord welke door de applicatie gebruikt wordt</entry>
+                            </row>
+                            <row>
+                                <entry><![CDATA[<isc-host>]]></entry>
+                                <entry>De host waar isc draait</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+            </para>
+        </section>
+
+        <section>
+            <title>Verificatie installatie</title>
+            <para>
+                Tomcat kan nu gestart worden.
+            </para>
+            <para>
+                Controleer na het starten van Tomcat dat alle deployables correct zijn gestart;
+                catalina.out en brp-systeem.log mogen geen ERROR regels bevatten.
+            </para>
+            <para>
+                Controleeer tevens dat onderstaande verificatie URLs op te vragen zijn:
+            </para>
+            <para>
+                <itemizedlist>
+                    <listitem><para>BRP Beheer: http://&lt;tomcat hostname&gt;:&lt;tomcat port&gt;/beheer/versie.html</para></listitem>
+                </itemizedlist>
+            </para>
+
+        </section>
+
+    </chapter>
+</book>

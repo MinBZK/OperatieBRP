@@ -1,0 +1,1 @@
+select hpb.* from kern.his_persbijhaard hpb where hpb.pers in(select id from kern.pers where bsn = ${DataSource Values#|persoon1|}) order by hpb.actieinh asc, hpb.dateindegel asc

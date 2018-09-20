@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.levering.services</groupId>
+        <artifactId>brp-levering-services</artifactId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+    <artifactId>brp-levering-services-afnemer-voorbeeld</artifactId>
+    <packaging>war</packaging>
+
+    <name>BRP Levering Services - Afnemer voorbeeld</name>
+    <description>Voorbeeld implementatie van een Kennisgeving Ontvangen voor de BRP. Server
+        implementatie van de WSDL zoals afnemers van de BRP deze gaan implementeren.</description>
+
+    <properties>
+        <docker.build.finalName>brp/afnemervoorbeeld</docker.build.finalName>
+    </properties>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen</groupId>
+            <artifactId>brp-algemeen-koppelvlak</artifactId>
+        </dependency>
+
+        <!-- DBCP -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+        </dependency>
+
+        <!-- Java EE-->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+
+        <!-- CXF -->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-management</artifactId>
+        </dependency>
+
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>compile</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- Name of the generated WAR file -->
+        <finalName>${project.artifactId}</finalName>
+
+        <resources>
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+        </resources>
+
+        <testResources>
+            <testResource>
+                <directory>${basedir}/src/test/resources</directory>
+                <includes>
+                    <include>log4j2.xml</include>
+                </includes>
+            </testResource>
+            <testResource>
+                <targetPath>../META-INF</targetPath>
+                <directory>src/main/resources/META-INF</directory>
+            </testResource>
+            <testResource>
+                <targetPath>../WEB-INF</targetPath>
+                <directory>${basedir}/src/main/webapp/WEB-INF</directory>
+            </testResource>
+            <testResource>
+                <targetPath>../WEB-INF</targetPath>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/test/webapp/WEB-INF</directory>
+            </testResource>
+        </testResources>
+
+        <plugins>
+
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <version>${cxf.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.apache.cxf</groupId>
+                        <artifactId>cxf-rt-bindings-soap</artifactId>
+                        <version>${cxf.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>commons-logging</groupId>
+                        <artifactId>commons-logging</artifactId>
+                        <version>1.1.1</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>xerces</groupId>
+                        <artifactId>xercesImpl</artifactId>
+                        <version>2.9.1</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <sourceRoot>${project.build.directory}/generated-sources/src/main/java</sourceRoot>
+                            <wsdlOptions>
+                                <wsdlOption>
+                                    <extraargs>
+                                        <extraarg>-verbose</extraarg>
+                                    </extraargs>
+                                    <wsdl>classpath:wsdl/brp-berichtverwerking.wsdl</wsdl>
+                                    <wsdlLocation>classpath:wsdl/brp-berichtverwerking.wsdl</wsdlLocation>
+                                    <autoNameResolution>true</autoNameResolution>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+                    <webResources>
+                        <resource>
+                            <directory>src/main/webapp</directory>
+                            <filtering>true</filtering>
+                            <includes>
+                                <include>*.*</include>
+                            </includes>
+                        </resource>
+                    </webResources>
+                    <archive>
+                        <manifestEntries>
+                            <groupId>${project.groupId}</groupId>
+                            <version>${project.version}</version>
+                            <project-name>${project.name}</project-name>
+                            <artifactId>${project.artifactId}</artifactId>
+                            <build>${built.on}</build>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>8.1.14.v20131031</version>
+                <configuration>
+                    <webApp>
+                        <contextPath>/brp-kennisgeving-ontvanger</contextPath>
+                    </webApp>
+                    <webAppSourceDirectory>${basedir}/src/main/webapp</webAppSourceDirectory>
+                    <useTestClasspath>true</useTestClasspath>
+                    <stopPort>9886</stopPort>
+                    <connectors>
+                        <connector implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                            <port>8080</port>
+                            <maxIdleTime>15000</maxIdleTime>
+                        </connector>
+                    </connectors>
+                    <jvmArgs>-Xms512m -Xmx1024m -XX:MaxPermSize=1024m -XX:PermSize=256m</jvmArgs>
+                    <systemProperties>
+                        <systemProperty>
+                            <name>log4j.configuration</name>
+                            <value>log4j2.xml</value>
+                        </systemProperty>
+                    </systemProperties>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/src.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>src-zip</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/levering/levering-services/afnemer-voorbeeld</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/levering/levering-services/brp-levering-services-afnemer-voorbeeld</developerConnection>
+  </scm>
+
+    <profiles>
+        <profile>
+            <id>release-skip-duplicate-test</id>
+            <activation>
+                <property>
+                    <name>performRelease</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skip>true</skip>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>ci</id>
+            <properties>
+                <maven.jdbc.archivering.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_levering_services_afnemer_voorbeeld</maven.jdbc.archivering.url>
+                <maven.jdbc.master.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_levering_services_afnemer_voorbeeld</maven.jdbc.master.url>
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_levering_services_afnemer_voorbeeld</maven.jdbc.url>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>maak-afnemer-schema</id>
+            <activation>
+                <property>
+                    <name>maakAfnemerSchema</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <executions>
+                            <!-- Vult database met afnemerschema en tabellen -->
+                            <execution>
+                                <id>drop-kern-schemas</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <dropFirst>true</dropFirst>
+                                    <changeLogFile>changeset/afnemervoorbeeld.xml</changeLogFile>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <driver>${maven.jdbc.driverClassName}</driver>
+                                    <url>${maven.jdbc.url}</url>
+                                    <username>${maven.jdbc.username}</username>
+                                    <password>${maven.jdbc.password}</password>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-assembly</id>
+                                <phase>pre-integration-test</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.4.0</version>
+                        <executions>
+                            <execution>
+                                <id>docker-build</id>
+                                <phase>install</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker-publish</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-tag-image</id>
+                                <phase>install</phase>
+                            </execution>
+                            <execution>
+                                <id>docker-push-tag</id>
+                                <phase>deploy</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>docker-release</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-tag-image</id>
+                                <phase>install</phase>
+                            </execution>
+                            <execution>
+                                <id>docker-push-tag</id>
+                                <phase>deploy</phase>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

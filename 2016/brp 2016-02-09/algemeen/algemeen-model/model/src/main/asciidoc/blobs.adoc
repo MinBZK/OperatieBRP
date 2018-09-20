@@ -1,0 +1,200 @@
+# Alles dat je altijd al wilde weten over de Blobs, maar niet durfde te vragen
+BRP Ontwikkelaars
+v0, Maart 2015
+:revnumber: {docVersion}
+:icons: font
+:numbered:
+
+
+## Reden
+Alle software die een persoon levert heeft altijd de historie van een persoon nodig om vast te kunnen stellen of en wat
+er geleverd gaat worden. Dit geldt zowel voor de diensten rond mutatielevering, afnemerindicaties en synchronisatie, maar
+ook voor bevraging in het kader van leveren en ook bevragen. Naast de historie van de groepen is ook de verantwoording
+van die historie benodigd. Het ophalen van al deze informatie tegelijk, duurt te lang om de gestelde performance eisen
+te halen.
+
+Om deze reden is er gezocht naar een alternatief dat deze performance wel ondersteunt. Door een persoon op een andere
+wijze op te slaan is het mogelijk om de gewenste leessnelheid wel te halen. De gekozen methode is het opslaan van de
+persoon in een JSON representatie. De BRP software verantwoordelijk voor het aanpassen van een persoon moet ook deze
+representatie wegschrijven. De bijhouding heeft deze belangrijke verantwoordelijkheid.
+
+
+## Jackson
+Voor het maken van JSON is gekozen voor de https://github.com/FasterXML/jackson[Jackson] bibliotheek. Deze biedt de
+grootste flexibiliteit in configuratie, opties en heeft een plugin-systeem dat de functionaliteit uitbreidbaar maakt. Er
+zijn verschillende manieren van serialiseren, ondersteuning voor meerdere data formats, dus niet alleen JSON, maar ook
+Smile of YAML zijn mogelijk.
+
+### Annotaties voor elk attribuut
+Ieder attribuut dat geserialiseerd moet worden heeft expliciet een Jackson annotatie. De eenvoudigste is `@JsonProperty`,
+dat Jackson vertelt dat het om een te serialiseren attribuut gaat. Voor _parent/child_ relaties worden de annotaties
+`@JsonManagedReference` en `@JsonBackReference` gebruikt. Dit gebeurt bijvoorbeeld bij de terugreferentie naar Persoon
+vanuit de groepen. Jackson weet dan bij het deserialiseren hoe de object referentie correct geregeld moet worden. +
+Aangezien de attributen van een groep in het BRP model van het type `Attribuut<T>` zijn, hebben alle implementaties van
+deze interface jackson annotaties (`@JsonCreator` en `@JsonValue`) om aan te duiden hoe deze waardes van JSON scalars naar
+BRP attributen vertaald moeten worden:
+
+[source, java]
+.voorbeeld attribuut implementatie
+----
+public class Burgerservicenummer implements Attribuut<String> {
+  @JsonCreator
+  public Burgerservicenummer(final String waarde) {
+   this(waarde, false, null);
+  }
+
+  @JsonValue
+  public String getWaarde() {
+   return waarde;
+  }
+  ...
+}
+----
+
+### Referenties
+Sommige typen objecten, zoals ActieModel, worden binnen een Persoon meerdere malen gerefereerd: meerdere groepen kunnen
+een actie als verantwoording hebben. Om ervoor te zorgen dat deze actie niet meerdere malen in de blob voorkomt, heeft
+deze klasse de Jackson annotatie `@JsonIdentityInfo`. De manier om te zorgen dat de actie bij elkaar worden geserialiseerd
+is het sorteren van de attributen die worden weggeschreven. De `PersoonHisVolledigMixin` sorteert eerst de verantwoording
+(de administratieve handelingen op een persoon) voor de andere attributen, door middel van `@JsonPropertyOrder`.
+
+### Relaties en Betrokkenheden.
+Relaties en Betrokkenheden zijn de plaats in de BRP waar Personen aan elkaar zijn verbonden. In de Java wereld heeft een
+relatie een lijst van betrokkenheden, en weten je niet zo maar vanaf welke persoon je naar de relatie toe bent
+genavigeerd.
+Dit probleem bestaat ook voor Jackson en het serialiseren van een relatie. Daarom worden hier speciale maatregelen genomen
+om niet in een oneindige loop terecht te komen tijdens het serialiseren. Daarnaast zijn relaties en betrokkenheden ook
+nog objecttypen met een subhierarchie: Betrokkenheid -> Ouder, Kind en Relatie -> Huwelijk, FamilierechtelijkeBetrekking.
+Om deze twee concerns op te lossen gebruiken we link:#mixins[Jacksons ``Mixin``s] en link:#custom_serializers[eigen
+serializers].
+
+[NOTE]
+Jackson heeft moeite met het correct afhandelen van `@JsonBackReference` en `@JsonSubTypes` informatie tegelijk.
+Om dat probleem op te lossen gebruiken we eigen serializers.
+
+
+## Techniek
+Voor het (de)serialiseren gebruiken we de https://github.com/FasterXML/jackson-databind[Jackson databinding] methode. De
+`ObjectMapper` kan geconfigureerd worden door middel van Jackson features en met behulp van http://wiki.fasterxml.com/JacksonFeatureModules[Jackson Modules]. Deze modules maken extra functionaliteit mogelijk, en configureren bijvoorbeeld
+``Mixin``s. Voor het serialiseren gebruiken we de `Hibernate4Module` die rekening houdt met hibernate-proxies, en onze
+eigen module (`PersoonHisVolledigMappingConfiguratieModule`) die de juiste mixins configureert.
+
+De implementatie en klasses voor het serialiseren bevinden zich in de package `nl.bzk.brp.serialisatie`. De basis klasse
+is `AbstractJacksonJsonSerializer`. Deze configureert de features van Jackson en registreert de benodigde modules. Merk
+op dat de Jackson objectmapper heel restrictief wordt geconfigureerd, omdat we alleen willen dat geannoteerde attributen
+worden opgenomen in een JSON representatie. Dit betekent effectief dat alle automatische features van de mapper worden
+uitgeschakeld. Naast de versies van serialisers die een JSON *String* representatie maken, zijn er ook
+implementaties die het dataformaat *https://github.com/FasterXML/jackson-dataformat-smile[Smile]* gebruiken. Dit is een
+binaire representatie die sneller en compacter is dan JSON string.
+
+Welke versie door de software wordt gebruikt wordt in de configuratie opgenomen:
+
+[source]
+.synchronisatie.properties
+----
+# Gebruik SMILE (= binary) JSON voor de blob of leesbare tekst JSON
+serialisatie.persoonHisVolledig.klassenaam=${serialisatie.persoon.klassenaam}
+serialisatie.afnemerIndicatie.klassenaam=${serialisatie.afnemerindicaties.klassenaam}
+----
+
+### Mixins
+Het model wordt gegenereerd en daarbij worden vaste patronen gevolgd. De specifieke uitzonderingen die nodig zijn
+voor het serialiseren van een Persoon, willen we niet in de generatoren opnemen. Daarom worden http://wiki.fasterxml.com/JacksonMixInAnnotations[Jackson Mixins] gebruikt om voor die uitzonderingen te beschrijven wat er moet gebeuren. De
+geregistreerde mixins staan in de `PersoonHisVolledigMappingConfiguratieModule`. De meeste mixins beschrijven dat er
+eigen serializers gebruikt moeten worden voor attributen. Dit gaat voornamelijk om atrributen rond Betrokkenheid en
+Relatie en rond groepen als Onderzoek en Multirealiteit, waar heb om referenties naar persoon gaat.
+
+### Custom serializers
+Om de subtypes van Relatie en Betrokkenheid correct te (de)serialiseren gebruiken we custom serializers, in combinatie
+met de Jackson annotatie `@JsonTypeInfo`. Door de `WRAPPER_ARRAY` strategie voor type informatie te gebruiken, hebben
+we in de JSON representatie het specifieke type van een relatie of betrokkenheid. Deze informatie wordt dan in de
+deserialisatie gebruikt om het Java model correct op te bouwen.
+
+#### Type informatie
+De wrapper strategie is nodig om in de custom serializer aan Jackson te kunnen vertellen welke type we willen
+deserialiseren. Dit zodat dat wel via Jackson gedaan wordt. Op deze manier wordt namelijk optimaal gebruik gemaakt van
+Jackson en het `@JsonIdentityInfo` mechanisme, dat niet werkt voor volledig custom deserialisatie. Dit is vooral duidelijk
+in de `BetrokkenenInRelatieSerializer` en `BetrokkenenInRelatieDeserializer`.
+
+#### Relatie en de betrokkenen
+In de `RelatieHisVolledigMixin` is te zien dat de Set betrokkenheden wordt geserialiseerd door de
+`BetrokkenenInRelatieSerializer`. Deze schrijft van een persoon slechts het JSON object `"persoon": {"iD": 00000}` en
+van de hoofdpersoon via `void serializeWithType()` alleen de referentie. Jackson kan bij het deserialiseren dan de object
+referentie naar de hoofdpersoon weer goed zetten (alsof `@JsonIdentityInfo` is gebruikt). Voor het ophalen van de andere
+betrokken personen wordt een link:#proxy_luielader[proxy] gebruikt.
+
+
+## Blobifier
+De Blobifier heeft de verantwoordelijkheid van het lezen en schrijven van geserialiseerde personen. Hiertoe heeft deze
+module een service en repository implementaties. Bij het deserialiseren van een blob wordt er een checksum validatie
+gedaan van de data. Deze checksum wordt gecreeerd en opgeslagen bij het serialiseren van de persoon. De `BlobifierService`
+gebruikt zelf geen transactie, en heeft (dus) de transactie nodig van de service/module die van de service gebruik maakt.
+
+[WARNING]
+Het object dat de blob en checksum bevat is het `PersoonCacheModel`. Dit object heeft ook een Constante voor de versie
+van het BMR. Dit nummer moet bij elke nieuwe versie van het BMR worden aangepast aan de juite versie, omdat deze waarde
+in de database wordt opgeslagen. Dit kan in de toekomst worden gebruikt bij link:#versionering[versionering] oplossingen.
+
+### Verantwoording
+De Blobifier haalt voor het opslaan van een Persoon, de verantwoording van die persoon op. Dit zijn de administratieve
+handelingen die hebben geleid tot de huidige toestand van de persoon. Deze handelingen worden aan de persoon 'gehangen'
+door de aanroep `PersoonHisVolledigImpl#setAdministratieveHandelingen()`. Daarna pas wordt de persoon geserialiseerd.
+
+### Proxy (Luielader)
+Na het deserialiseren van een persoon, is deze nog niet compleet als voor het serializeren. De betrokken personen zijn
+niet meer dan een leeg persoon object met slechts een ID. Voor deze personen plaatst de Blobifier een proxy object, ofwel
+een `PersoonHisVolledigImplLuieLader`. Deze proxy fungeert net als een Hibernate proxy. Op het moment dat informatie van
+dit object nodig is, zal het worden opgehaald. In ons geval zal de blob van de betrokken persoon worden opgehaald en
+deserialiseerd.
+
+### Inmemory blob
+Het kan voorkomen dat voor een persoon geen blob beschikbaar is. Als de Blobifier dan om een persoon wordt gevraagd, zal
+deze toch de persoon uit de relationele tabellen moeten lezen. Daarna wordt van deze persoon in het proces de blob
+gemaakt, en weer gedeserialiseerd voordat deze wordt teruggegeven. Op deze manier weten we zeker dat de code die de
+persoon opvraagt een gedeserialiseerde JSON representatie ontvangt.
+
+### Afnemerindicaties
+Naast een JSON representatie van een persoon, is er ook een van de afnemerindicaties die voor een persoon zijn
+vastgelegd. Dit is los van de persoon, omdat afnemerindicaties juridisch niet op de _persoonslijst_ van een persoon staan.
+Deze blob staat in een aparte kolom in de database. Ook zijn er aparte serializer implementaties
+(`AfnemerIndicatieSerializer`), voor JSON en Smile, voor deze serialisatie.
+
+
+## Aandachtspunten voor de toekomst
+Er zijn concerns waar nog geen oplossing voor nodig is, of waarvoor nog niets is bedacht. Deze zijn hier opgenomen.
+
+### Versionering
+Potentieel zijn er verschillende versies van het model in gebruik, en daarmee verschillende versies van de blob. Er is
+momenteel een (1) middel om verschillende versies te detecteren, namelijk het attribuut versie van `PersoonCacheModel`.
+Hoe er met verschillende versies moet worden omgegaan is niet bepaald. Een andere optie is een versie object te maken die
+door het PersoonHisModel wordt geextend, is het mogelijk om alleen de versie van de blob op te vragen.
+
+[source, java]
+----
+ObjectReader versionReader = mapper
+    .reader(VersionedHis.class)
+    .without(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+VersionedHis versioned = versionReader.readValue(bits);
+----
+
+Potentiele wijzigingen in het model waarmee versionering rekening moet houden zijn:
+
+- Toevoegen van een nieuwe property (object of attribuut);
+Door deze property te annoteren met `@JsonProperty`, wordt deze automatisch meegenomen in het serialiseren/deserialiseren.
+Doordat de `FAIL_ON_UNKNOWN_PROPERTIES` feature uit staat, kunnen we gewoon oude blobs inlezen.
+- Hernoemen van een property (object of attribuut);
+Om dit te ondersteunen zal een custom serialize / deserialize moeten worden geschreven. Deze kan op alleen deze property
+worden gezet door middel van de `@JsonSerialize(using = CustomSerializer.class)` en `@JsonDeserialize(using =
+CustomDeSerializer.class)` annotaties.
+- Verwijderen van een property (object of attribuut);
+Oude blob kan worden gelezen omdat het niet meer bestaan van een property kan worden genegeerd met de `@AnySetter`
+annotatie. (En de `FAIL_ON_UNKNOWN_PROPERTIES` mapper feature)
+- Veranderen van de cardinaliteit van een property;
+Verandering van cardinaliteit betekent ook veel database wijzigingen, dus de kans is groot dat dit gewoon betekent dat
+het opnieuw maken van de blob afgedwongen moet worden. (Kan door middel van een versie check bijvoorbeeld gebeuren).
+
+### Ophalen van verantwoording
+Performance testen in het verleden hebben uitgewezen dat het maken van blobs met een behoorlijke snelheid kan worden
+uitgevoerd (± 125 blobs/min). Nu voor elke persoon eerst de verantwoording wordt opgehaald is deze snelheid 5 keer lager.
+Indien deze snelheid een probleem gaat vormen, moet er een effectievere oplossing worden gezocht voor het ophalen van
+de verantwoording van een persoon.

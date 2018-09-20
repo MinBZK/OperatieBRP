@@ -1,0 +1,409 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 12-03-2014 -->
+<!-- ... -->
+<!-- Wijzigingen: -->
+<!-- 1) Consolidatie gegevensmodel BRP -->
+<!-- 2) Consolidatie berichtmodel BRP -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020001">
+	<include schemaLocation="brp0200_brpBijhouding_Basis.xsd"/>
+	<!-- ... -->
+	<!-- Container Acties Binnengemeentelijke verhuizing -->
+	<complexType name="Container_Handeling_Acties_VerhuizingBinnengemeentelijk_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_VerhuizingBinnengemeentelijk">
+				<sequence>
+					<element name="registratieAdres" type="brp:Actie_RegistratieBinnengemeentelijkeVerhuizing_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieVerstrekkingsbeperking" type="brp:Actie_RegistratieVerstrekkingsbeperkingBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Actie Registratie Adres Binnengemeentelijk -->
+	<complexType name="Actie_RegistratieBinnengemeentelijkeVerhuizing_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieAdres">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_AdresBinnengemeentelijk" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_AdresBinnengemeentelijk">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="adressen" type="brp:Container_PersoonAdressenBinnengemeentelijk_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonAdressenBinnengemeentelijk_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_PersoonAdressen">
+				<sequence>
+					<element name="adres" type="brp:Objecttype_PersoonAdresBinnengemeentelijk_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonAdresBinnengemeentelijk_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonAdres">
+				<sequence>
+					<element name="soortCode" type="brp:SoortAdresCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="redenWijzigingCode" type="brp:RedenWijzigingVerblijfCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="aangeverAdreshoudingCode" type="brp:AangeverCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="datumAanvangAdreshouding" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="identificatiecodeAdresseerbaarObject" type="brp:IdentificatiecodeAdresseerbaarObject" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="identificatiecodeNummeraanduiding" type="brp:IdentificatiecodeNummeraanduiding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="naamOpenbareRuimte" type="brp:NaamOpenbareRuimte" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="afgekorteNaamOpenbareRuimte" type="brp:AfgekorteNaamOpenbareRuimte" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeentedeel" type="brp:Gemeentedeel" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummer" type="brp:Huisnummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisletter" type="brp:Huisletter" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="postcode" type="brp:Postcode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsnaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="locatieTenOpzichteVanAdres" type="brp:LocatieTenOpzichteVanAdres" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="locatieomschrijving" type="brp:Locatieomschrijving" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonAdres"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Intergemeentelijke verhuizing -->
+	<complexType name="Container_Handeling_Acties_VerhuizingIntergemeentelijk_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_VerhuizingIntergemeentelijk">
+				<sequence>
+					<element name="registratieAdres" type="brp:Actie_RegistratieIntergemeentelijkeVerhuizing_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieVerstrekkingsbeperking" type="brp:Actie_RegistratieVerstrekkingsbeperkingBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Actie Registratie Adres Intergemeentelijk -->
+	<complexType name="Actie_RegistratieIntergemeentelijkeVerhuizing_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieAdres">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_AdresNederland" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_AdresNederland">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="adressen" type="brp:Container_PersoonAdressenNederland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonAdressenNederland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_PersoonAdressen">
+				<sequence>
+					<element name="adres" type="brp:Objecttype_PersoonAdresNederland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonAdresNederland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonAdres">
+				<sequence>
+					<element name="soortCode" type="brp:SoortAdresCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="redenWijzigingCode" type="brp:RedenWijzigingVerblijfCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="aangeverAdreshoudingCode" type="brp:AangeverCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="datumAanvangAdreshouding" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="identificatiecodeAdresseerbaarObject" type="brp:IdentificatiecodeAdresseerbaarObject" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="identificatiecodeNummeraanduiding" type="brp:IdentificatiecodeNummeraanduiding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeenteCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="naamOpenbareRuimte" type="brp:NaamOpenbareRuimte" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="afgekorteNaamOpenbareRuimte" type="brp:AfgekorteNaamOpenbareRuimte" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeentedeel" type="brp:Gemeentedeel" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummer" type="brp:Huisnummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisletter" type="brp:Huisletter" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="postcode" type="brp:Postcode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsnaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="locatieTenOpzichteVanAdres" type="brp:LocatieTenOpzichteVanAdres" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="locatieomschrijving" type="brp:Locatieomschrijving" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonAdres"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Verhuizing naar buitenland -->
+	<complexType name="Container_Handeling_Acties_VerhuizingNaarBuitenland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_VerhuizingNaarBuitenland">
+				<sequence>
+					<element name="registratieMigratie" type="brp:Actie_RegistratieVerhuizingBuitenland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieVerstrekkingsbeperking" type="brp:Actie_RegistratieVerstrekkingsbeperkingBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Actie Registratie Verhuizing naar buitenland -->
+	<complexType name="Actie_RegistratieVerhuizingBuitenland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieMigratie">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_Migratie" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_Migratie">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="migratie" type="brp:Groep_PersoonMigratie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonMigratie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonMigratie">
+				<sequence>
+					<element name="redenWijzigingCode" type="brp:RedenWijzigingVerblijfCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="aangeverCode" type="brp:AangeverCode" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="landGebiedCode" type="brp:LandGebiedCode" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel1" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel2" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel3" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel4" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel5" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel6" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Container Acties Correctie adres -->
+	<complexType name="Container_Handeling_Acties_CorrectieAdres_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_CorrectieAdres">
+				<sequence>
+					<element name="correctieAdres" type="brp:Actie_CorrectieAdres_Bijhouding" nillable="false" minOccurs="1" maxOccurs="unbounded"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Actie Correctie adres -->
+	<complexType name="Actie_CorrectieAdres_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_CorrectieAdres">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_AdresCorrectieAdres" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_AdresCorrectieAdres">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="adressen" type="brp:Container_PersoonAdressenCorrectie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonAdressenCorrectie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_PersoonAdressen">
+				<sequence>
+					<element name="adres" type="brp:Objecttype_PersoonAdresCorrectie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonAdresCorrectie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonAdres">
+				<sequence>
+					<element name="soortCode" type="brp:SoortAdresCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="redenWijzigingCode" type="brp:RedenWijzigingVerblijfCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="aangeverAdreshoudingCode" type="brp:AangeverCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="datumAanvangAdreshouding" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="identificatiecodeAdresseerbaarObject" type="brp:IdentificatiecodeAdresseerbaarObject" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="identificatiecodeNummeraanduiding" type="brp:IdentificatiecodeNummeraanduiding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeenteCode" type="brp:GemeenteCode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="naamOpenbareRuimte" type="brp:NaamOpenbareRuimte" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="afgekorteNaamOpenbareRuimte" type="brp:AfgekorteNaamOpenbareRuimte" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeentedeel" type="brp:Gemeentedeel" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummer" type="brp:Huisnummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisletter" type="brp:Huisletter" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="postcode" type="brp:Postcode" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsnaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="locatieTenOpzichteVanAdres" type="brp:LocatieTenOpzichteVanAdres" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="locatieomschrijving" type="brp:Locatieomschrijving" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsAdresRegel1" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel2" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel3" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel4" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel5" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel6" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="landGebiedCode" type="brp:LandGebiedCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="indicatiePersoonAangetroffenOpAdres" type="brp:Nee" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="PersoonAdres"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Container Acties WijzigingBijzondereVerblijfsrechtelijkePositie -->
+	<complexType name="Container_Handeling_Acties_WijzigingBijzondereVerblijfsrechtelijkePositie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Container_Handeling_Acties_WijzigingBijzondereVerblijfsrechtelijkePositie">
+				<sequence>
+					<element name="registratieBijzondereVerblijfsrechtelijkePositie" type="brp:Actie_RegistratieBijzonderVerblijfsrechtelijkePositieBijIngeschrevene_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="registratieMigratie" type="brp:Actie_RegistratieMigratieBijzondereVerblijfsrechtelijkePositie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="registratieVerstrekkingsbeperking" type="brp:Actie_RegistratieVerstrekkingsbeperkingBijIngeschrevene_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Actie Registratie Adres Bijzondere verblijfsrechtelijke positie -->
+	<complexType name="Actie_RegistratieMigratieBijzondereVerblijfsrechtelijkePositie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Actie_RegistratieMigratie">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon_MigratieBijzondereVerblijfsrechtelijkePositie" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Actie"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon_MigratieBijzondereVerblijfsrechtelijkePositie">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="migratie" type="brp:Groep_PersoonMigratieBijzondereVerblijfsrechtelijkePositie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="Persoon"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="required"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonMigratieBijzondereVerblijfsrechtelijkePositie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonMigratie">
+				<sequence>
+					<element name="redenWijzigingCode" type="brp:RedenWijzigingVerblijfCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="aangeverCode" type="brp:AangeverCode" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="landGebiedCode" type="brp:LandGebiedCode" nillable="false" minOccurs="1" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel1" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel2" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel3" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel4" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel5" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+					<element name="buitenlandsAdresRegel6" type="brp:Adresregel" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

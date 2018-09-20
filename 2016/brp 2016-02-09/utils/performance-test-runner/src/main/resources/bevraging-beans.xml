@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <import resource="classpath:datasource-context.xml"/>
+    <import resource="classpath:dataaccess-beans.xml"/>
+
+    <context:property-placeholder location="classpath:jdbc.properties, classpath:runner.properties" />
+
+    <context:annotation-config/>
+    <context:component-scan base-package="nl.bzk.brp.bevraging"/>
+
+    <task:executor id="executor" pool-size="5" queue-capacity="2000"/>
+
+    <bean id="expressieString" class="java.lang.String">
+        <constructor-arg value="${populatieBeperking}" />
+    </bean>
+
+    <!-- tool chain beans -->
+    <bean id="bevraagVolledigChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="rapporteerStap"/>
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="warmDatabaseOpStap"/>
+                <ref bean="bevraagPersoonVolledigDirectStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="serializeChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="rapporteerStap"/>
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="deserializeChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="rapporteerStap"/>
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobStap"/>
+                <ref bean="serializeerPersoonsLijstStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="expressietaalChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="rapporteerStap"/>
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="warmDatabaseOpStap"/>
+                <ref bean="hibernateReportStap"/>
+                <ref bean="haalPersonenOpStap"/>
+                <ref bean="haalAfnemersOpStap"/>
+                <ref bean="expressietaalMatchStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="leesGenormalizeerdModelEnSerializeJpaChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="rapporteerStap"/>
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="warmDatabaseOpStap"/>
+                <ref bean="hibernateReportStap"/>
+                <ref bean="bevraagPersoonVolledigEnSerializeerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="selectieJDBC" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="rapporteerStap" />
+                <ref bean="timingStap" />
+                <ref bean="databaseInfoStap" />
+                <ref bean="processAllJdbcStap" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="selectieJPA" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="rapporteerStap" />
+                <ref bean="timingStap" />
+                <ref bean="databaseInfoStap" />
+                <ref bean="processAllJpaStap" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="catalog" class="org.apache.commons.chain.impl.CatalogBase">
+        <constructor-arg>
+            <map>
+                <entry key="serializeer" value-ref="serializeChain"/>
+                <entry key="deserializeer" value-ref="deserializeChain"/>
+                <entry key="volledig-jpa" value-ref="bevraagVolledigChain"/>
+                <entry key="expressietaal" value-ref="expressietaalChain"/>
+                <entry key="leesGenormalizeerdModelEnSerializeJpa" value-ref="leesGenormalizeerdModelEnSerializeJpaChain"/>
+                <entry key="selectieJpa" value-ref="selectieJPA" />
+                <entry key="selectieJdbc" value-ref="selectieJDBC" />
+                <entry key="leesBlob" value-ref="leesBlobStap" />
+            </map>
+        </constructor-arg>
+    </bean>
+</beans>

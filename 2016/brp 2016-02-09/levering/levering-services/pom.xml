@@ -1,0 +1,353 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-parent</artifactId>
+        <groupId>nl.bzk.brp</groupId>
+        <version>96-SNAPSHOT</version>
+        <relativePath>../../brp-parent</relativePath>
+    </parent>
+
+    <groupId>nl.bzk.brp.levering.services</groupId>
+    <artifactId>brp-levering-services</artifactId>
+    <packaging>pom</packaging>
+
+    <name>BRP Levering Services</name>
+
+    <modules>
+        <module>bezemwagen</module>
+        <module>mutatielevering</module>
+        <module>onderhoud-afnemerindicaties</module>
+        <module>synchronisatie</module>
+        <module>verzending</module>
+        <module>afnemer-voorbeeld</module>
+    </modules>
+
+    <properties>
+        <!-- profile voor JDBC connecties etc., in maven filter properties bestand (zie /project/build/filters) -->
+        <build.profile.id>default</build.profile.id>
+        <docker.build.finalName>brp/${build.finalName}</docker.build.finalName>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>nl.bzk.brp.algemeen</groupId>
+                <artifactId>brp-algemeen-koppelvlak</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <dependencies>
+        <!-- Project -->
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-expressietaal</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.util</groupId>
+            <artifactId>brp-algemeen-util-logging</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-dataaccess</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-blobifier</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.kern</groupId>
+            <artifactId>brp-algemeen-kern-regels</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.levering.kern</groupId>
+            <artifactId>brp-levering-kern-algemeen</artifactId>
+        </dependency>
+
+        <!-- Logging, voor Graylog en stuur alle commons logging en java util
+             logging over slf4j, zodat die ook naar graylog kan -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-api</artifactId>
+            <version>${log4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-web</artifactId>
+            <version>${log4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <!-- test dependencies -->
+
+        <!-- Project TEST dependencies -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.levering.kern</groupId>
+            <artifactId>brp-levering-kern-algemeen</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-dataaccess</artifactId>
+            <classifier>test-support</classifier>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-dataaccess</artifactId>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>xmlunit</groupId>
+            <artifactId>xmlunit</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+    <build>
+        <pluginManagement>
+            <plugins>
+                <!-- Een correcte database is nodig voor de integratie tests.
+                In plaats van te 'vertrouwen' op een voorgaande data access build,
+                zorgen we in een webservice build altijd zelf voor een goede database om mee te testen. -->
+                <plugin>
+                    <groupId>org.liquibase</groupId>
+                    <artifactId>liquibase-maven-plugin</artifactId>
+                    <configuration>
+                        <skip>${skipTests}</skip>
+                        <driver>${maven.jdbc.driverClassName}</driver>
+                        <url>${maven.jdbc.url}</url>
+                        <username>${maven.jdbc.username}</username>
+                        <password>${maven.jdbc.password}</password>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                            <artifactId>brp-algemeen-opslag-database</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <inherited>true</inherited>
+                    <executions>
+                        <execution>
+                            <id>create-db</id>
+                            <goals>
+                                <goal>update</goal>
+                            </goals>
+                            <phase>process-test-classes</phase>
+                            <configuration>
+                                <dropFirst>true</dropFirst>
+                                <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                <changeLogFile>changeset/brp-databases.xml</changeLogFile>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=512m</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <revisionOnScmFailure>onbekend</revisionOnScmFailure>
+                </configuration>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create</goal>
+                        </goals>
+                        <phase>validate</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>versienummer</id>
+                        <goals>
+                            <goal>parse-version</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <!--properties voor test uitpakken-->
+                    <execution>
+                        <id>unpack-test-properties</id>
+                        <phase>generate-test-resources</phase>
+                    </execution>
+                    <!--properties voor docker uitpakken-->
+                    <execution>
+                        <id>unpack-docker-properties</id>
+                        <phase>generate-test-resources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--properties voor test uitpakken filteren zodat ze gevuld worden -->
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>filter-test-properties</id>
+                        <phase>process-test-resources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/levering/levering-services</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/levering/levering-services</developerConnection>
+    </scm>
+
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>db.postgresql</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_levering_services</maven.jdbc.url>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>inmemory</id>
+            <activation>
+                <property>
+                    <name>db.inmemory</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.url>
+                <maven.jdbc.username>brp</maven.jdbc.username>
+                <maven.jdbc.password>brp</maven.jdbc.password>
+                <maven.jdbc.pool.maxActive>100</maven.jdbc.pool.maxActive>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+            <plugins>
+                <plugin>
+                    <groupId>org.liquibase</groupId>
+                    <artifactId>liquibase-maven-plugin</artifactId>
+                    <executions>
+                        <execution>
+                            <id>create-db</id>
+                            <phase>process-test-classes</phase>
+                            <goals>
+                                <goal>update</goal>
+                            </goals>
+                            <configuration>
+                                <skip>${skipTests}</skip>
+                                <driver>${maven.jdbc.driverClassName}</driver>
+                                <dropFirst>true</dropFirst>
+                                <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                <changeLogFile>changeset/brp-hsqldb-databases.xml</changeLogFile>
+                            </configuration>
+                        </execution>
+                    </executions>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.hsqldb</groupId>
+                            <artifactId>hsqldb</artifactId>
+                            <version>${hsqldb.version}</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.apache.maven.surefire</groupId>
+                            <artifactId>surefire-junit47</artifactId>
+                            <version>2.16</version>
+                        </dependency>
+                    </dependencies>
+                    <configuration>
+                        <excludedGroups>nl.bzk.brp.utils.junit.OverslaanBijInMemoryDatabase</excludedGroups>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

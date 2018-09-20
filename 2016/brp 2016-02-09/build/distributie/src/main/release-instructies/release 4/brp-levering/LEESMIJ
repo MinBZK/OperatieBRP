@@ -1,0 +1,67 @@
+19 April 2013 - BRP levering versie 0.2.1
+
+De release notes van deze versie: https://www.modernodam.nl/confluence/display/mGBA/BRP+Release+4
+
+Release 0.2.1
+Deze release bevat een bugfix waardoor berichten altijd naar 1 endpoint werden gestuurd en niet naar een endpoint
+van een partij uit de database. Daarnaast zijn er wat logmeldingen toegevoegd.
+
+Installatie instructie:
+1. Pas de logging configuratie aan om minder debug meldingen te krijgen:
+   <logger name="nl.bzk.brp">
+        <level value="info">
+   </logger>
+   <logger name="nl.bzk.brp.levering">
+        <level value="debug">
+   </logger>
+2. Volg de handleiding voor de deployment van de BRP Levering Services.
+       Zie: "documentatie\Installatie handleiding BRP Levering.pdf"
+       (Het komt neer op een redeploy van de war files, geen configuratie wijzigingen).
+3. Test of de afnemer beschikbaar is door met een browser naar de volgende url te gaan:
+   https://brp-proeftuin-links.modernodam.nl/brp-kennisgeving-ontvanger/levering/kennisgevingService
+   Indien je daar een scherm met services krijgt, is de service bereikbaar en correct gedeployed.
+4. Pas de geheugen instellingen van Tomcat op de bijhouding server aan (ap01) met de volgende instellingen:
+   -XX:MaxPermSize=256m -XX:PermSize=128m
+  (Controleer tevens de -Xmx en -Xms settings, indien die er niet zijn wordt er maar 64m gereserveerd. Dat mag minimaal
+  twee keer zoveel zijn).
+
+17 April 2013 - BRP levering versie 0.2.0
+
+Release 0.2.0
+Bij deze oplevering hoort een SQL bestand en een aantal WAR-bestanden. In het SQL bestand staan de specifieke endpoints
+voor de BRPreview deelnemers, zodat deze bij de verwerking van mutaties berichten kunnen ontvangen.
+De WAR-bestanden vormen alle losse onderdelen die verantwoordelijk zijn voor de verwerking van mutaties nav bijhoudingen.
+
+Het SQL bestand is te vinden op deze locatie:
+        documentatie\release 4\brp-levering\db\wsdl-endpoints.sql
+        
+Installatie instructie:
+1. Voer het bestand "documentatie\release 4\brp-levering\db\wsdl-endpoints.sql" uit op de database.
+2. Voer het bestand "documentatie\release 4\brp-levering\db\historie-fix.sql" uit op de database.
+3. Pas de logging configuratie aan. Voeg onderstaande logger packages toe:
+
+       <logger name="nl.moderniseringgba.brp">
+             <level value="debug"/>
+       </logger>
+       <logger name="org.apache.activemq">
+           <level value="info" />
+       </logger>
+       <logger name="org.apache.camel">
+           <level value="info" />
+       </logger>
+       <logger name="org.springframework.jms">
+           <level value="info" />
+       </logger>
+
+4. Wijzig de syslog appender met de volgende waardes om ervoor te zorgen dat er verschil tussen de machines die loggen zichtbaar te maken:
+       <param name="Facility" value="LOCAL1" />
+       <param name="FacilityPrinting" value="true" />
+       <layout class="org.apache.log4j.PatternLayout">
+           <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} %F [%t]  %-5p (%C{5}:%-3L) %m%n"/>
+       </layout>
+
+
+5. Volg de handleiding voor de deployment van de BRP Levering Services.
+    Zie: "documentatie\Installatie handleiding BRP Levering.pdf"
+
+6. Deploy als laatste de afnemer service (brp-kennisgeving-ontvanger.war), waar de berichten vanuit de mutatie server heen worden gestuurd.

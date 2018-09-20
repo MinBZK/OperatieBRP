@@ -1,0 +1,68 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+    ">
+
+    <aop:aspectj-autoproxy>
+        <aop:include name="timingAspect"/>
+    </aop:aspectj-autoproxy>
+
+    <bean id="timingAspect" class="org.perf4j.slf4j.aop.TimingAspect"/>
+
+    <context:component-scan base-package="nl.bzk.brp.levering.mutatielevering.service.bericht" />
+    <context:component-scan base-package="nl.bzk.brp.webservice.business.service" />
+    <context:component-scan base-package="nl.bzk.brp.business.stappen" />
+
+    <bean id="administratieveHandelingStappenVerwerker" class="nl.bzk.brp.levering.mutatielevering.stappen.AdministratieveHandelingStappenVerwerker">
+        <property name="stappen" ref="administratieveHandelingVerwerkingStappen" />
+    </bean>
+
+    <util:list id="administratieveHandelingVerwerkingStappen" value-type="nl.bzk.brp.levering.mutatielevering.stappen.AbstractAdministratieveHandelingVerwerkingStap">
+        <bean id="transactieStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.TransactieStap" />
+        <bean id="administratieveHandelingLockStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.AdministratieveHandelingLockStap" />
+        <bean id="haalAdministratieveHandelingOpStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.HaalAdministratieveHandelingOpStap" />
+		<bean id="haalBijgehoudenPersonenIdsOpStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.HaalBijgehoudenPersonenIdsOpStap" />
+		<bean id="verifieerAdministratieveHandelingStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.VerifieerAdministratieveHandelingStap" />
+<!--
+		<bean id="logAdministratieveHandelingStap" class="nl.bzk.brp.levering.mutatieleveringpen.administratievehandeling.LogAdministratieveHandelingStap" />
+-->
+        <bean id="haalBijgehoudenPersonenHisVolledigOpStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.HaalBijgehoudenPersonenHisVolledigOpStap" />
+        <bean id="bepaalLeveringsautorisatiePopulatieStap"
+              class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.BepaalLeveringsautorisatiePopulatieStap" />
+        <bean id="filterOnderzoekenStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.OnderzoekenFilterStap" />
+        <bean id="startStappenAfnemersStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.StartStappenLeveringsautorisatiesStap" />
+        <bean id="markeerAdministratieveHandelingAlsVerwerktStap" class="nl.bzk.brp.levering.mutatielevering.stappen.administratievehandeling.MarkeerAdministratieveHandelingAlsVerwerktStap" />
+    </util:list>
+
+    <bean id="afnemerStappenVerwerker" class="nl.bzk.brp.levering.mutatielevering.stappen.AfnemerStappenVerwerker">
+        <property name="stappen" ref="afnemerVerwerkingStappen" />
+    </bean>
+
+    <util:list id="afnemerVerwerkingStappen" value-type="nl.bzk.brp.levering.business.stappen.populatie.AbstractAfnemerVerwerkingStap">
+        <bean id="maakLegeViewOpPersonenStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.MaakLegeViewOpPersonenStap" />
+        <bean id="plaatsVerwerkingssoortenStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.PlaatsVerwerkingssoortenStap" />
+        <bean id="bepaalViewOpPersonenStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.BepaalViewOpPersonenStap" />
+        <bean id="maakMaxKennisgevingBerichtStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.MaakMaxKennisgevingBerichtStap" />
+        <bean id="voegStuurgegevensToeStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.VoegStuurgegevensToeStap" />
+        <bean id="markeerAttributenInOnderzoek" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.MarkeerAttributenInOnderzoekStap" />
+        <bean id="voorkomenFilterStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.VoorkomenFilterStap" />
+        <bean id="attributenFilterStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.AttributenFilterStap" />
+        <bean id="betrokkenheidBepaalMagLeverenStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.BetrokkenheidBepaalMagLeverenStap" />
+        <bean id="autoriseerOnderzoekenStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.AutoriseerOnderzoekenStap" />
+        <bean id="filterVerantwoordingsinformatieStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.FilterVerantwoordingsinformatieStap" />
+        <!--  brp.bedrijfsregel VR00089 -->
+        <bean id="filterLegePersonenStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.FilterLegePersonenStap" />
+        <bean id="zetObjectSleutelStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.ZetPersoonObjectSleutelVoorOnderzoekStap" />
+        <bean id="maakUitgaandBerichtStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.MaakUitgaandBerichtStap" />
+        <bean id="plaatsAfnemerindicatieStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.PlaatsAfnemerindicatieStap" />
+        <bean id="zetBerichtOpQueueStap" class="nl.bzk.brp.levering.mutatielevering.stappen.populatie.ZetBerichtOpQueueStap" />
+    </util:list>
+
+</beans>

@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.art.levering.synchronisatie</groupId>
+        <artifactId>brp-art-levering-synchronisatie</artifactId>
+        <version>0.8.9-SNAPSHOT</version>
+    </parent>
+    <artifactId>brp-art-levering-synchronisatie-verzoek-synchronisatie</artifactId>
+    <packaging>jar</packaging>
+    <name>ART Levering - Synchronisatie - Verzoek Synchronisatie</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>${groupid.synchronisatie}</groupId>
+            <artifactId>${art.levering.synchronisatie.prefix}${id.OnderhoudAfnemerindicaties}</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${groupid.bijhouding}</groupId>
+            <artifactId>${art.bijhouding.prefix}${id.kuc033-document-verzoek-mededeling}</artifactId>
+            <version>${art.bijhouding.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${groupid.bijhouding}</groupId>
+            <artifactId>${art.bijhouding.prefix}${id.puc700-verblijf-adres-verhuizing-in-nederland}</artifactId>
+            <version>${art.bijhouding.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>extract-${id.OnderhoudAfnemerindicaties}</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${groupid.synchronisatie}</groupId>
+                                    <artifactId>${art.levering.synchronisatie.prefix}${id.OnderhoudAfnemerindicaties}</artifactId>
+                                    <overWrite>true</overWrite>
+                                    <includes>**/*</includes>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${art-afhankelijkheden.directory}/ARTS/${id.OnderhoudAfnemerindicaties}</outputDirectory>
+                            <excludes>*.log, *.log.*</excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>extract-${id.kuc033-document-verzoek-mededeling}</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${groupid.bijhouding}</groupId>
+                                    <artifactId>${art.bijhouding.prefix}${id.kuc033-document-verzoek-mededeling}</artifactId>
+                                    <overWrite>true</overWrite>
+                                    <includes>**/*</includes>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${art-afhankelijkheden.directory}/ARTS/${id.kuc033-document-verzoek-mededeling}</outputDirectory>
+                            <excludes>*.log, *.log.*</excludes>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>extract-${id.puc700-verblijf-adres-verhuizing-in-nederland}</id>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${groupid.bijhouding}</groupId>
+                                    <artifactId>${art.bijhouding.prefix}${id.puc700-verblijf-adres-verhuizing-in-nederland}</artifactId>
+                                    <overWrite>true</overWrite>
+                                    <includes>**/*</includes>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${art-afhankelijkheden.directory}/ARTS/${id.puc700-verblijf-adres-verhuizing-in-nederland}</outputDirectory>
+                            <excludes>*.log, *.log.*</excludes>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/art/levering/trunk/synchronisatie/VerzoekSynchronisatie</connection>
+    </scm>
+
+    <profiles>
+        <profile>
+            <id>run-ART</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>com.smartbear.soapui</groupId>
+                        <artifactId>soapui-maven-plugin</artifactId>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>release-ART</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+</project>

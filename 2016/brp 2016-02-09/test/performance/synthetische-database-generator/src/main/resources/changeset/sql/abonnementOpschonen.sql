@@ -1,0 +1,10 @@
+delete from autaut.his_persafnemerindicatie;
+delete from autaut.persafnemerindicatie;
+delete from autaut.his_afleverwijze;
+delete from autaut.afleverwijze;
+delete from autaut.his_toegangabonnement;
+delete from autaut.toegangabonnement;
+delete from autaut.his_dienst;
+delete from autaut.dienst;
+delete from autaut.his_abonnement;
+delete from autaut.abonnement;

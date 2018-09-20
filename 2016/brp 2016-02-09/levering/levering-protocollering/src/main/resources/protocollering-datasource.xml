@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+       http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <bean id="protocolleringDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.protocollering.driverClassName}"/>
+        <property name="url" value="${jdbc.protocollering.url}"/>
+        <property name="username" value="${jdbc.protocollering.username}"/>
+        <property name="password" value="${jdbc.protocollering.password}"/>
+        <property name="defaultReadOnly" value="${jdbc.readonly:false}"/>
+        <property name="defaultTransactionIsolation" value="${jdbc.transactionisolation:2}"/> <!-- default TRANSACTION_READ_COMMITTED, voor read-only: TRANSACTION_NONE = 0) -->
+        <property name="initialSize" value="${jdbc.protocollering.pool.initialSize:1}"/>
+        <property name="maxActive" value="${jdbc.protocollering.pool.maxActive:100}"/>
+        <property name="minIdle" value="${jdbc.protocollering.pool.minIdle:1}"/>
+        <property name="maxIdle" value="${jdbc.protocollering.pool.maxIdle:5}"/>
+        <property name="maxWait" value="30000"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="true"/>
+    </bean>
+
+    <jpa:repositories base-package="nl.bzk.brp.protocollering.verwerking.repository" />
+
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="protocolleringEntityManagerFactory" />
+        <property name="jpaDialect" ref="jpaDialect" />
+        <!-- not implemented by PostgreSQL JDBC :(
+            <property elementNaam="defaultTimeout" value="15" />
+        -->
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+        <property name="database" value="POSTGRESQL" />
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQL82Dialect" />
+    </bean>
+
+    <bean id="protocolleringEntityManagerFactory" name="nl.bzk.brp.protocollering" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="nl.bzk.brp.protocollering"/>
+        <property name="packagesToScan" value="nl.bzk.brp.model.operationeel.lev" />
+        <property name="dataSource" ref="protocolleringDataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>

@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- nieuwste version check van dependencies: mvn versions:display-dependency-updates -->
+
+<!-- 1) om een lege database te maken zonder constraints en indexen:
+    - drop en create een database
+    - stel database.properties in met juiste credentials
+	- draai commando: mvn clean install -P build-db
+
+	2) om de generatie te starten:
+	- 1) mvn clean install
+	- 2) ga naar target directory
+	- 3) voer uit java -jar TestDataGeneratie-{VERSIE}-jar-with-dependencies.jar
+
+	- -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.test</groupId>
+        <artifactId>brp-test-performance</artifactId>
+        <version>14.0.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>brp-test-synthetische-database-generator</artifactId>
+    <packaging>jar</packaging>
+
+    <name>BRP Test Performance - Synthetische database generator</name>
+    <description>Vul de BRP database met correcte verdeling random data, voor het doen van performance tests.</description>
+    <url>https://www.operatiebrp.nl/</url>
+    <inceptionYear>2011</inceptionYear>
+    <organization>
+        <name>OperatieBRP</name>
+        <url>http://www.operatiebrp.nl/</url>
+    </organization>
+
+    <properties>
+    	<checkstyle.skip>true</checkstyle.skip>
+        <project.brp.model.version>0.8.7</project.brp.model.version>
+        <project.brp.database.version>0.9.12</project.brp.database.version>
+        <art-testdata.version>2.1.1</art-testdata.version>
+        <spring.version>3.0.5.RELEASE</spring.version>
+        <postgres.version>9.3-1102-jdbc41</postgres.version>
+        <!-- moet versie 3.3.2.GA zijn of ouder -->
+        <hibernate-core.version>3.3.2.GA</hibernate-core.version>
+        <hibernate-tools.version>3.2.4.GA</hibernate-tools.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <dburl>jdbc:postgresql://pdb97.modernodam.nl/synthetisch</dburl>
+        <dbusername>brp</dbusername>
+        <dbpassword>brp</dbpassword>
+        <xlsfile>${project.build.directory}/brp-testdata/SierraTestdata-KUC002-Erkenning-na-geboorte.xls</xlsfile>
+        <sqlfile>target/dummy.sql</sqlfile>
+
+        <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>hibernate3-maven-plugin</artifactId>
+                    <version>3.0</version>
+                    <dependencies>
+                        <dependency>
+                            <groupId>org.hibernate</groupId>
+                            <artifactId>hibernate-core</artifactId>
+                            <version>${hibernate-core.version}</version>
+                        </dependency>
+						<dependency>
+							<groupId>org.postgresql</groupId>
+							<artifactId>postgresql</artifactId>
+							<version>${postgres.version}</version>
+						</dependency>
+                        <dependency>
+                            <groupId>cglib</groupId>
+                            <artifactId>cglib</artifactId>
+                            <version>2.2</version>
+                        </dependency>
+                        <dependency>
+                            <groupId>org.slf4j</groupId>
+                            <artifactId>slf4j-api</artifactId>
+                            <version>1.6.1</version>
+                        </dependency>
+                    </dependencies>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <!-- create csv files -->
+        <profile>
+            <id>create-csv</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.7</version>
+                        <executions>
+                            <execution>
+                                <id>extract-brp-test-data</id>
+                                <phase>generate-sources</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>nl.bzk.brp.art.data</groupId>
+                                            <artifactId>brp-art-data-testdata</artifactId>
+                                            <type>jar</type>
+                                            <overWrite>true</overWrite>
+                                            <includes>**/*.xls</includes>
+                                            <outputDirectory>${project.build.directory}</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>build-sql-csv</id>
+                                <!-- Dient na process-classes en voor test (de *.sql moeten uit de jar file komen) -->
+                                <phase>generate-test-resources</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <arguments>
+                                        <argument>-c</argument>
+                                        <argument>-x</argument>
+                                        <argument>${xlsfile}</argument>
+                                        <argument>-s</argument>
+                                        <argument>${sqlfile}</argument>
+                                    </arguments>
+                                    <mainClass>nl.bzk.brp.art.util.main.UtilRunner</mainClass>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>copy-csv-files</id>
+                                <phase>process-test-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <overwrite>true</overwrite>
+                                    <resources>
+                                        <resource>
+                                            <directory>${basedir}/target/csv</directory>
+                                            <filtering>false</filtering>
+                                        </resource>
+                                    </resources>
+                                    <outputDirectory>src/main/resources/csv</outputDirectory>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Profile to build the database -->
+        <profile>
+            <id>build-db</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <configuration>
+                            <driver>${maven.jdbc.driverClassName}</driver>
+                            <url>${dburl}</url>
+                            <username>${dbusername}</username>
+                            <password>${dbpassword}</password>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                                <artifactId>brp-algemeen-opslag-database</artifactId>
+                                <version>${project.brp.database.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <id>create-db</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <dropFirst>true</dropFirst>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changeLogFile>synthetische-database.xml</changeLogFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Profile to add the db constraints -->
+        <profile>
+            <id>finish-db</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <configuration>
+                            <driver>${maven.jdbc.driverClassName}</driver>
+                            <url>${dburl}</url>
+                            <username>${dbusername}</username>
+                            <password>${dbpassword}</password>
+                        </configuration>
+                        <dependencies>
+                            <dependency>
+                                <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                                <artifactId>brp-algemeen-opslag-database</artifactId>
+                                <version>${project.brp.database.version}</version>
+                            </dependency>
+                        </dependencies>
+                        <executions>
+                            <execution>
+                                <id>finalize-db</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changeLogFile>changeset/addConstraintsAndIndexes.xml</changeLogFile>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>finalize-db-changeset-syndb</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changeLogFile>changeset/changeset.xml</changeLogFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Profile to add the abonnementen -->
+        <profile>
+            <id>finish-db-add-abo</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <configuration>
+                            <driver>${maven.jdbc.driverClassName}</driver>
+                            <url>${dburl}</url>
+                            <username>${dbusername}</username>
+                            <password>${dbpassword}</password>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>add-abonnementen</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changeLogFile>changeset/abonnementen.xml</changeLogFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Profiel dat de abonnementen tbv afnemerindicaties aanmaakt, moet gedraaid worden voordat de afnemer
+         indicaties geplaatst worden!-->
+        <profile>
+            <id>add-afnemerindicaties-abonnementen</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <configuration>
+                            <driver>${maven.jdbc.driverClassName}</driver>
+                            <url>${dburl}</url>
+                            <username>${dbusername}</username>
+                            <password>${dbpassword}</password>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>add-abonnementen</id>
+                                <phase>install</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changeLogFile>changeset/abonnementen-afnemerindicaties.xml</changeLogFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Profiles for Hibernate Rev-Eng -->
+        <profile>
+            <id>reengineer-kern-hbm2hbmxml</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>hibernate3-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>hibernate-hbm-generation</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <hibernatetool>
+                                        <jdbcconfiguration packagename="nl.bzk.brp.testdatageneratie.domain.kern"
+                                                           propertyfile="src/test/resources/database.properties"
+                                                           revengfile="src/test/resources/hibernate/hibernate_kern.reveng.xml"
+                                                           reversestrategy="nl.bzk.brp.testdatageneratie.helper.SynDbGenReverseEngineeringStrategy"/>
+                                        <hbm2hbmxml destdir="src/main/resources"/>
+                                        <classpath>
+                                            <path location="src/main/resources"/>
+                                        </classpath>
+                                    </hibernatetool>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>reengineer-kern-hbm2java</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>hibernate3-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>hibernate-java-generation</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <hibernatetool destdir="src/main/java">
+                                        <configuration
+                                                configurationfile="src/test/resources/hibernate/hibernate_kern.cfg.xml"/>
+                                        <hbm2java jdk5="true" ejb3="false"/>
+                                    </hibernatetool>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        
+        <profile>
+            <id>reengineer-autaut</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>hibernate3-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>hibernate-hbm-generation</id>
+                                <phase>process-classes</phase>
+                                <configuration>
+                                    <hibernatetool>
+                                        <jdbcconfiguration packagename="nl.bzk.brp.testdatageneratie.domain.autaut"
+                                                           propertyfile="src/test/resources/database.properties"
+                                                           revengfile="src/test/resources/hibernate/hibernate_autaut.reveng.xml"
+                                                           reversestrategy="nl.bzk.brp.testdatageneratie.helper.SynDbGenReverseEngineeringStrategy"/>
+                                        <hbm2hbmxml destdir="src/main/resources"/>
+                                        <classpath>
+                                            <path location="src/main/resources"/>
+                                        </classpath>
+                                    </hibernatetool>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>hibernate-java-generation</id>
+                                <phase>process-classes</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <hibernatetool destdir="src/main/java">
+                                        <configuration
+                                                configurationfile="src/test/resources/hibernate/hibernate_autaut.cfg.xml"/>
+                                        <hbm2java jdk5="true" ejb3="false"/>
+                                    </hibernatetool>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>reengineer-bronnen</id>
+            <activation>
+                <activeByDefault>false</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>hibernate3-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>hibernate-hbm-bronne-generation-bronnen</id>
+                                <phase>process-classes</phase>
+                                <configuration>
+                                    <hibernatetool>
+                                        <jdbcconfiguration packagename="nl.bzk.brp.testdatageneratie.domain.bronnen"
+                                                           propertyfile="src/test/resources/database_bronnen.properties"
+                                                           revengfile="src/test/resources/hibernate/hibernate_bronnen.reveng.xml"
+                                                           reversestrategy="nl.bzk.brp.testdatageneratie.helper.SynDbGenReverseEngineeringStrategy"/>
+                                        <hbm2hbmxml destdir="src/main/resources"/>
+                                        <classpath>
+                                            <path location="src/main/resources"/>
+                                        </classpath>
+                                    </hibernatetool>
+                                </configuration>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                            <execution>
+                                <id>hibernate-java-generation</id>
+                                <phase>generate-test-sources</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                                <configuration>
+                                    <hibernatetool destdir="src/main/java">
+                                        <configuration
+                                                configurationfile="src/test/resources/hibernate/hibernate_bronnen.cfg.xml"/>
+                                        <hbm2java jdk5="true" ejb3="false"/>
+                                    </hibernatetool>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <!-- Profile to build TestDataGeneratie -->
+        <profile>
+            <id>build-testdatageneratie</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>appassembler-maven-plugin</artifactId>
+                        <version>1.3</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>assemble</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <repositoryLayout>default</repositoryLayout>
+                            <repositoryName>lib</repositoryName>
+                            <configurationSourceDirectory>src/config</configurationSourceDirectory>
+                            <configurationDirectory>conf</configurationDirectory>
+                            <copyConfigurationDirectory>true</copyConfigurationDirectory>
+                            <!-- Enable when encountering problems on windows: <useWildcardClassPath>true</useWildcardClassPath> -->
+                            <!--<useAllProjectDependencies>true</useAllProjectDependencies>-->
+                            <programs>
+                                <program>
+                                    <mainClass>nl.bzk.brp.testdatageneratie.SynDbGen</mainClass>
+                                    <name>syndbgen</name>
+                                </program>
+                                <program>
+                                    <mainClass>nl.bzk.brp.testdatageneratie.AfnemerIndicatiesVullenGen</mainClass>
+                                    <name>afnemerindicatiesvullen</name>
+                                </program>
+                            </programs>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.3</version>
+                        <executions>
+                            <execution>
+                                <id>assembly-bin</id>
+                                <configuration>
+                                    <descriptor>src/main/assembly/bin.xml</descriptor>
+                                </configuration>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <configuration>
+                            <encoding>UTF-8</encoding>
+                        </configuration>
+                    </plugin>
+
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                    </plugin>
+
+                    <plugin>
+                        <artifactId>maven-eclipse-plugin</artifactId>
+                        <configuration>
+                            <additionalProjectnatures>
+                                <projectnature>org.eclipse.jdt.core.javanature</projectnature>
+                                <projectnature>org.hibernate.eclipse.console.hibernateNature</projectnature>
+                            </additionalProjectnatures>
+                            <downloadSources>true</downloadSources>
+                            <downloadJavadocs>false</downloadJavadocs>
+                            <buildcommands>
+                                <buildcommand>org.eclipse.jdt.core.javabuilder</buildcommand>
+                                <buildcommand>org.hibernate.eclipse.console.hibernateBuilder</buildcommand>
+                            </buildcommands>
+                            <wtpversion>1.5</wtpversion>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-database</artifactId>
+            <version>${project.brp.database.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.art.data</groupId>
+            <artifactId>brp-art-data-testdata-generator</artifactId>
+            <version>${art-testdata.version}</version>
+        </dependency>
+        
+        <dependency>
+	        <groupId>nl.bzk.brp.art.data</groupId>
+	        <artifactId>brp-art-data-testdata</artifactId>
+	        <version>${art-testdata.version}</version>
+	</dependency>
+
+        <dependency>
+            <groupId>commons-logging</groupId>
+            <artifactId>commons-logging</artifactId>
+            <version>1.1.1</version>
+        </dependency>
+
+        <!-- hibernate -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-c3p0</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+
+        <!-- mysql -->
+        <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.16</version>
+        </dependency>
+
+        <!-- postgresql -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgres.version}</version>
+        </dependency>
+
+        <!-- dbcp -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-tools</artifactId>
+            <version>${hibernate-tools.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>net.sf.ehcache</groupId>
+            <artifactId>ehcache-core</artifactId>
+            <version>2.5.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <version>${project.brp.model.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.supercsv</groupId>
+            <artifactId>super-csv</artifactId>
+            <version>2.1.0</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.perf4j</groupId>
+            <artifactId>perf4j</artifactId>
+            <version>0.9.16</version>
+            <scope>compile</scope>
+        </dependency>
+
+    </dependencies>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/test/performance/brp-test-synthetische-database-generator</connection>
+    </scm>
+
+</project>

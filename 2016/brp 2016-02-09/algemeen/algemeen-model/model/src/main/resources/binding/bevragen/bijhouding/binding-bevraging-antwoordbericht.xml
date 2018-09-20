@@ -1,0 +1,111 @@
+<binding package="nl.bzk.brp.model.bevraging.bijhouding" direction="output">
+
+    <namespace uri="http://www.bzk.nl/brp/brp0200" default="all" prefix="brp"/>
+
+    <!-- Let op: Volgorde includes is belangrijk: -->
+
+    <!-- Stuurgegevens hieruit nodig -->
+    <include path="classpath:/binding/basis/binding-brpxml.xml" precompiled="false"/>
+
+    <!-- Gegenereerde binding: -->
+    <include path="classpath:/binding/bevragen/bijhouding/binding-bevraging-objecttypen-historie.xml"
+             precompiled="false"/>
+
+    <!-- Handmatige (niet-gegenereerde) bindings use case 'geef details persoon': -->
+    <include path="classpath:/binding/bevragen/bijhouding/binding-bevraging-objecttypen-detailspersoon.xml"
+             precompiled="false"/>
+
+    <!-- Gegenereerde binding: -->
+    <include path="classpath:/binding/bevragen/bijhouding/binding-bevraging-objecttypen.xml" precompiled="false"/>
+
+    <!-- Algemene bindings voor zowel bijhouding als levering: -->
+    <include path="classpath:/binding/bevragen/binding-bevraging-groepen-algemeen.xml" precompiled="false"/>
+
+    <!-- Handmatige (niet-gegenereerde) bindings andere use cases: -->
+    <include path="classpath:/binding/bevragen/bijhouding/binding-bevraging-objecttypen-kandidaatvader.xml"
+             precompiled="false"/>
+    <include path="classpath:/binding/bevragen/bijhouding/binding-bevraging-objecttypen-personenopadres.xml"
+             precompiled="false"/>
+    <include path="classpath:/binding/bevragen/bijhouding/binding-bevraging-objecttypen-zoekpersoon.xml"
+             precompiled="false"/>
+
+    <mapping name="bhg_bvgGeefDetailsPersoon_R"
+             class="nl.bzk.brp.model.bevraging.bijhouding.GeefDetailsPersoonAntwoordBericht">
+        <structure map-as="Objecttype_AbstractAntwoordBericht"/>
+        <collection get-method="getGevondenPersonen" name="personen" test-method="isResultaatGevonden"
+                    item-type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView" usage="optional">
+            <structure name="persoon" map-as="Objecttype_PersoonDetails_Levering" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping name="bhg_bvgGeefPersonenOpAdresMetBetrokkenheden_R"
+             class="nl.bzk.brp.model.bevraging.bijhouding.GeefPersonenOpAdresMetBetrokkenhedenAntwoordBericht">
+        <structure map-as="Objecttype_AbstractAntwoordBericht"/>
+        <collection get-method="getGevondenPersonen" name="personen" test-method="isResultaatGevonden"
+                    item-type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView" usage="optional">
+            <structure name="persoon" map-as="Objecttype_Persoon_GeefPersoonOpAdresMetBetrokkenheden_Resultaat"
+                       usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping name="bhg_bvgBepaalKandidaatVader_R"
+             class="nl.bzk.brp.model.bevraging.bijhouding.BepaalKandidaatVaderAntwoordBericht">
+        <structure map-as="Objecttype_AbstractAntwoordBericht"/>
+        <collection get-method="getGevondenPersonen" name="personen" test-method="isResultaatGevonden"
+                    item-type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView" usage="optional">
+            <structure name="persoon" map-as="Objecttype_PersoonBepaalKandidaatVader_Resultaat" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping name="bhg_bvgZoekPersoon_R" class="nl.bzk.brp.model.bevraging.bijhouding.ZoekPersoonAntwoordBericht">
+        <structure map-as="Objecttype_AbstractAntwoordBericht"/>
+        <collection get-method="getGevondenPersonen" name="personen" test-method="isResultaatGevonden"
+                    item-type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonHisVolledigView" usage="optional">
+            <structure name="persoon" map-as="Objecttype_PersoonZoekPersoon_Levering" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_AbstractAntwoordBericht"
+             class="nl.bzk.brp.model.bevraging.BevragingAntwoordBericht">
+        <structure name="stuurgegevens" get-method="getStuurgegevens"
+                   type="nl.bzk.brp.model.bericht.ber.BerichtStuurgegevensGroepBericht"
+                   map-as="Stuurgegevens_SynchroonResultaat"/>
+        <structure name="resultaat" map-as="Groep_BerichtResultaat_Bevraging" get-method="getResultaat"/>
+        <structure name="meldingen" get-method="getMeldingen" map-as="Container_BerichtMeldingen_Levering"
+                   usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Groep_BerichtResultaat_Bevraging"
+             class="nl.bzk.brp.model.bericht.ber.BerichtResultaatGroepBericht">
+        <value name="communicatieID" constant="Resultaat" style="attribute" usage="optional"/>
+        <structure get-method="getVerwerking">
+            <value name="verwerking" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+        <structure get-method="getHoogsteMeldingsniveau" set-method="setHoogsteMeldingsniveau" usage="optional">
+            <value name="hoogsteMeldingsniveau" get-method="getWaarde" enum-value-method="getNaam"/>
+        </structure>
+    </mapping>
+
+    <mapping class="java.util.List" abstract="true" type-name="Container_BerichtMeldingen_Levering"
+             create-type="java.util.ArrayList">
+        <collection usage="optional">
+            <structure map-as="Objecttype_Melding_Levering" name="melding"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.BerichtMeldingBericht" abstract="true"
+             type-name="Objecttype_Melding_Levering">
+        <structure get-method="getMelding">
+            <value name="objecttype" constant="Melding" style="attribute"/>
+            <value style="attribute" name="referentieID" get-method="getReferentieID" usage="optional"/>
+            <value style="attribute" name="communicatieID" get-method="getCommunicatieID" usage="optional"/>
+            <structure get-method="getRegel">
+                <value name="regelCode" get-method="getWaarde" enum-value-method="getCode"/>
+            </structure>
+            <structure get-method="getSoort">
+                <value name="soortNaam" get-method="getWaarde" enum-value-method="getNaam"/>
+            </structure>
+            <structure name="melding" get-method="getMelding" map-as="MeldingtekstAttribuut"/>
+        </structure>
+    </mapping>
+</binding>

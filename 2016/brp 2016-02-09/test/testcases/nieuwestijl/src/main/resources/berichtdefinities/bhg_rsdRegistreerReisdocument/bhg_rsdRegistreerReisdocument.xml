@@ -1,0 +1,189 @@
+<brp:bhg_rsdRegistreerReisdocument xmlns:brp="http://www.bzk.nl/brp/brp0200">
+    <brp:stuurgegevens brp:communicatieID="${stuurgegevens.communicatieID}">
+        <brp:zendendePartij>${stuurgegevens.zendendePartij}</brp:zendendePartij>
+        <brp:zendendeSysteem>${stuurgegevens.zendendeSysteem}</brp:zendendeSysteem>
+        <brp:referentienummer>${stuurgegevens.referentienummer}</brp:referentienummer>
+        <brp:tijdstipVerzending>${stuurgegevens.tijdstipVerzending}</brp:tijdstipVerzending>
+    </brp:stuurgegevens>
+    <brp:parameters brp:communicatieID="${parameters.communicatieID}">
+        <brp:verwerkingswijze>${parameters.verwerkingswijze}</brp:verwerkingswijze>
+        <!--Optional:-->
+        <brp:bezienVanuitPersoon>${parameters.bezienVanuitPersoon}</brp:bezienVanuitPersoon>
+    </brp:parameters>
+    <!--You have a CHOICE of the next 3 items at this level-->
+    <brp:verkrijgingReisdocument brp:communicatieID="${verkrijgingReisdocument.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${verkrijgingReisdocument.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${verkrijgingReisdocument.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list verkrijgingReisdocument.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--1 or more repetitions:-->
+            [#list verkrijgingReisdocument.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieReisdocument = verkrijgingReisdocument.acties.registratieReisdocument]
+            <brp:registratieReisdocument brp:communicatieID="${registratieReisdocument.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieReisdocument.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${registratieReisdocument.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieReisdocument.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${registratieReisdocument.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieReisdocument.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:reisdocumenten>
+                        <brp:reisdocument brp:communicatieID="${registratieReisdocument.persoon.reisdocumenten.reisdocument.communicatieID}" brp:objecttype="PersoonReisdocument">
+                            <brp:soortCode>${verkrijgingReisdocument.acties.registratieReisdocument.persoon.reisdocumenten.reisdocument.soortCode}</brp:soortCode>
+                            <brp:nummer>${verkrijgingReisdocument.acties.registratieReisdocument.persoon.reisdocumenten.reisdocument.nummer}</brp:nummer>
+                            <!--Optional:-->
+                            <brp:autoriteitVanAfgifte>${verkrijgingReisdocument.acties.registratieReisdocument.persoon.reisdocumenten.reisdocument.autoriteitVanAfgifte}</brp:autoriteitVanAfgifte>
+                            <brp:datumIngangDocument>${verkrijgingReisdocument.acties.registratieReisdocument.persoon.reisdocumenten.reisdocument.datumIngangDocument}</brp:datumIngangDocument>
+                            <brp:datumEindeDocument>${verkrijgingReisdocument.acties.registratieReisdocument.persoon.reisdocumenten.reisdocument.datumEindeDocument}</brp:datumEindeDocument>
+                            <brp:datumUitgifte>${verkrijgingReisdocument.acties.registratieReisdocument.persoon.reisdocumenten.reisdocument.datumUitgifte}</brp:datumUitgifte>
+                        </brp:reisdocument>
+                    </brp:reisdocumenten>
+                </brp:persoon>
+            </brp:registratieReisdocument>
+        </brp:acties>
+    </brp:verkrijgingReisdocument>
+    <brp:onttrekkingReisdocument brp:communicatieID="${onttrekkingReisdocument.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${onttrekkingReisdocument.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${onttrekkingReisdocument.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list onttrekkingReisdocument.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--1 or more repetitions:-->
+            [#list onttrekkingReisdocument.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieReisdocument = onttrekkingReisdocument.acties.registratieReisdocument]
+            <brp:registratieReisdocument brp:communicatieID="${registratieReisdocument.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieReisdocument.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${registratieReisdocument.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieReisdocument.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${registratieReisdocument.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieReisdocument.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:reisdocumenten>
+                        <brp:reisdocument brp:communicatieID="${registratieReisdocument.persoon.reisdocumenten.reisdocument.communicatieID}" brp:objecttype="PersoonReisdocument">
+                            <brp:datumInhoudingVermissing>${registratieReisdocument.persoon.reisdocumenten.reisdocument.datumInhoudingVermissing}</brp:datumInhoudingVermissing>
+                            <brp:aanduidingInhoudingVermissingCode>${registratieReisdocument.persoon.reisdocumenten.reisdocument.aanduidingInhoudingVermissingCode}</brp:aanduidingInhoudingVermissingCode>
+                        </brp:reisdocument>
+                    </brp:reisdocumenten>
+                </brp:persoon>
+            </brp:registratieReisdocument>
+        </brp:acties>
+    </brp:onttrekkingReisdocument>
+    <brp:signaleringReisdocument brp:communicatieID="${signaleringReisdocument.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${signaleringReisdocument.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${signaleringReisdocument.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list signaleringReisdocument.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--1 or more repetitions:-->
+            [#list signaleringReisdocument.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieSignaleringReisdocument = signaleringReisdocument.acties.registratieSignaleringReisdocument]
+            <brp:registratieSignaleringReisdocument brp:communicatieID="${registratieSignaleringReisdocument.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieSignaleringReisdocument.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${registratieSignaleringReisdocument.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieSignaleringReisdocument.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${registratieSignaleringReisdocument.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieSignaleringReisdocument.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:indicaties>
+                        <brp:signaleringMetBetrekkingTotVerstrekkenReisdocument brp:communicatieID="${registratieSignaleringReisdocument.persoon.indicaties.signaleringMetBetrekkingTotVerstrekkenReisdocument.communicatieID}" brp:objecttype="PersoonIndicatie">
+                            <brp:waarde>${registratieSignaleringReisdocument.persoon.indicaties.signaleringMetBetrekkingTotVerstrekkenReisdocument.waarde}</brp:waarde>
+                        </brp:signaleringMetBetrekkingTotVerstrekkenReisdocument>
+                    </brp:indicaties>
+                </brp:persoon>
+            </brp:registratieSignaleringReisdocument>
+        </brp:acties>
+    </brp:signaleringReisdocument>
+</brp:bhg_rsdRegistreerReisdocument>

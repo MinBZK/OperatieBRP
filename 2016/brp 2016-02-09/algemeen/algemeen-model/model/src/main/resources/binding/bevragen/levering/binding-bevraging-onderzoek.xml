@@ -1,0 +1,55 @@
+<binding direction="output">
+
+    <mapping class="java.util.Set" abstract="true" type-name="Container_PersoonOnderzoeken_Levering"
+             create-type="java.util.HashSet">
+        <collection usage="optional">
+            <structure map-as="PersoonOnderzoeken_Levering" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.PersoonOnderzoekHisVolledigView"
+             type-name="PersoonOnderzoeken_Levering" abstract="true">
+        <structure name="onderzoek">
+            <value constant="Onderzoek" style="attribute" name="objecttype"/>
+            <value style="attribute" name="objectSleutel" usage="optional" get-method="getID" />
+            <structure get-method="getOnderzoek">
+                <structure get-method="getOnderzoekHistorie" usage="optional">
+                    <collection get-method="getHistorie">
+                        <structure usage="optional" map-as="Groep_Onderzoek_Levering"/>
+                    </collection>
+                </structure>
+                <structure name="gegevensInOnderzoek" usage="optional">
+                    <collection get-method="getGegevensInOnderzoek" usage="optional">
+                        <structure usage="optional" map-as="Onderzoek_GegevenInOnderzoek"/>
+                    </collection>
+                </structure>
+            </structure>
+        </structure>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.hisvolledig.predikaatview.kern.GegevenInOnderzoekHisVolledigView" type-name="Onderzoek_GegevenInOnderzoek"
+            abstract="true">
+        <structure name="gegevenInOnderzoek" type="nl.bzk.brp.model.hisvolledig.predikaatview.kern.GegevenInOnderzoekHisVolledigView" usage="optional">
+            <value constant="GegevenInOnderzoek" style="attribute" name="objecttype" />
+            <value style="attribute" name="objectSleutel" usage="required" get-method="getID" />
+            <structure usage="optional" get-method="getElement">
+                <structure map-as="Onderzoek_GegevenInOnderzoek_ElementNaam" name="elementNaam" />
+            </structure>
+            <structure usage="optional" get-method="getObjectSleutelGegeven">
+                <structure map-as="SleutelwaardeAttribuut" name="objectSleutelGegeven" usage="optional" />
+            </structure>
+            <structure usage="optional" get-method="getVoorkomenSleutelGegeven">
+                <structure map-as="SleutelwaardeAttribuut" name="voorkomenSleutelGegeven" usage="optional" />
+            </structure>
+        </structure>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.algemeen.stamgegeven.kern.ElementAttribuut" type-name="Onderzoek_GegevenInOnderzoek_ElementNaam" abstract="true">
+        <structure get-method="getWaarde">
+            <structure get-method="getNaam" usage="optional">
+                <structure map-as="NaamEnumeratiewaardeLangAttribuut"/>
+            </structure>
+        </structure>
+    </mapping>
+
+</binding>

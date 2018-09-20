@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+         http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <import resource="test-context.xml" />
+
+    <!-- Zet een test broker op -->
+    <amq:broker id="testProtocolleringPublicatieBroker" persistent="false" useJmx="false" brokerName="localhost">
+        <amq:transportConnectors>
+            <amq:transportConnector uri="${protocollering.jms.url}"/>
+        </amq:transportConnectors>
+    </amq:broker>
+
+    <amq:queue id="ProtocolleringQueue" physicalName="${protocollering.jms.queue}"/>
+</beans>

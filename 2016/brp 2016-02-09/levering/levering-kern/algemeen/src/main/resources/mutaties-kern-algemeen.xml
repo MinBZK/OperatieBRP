@@ -1,0 +1,56 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:cache="http://www.springframework.org/schema/cache"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+    <context:component-scan base-package="nl.bzk.brp.levering.algemeen, nl.bzk.brp.levering.business"/>
+
+    <import resource="classpath:levering-dataaccess-alleenlezen-context.xml"/>
+
+    <bean id="berichtVerwerkingssoortToevoeger" class="nl.bzk.brp.levering.business.bepalers.impl.BerichtVerwerkingssoortZetterImpl">
+        <constructor-arg ref="berichtVerwerkingssoortBepalerImpl"/>
+    </bean>
+
+    <bean id="berichtVerwerkingssoortVerwijderaar" class="nl.bzk.brp.levering.business.bepalers.impl.BerichtVerwerkingssoortZetterImpl">
+        <constructor-arg ref="nullVerwerkingssoortBepaler"/>
+    </bean>
+
+    <!-- Spring Cache settings -->
+
+    <!-- doorzoek code op @Cacheable annotaties-->
+    <cache:annotation-driven />
+
+    <bean id="cacheManager" class="org.springframework.cache.support.SimpleCacheManager">
+        <property name="caches">
+            <set>
+                <bean name="ExpressiesVoorHistorieEnVerantwoordingAttributenCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="AllExpressiesVoorHistorieEnVerantwoordingAttributenCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="AttributenFilterExpressieCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="TotalePopulatiebeperkingExpressieCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="AttenderingsCriteriumExpressieCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="ExpressiesVoorHistorieEnVerantwoordingAttributenLijstCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="AllExpressiesVoorHistorieEnVerantwoordingAttributenLijstCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="GeautoriseerdeGroepenCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="GeautoriseerdeGerelateerdeObjectTypen"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+                <bean name="AlleExpressieParserResultatenVanElementenCache"
+                      class="org.springframework.cache.concurrent.ConcurrentMapCacheFactoryBean" />
+            </set>
+        </property>
+    </bean>
+
+    <!-- Einde Spring Cache settings -->
+
+</beans>

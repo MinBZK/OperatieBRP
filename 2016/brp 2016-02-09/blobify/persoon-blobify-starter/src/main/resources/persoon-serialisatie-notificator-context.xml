@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+             http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+       ">
+
+    <context:annotation-config/>
+
+    <context:property-placeholder system-properties-mode="OVERRIDE"
+            location="classpath*:brp-*.properties"/>
+
+    <import resource="classpath:datasource-beans.xml"/>
+    <import resource="classpath:dataaccess-beans.xml"/>
+    <import resource="classpath:persoon-serialisatie-notificator-jms-context.xml"/>
+
+    <context:component-scan base-package="nl.bzk.brp.serialisatie.notificator"/>
+
+    <bean id="catalog" class="org.apache.commons.chain.impl.CatalogBase">
+        <constructor-arg>
+            <map>
+                <entry key="specifieke-personen" value-ref="specifiekePersonenChain"/>
+                <entry key="alle-personen" value-ref="allePersonenChain"/>
+                <entry key="bijgehouden-personen" value-ref="bijgehoudenPersonenChain"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <bean id="specifiekePersonenChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="converteerPersoonIdentifiersNaarIntStap"/>
+                <ref bean="plaatsPersonenOpQueueStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="allePersonenChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="plaatsAllePersonenOpQueueStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="bijgehoudenPersonenChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="haalBijgehoudenPersoonIdentifiersStap"/>
+                <ref bean="plaatsPersonenOpQueueStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="threadPoolTaskExecutor" class="org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor">
+        <property name="corePoolSize" value="${jms.persoonserialisatienotificatie.aantalThreads}" />
+        <property name="maxPoolSize" value="${jms.persoonserialisatienotificatie.aantalThreads}" />
+        <property name="keepAliveSeconds" value="60" />
+        <property name="queueCapacity" value="0" />
+        <property name="rejectedExecutionHandler" ref="callerRunsPolicy" />
+     </bean>
+
+    <bean id="callerRunsPolicy" class="java.util.concurrent.ThreadPoolExecutor$CallerRunsPolicy" />
+
+</beans>

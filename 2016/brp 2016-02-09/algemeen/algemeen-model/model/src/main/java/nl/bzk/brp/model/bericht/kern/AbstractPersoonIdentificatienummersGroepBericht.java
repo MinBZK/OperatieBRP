@@ -1,0 +1,117 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.model.bericht.kern;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.annotation.Generated;
+import nl.bzk.brp.model.algemeen.attribuuttype.kern.AdministratienummerAttribuut;
+import nl.bzk.brp.model.algemeen.attribuuttype.kern.BurgerservicenummerAttribuut;
+import nl.bzk.brp.model.basis.AbstractMaterieleHistorieGroepBericht;
+import nl.bzk.brp.model.basis.Attribuut;
+import nl.bzk.brp.model.basis.Groep;
+import nl.bzk.brp.model.basis.MetaIdentificeerbaar;
+import nl.bzk.brp.model.logisch.kern.PersoonIdentificatienummersGroepBasis;
+
+/**
+ * Groep identificerende nummers
+ *
+ * De groep ""identificatienummers"" bevat het burgerservicenummer, en het Administratienummer, waarmee de persoon uniek
+ * wordt aangeduid.
+ *
+ * Verplicht aanwezig bij persoon
+ *
+ * 1. Omdat in uitzonderingssituaties het nodig kan zijn om het burgerservicenummer en/of Administratienummer van een
+ * persoon te wijzigen, is ervoor gekozen om burgerservicenummer en/of Administratienummer NIET als technische sleutel
+ * te hanteren binnen de BRP.
+ *
+ * 2. Keuze van historie: LO 3.x onderkend beide vormen van historie voor BSN en A nummer: óók materiële. Er is een
+ * discussie geweest wat precies die materiële historie zou zijn: is er niet simpelweg sprake van alleen een formele
+ * tijdslijn voor het BSN en Anummer. Conclusie was: neen, er is ook een materiële tijdslijn. En ja, die komt meestal
+ * overeen met de formele tijdslijn. NB: geldigheid gegeven wordt wel (mogelijk) geleverd aan afnemer.
+ *
+ *
+ *
+ */
+@Generated(value = "nl.bzk.brp.generatoren.java.BerichtModelGenerator")
+public abstract class AbstractPersoonIdentificatienummersGroepBericht extends AbstractMaterieleHistorieGroepBericht implements Groep,
+        PersoonIdentificatienummersGroepBasis, MetaIdentificeerbaar
+{
+
+    private static final Integer META_ID = 3344;
+    private static final List<Integer> ONDERLIGGENDE_ATTRIBUTEN = Arrays.asList(3018, 3013);
+    private BurgerservicenummerAttribuut burgerservicenummer;
+    private AdministratienummerAttribuut administratienummer;
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public BurgerservicenummerAttribuut getBurgerservicenummer() {
+        return burgerservicenummer;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public AdministratienummerAttribuut getAdministratienummer() {
+        return administratienummer;
+    }
+
+    /**
+     * Zet Burgerservicenummer van Identificatienummers.
+     *
+     * @param burgerservicenummer Burgerservicenummer.
+     */
+    public void setBurgerservicenummer(final BurgerservicenummerAttribuut burgerservicenummer) {
+        this.burgerservicenummer = burgerservicenummer;
+    }
+
+    /**
+     * Zet Administratienummer van Identificatienummers.
+     *
+     * @param administratienummer Administratienummer.
+     */
+    public void setAdministratienummer(final AdministratienummerAttribuut administratienummer) {
+        this.administratienummer = administratienummer;
+    }
+
+    /**
+     * Geeft alle attributen van de groep met uitzondering van attributen die null zijn.
+     *
+     * @return Lijst met attributen van de groep.
+     */
+    public final List<Attribuut> getAttributen() {
+        final List<Attribuut> attributen = new ArrayList<>();
+        if (burgerservicenummer != null) {
+            attributen.add(burgerservicenummer);
+        }
+        if (administratienummer != null) {
+            attributen.add(administratienummer);
+        }
+        return attributen;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Integer getMetaId() {
+        return META_ID;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean bevatElementMetMetaId(final Integer metaId) {
+        return ONDERLIGGENDE_ATTRIBUTEN.contains(metaId);
+    }
+
+}

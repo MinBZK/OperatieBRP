@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 22-12-2014 -->
+<!-- -->
+<!-- Wijzigingen: -->
+<!-- 1) Betreft specifieke bijhouding; geen prevalidatie-modus, derhalve geen groep 'Berichtparameters' en geen 'toelichtingOntlening' -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020003">
+	<include schemaLocation="brp0200_lvgAfnemerindicatie_Basis.xsd"/>
+	<!-- ... -->
+	<element name="lvg_synRegistreerAfnemerindicatie" type="brp:Leveren_RegistreerAfnemerindicatie_Bijhouding"/>
+	<element name="lvg_synRegistreerAfnemerindicatie_R" type="brp:Leveren_RegistreerAfnemerindicatie_BijhoudingResultaat"/>
+	<!-- ... -->
+	<!-- Bericht RegistreerAfnemerindicatie -->
+	<complexType name="Leveren_RegistreerAfnemerindicatie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_PlaatsingVerwijdering" nillable="false" minOccurs="1" maxOccurs="1" />
+					<choice>
+						<element name="plaatsingAfnemerindicatie" type="brp:Handeling_PlaatsingAfnemerindicatie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="verwijderingAfnemerindicatie" type="brp:Handeling_VerwijderingAfnemerindicatie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/> 
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_BerichtParameters_PlaatsingVerwijdering">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtParameters">
+				<sequence>
+					<element name="leveringsautorisatieIdentificatie" type="brp:LeveringsautorisatieID" nillable="false" minOccurs="1" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling PlaatsingAfnemerindicatie -->
+	<complexType name="Handeling_PlaatsingAfnemerindicatie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_PlaatsingAfnemerindicatie">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_PlaatsingAfnemerindicatie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling Verwijdering Afnemerindicatie -->
+	<complexType name="Handeling_VerwijderingAfnemerindicatie_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_VerwijderingAfnemerindicatie">
+				<sequence>
+					<element name="partijCode" type="brp:PartijCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_VerwijderingAfnemerindicatie_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- BijhoudingResultaat -->
+	<complexType name="Leveren_RegistreerAfnemerindicatie_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_BijhoudingAfnemerindicaties" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="plaatsingAfnemerindicatie" type="brp:Handeling_PlaatsingAfnemerindicatie_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="verwijderingAfnemerindicatie" type="brp:Handeling_VerwijderingAfnemerindicatie_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

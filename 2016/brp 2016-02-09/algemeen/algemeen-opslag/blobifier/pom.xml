@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <artifactId>brp-algemeen-opslag</artifactId>
+        <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>brp-algemeen-opslag-blobifier</artifactId>
+
+    <name>BRP Algemeen Opslag - Blobifier Service</name>
+    <description>Service om een persoon af te drukken naar een binaire JSON vorm voor snelle toegang tot de gehele persoon.</description>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-opslag/blobifier</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-opslag/brp-algemeen-opslag-blobifier</developerConnection>
+  </scm>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+        </dependency>
+
+        <!-- project brp dependencies -->
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.util</groupId>
+            <artifactId>brp-algemeen-util-logging</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-database</artifactId>
+            <version>${project.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+            <artifactId>brp-algemeen-opslag-dataaccess</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Java / JEE -->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+            <version>${javax.inject.version}</version>
+        </dependency>
+
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.data</groupId>
+            <artifactId>spring-data-jpa</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- JPA/Hibernate -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-entitymanager</artifactId>
+        </dependency>
+
+        <!-- Caching -->
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-ehcache</artifactId>
+            <version>${hibernate.version}</version>
+        </dependency>
+
+        <!-- Database driver(s) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.dbunit</groupId>
+            <artifactId>dbunit</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Datasource related -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-core</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+            <version>1.4</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/test/resources</directory>
+                <excludes>
+                    <exclude>*.sql</exclude>
+                    <exclude>*.xml</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+        <finalName>${project.artifactId}</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.liquibase</groupId>
+                <artifactId>liquibase-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>create-db</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>update</goal>
+                        </goals>
+                        <configuration>
+                            <skip>${skipTests}</skip>
+                            <dropFirst>true</dropFirst>
+                            <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                            <changeLogFile>changeset/brp-databases.xml</changeLogFile>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                        <artifactId>brp-algemeen-opslag-database</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+                <configuration>
+                    <driver>${maven.jdbc.driverClassName}</driver>
+                    <url>${maven.jdbc.url}</url>
+                    <username>${maven.jdbc.username}</username>
+                    <password>${maven.jdbc.password}</password>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>db.postgresql</name>
+                </property>
+            </activation>
+            <properties>
+                <!-- speciale database connectie voor archivering/logging en protocollering -->
+                <maven.jdbc.archivering.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_opslag_blobifier</maven.jdbc.archivering.url>
+                <!-- connectie naar de master database om locks te leggen en wijzigingen te doen -->
+                <maven.jdbc.master.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_opslag_blobifier</maven.jdbc.master.url>
+                <!-- overridden properties -->
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_opslag_blobifier</maven.jdbc.url>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>inmemory</id>
+            <activation>
+                <property>
+                    <name>db.inmemory</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.archivering.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.archivering.driverClassName>
+                <maven.jdbc.archivering.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;sql.syntax_pgs=true;hsqldb.tx=mvcc</maven.jdbc.archivering.url>
+                <maven.jdbc.archivering.username>brp</maven.jdbc.archivering.username>
+                <maven.jdbc.archivering.password>brp</maven.jdbc.archivering.password>
+
+                <maven.jdbc.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;sql.syntax_pgs=true;hsqldb.tx=mvcc</maven.jdbc.url>
+                <maven.jdbc.username>brp</maven.jdbc.username>
+                <maven.jdbc.password>brp</maven.jdbc.password>
+                <maven.jdbc.pool.maxActive>100</maven.jdbc.pool.maxActive>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                    <version>2.3.2</version>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create-db</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skipTests}</skip>
+                                    <dropFirst>true</dropFirst>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changeLogFile>changeset/brp-hsqldb-databases.xml</changeLogFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.hsqldb</groupId>
+                                <artifactId>hsqldb</artifactId>
+                                <version>2.3.2</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

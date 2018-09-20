@@ -1,0 +1,31 @@
+
+== Groovy Metaprogramming in de DSL
+De DSL is gemaakt om op een makkelijke wijze gegevens in de database te kunnen
+zetten. Hiertoe wordt gebruik gemaakt van BRP modules. Soms is het noodzakelijk
+om aanpassen te doen aan deze modules om het beschrijven van personen functioneel
+te houden. Het is echter niet wenselijk om deze aanpassing, die uitsluitend ten
+behoeve van tests is, direct in de modules te doen. Daarom is ervoor gekozen om
+deze aanpassingen door middel van Groovy _metaprogramming_ te doen: Groovy
+mechanismes worden gebruikt om code waarover geen (directe) controle is, aan te
+passen. Hiertoe gebruiken we twee mechanismes: _DelegatingMetaClass_ en _Extension modules_.
+
+Alle implementaties en klasses die met metaprogramming te maken hebben zijn te
+vinden onder het package `groovy.runtime.metaclass`.
+
+
+=== DelegatingMetaClass
+Voor de builders die worden gebruikt om het persoon model op te bouwen, worden sommige
+constructor aanroepen onderschept. Door middel van implementaties van `DelegatingMetaClass`
+wordt er een constructor gecreeerd die in de originele code niet bestaat. Op deze wijze
+kan bijvoorbeeld aan een bestaand adres historie worden toegevoegd door de builders, waar
+dat met de originele builders niet mogelijk is.
+
+
+=== Extension modules
+Zie de uitleg in de link:http://docs.groovy-lang.org/docs/groovy-2.4.3/html/documentation/#_extension_modules[Groovy documentatie].
+
+Extension modules worden gebruikt om nieuwe methodes op bestaande (gecompileerde) klasses
+toe te voegen. Dit gebruiken we om bijvoorbeeld nieuwe methodes toe te voegen aan de
+Repository implementaties die worden gebruikt uit de algemeen-dataaccess module voor het
+opzoeken van referentie data in de database. Ook andere handige methodes voor `PersoonHisVolledigImpl`
+en de `gelijk()` methode op ActieModel en AdministratieveHandeling worden zo toegevoegd.

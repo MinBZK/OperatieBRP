@@ -1,0 +1,113 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.model.hisvolledig.momentview.kern;
+
+import javax.annotation.Generated;
+import nl.bzk.brp.model.algemeen.attribuuttype.kern.DatumAttribuut;
+import nl.bzk.brp.model.algemeen.attribuuttype.kern.DatumTijdAttribuut;
+import nl.bzk.brp.model.algemeen.stamgegeven.kern.ElementEnum;
+import nl.bzk.brp.model.basis.ElementIdentificeerbaar;
+import nl.bzk.brp.model.basis.ModelMoment;
+import nl.bzk.brp.model.hisvolledig.kern.PersoonAdresHisVolledig;
+import nl.bzk.brp.model.logisch.kern.PersoonAdresBasis;
+import nl.bzk.brp.model.operationeel.kern.HisPersoonAdresModel;
+
+/**
+ * View klasse voor Persoon \ Adres.
+ *
+ */
+@Generated(value = "nl.bzk.brp.generatoren.java.HisVolledigMomentViewModelGenerator")
+public abstract class AbstractPersoonAdresView implements ModelMoment, PersoonAdresBasis, ElementIdentificeerbaar {
+
+    private final PersoonAdresHisVolledig persoonAdres;
+    private final DatumTijdAttribuut formeelPeilmoment;
+    private final DatumAttribuut materieelPeilmoment;
+
+    /**
+     * Constructor die het HisVolledig object achter de view proxied.
+     *
+     * @param persoonAdres hisVolledig instantie voor deze view.
+     * @param formeelPeilmoment formeel peilmoment.
+     * @param materieelPeilmoment materieel peilmoment.
+     */
+    public AbstractPersoonAdresView(
+        final PersoonAdresHisVolledig persoonAdres,
+        final DatumTijdAttribuut formeelPeilmoment,
+        final DatumAttribuut materieelPeilmoment)
+    {
+        this.persoonAdres = persoonAdres;
+        this.formeelPeilmoment = formeelPeilmoment;
+        this.materieelPeilmoment = materieelPeilmoment;
+
+    }
+
+    /**
+     * Retourneert formeel peilmoment voor deze view.
+     *
+     * @return Formeel peilmoment voor deze view.
+     */
+    protected final DatumTijdAttribuut getFormeelPeilmoment() {
+        return formeelPeilmoment;
+    }
+
+    /**
+     * Retourneert materieel peilmoment voor deze view.
+     *
+     * @return Materieel peilmoment voor deze view.
+     */
+    protected final DatumAttribuut getMaterieelPeilmoment() {
+        return materieelPeilmoment;
+    }
+
+    /**
+     * Functie die aangeeft of er actuele gegevens zijn in deze view.
+     *
+     * @return true indien actuele gegevens aanwezig, anders false
+     */
+    public boolean heeftActueleGegevens() {
+        return this.getStandaard() != null;
+    }
+
+    /**
+     * Retourneert ID van Persoon \ Adres.
+     *
+     * @return ID.
+     */
+    public final Integer getID() {
+        return persoonAdres.getID();
+    }
+
+    /**
+     * Retourneert Persoon van Persoon \ Adres.
+     *
+     * @return Persoon.
+     */
+    public final PersoonView getPersoon() {
+        if (persoonAdres.getPersoon() != null) {
+            return new PersoonView(persoonAdres.getPersoon(), getFormeelPeilmoment(), getMaterieelPeilmoment());
+        }
+        return null;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public final HisPersoonAdresModel getStandaard() {
+        return persoonAdres.getPersoonAdresHistorie().getHistorieRecord(getMaterieelPeilmoment(), getFormeelPeilmoment());
+    }
+
+    /**
+     * Retourneert het Element behorende bij dit objecttype.
+     *
+     * @return Element enum instantie behorende bij dit objecttype.
+     */
+    public final ElementEnum getElementIdentificatie() {
+        return ElementEnum.PERSOON_ADRES;
+    }
+
+}

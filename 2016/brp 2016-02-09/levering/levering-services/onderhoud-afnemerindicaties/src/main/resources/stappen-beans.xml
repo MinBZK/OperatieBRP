@@ -1,0 +1,39 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    ">
+
+    <bean id="onderhoudAfnemerindicatiesBerichtVerwerker"
+          class="nl.bzk.brp.levering.afnemerindicaties.service.OnderhoudAfnemerindicatiesBerichtVerwerker">
+        <property name="stappen" ref="onderhoudAfnemerindicatiesStappen"/>
+    </bean>
+
+    <bean id="onderhoudAfnemerindicatiesStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.webservice.business.stappen.AbstractBerichtVerwerkingStap">
+                <!-- Stap die de berichten valideert aan de hand van de bean annotaties. -->
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.BerichtGegevensValidatieStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.HaalLeveringsautorisatieEnPartijGegevensOpStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.TransactieStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.HaalBetrokkenPersoonHisVolledigOpStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.OnderhoudAfnemerindicatiesStap"/>
+                <!-- TODO Quickfix: om persoon opnieuw op te halen voor het maken van het volledigbericht. -->
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.HaalBetrokkenPersoonHisVolledigOpStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.VoorbereidVerwerkingStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.MaakMaxBerichtStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.VoegStuurgegevensToeStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.OnderzoekenFilterStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.VoorkomenFilterStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.AttributenFilterStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.BetrokkenheidBepaalMagLeverenStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.AutoriseerOnderzoekenStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.FilterVerantwoordingsinformatieStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.ZetPersoonObjectSleutelVoorOnderzoekStap" />
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.MaakUitgaandBerichtStap"/>
+                <bean class="nl.bzk.brp.levering.afnemerindicaties.stappen.persoon.ZetBerichtOpQueueStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+</beans>

@@ -1,0 +1,16 @@
+--FIXME autaut proeftuin
+---- Verwijder de verwijzing naar abonnement binnen de afnemerindicaties.
+--UPDATE autaut.persafnemerindicatie SET abonnement = null;
+--
+---- Verwijder alle bestaande abonnementen, toegangabonnementen, diensten en afleverwijzen
+--DELETE FROM autaut.his_afleverwijze;
+--DELETE FROM autaut.his_toegangabonnement;
+--DELETE FROM autaut.his_dienst;
+--DELETE FROM autaut.his_abonnement;
+--
+--DELETE FROM autaut.abonnementattribuut;
+--DELETE FROM autaut.afleverwijze;
+--DELETE FROM autaut.toegangabonnement;
+--DELETE FROM autaut.dienst;
+--DELETE FROM autaut.abonnementgroep;
+--DELETE FROM autaut.abonnement;

@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 04-06-2014 -->
+<!-- ... -->
+<!-- Wijzigingen: -->
+<!-- 1) Uitwerking GeefDetailsPersoon -->
+<!-- 2) Uitwerking 'Geef medebewoners' -->
+<!-- 3) Eerste werkversies van 'Zoek persoon' -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020002">
+	<include schemaLocation="brp0200_brpLevering_Basis.xsd"/>
+	<!-- -->
+	<!-- Berichtparameters: Zoek persoon -->
+	<complexType name="Groep_BerichtParameters_LeveringBevragingZoekPersoon">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtParameters">
+				<sequence>
+					<element name="abonnementNaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="optional"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Berichtparameters: Geef details persoon -->
+	<complexType name="Groep_BerichtParameters_LeveringBevragingGeefDetailsPersoon">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtParameters">
+				<sequence>
+					<element name="abonnementNaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="peilmomentMaterieelResultaat" type="brp:Datum" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="peilmomentFormeelResultaat" type="brp:DatumTijd" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="historievorm" type="brp:HistorievormNaam" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="optional"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Berichtparameters: Geef medebewoners -->
+	<complexType name="Groep_BerichtParameters_LeveringBevragingGeefMedebewoners">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtParameters">
+				<sequence>
+					<element name="abonnementNaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="peilmomentMaterieelSelectie" type="brp:Datum" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="optional"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Zoekcriteria Persoon: Zoek persoon -->
+	<complexType name="Groep_BerichtZoekcriteriaPersoon_LeveringBevragingZoekPersoon">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtZoekcriteriaPersoon">
+				<sequence>
+					<!-- Via bedrijfsregels worden juiste combinaties gecontroleerd -->
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="administratienummer" type="brp:Administratienummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamstam" type="brp:Geslachtsnaamstam" nillable="false" minOccurs="0" maxOccurs="1"/>	
+					<element name="geboortedatum" type="brp:DatumMetOnzekerheid" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Zoekcriteria Persoon: Zoek persoon op adres -->
+	<complexType name="Groep_BerichtZoekcriteriaPersoon_LeveringBevragingZoekPersoonOpAdres">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtZoekcriteriaPersoon">
+				<sequence>
+					<element name="gemeenteCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="naamOpenbareRuimte" type="brp:NaamOpenbareRuimte" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummer" type="brp:Huisnummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisletter" type="brp:Huisletter" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="postcode" type="brp:Postcode" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- Zoekcriteria Persoon: Geef details persoon en Geef medebewoners -->
+	<complexType name="Groep_BerichtZoekcriteriaPersoon_LeveringBevragingIdentificatienummers">
+		<complexContent>
+			<restriction base="brp:Groep_BerichtZoekcriteriaPersoon">
+				<sequence>
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="administratienummer" type="brp:Administratienummer" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="brp:objecttype" use="prohibited"/>
+				<attribute ref="brp:verwerkingssoort" use="prohibited"/>
+				<attribute ref="brp:objectSleutel" use="prohibited"/>
+				<attribute ref="brp:voorkomenSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

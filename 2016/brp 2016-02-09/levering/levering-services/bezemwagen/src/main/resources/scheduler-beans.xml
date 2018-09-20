@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/task"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:task="http://www.springframework.org/schema/task"
+             xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <annotation-driven/>
+
+    <!-- Ingeplande taken met ingestelde uitstel na uitvoering, deze bevindt zich in eigen context,
+        zodat deze buiten junit tests kan worden gehouden. Anders houdt deze de verbinding met de broker open,
+        wat resulteert in een exception. -->
+    <task:scheduled-tasks scheduler="mutatieControleScheduler">
+        <task:scheduled ref="administratieveHandelingPublicatieServiceImpl"
+                   method="plaatsOnverwerkteAdministratieveHandelingenOpQueue" fixed-delay="${opruim.uitstel}"/>
+    </task:scheduled-tasks>
+
+    <task:scheduler id="mutatieControleScheduler"/>
+
+</beans:beans>

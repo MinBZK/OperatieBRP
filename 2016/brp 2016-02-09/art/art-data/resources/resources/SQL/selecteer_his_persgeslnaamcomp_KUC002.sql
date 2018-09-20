@@ -1,0 +1,14 @@
+select
+hpgc.id,
+hpgc.persgeslnaamcomp,
+hpgc.dataanvgel,
+hpgc.dateindegel,
+hpgc.tsreg,
+hpgc.tsverval,
+hpgc.actieinh,
+hpgc.actieverval,
+hpgc.actieaanpgel,
+hpgc.predicaat,
+hpgc.adellijketitel,
+hpgc.voorvoegsel, '['||hpgc.scheidingsteken||']' scheidingsteken, hpgc.stam from kern.his_persgeslnaamcomp hpgc where hpgc.persgeslnaamcomp in (select id from kern.persgeslnaamcomp where pers in (select id from kern.pers where bsn = ${DataSource Values#burgerservicenummer_B10}))
+order by hpgc.dataanvgel ASC;

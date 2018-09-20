@@ -1,0 +1,254 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>brp-algemeen-util</artifactId>
+        <groupId>nl.bzk.brp.algemeen.util</groupId>
+        <version>96-SNAPSHOT</version>
+    </parent>
+    <artifactId>brp-algemeen-util-locking</artifactId>
+
+    <packaging>jar</packaging>
+
+    <name>BRP Algemeen Utiliteits klassen - Locking service</name>
+    <description>Bibliotheek om binnen de BRP via een service personen en andere objecten functioneelte 'locken'.</description>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-util/locking</connection>
+      <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/trunk/algemeen/algemeen-util/brp-algemeen-util-locking</developerConnection>
+  </scm>
+
+    <properties>
+        <!-- security -->
+        <maven.security.privatekey.alias>serverkey</maven.security.privatekey.alias>
+        <maven.security.privatekey.password>serverkeypassword</maven.security.privatekey.password>
+
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.model</groupId>
+            <artifactId>brp-algemeen-model-model</artifactId>
+            <version>${project.version}</version>
+            <classifier>tests</classifier>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>nl.bzk.brp.algemeen.util</groupId>
+            <artifactId>brp-algemeen-util-logging</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Java / JEE -->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+
+        <!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+        </dependency>
+
+        <!-- Commons -->
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <testResources>
+            <testResource>
+                <filtering>true</filtering>
+                <directory>src/test/resources</directory>
+            </testResource>
+        </testResources>
+
+        <pluginManagement>
+            <plugins>
+                <!-- Een correcte database is nodig voor de integratie tests.
+                In plaats van te 'vertrouwen' op een voorgaande data access build,
+                zorgen we in een webservice build altijd zelf voor een goede database om mee te testen. -->
+                <plugin>
+                    <groupId>org.liquibase</groupId>
+                    <artifactId>liquibase-maven-plugin</artifactId>
+                    <configuration>
+                        <driver>${maven.jdbc.driverClassName}</driver>
+                        <url>${maven.jdbc.url}</url>
+                        <username>${maven.jdbc.username}</username>
+                        <password>${maven.jdbc.password}</password>
+                    </configuration>
+                    <dependencies>
+                        <dependency>
+                            <groupId>nl.bzk.brp.algemeen.opslag</groupId>
+                            <artifactId>brp-algemeen-opslag-database</artifactId>
+                            <version>${project.version}</version>
+                        </dependency>
+                    </dependencies>
+                    <inherited>true</inherited>
+                    <executions>
+                        <execution>
+                            <id>create-db</id>
+                            <goals>
+                                <goal>update</goal>
+                            </goals>
+                            <phase>process-test-classes</phase>
+                            <configuration>
+                                <dropFirst>true</dropFirst>
+                                <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                <changeLogFile>changeset/brp-databases.xml</changeLogFile>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <configuration>
+                        <argLine>-Xms512m -Xmx1024m -XX:MaxPermSize=512m</argLine>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>ci.build</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.archivering.junit.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_util_locking</maven.jdbc.archivering.junit.url>
+                <maven.jdbc.archivering.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_util_locking</maven.jdbc.archivering.url>
+                <maven.jdbc.junit.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_util_locking</maven.jdbc.junit.url>
+                <maven.jdbc.url>jdbc:postgresql://${jenkins.postgresql.host}/brp_algemeen_util_locking</maven.jdbc.url>
+            </properties>
+        </profile>
+        <profile>
+            <id>inmemory</id>
+            <activation>
+                <property>
+                    <name>db.inmemory</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.archivering.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.archivering.driverClassName>
+                <maven.jdbc.archivering.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.archivering.url>
+                <maven.jdbc.archivering.username>brp</maven.jdbc.archivering.username>
+                <maven.jdbc.archivering.password>brp</maven.jdbc.archivering.password>
+
+                <maven.jdbc.master.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.master.driverClassName>
+                <maven.jdbc.master.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.master.url>
+                <maven.jdbc.master.username>brp</maven.jdbc.master.username>
+                <maven.jdbc.master.password>brp</maven.jdbc.master.password>
+
+                <maven.jdbc.driverClassName>org.hsqldb.jdbc.JDBCDriver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:hsqldb:file:${project.build.directory}/db;shutdown=true;</maven.jdbc.url>
+                <maven.jdbc.username>brp</maven.jdbc.username>
+                <maven.jdbc.password>brp</maven.jdbc.password>
+                <maven.jdbc.pool.maxActive>100</maven.jdbc.pool.maxActive>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.liquibase</groupId>
+                        <artifactId>liquibase-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>create-db</id>
+                                <phase>process-test-classes</phase>
+                                <goals>
+                                    <goal>update</goal>
+                                </goals>
+                                <configuration>
+                                    <skip>${skipTests}</skip>
+                                    <driver>${maven.jdbc.driverClassName}</driver>
+                                    <dropFirst>true</dropFirst>
+                                    <promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+                                    <changeLogFile>changeset/brp-hsqldb-databases.xml</changeLogFile>
+                                </configuration>
+                            </execution>
+                        </executions>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.hsqldb</groupId>
+                                <artifactId>hsqldb</artifactId>
+                                <version>${hsqldb.version}</version>
+                            </dependency>
+                        </dependencies>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.apache.maven.surefire</groupId>
+                                <artifactId>surefire-junit47</artifactId>
+                                <version>2.16</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <excludedGroups>nl.bzk.brp.utils.junit.OverslaanBijInMemoryDatabase</excludedGroups>
+                        </configuration>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

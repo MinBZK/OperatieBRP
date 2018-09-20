@@ -1,0 +1,23 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+    http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd
+">
+    <preConditions onFail="HALT">
+        <dbms type="postgresql"/>
+    </preConditions>
+
+    <!-- Vacuum database, opruimen van ongebruikte rijen en Analyze -->
+    <changeSet id="vacuumAnalyzeDb" author="brp" runInTransaction="false">
+        <comment>Vacuum database.</comment>
+        <sqlFile path="changeset/sql/helper/vacuumAnalyzeDb.sql" splitStatements="false"/>
+    </changeSet>
+
+    <!-- Afgeleid administratief vullen via sql script zodat elke persoon een afg adm rij heeft. -->
+    <changeSet id="vulAfgeleidAdministratief" author="brp">
+        <comment>Vul afgeleid administratief.</comment>
+        <sqlFile path="changeset/sql/helper/vulAfgeleidAdministratief.sql" splitStatements="false"/>
+    </changeSet>
+
+</databaseChangeLog>

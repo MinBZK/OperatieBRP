@@ -1,0 +1,51 @@
+20 September 2013 - BRP Release 10
+
+Deze release is gebaseerd op BMR Release 14, database versie 14.4 en koppelvlak Release 13.3. Daar deze release slechts
+een functionele uitbreiding is van de vorige release en er geen grote database noch architecturele changes zijn, is
+voor deze release geen geheel nieuwe installatie nodig en ook geen nieuwe database. Het vervangen van de services met de
+nieuwe versies, het aanpassen van een property en het draaien van enkele scripts is voldoende.
+
+
+DATABASE
+Zoals reeds vernoemd is er voor deze release GEEN nieuwe database vereist. Er dienen slechts een drietal scripts
+gedraaid te worden op de huidige database versie, waarbij de volgorde niet uitmaakt. Uiteraard is het aan te raden deze
+scripts pas te draaien nadat alle servers/services zijn gestopt en in ieder geval zeker voordat de (nieuwe) services
+weer worden gestart. De scripts die uitgevoerd dienen te worden zijn:
+    - db/update_abonnementen.sql
+    - db/levering-changes.sql
+    - db/vulling_afgeleid_administratief.sql
+
+Merk wel op dat dit laatste script, 'db/vulling_afgeleid_administratief.sql', een functie bevat die over alle personen
+in de database heen gaat en dus lange tijd in beslag neemt. Vermoedelijk zo'n 16 tot 20 minuten.
+
+
+BIJHOUDING v 0.6.2
+De standaard installatie voor BRP is van toepassing, met een enkele wijziging aan de brp.properties ten behoeve van de
+communicatie tussen de bijhouding service en de mutatie-levering modules. De stappen zijn dus:
+    - stop de BRP server,
+    - verwijder de BRP directory
+    - vervang de BRP war file met de nieuwe versie
+    - pas het bestand 'brp.properties' aan voor de property 'jms.administratieve.handeling.url' conform het volgende
+      voorbeeld (waarbij uiteraard [huidige_url] vervangen dient te worden door de huidige URL):
+            jms.administratieve.handeling.url=[huidige_url]?jms.useAsyncSend=true
+    - start de BRP server
+
+
+LEVERING v0.3.9
+    - Stop de server(s)
+    - Verwijder de oude wars en directories
+    - Deploy de war's uit de levering folder en start de server
+
+
+ROUTERING CENTRALE 1.0.0
+    - Stop de server(s)
+    - Deploy de war routering-centrale.war.
+    - Start de server
+
+
+PROTOCOLLERING VERWERKER 1.0
+    - Stop de server(s)
+    - Deploy de war protocollering-verwerker.war
+    - Start de server
+
+

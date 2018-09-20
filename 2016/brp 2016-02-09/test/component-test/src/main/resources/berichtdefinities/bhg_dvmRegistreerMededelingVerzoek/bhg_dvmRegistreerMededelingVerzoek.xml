@@ -1,0 +1,214 @@
+<brp:bhg_dvmRegistreerMededelingVerzoek xmlns:brp="http://www.bzk.nl/brp/brp0200">
+    <brp:stuurgegevens brp:communicatieID="${stuurgegevens.communicatieID}">
+        <brp:zendendePartij>${stuurgegevens.zendendePartij}</brp:zendendePartij>
+        <brp:zendendeSysteem>${stuurgegevens.zendendeSysteem}</brp:zendendeSysteem>
+        <brp:referentienummer>${stuurgegevens.referentienummer}</brp:referentienummer>
+        <brp:tijdstipVerzending>${stuurgegevens.tijdstipVerzending}</brp:tijdstipVerzending>
+    </brp:stuurgegevens>
+    <brp:parameters brp:communicatieID="${parameters.communicatieID}">
+        <brp:verwerkingswijze>${parameters.verwerkingswijze}</brp:verwerkingswijze>
+    </brp:parameters>
+    <!--You have a CHOICE of the next 3 items at this level-->
+    <brp:wijzigingVerstrekkingsbeperking brp:communicatieID="${wijzigingVerstrekkingsbeperking.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${wijzigingVerstrekkingsbeperking.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${wijzigingVerstrekkingsbeperking.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list wijzigingVerstrekkingsbeperking.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list wijzigingVerstrekkingsbeperking.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieVerstrekkingsbeperking = wijzigingVerstrekkingsbeperking.acties.registratieVerstrekkingsbeperking]
+            <brp:registratieVerstrekkingsbeperking brp:communicatieID="${registratieVerstrekkingsbeperking.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieVerstrekkingsbeperking.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${registratieVerstrekkingsbeperking.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieVerstrekkingsbeperking.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${wijzigingVerstrekkingsbeperking.acties.registratieVerstrekkingsbeperking.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieVerstrekkingsbeperking.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <!--Optional:-->
+                    <brp:indicaties>
+                        <brp:volledigeVerstrekkingsbeperking brp:communicatieID="${wijzigingVerstrekkingsbeperking.acties.registratieVerstrekkingsbeperking.persoon.indicaties.volledigeVerstrekkingsbeperking.communicatieID}" brp:objecttype="PersoonIndicatie">
+                            <brp:waarde>${wijzigingVerstrekkingsbeperking.acties.registratieVerstrekkingsbeperking.persoon.indicaties.volledigeVerstrekkingsbeperking.waarde}</brp:waarde>
+                        </brp:volledigeVerstrekkingsbeperking>
+                    </brp:indicaties>
+                    <!--Optional:-->
+                    <brp:verstrekkingsbeperkingen>
+                        <!--1 or more repetitions:-->
+                        [#list registratieVerstrekkingsbeperking.persoon.verstrekkingsbeperkingen as verstrekkingsbeperking]
+                        <brp:verstrekkingsbeperking brp:communicatieID="${verstrekkingsbeperking.communicatieID}" brp:objecttype="PersoonVerstrekkingsbeperking">
+                            <!--Optional:-->
+                            <brp:partijCode>${verstrekkingsbeperking.partijCode}</brp:partijCode>
+                            <!--Optional:-->
+                            <brp:omschrijvingDerde>${verstrekkingsbeperking.omschrijvingDerde}</brp:omschrijvingDerde>
+                            <!--Optional:-->
+                            <brp:gemeenteVerordeningPartijCode>${verstrekkingsbeperking.gemeenteVerordeningPartijCode}</brp:gemeenteVerordeningPartijCode>
+                        </brp:verstrekkingsbeperking>
+                        [/#list]
+                    </brp:verstrekkingsbeperkingen>
+                </brp:persoon>
+            </brp:registratieVerstrekkingsbeperking>
+        </brp:acties>
+    </brp:wijzigingVerstrekkingsbeperking>
+    <brp:wijzigingGezag brp:communicatieID="${wijzigingGezag.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${wijzigingGezag.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${wijzigingGezag.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list wijzigingGezag.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list wijzigingGezag.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieGezag = wijzigingGezag.acties.registratieGezag]
+            <brp:registratieGezag brp:communicatieID="${registratieGezag.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieGezag.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${registratieGezag.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieGezag.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${registratieGezag.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieGezag.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <!--Optional:-->
+                    <brp:indicaties>
+                        <brp:derdeHeeftGezag brp:communicatieID="${registratieGezag.persoon.indicaties.derdeHeeftGezag.communicatieID}" brp:objecttype="PersoonIndicatie">
+                            <brp:waarde>${registratieGezag.persoon.indicaties.derdeHeeftGezag.waarde}</brp:waarde>
+                        </brp:derdeHeeftGezag>
+                    </brp:indicaties>
+                    <!--Optional:-->
+                    <brp:betrokkenheden>
+                        <brp:kind brp:communicatieID="${registratieGezag.persoon.betrokkenheden.kind.communicatieID}" brp:objectSleutel="${registratieGezag.persoon.betrokkenheden.kind.objectSleutel}" brp:objecttype="Betrokkenheid">
+                            <brp:familierechtelijkeBetrekking brp:communicatieID="${registratieGezag.persoon.betrokkenheden.kind.familierechtelijkeBetrekking.communicatieID}" brp:objectSleutel="${registratieGezag.persoon.betrokkenheden.kind.familierechtelijkeBetrekking.objectSleutel}" brp:objecttype="Relatie">
+                                <brp:betrokkenheden>
+                                    <!--1 to 2 repetitions:-->
+                                    [#list registratieGezag.persoon.betrokkenheden.kind.familierechtelijkeBetrekking.betrokkenheden as ouder]
+                                    <brp:ouder brp:communicatieID="${ouder.communicatieID}" brp:objectSleutel="${ouder.objectSleutel}" brp:objecttype="Betrokkenheid">
+                                        <brp:persoon brp:communicatieID="${ouder.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=ouder.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon"/>
+                                        <brp:ouderlijkGezag brp:communicatieID="${ouder.ouderlijkGezag.communicatieID}">
+                                            <brp:indicatieOuderHeeftGezag>${ouder.ouderlijkGezag.indicatieOuderHeeftGezag}</brp:indicatieOuderHeeftGezag>
+                                        </brp:ouderlijkGezag>
+                                    </brp:ouder>
+                                    [/#list]
+                                </brp:betrokkenheden>
+                            </brp:familierechtelijkeBetrekking>
+                        </brp:kind>
+                    </brp:betrokkenheden>
+                </brp:persoon>
+            </brp:registratieGezag>
+        </brp:acties>
+    </brp:wijzigingGezag>
+    <brp:wijzigingCuratele brp:communicatieID="${wijzigingCuratele.communicatieID}" brp:objecttype="AdministratieveHandeling">
+        <brp:partijCode>${wijzigingCuratele.partijCode}</brp:partijCode>
+        <!--Optional:-->
+        <brp:toelichtingOntlening>${wijzigingCuratele.toelichtingOntlening}</brp:toelichtingOntlening>
+        <!--Optional:-->
+        <brp:gedeblokkeerdeMeldingen>
+            <!--1 or more repetitions:-->
+            [#list wijzigingCuratele.gedeblokkeerdeMeldingen as gedeblokkeerdeMelding]
+            <brp:gedeblokkeerdeMelding brp:communicatieID="${gedeblokkeerdeMelding.communicatieID}" brp:objecttype="GedeblokkeerdeMelding" brp:referentieID="${gedeblokkeerdeMelding.referentieID}">
+                <brp:regelCode>${gedeblokkeerdeMelding.regelCode}</brp:regelCode>
+            </brp:gedeblokkeerdeMelding>
+            [/#list]
+        </brp:gedeblokkeerdeMeldingen>
+        <!--Optional:-->
+        <brp:bronnen>
+            <!--Zero or more repetitions:-->
+            [#list wijzigingCuratele.bronnen as bron]
+            <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron">
+                <!--Optional:-->
+                <brp:document brp:communicatieID="${bron.document.communicatieID}" brp:objecttype="Document">
+                    <brp:soortNaam>${bron.document.soortNaam}</brp:soortNaam>
+                    <brp:identificatie>${bron.document.identificatie}</brp:identificatie>
+                    <!--Optional:-->
+                    <brp:aktenummer>${bron.document.aktenummer}</brp:aktenummer>
+                    <brp:partijCode>${bron.document.partijCode}</brp:partijCode>
+                </brp:document>
+                <!--Optional:-->
+                <brp:rechtsgrondCode>${bron.rechtsgrondCode}</brp:rechtsgrondCode>
+                <!--Optional:-->
+                <brp:rechtsgrondomschrijving>${bron.rechtsgrondomschrijving}</brp:rechtsgrondomschrijving>
+            </brp:bron>
+            [/#list]
+        </brp:bronnen>
+        <brp:acties>
+            [#assign registratieCuratele = wijzigingCuratele.acties.registratieCuratele]
+            <brp:registratieCuratele brp:communicatieID="${registratieCuratele.communicatieID}" brp:objecttype="Actie">
+                <brp:datumAanvangGeldigheid>${registratieCuratele.datumAanvangGeldigheid}</brp:datumAanvangGeldigheid>
+                <!--Optional:-->
+                <brp:datumEindeGeldigheid>${registratieCuratele.datumEindeGeldigheid}</brp:datumEindeGeldigheid>
+                <!--Optional:-->
+                <brp:bronnen>
+                    <!--1 or more repetitions:-->
+                    [#list registratieCuratele.bronnen as bron]
+                    <brp:bron brp:communicatieID="${bron.communicatieID}" brp:objecttype="ActieBron" brp:referentieID="${bron.referentieID}"/>
+                    [/#list]
+                </brp:bronnen>
+                <brp:persoon brp:communicatieID="${registratieCuratele.persoon.communicatieID}" brp:objectSleutel="[@objectsleutel var=registratieCuratele.persoon.objectSleutel partij=stuurgegevens.zendendePartij/]" brp:objecttype="Persoon">
+                    <brp:indicaties>
+                        <brp:onderCuratele brp:communicatieID="${registratieCuratele.persoon.indicaties.onderCuratele.communicatieID}" brp:objecttype="PersoonIndicatie">
+                            <brp:waarde>${registratieCuratele.persoon.indicaties.onderCuratele.waarde}</brp:waarde>
+                        </brp:onderCuratele>
+                    </brp:indicaties>
+                </brp:persoon>
+            </brp:registratieCuratele>
+        </brp:acties>
+    </brp:wijzigingCuratele>
+</brp:bhg_dvmRegistreerMededelingVerzoek>

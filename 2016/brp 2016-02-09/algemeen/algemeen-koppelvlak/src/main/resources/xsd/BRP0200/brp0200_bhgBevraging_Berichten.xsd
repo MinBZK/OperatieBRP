@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 04-06-2014 -->
+<!-- -->
+<!-- Wijzigingen: -->
+<!-- 1) Specifieke definitie berichtparameters voor Zoek persoon en Geef personen op adres -->
+<!-- 2) Wijziging naam berichtparameters en zoekcriteria vraagbericht 'GeefDetailsPersoon' -->
+<!-- 3) Berichtparameters voor Bepaal kandidaat vader verwijderd (o.b.v. specificaties) -->
+<!-- 4) Bijhouidng bevraging 'Geef medebewoners' toegevoegd; opvolger van GeefPersonenOpAdres' (bestaan tijdelijk naast elkaar) -->
+<!-- ... -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bzk.nl/brp/brp0200" targetNamespace="http://www.bzk.nl/brp/brp0200" elementFormDefault="qualified" attributeFormDefault="unqualified" version="020002">
+	<include schemaLocation="brp0200_bhgBevraging_Basis.xsd"/>
+	<!-- ... -->
+	<element name="bhg_bvgZoekPersoon" type="brp:BijhoudingBevraging_ZoekPersoon_Verzoek"/>
+	<element name="bhg_bvgZoekPersoon_R" type="brp:BijhoudingBevraging_ZoekPersoon_Resultaat"/>
+	<element name="bhg_bvgGeefDetailsPersoon" type="brp:BijhoudingBevraging_GeefDetailsPersoon_Verzoek"/>
+	<element name="bhg_bvgGeefDetailsPersoon_R" type="brp:BijhoudingBevraging_GeefDetailsPersoon_Resultaat"/>
+	<element name="bhg_bvgBepaalKandidaatVader" type="brp:BijhoudingBevraging_BepaalKandidaatVader_Verzoek"/>
+	<element name="bhg_bvgBepaalKandidaatVader_R" type="brp:BijhoudingBevraging_BepaalKandidaatVader_Resultaat"/>
+	<element name="bhg_bvgGeefMedebewoners" type="brp:BijhoudingBevraging_GeefMedebewoners_Verzoek"/>
+	<element name="bhg_bvgGeefMedebewoners_R" type="brp:BijhoudingBevraging_GeefMedebewoners_Resultaat"/>
+	<!-- Onderstaand de huidige variant; deze wordt vervangen door 'Geef medebewoners' -->
+	<element name="bhg_bvgGeefPersonenOpAdresMetBetrokkenheden" type="brp:Bevraging_GeefPersonenOpAdresMetBetrokkenheden_Verzoek"/>
+	<element name="bhg_bvgGeefPersonenOpAdresMetBetrokkenheden_R" type="brp:Bevraging_GeefPersonenOpAdresMetBetrokkenheden_Resultaat"/>
+	<!-- ... -->
+	<!-- Vraagbericht: Zoek Persoon -->
+	<complexType name="BijhoudingBevraging_ZoekPersoon_Verzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_BijhoudingBevragingZoekPersoon" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="zoekcriteriaPersoon" type="brp:Groep_BerichtZoekcriteriaPersoon_BijhoudingBevragingZoekPersoon" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- VraagberichtResultaat: Zoek Persoon -->
+	<complexType name="BijhoudingBevraging_ZoekPersoon_Resultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Levering" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="personen" type="brp:Container_BerichtPersonen_ZoekPersoon_Levering" nillable="false" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Vraagbericht: Geef Details Persoon -->
+	<complexType name="BijhoudingBevraging_GeefDetailsPersoon_Verzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_BijhoudingBevragingGeefDetailsPersoon" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="zoekcriteriaPersoon" type="brp:Groep_BerichtZoekcriteriaPersoon_BijhoudingBevragingGeefDetailsPersoon" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- VraagberichtResultaat: Geef Details Persoon -->
+	<complexType name="BijhoudingBevraging_GeefDetailsPersoon_Resultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Levering" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="personen" type="brp:Container_BerichtPersonen_GeefDetailsPersoon_Levering" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Vraagbericht: InformatieVraag Bepaal kandidaat Vader -->
+	<complexType name="BijhoudingBevraging_BepaalKandidaatVader_Verzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="zoekcriteriaPersoon" type="brp:Groep_BerichtZoekcriteriaPersoon_BijhoudingBevragingBepaalKandidaatVader" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- VraagberichtResultaat: InformatieVraag Bepaal kandidaat Vader -->
+	<complexType name="BijhoudingBevraging_BepaalKandidaatVader_Resultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Levering" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="personen" type="brp:Container_BerichtPersonen_BepaalKandidaatVader_BijhoudingBevragingResultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Vraagbericht: Geef medebewoners -->
+	<complexType name="BijhoudingBevraging_GeefMedebewoners_Verzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_BijhoudingBevragingGeefMedebewoners" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="zoekcriteriaPersoon" type="brp:Groep_BerichtZoekcriteriaPersoon_BijhoudingBevragingGeefMedebewoners" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- VraagberichtResultaat: Geef medebewoners -->
+	<complexType name="BijhoudingBevraging_GeefMedebewoners_Resultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Levering" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="personen" type="brp:Container_BerichtPersonen_GeefMedebewoners_Levering" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Vraagbericht: InformatieVraag Personen op adres inclusief betrokkenheden; wordt straks vervangen door 'Geef medebewoners' -->
+	<complexType name="Bevraging_GeefPersonenOpAdresMetBetrokkenheden_Verzoek">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonVerzoek" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_BijhoudingBevragingGeefPersonenOpAdres" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="zoekcriteriaPersoon" type="brp:Groep_BerichtZoekcriteriaPersoon_BijhoudingBevragingPersonenOpAdresMetBetrokkenheden" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- VraagberichtResultaat: InformatieVraag Personen op adres inclusief betrokkenheden -->
+	<complexType name="Bevraging_GeefPersonenOpAdresMetBetrokkenheden_Resultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Stuurgegevens_SynchroonResultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bevraging" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Levering" nillable="false" minOccurs="0" maxOccurs="1"/>
+					<element name="personen" type="brp:Container_BerichtPersonen_PersoonOpAdresMetBetrokkenheden_Resultaat" nillable="false" minOccurs="0" maxOccurs="1" />
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+</schema>

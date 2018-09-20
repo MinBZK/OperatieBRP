@@ -1,0 +1,40 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.0.xsd">
+
+	<changeSet id="0" author="brp" runAlways="true">
+		<comment>Abonnementen opschonen voor de test.</comment>
+		<sqlFile path="changeset/sql/abonnementOpschonen.sql"/>
+	</changeSet>
+    <changeSet id="1" author="brp" runAlways="true">
+		<preConditions onFail="HALT">
+			<changeSetExecuted id="0" author="brp" changeLogFile="changeset/abonnementen.xml" />
+		</preConditions>
+        <comment>Abonnementen toevoegen voor de test.</comment>
+        <sqlFile path="changeset/sql/abonnement.sql"/>
+    </changeSet>
+    <changeSet id="2" author="brp" runAlways="true">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="1" author="brp" changeLogFile="changeset/abonnementen.xml" />
+        </preConditions>
+        <comment>Abonnementen toevoegen voor de test.</comment>
+        <sqlFile path="changeset/sql/abonnementNieuw.sql"/>
+    </changeSet>
+    <changeSet id="3" author="brp" runAlways="true">
+        <preConditions onFail="HALT">
+            <changeSetExecuted id="2" author="brp" changeLogFile="changeset/abonnementen.xml" />
+        </preConditions>
+        <comment>Persafnemerindicatie toevoegen voor de test.</comment>
+        <sqlFile path="changeset/sql/persAfnemerIndicatieNieuw.sql"/>
+    </changeSet>
+	<changeSet id="4" author="brp" runAlways="true">
+		<preConditions onFail="HALT">
+			<changeSetExecuted id="3" author="brp" changeLogFile="changeset/abonnementen.xml" />
+		</preConditions>
+		<comment>Historie maken van de toegevoegde records.</comment>
+		<sqlFile path="changeset/sql/abonnementHis.sql"/>
+	</changeSet>
+
+</databaseChangeLog>

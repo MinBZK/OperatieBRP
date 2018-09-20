@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    ">
+
+    <bean id="administratieveHandelingConnectionFactory"
+          class="org.springframework.jms.connection.CachingConnectionFactory">
+        <constructor-arg name="targetConnectionFactory" ref="actualConnectionFactory"/>
+    </bean>
+
+    <bean id="actualConnectionFactory" class="org.apache.activemq.ActiveMQConnectionFactory">
+        <property name="brokerURL" value="${jms.broker.ah.url:''}"/>
+    </bean>
+
+    <bean id="administratieveHandelingQueue" class="org.apache.activemq.command.ActiveMQQueue">
+        <constructor-arg value="${jms.broker.ah.queue:''}"/>
+    </bean>
+
+    <bean id="administratieveHandelingJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="administratieveHandelingConnectionFactory"/>
+        <property name="defaultDestination" ref="administratieveHandelingQueue"/>
+    </bean>
+</beans>

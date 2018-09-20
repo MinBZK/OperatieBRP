@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %level %logger{36} - %msg%n"/>
+        </Console>
+
+        <RollingFile name="Systeem" fileName="target/logs/brp-systeem.log"
+                     filePattern="target/logs/brp-systeem-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT"/>
+            <PatternLayout>
+                <pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
+            </PatternLayout>
+            <TimeBasedTriggeringPolicy/>
+        </RollingFile>
+
+        <RollingFile name="Functioneel" fileName="target/logs/brp-beheer-functioneel.log"
+                     filePattern="target/logs/brp-beheer-functioneel-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <BrpJsonLayout/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="2 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+        <RollingFile name="Technisch" fileName="target/logs/brp-beheer-technisch.log"
+                     filePattern="target/logs/brp-beheer-technisch-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="TECHNISCHE_LOG" onMatch="ACCEPT" onMismatch="DENY"/>
+            <BrpJsonLayout/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="2 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+        <RollingFile name="Beheer" fileName="target/logs/brp-beheer-mdc.log"
+                     filePattern="target/logs/brp-beheer-mdc-%d{MM-dd-yyyy}.log.gz">
+            <MarkerFilter marker="BEHEER" onMatch="ACCEPT" onMismatch="DENY"/>
+            <BrpJsonLayout/>
+            <Policies>
+                <TimeBasedTriggeringPolicy interval="1"/>
+                <SizeBasedTriggeringPolicy size="2 GB"/>
+            </Policies>
+            <DefaultRolloverStrategy max="3"/>
+        </RollingFile>
+
+<!-- 
+		<appender name="Logstash2" class="org.apache.log4j.net.SocketAppender"> 
+            <MarkerFilter marker="LOGSTASH2" onMatch="ACCEPT" onMismatch="DENY"/>
+            <param name="Port" value="5000"/>
+		    <param name="RemoteHost" value="<ip-adres/DNS-naam Logstash server>"/>
+		    <param name="RemoteHost" value="192.168.205.21"/>
+	    	<param name="ReconnectionDelay" value="10000"/> 
+        	<layout class="org.apache.log4j.PatternLayout">
+            	<param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss}[%t] %-5p (%C{5}:%-3L) %X{url} %X{ipAdres} %X{identificatie}%m%n"/>
+	    	</layout>
+	    	<param name="ignoreExceptions" value="false"/>
+		</appender>
+ 
+ 		<Socket name="Logstash" host="192.168.205.21" port="5000">
+            <MarkerFilter marker="LOGSTASH" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout>
+                <pattern>%d{dd MMM yyyy HH:mm:ss}[%t] %-5p (%C{5}:%-3L) %X{url} %X{ipAdres} %X{identificatie}%m%n</pattern>
+            </PatternLayout>
+    	</Socket>
+-->
+
+    </Appenders>
+    <Loggers>
+        <Root level="INFO">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="Systeem"/>
+            <AppenderRef ref="Functioneel"/>
+            <AppenderRef ref="Technisch"/>
+            <AppenderRef ref="Beheer"/>
+        </Root>
+        <logger name="org.hibernate" level="WARN"/>
+        <!--logger name="nl.bzk.brp" level="DEBUG"/-->
+        <!--logger name="org.springframework.web" level="DEBUG"/-->
+        <!--logger name="org.springframework.orm.jpa.support.OpenEntityManagerInViewInterceptor" level="DEBUG"/-->
+        <!--logger name="org.springframework.security.access.prepost.PrePostAnnotationSecurityMetadataSource" level="TRACE"/-->
+    </Loggers>
+</Configuration>

@@ -1,0 +1,43 @@
+1 mei 2013 - BRP Release 6
+
+BIJHOUDING v0.5.22
+
+Deze oplevering bevat geen nieuwe bijhouding service ten opzichte van de vorige versie.
+
+
+LEVERING v0.3.0
+
+Bij deze release moeten de volgende installatie instructies worden gevolgd voor de levering services:
+1. Voer het bestand "documentatie\release 6\brp-levering\db\release-6-changes.sql" uit op de database.
+2. Maak een client.jks keystore aan voor de levering-service, voorstel is om in deze keystore het certificaat dat nu ook gebruikt wordt bij de bijhouding als encryptie certificaat (dus met de apache proxy configuratie) op te nemen.
+   Dit is nodig om over twee-zijdig SSL te communiceren met de afnemers.
+   met de afnemers.
+3. Wijzig de levering-service.properties met de volgende properties, waarbij de waardes moeten worden veranderd uiteraard voor de operationele omgeving:
+
+    # Speciale connectie voor Archivering, Logging en Protocollering
+    jdbc.alp.driverClassName=org.postgresql.Driver
+    jdbc.alp.url=postgresql://databaseserver/brpschema
+    jdbc.alp.username=
+    jdbc.alp.password=
+
+    # Connectie naar de master database om locks te kunnen plaatsen en wijzigingen te kunnen doorvoeren
+    jdbc.master.driverClassName=org.postgresql.Driver
+    jdbc.master.url=postgresql://databaseserver/brpschema
+    jdbc.master.username=
+    jdbc.master.password=
+
+   security.keystore.type=JKS
+   # bestandsnaam relatief aan werkdirectory
+   security.keystore.bestand=/path/to/keystores/levering.jks
+   security.keystore.wachtwoord=levering
+   # wachtwoord van de key in de keystore
+   security.keystore.keywachtwoord=clientkey
+
+   security.truststore.type=JKS
+   security.truststore.bestand=/path/to/keystores/afnemers_trust.jks
+   security.truststore.wachtwoord=afnemers
+
+   security.disable.cn.check=true
+
+
+4. Deploy de war's uit de levering folder en start de server.
