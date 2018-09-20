@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd"
+                      xmlns:esbr="http://www.jboss.org/xsd/jbossesb/smooks/routing-1.0.xsd">
+    
+    <!--
+        At the end of every order-item, bind together the orderDetail with the current
+        order item in a new HashMap and asign it under the beanId "03_order" in the bean
+        context.  The data is pulled into the "highprice" Java object model using java
+        binding configs that pull the data from the bean context, which contains data from
+        the database, as well as data bound in for the input message.  We use MVEL
+        expressions to access this info (expression bindings).
+
+        03_order gets routed by the above config..
+    -->
+    <jb:bean beanId="03_order" class="org.jboss.soa.esb.example.highprice.Order" createOnElement="order-item">
+        <jb:wiring property="address" beanIdRef="03_address" />
+        <jb:wiring property="product" beanIdRef="03_product" />
+        <jb:expression property="firstName">accounts[0].FIRSTNAME</jb:expression>
+        <jb:expression property="lastName">accounts[0].LASTNAME</jb:expression>
+        <jb:expression property="date">orderDetail.date</jb:expression>
+        <jb:expression property="quantity">orderItem.quantity</jb:expression>
+    </jb:bean>
+
+    <jb:bean beanId="03_address" class="org.jboss.soa.esb.example.highprice.Address" createOnElement="order-item">
+        <jb:expression property="email">accounts[0].EMAIL</jb:expression>
+        <jb:expression property="address1">accounts[0].ADDR1</jb:expression>
+        <jb:expression property="address2">accounts[0].ADDR2</jb:expression>
+        <jb:expression property="city">accounts[0].CITY</jb:expression>
+        <jb:expression property="state">accounts[0].STATE</jb:expression>
+    </jb:bean>
+
+    <jb:bean beanId="03_product" class="org.jboss.soa.esb.example.highprice.Product" createOnElement="order-item">
+        <jb:expression property="id">product.PRODUCTID</jb:expression>
+        <jb:expression property="title">product.NAME</jb:expression>
+        <jb:expression property="category">product.CATEGORY</jb:expression>
+        <jb:expression property="price">(float)product.LISTPRICE</jb:expression>
+    </jb:bean>
+
+    <!--
+        At the end of every order-item, route the order item Java Objects ("03_order") to the
+        "03_High_Price" Service, if the price per item is 190 or more...
+    -->
+    <esbr:routeBean beanIdRef="03_order" toServiceCategory="HugeQS" toServiceName="03_High_Price" routeOnElement="order-item">
+        <condition><!-- product.LISTPRICE > 190.00 --></condition>
+    </esbr:routeBean>
+
+</smooks-resource-list>

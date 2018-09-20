@@ -1,0 +1,41 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns:xsi = "http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation = "http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd">   
+	<hosts>
+		<host name = "filebank" dnsName = "localhost"/>
+		<host name = "jmsbank" dnsName = "localhost"/>
+		<host name = "loanbroker" dnsName = "localhost"/>
+		<host name = "jms-provider" dnsName = "localhost"/>  
+	</hosts>  
+	<servers>    
+		<server name = "fileBankServer" host = "fileBank" appserver = "jboss-4.0.3SP1">    
+			<properties>    
+				<property name = "java.naming.provider.url" value = "localhost:1099"/>    
+				<property name = "java.naming.factory.initial" value = "org.jnp.interfaces.NamingContextFactory"/>    
+				<property name = "java.naming.factory.url.pkgs" value = "org.jboss.naming:org.jnp.interfaces"/>    
+			</properties>    
+		</server>   
+		<server name = "inhouse-jboss-4.0.4" host = "jms-provider" appserver = "jboss-4.0.4">    
+			<properties>
+				<property name = "java.naming.provider.url" value = "localhost:1099"/>
+				<property name = "java.naming.factory.initial" value = "org.jnp.interfaces.NamingContextFactory"/>
+				<property name = "java.naming.factory.url.pkgs" value = "org.jboss.naming:org.jnp.interfaces"/>    
+			</properties>    
+		</server>    
+		<server name = "loanbroker-listener" host = "loanbroker" appserver = "jbossesb"/>    
+	</servers>    
+	<buses>    
+		<bus name = "bank-jms-channel" server = "fileBankServer" resourceType = "QUEUE" userName = "" password = ""/>    
+		<bus name = "bank-ftp-channel" server = "inhouse-jboss-4.0.4" resourceType = "FTP" userName = "kurt" password = "secret"/>    
+	</buses>    
+	<services>    
+		<service name = "filebank-gateway" category = "gateway" server = "loanbroker-listener" description = "This listener picks up files deposited by the fileBank" class = "org.jboss.soa.esb.FileBankGateway">    	  
+			<listeners>    	    
+				<listener description = "A File-Based listener" bus = "bank-ftp-bus"/>    	    
+				<listener description = "A JMS-Based listener" bus = "bank-jms-bus"/>    	  
+			</listeners>    	  
+			<actions>    	    
+				<action name = "TestDefaultRouteAction" process = "route" class = "org.jboss.soa.esb.actions.CbrProxyAction" service-category = "MessageRouting" service-name = "ContentBasedRoutingService"/>    
+			</actions>    
+		</service>    
+	</services>
+</jbossesb>

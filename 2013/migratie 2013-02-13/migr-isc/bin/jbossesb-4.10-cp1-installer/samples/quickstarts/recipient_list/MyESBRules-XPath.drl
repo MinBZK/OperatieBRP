@@ -1,0 +1,27 @@
+#created on: 20070601
+package com.jboss.soa.esb.routing.cbr
+
+#list any import classes here.
+import org.jboss.soa.esb.message.Message;
+import org.jboss.soa.esb.message.format.MessageType;
+
+expander XPathLanguage.dsl
+
+#declare any global variables here
+global java.util.List destinations;
+
+rule "Routing Rule using XPATH equals regular"
+        when
+                xpathLessThan "/Order/@totalAmount", "100.00"
+        then 
+                Log : "regular destination";
+                Destination : "regular";
+end
+
+rule "Routing Rule using XPATH equals confirm"
+        when    
+                xpathGreaterThan "/Order/@totalAmount", "99.99"
+        then
+                Log : "confirm destination";
+                Destination : "extra";
+end

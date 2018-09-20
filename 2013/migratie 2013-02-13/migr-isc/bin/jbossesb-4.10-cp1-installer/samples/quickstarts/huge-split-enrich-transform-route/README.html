@@ -1,0 +1,705 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>JBossESB Quickstart - "Huge Split, Enrich, Transform and Route"</title>
+    <style type="text/css">
+        body {
+            font-family: helvetica
+        }
+        pre {
+            margin-left: 20px;
+            background-color: lavender;
+        }
+        .rhighlight {
+            color: red;
+        }        
+        div.indent {
+            margin-left: 20px;
+        }
+        h4 {
+            font-style: italic;
+        }
+        .commentedcode {
+            font-size: smaller; color: slategray;
+        }
+    </style>
+</head>
+<body>
+
+<img src="http://jboss.com/themes/jbosstheme/img/logo.gif"/><br/>
+<h2>JBossESB Quickstart - "Huge Split, Enrich, Transform and Route"</h2>
+<div class="indent">
+
+    This Quickstart demonstrates how JBossESB can be used to:
+
+    <ol>
+        <li>split,</li>
+        <li>enrich,</li>
+        <li>transform, and</li>
+        <li>route</li>
+    </ol>
+
+    messages of any size, including huge messages i.e. GB size messages.
+    <p/>
+    <b>Table of Contents:</b>
+    <div class="indent">
+        <a href="#overview">Overview</a><br/>
+        <a href="#main-points">Main Points of Note</a><br/>
+        <a href="#illustration">Illustration</a><br/>
+        <a href="#running">Running the Quickstart</a><br/>
+        <a href="#flash-demo">Flash Demonstration</a><br/>
+        <a href="#how-it-works">How it Works</a><br/>
+        <div class="indent">
+            <a href="#high-level">High Level</a><br/>
+            <a href="#splitting-routing">Splitting &amp; Routing Details</a>
+        </div>
+    </div>
+
+    <h3 id="overview">Overview</h3>
+
+    Messages can often be received containing data of interest to multiple parties.  Extracting and distributing this data
+    is a non trivial process.  Firstly you have the challenge of physically extracting the message data from the source message.
+    Then you need to reassemble the extracted data in a format consumable by each of these parties.  Each party may have different
+    requirements (different formats etc) and it's the natural responsibility of the ESB to take care of these differing integration
+    requirements.  Things can get even more complex if the source message does not contain all the information required by the
+    interested parties.
+    <p/>
+    JBossESB features tools that support solving these issues in a declaritive manner i.e. typically, there's no need to write reams of code.
+    The ability to parse, split transform and route message fragments is very powerful.  These capabilities are also key to solving another
+    message processing related usecase encountered in the Enterprise i.e. that of <b>processing huge messages (GBs)</b>.  JBossESB's abilty to perform
+    complex splitting operations on messages of different formats provides one solution to processing huge messages.
+    <p/>
+    This quickstart demonstrates these capabilities and walks you through the components involved.  The Quickstart is based on
+    a usecase where JBossESB is used to process Order messages (EDI format) from the local file system.
+    Each Order message contains order header information (orderId, date, customer userId etc), as well as a list of order items
+    (productId, quantity etc).  JBossESB is used to:
+    <ol>
+        <li>Split out and route order items whose "price" is less than "17.00" to the "02_Low_Price" Service.  The "02_Low_Price"
+            Service expects the order item data to:
+            <ol type="a">
+                <li>be in <b>XML format</b>,</li>
+                <li>contain order header data, as well as the order item data, and</li>
+                <li>contain additional customer and product data not provided in the source EDI message.</li>
+            </ol>
+        </li>
+        <li>Split out and route order items whose "price" is greater than "190.00" to the "03_High_Price" Service.  The "03_High_Price"
+            Service expects the order item data to:
+            <ol type="a">
+                <li>be in a populated <b>Java Object model</b>,</li>
+                <li>contain order header data, as well as the order item data, and</li>
+                <li>contain additional customer and product data not provided in the source EDI message.</li>
+            </ol>
+        </li>
+        <li>Split out and route order items whose "category" is "REPTILES" to the "04_Reptiles_notify_webservice_proxy" Service.  The "04_Reptiles_notify_webservice_proxy"
+            Service expects the order item data to:
+            <ol type="a">
+                <li>be in <b>SOAP format</b> complying with the ReptilesNotifyWS interface (to which the 04_Reptiles_notify_webservice_proxy
+                    routes the SOAP message using the HttpRouter),</li>
+                <li>contain order header data, as well as the order item data, and</li>
+                <li>contain additional customer and product data not provided in the source EDI message.</li>
+            </ol>
+        </li>
+        <li>Split out and route all order items to the <b>"Orders" table in the database</b> ("05_Database").</li>
+    </ol>
+    <p/>
+    See the <a href="http://milyn.codehaus.org/jbossesb/huge-split-route-qs/flash/huge-splitting-routing.html">Flash Demonstration of this Quickstart</a>.
+
+    <h3 id="main-points">Main Points of Note</h3>
+    The main points of note are:
+    <ul>
+        <li>The split messages don't just contain data from the order item in question, they also contain data
+            from the message header (orderId, date etc).  This means the split is <b>not just a dumb fragment extraction</b>.
+            Data from different fragments (header and order item) needs to be merged together into the new messages.</li>
+        <li>The routed messages need to be "<b>Enriched</b>" with additional customer and product data from the database.</li>
+        <li>The routed messages are in <b>different formats</b> - XML, Java, SOAP, JDBC.</li>
+        <li>Each order item may be sent to <b>multiple parties concurrently</b>.</li>
+        <li>Each order item is routed based on content (<b>Content Based Routing</b>).</li>
+    </ul>
+
+    <h3 id="illustration">Illustration</h3>
+    The Quickstart can be illustrated as follows:
+    <p/>
+    <a href="docs/Overview.png"><img src="docs/Overview.png" width="40%" height="40%" alt="Click to Enlarge..."/></a>
+    <p/>
+    See the <a href="http://milyn.codehaus.org/jbossesb/huge-split-route-qs/flash/huge-splitting-routing.html">Flash Demonstration of this Quickstart</a>.
+
+    <h3 id="running">Running the Quickstart</h3>
+    <ol>
+        <li>Open 6 command shell windows in the root folder of this quickstart.</li>
+        <li>In one of the command shell windows, start your JBoss ESB/Application Server instance.</li>
+        <li>In one of the command shell windows, type "ant deploy-jms-dests" to deploy the JMS Queues.</li>
+        <li>In one of the command shell windows, type "ant start-hsqldb-server".</li>
+        <li>In the remaining command shell windows, type the following commands in seperate windows:
+            <ul>
+                <li>"ant 01_split_enrich_transform_route"</li>
+                <li>"ant 02_Low_Price"</li>
+                <li>"ant 03_High_Price"</li>
+                <li>"ant 04_Reptiles_notify_webservice" (this just builds and deploys the Webservice)</li>
+            </ul>
+        </li>
+        <li>In the 6th command shell window, type "ant createMessage" to execute the message creation
+            script.  This script will generate an EDI message in the Service input folder.</li>
+    </ol>
+    <p/>
+    See the <a href="http://milyn.codehaus.org/jbossesb/huge-split-route-qs/flash/huge-splitting-routing.html">Flash Demonstration of this Quickstart</a>.
+
+    <h3 id="flash-demo">Flash Demonstration</h3>
+    See the <a href="http://milyn.codehaus.org/jbossesb/huge-split-route-qs/flash/huge-splitting-routing.html">Flash Demonstration of this Quickstart</a>.
+
+    <h3 id="how-it-works">How it Works</h3>
+    The main ESB components used in this quickstart (and how they depend on each other) are as follows:
+    <ul>
+        <li>FileGateway
+            <ul>
+                <li>FileStreamSplitter
+                    <ul>
+                        <li>Smooks
+                            <ul>
+                                <li>EdiParser</li>
+                                <li>FreeMarker</li>
+                                <li>FragmentRouter
+                                    <ul>ServiceInvoker</ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li>HttpRouter</li>
+    </ul>
+
+    <div class="indent">
+        <h4 id="high-level">High Level</h4>
+        As can be seen from the <a href="#illustration">illustration above</a>, this quickstart revolves around the
+        "01_split_enrich_transform_route" Service deployment.  This .esb deployment defines the "SplitterService"
+        and "04_Reptiles_notify_webservice_proxy" Services as follows:
+
+        <p/>
+        <pre>
+&lt;service category="HugeQS" name="SplitterService" description="Splits out the order items and routes them."&gt;
+    &lt;listeners&gt;
+        <span class="rhighlight">&lt;fs-listener name="FileGateway" busidref="ediFileMessageBus" is-gateway="true" poll-frequency-seconds="2"&gt;
+            &lt;property name="composer-class" value="org.jboss.soa.esb.smooks.splitting.FileStreamSplitter"/&gt;
+            &lt;property name="splitterConfig" value="/smooks_configs/main.xml"/&gt;
+            &lt;!-- property name="reportPath" value="/zap/report.html"/ --&gt;
+        &lt;/fs-listener&gt;</span>
+    &lt;/listeners&gt;
+    &lt;actions mep="OneWay"&gt;
+        &lt;action name="print" class="org.jboss.soa.esb.example.PrintMessage"&gt;
+            &lt;property name="delay" value="500" /&gt;
+        &lt;/action&gt;
+    &lt;/actions&gt;
+&lt;/service&gt;
+
+&lt;service category="HugeQS" name="04_Reptiles_notify_webservice_proxy" description="Routes the SOAP requests to the 'Reptiles Notification' Webservice"&gt;
+    &lt;actions mep="OneWay"&gt;
+        &lt;action name="httprouter" class="org.jboss.soa.esb.actions.routing.http.HttpRouter"&gt;
+            &lt;property name="endpointUrl" value="http://127.0.0.1:8080/Quickstart_Huge_Enrich_Split_Transform_Route/ReptilesNotifyWS" /&gt;
+            &lt;property name="method" value="POST" /&gt;
+            &lt;property name="responseType" value="STRING" /&gt;
+        &lt;/action&gt;
+    &lt;/actions&gt;
+&lt;/service&gt;</pre>
+        <p/>
+
+        The "SplitterService" is of most interest since this is the Service that performs the Splitting &amp; Routing of the Order Items contained in the
+        source EDI Order message.  The FileGateway is configured with the <code>FileStreamSplitter</code>, which is a specialised MessageComposer implementation.
+        The <code>FileStreamSplitter</code> uses <a href="http://milyn.codehaus.org">Smooks</a> to perform the Splitting &amp; Routing of the Order Items.
+        <a href="#splitting-routing">We will look at this in more detail later</a>.
+        <p/>
+        The "04_Reptiles_notify_webservice_proxy" Service is also interesting.  It acts as a Webservice proxy service to the "ReptilesNotifyWS" Webservice (<a href="#illustration">see illustration</a>),
+        using the <code>HttpRouter</code> to route SOAP payloads received from "SplitterService".
+        <p/>
+        The "SplitterService" Service also routes split Order Item messages to a number of other Services based on content (Content Based Routing).  The "02_Low_Price" and "03_High_Price"
+        Services are very simple and effectively the same.  The only difference is that the "02_Low_Price" Service receives low priced Order Items as XML, while the
+        "03_High_Price" Service receives high priced Order Items as Java Objects.  The configuration of the "02_Low_Price" Service is as follows:
+
+        <p/>
+        <pre>
+&lt;service category="HugeQS" name="02_Low_Price" description="02_Low_Price Service"&gt;
+    &lt;listeners&gt;
+        &lt;jms-listener name="XMLjms" busidref="02XMLBus" /&gt;
+    &lt;/listeners&gt;
+    &lt;actions mep="OneWay"&gt;
+        &lt;action name="print" class="org.jboss.soa.esb.example.PrintMessage" /&gt;
+    &lt;/actions&gt;
+&lt;/service&gt;</pre>
+        <p/>
+
+        As can be seen, this Service (and the "03_High_Price" Service) is very simple.  It just prints the ESB Message payload to the console.
+        <p/>
+        The "SplitterService" Service also routes split Order Item messages to the Database.  <a href="#splitting-routing">We will look at this in more detail later</a>.
+        <p/>
+        In all cases where the "SplitterService" Service routes split Order Item messages, the messages are enriched with additional Customer and Product data, which
+        it gets from the Database.
+
+        <h4 id="splitting-routing">Splitting &amp; Routing Details</h4>
+        The incomming EDI messages are in the following format:
+<pre>
+HDR*1213529618453*0*Wed Nov 15 13:45:28 EST 2006
+CUS*ACID
+ORD*0*4*AV-CB-01
+ORD*1*5*FL-DLH-02
+ORD*2*5*AV-CB-01
+... <i>(more ORD segments, 1 per Order Item)</i>...</pre>
+        The top level <a href="http://milyn.codehaus.org/Smooks">Smooks</a> configuration for Splitting &amp; Routing this message is:
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:edi="http://www.milyn.org/xsd/smooks/edi-1.1.xsd"&gt;
+
+    &lt;!--
+    Filter the message using the SAX Filter (i.e. not DOM, so no
+    intermediate DOM, so we can process huge messages...
+    --&gt;
+    &lt;params&gt;
+        &lt;param name="stream.filter.type"&gt;SAX&lt;/param&gt;
+    &lt;/params&gt;
+
+    &lt;!-- Configure the reader for the EDI message... --&gt;
+    &lt;edi:reader mappingModel="<a href="#edi-parsing">/smooks_configs/parse/edi-to-xml-order-mapping.xml</a>" /&gt;
+
+    &lt;!-- Import datasource configs... --&gt;
+    &lt;import file="<a href="#datasources">database/datasources.xml</a>" /&gt;
+
+    &lt;!-- Import reference/enrichment data configs - products, accounts etc... --&gt;
+    &lt;import file="<a href="#refdata">database/ref-data.xml</a>" /&gt;
+
+    &lt;!-- Import config for binding order and order-item data into memory... --&gt;
+    &lt;import file="<a href="#bindings">bindings.xml</a>" /&gt;
+
+    &lt;!-- Import config for routing order item XML to the "02_Low_Price" Service... --&gt;
+    &lt;import file="<a href="#routing-02_Low_Price">routing/route-to-02_Low_Price_Service.xml</a>" /&gt;
+
+    &lt;!-- Import config for routing order item Java Objects to the "03_High_Price" Service... --&gt;
+    &lt;import file="<a href="#routing-03_High_Price">routing/route-to-03_High_Price_Service.xml</a>" /&gt;
+
+    &lt;!-- Import config for routing order item Java Objects to the "04_Reptiles_notify_webservice_proxy" Service... --&gt;
+    &lt;import file="<a href="#routing-04_Reptiles_notify_webservice_proxy">routing/route-to-04_Reptiles_notify_webservice_proxy.xml</a>" /&gt;
+
+    &lt;!-- Import config for routing order items to the database... --&gt;
+    &lt;import file="<a href="#routing-05_Database">routing/route-to-05_Database.xml</a>" /&gt;
+
+&lt;/smooks-resource-list&gt;</pre>
+
+        Detailed explanations for each of the imported resource configuration files are hyperlinked.
+
+        <h5 id="edi-parsing">EDI Parsing</h5>
+        As its name suggests, the &lt;edi:reader&gt; configuration configures the reader for the Smooks instance.
+        
+<pre>
+&lt;!-- Configure the reader for the EDI message... --&gt;
+&lt;edi:reader mappingModel="<a href="#edi-parsing">/smooks_configs/parse/edi-to-xml-order-mapping.xml</a>" /&gt;</pre>
+
+        The "mappingModel" attribute defines the EDI to SAX Event mapping model configuration for the parser.  After
+        configuring this resource and turning on the Smooks Execution Report we can see the message event stream as produced
+        by the EDI Parser:
+        <p/>
+        <a href="docs/source-model.gif"><img src="docs/source-model.gif" width="40%" height="40%" alt="Click to Enlarge..."/></a>
+        <p/>
+
+        <h5 id="datasources">database/datasources.xml</h5>
+        This Quickstart interfaces to the database for a number of reasons:
+        <ol>
+            <li>Reading Customer and Product information not presented in the source EDI message.  This information is used to enrich
+            the split order item messages before routing.</li>
+            <li>Persisting Order Item details (Routing to the Database).</li>
+        </ol>
+        The "database/datasources.xml" Smooks resource configuration file defines the Datasource details for accessing the Database:
+<pre>
+&lt;smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                   xmlns:ds="http://www.milyn.org/xsd/smooks/datasource-1.1.xsd"&gt;
+
+    &lt;!--
+        Configure the "OrderManagement" DB access datasource...
+    --&gt;
+    &lt;ds:direct bindOnElement="$document" datasource="OrderManagement" autoCommit="false"
+               driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:9002"
+               username="sa" password="" /&gt;
+
+&lt;/smooks-resource-list&gt;</pre>
+
+        This Datasource is bound to the Smooks ExecutionContext at the start of message processing (bindOnElement="$document" - selects the message root/document event as the lifecycle event).
+        Any JDBC Connection created for the ExecutionContext is committed/rolledback and cleaned up at the end of the message processing (bindOnElement="$document").  The <b>HtmlReportGenerator</b>
+        (Smooks Execution Report Generator) is very useful for visualising this e.g. The "visitBefore" event shows the binding of the Datasource to the ExecutionContext:
+        <p/>
+        <a href="docs/datasource-vbefore.gif"><img src="docs/datasource-vbefore.gif" width="40%" height="40%" alt="Click to Enlarge..."/></a>
+        <p/>
+        And the "visitAfter" event shows the cleanup:
+        <p/>
+        <a href="docs/datasource-vafter.gif"><img src="docs/datasource-vafter.gif" width="40%" height="40%" alt="Click to Enlarge..."/></a>
+        <p/>
+
+        <h5 id="refdata">database/ref-data.xml</h5>
+        The "database/ref-data.xml" resource file configures resource for reading reference/enhancement data from the
+        Database.  Each resource is commented inline:
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                   xmlns:db="http://www.milyn.org/xsd/smooks/db-routing-1.1.xsd"&gt;
+
+    &lt;!--
+        The "OrderManagement" datasource is configured in the <a href="#datasources">database/datasources.xml</a> config file.
+    --&gt;
+
+    &lt;!--
+        At the start of the message, select the list of products and bind it into the bean context
+        under the beanId of "products".  We only want to do this lookup once Smooks instance i.e. not for
+        every message, otherwise we'd kill memory performance.  To control this, we set the "resultSetScope"
+        param to "APPLICATION".  The actual order item product row will be selected from the resultset by
+        the ResultsetRowSelector config (below)...
+    --&gt;
+    &lt;db:executor executeOnElement="$document" datasource="OrderManagement" executeBefore="true"&gt;
+        &lt;db:statement&gt;select productid, name, attr1, listprice, category from product p, item i where p.productid = i.productid&lt;/db:statement&gt;
+        &lt;db:resultSet name="products" scope="APPLICATION" /&gt;
+    &lt;/db:executor&gt;
+
+    &lt;!--
+        For every order-item, select the appropriate product row from the in-mem "products" reference data
+        resultset, using the ResultsetRowSelector. Bind the selected product row back into the
+        bean context under a beanId of "product"...
+    --&gt;
+    &lt;db:resultSetRowSelector selectRowOnElement="order-item/product-id" resultSetName="products" beanId="product" executeBefore="false"&gt;
+        &lt;db:where&gt;row.PRODUCTID == orderItem.productId&lt;/db:where&gt;
+        &lt;db:failedSelectError&gt;Unknown Order Item product ID '${orderItem.productId}' on order '${orderDetail.orderNum?c}'.&lt;/db:failedSelectError&gt;
+    &lt;/db:resultSetRowSelector&gt;
+
+    &lt;!--
+        At the end of the customer-details/username, select the user account and bind it into the bean context
+        under the beanId of "accounts".  The users account should be the only entry in this list....
+    --&gt;
+    &lt;db:executor executeOnElement="customer-details" datasource="OrderManagement"&gt;
+        &lt;db:statement&gt;select * from ACCOUNT where userid = ${orderDetail.uname}&lt;/db:statement&gt;
+        &lt;db:resultSet name="accounts" /&gt;
+    &lt;/db:executor&gt;
+
+&lt;/smooks-resource-list&gt;</pre>
+        The data read from the Database by the above resources is bound into the bean context and so is available
+        to other resources executing under the same ExecutionContext e.g. templating resources, BeanPopulator
+        resources etc.  The full Products list Resultset is available under the beanId "<b>products</b>", with the
+        product for the current Order Item being processed being available under the beanId "<b>product</b>" (see the
+        &lt;db:resultSetRowSelector&gt; resource above).  The customer account info for the message being processed under the
+        ExecutionContext is captured and made available under the beanId of "<b>accounts</b>".  We don't select the
+        customer account row from the Resultset (using the &lt;db:resultSetRowSelector&gt; - as done with the products Resultset).
+        It would be a good idea to add this &lt;db:resultSetRowSelector&gt; because we could then configure a "&lt;db:failedSelectError&gt;".
+        It would also mean that the expressions used in other resources to reference the account info (e.g. in templates) wouldn't
+        contain the Resultset row indexing characters i.e. "accounts[0]".  Instead, we would reference the account
+        info using "account" based expressions, which is possibly a little clearer.
+
+        <h5 id="bindings">bindings.xml</h5>
+        At the heart of nearly all Smooks based message processing is the concept of "binding" data from the Source
+        message event stream into memory (into the bean context).  Once the data is bound into memory in a Physical or
+        Virtual Object Model, it can be used by other Smooks resources such as:
+        <ul>
+            <li>Templating resources (FreeMarker, XSLT, StringTemplate),</li>
+            <li>BeanPopulator resources (Expression Based Bindings),</li>
+            <li>Routing resources (Database, File, JMS),</li>
+            <li>Resource &lt;condition&gt; expressions,</li>
+            <li>Custom Smooks Visitor implementations</li>
+            <li>etc, etc, etc...</li>
+        </ul>
+
+        The populated Object Model may itself be the Result output by the Smooks.filter operation.  Basically, the
+        data binding functionality provided by the Javabean Cartridge is a very fundamental part of practically
+        all Smooks based filtering operations.  Without it, you are quite limited in what you can do.
+        <p/>
+        The "bindings.xml" resource defines the core bindings used in this quickstart.  It extracts the Order header
+        and Order Item data from the message event stream and binds it into a Virtual Object Model (i.e. a HashMap):
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.1.xsd"&gt;
+
+    &lt;!--
+        Virtual Model Binding Configurations for the order message elements...
+
+        Just capturing the order and order-item element details into 2
+        Maps, overwriting each order-item as we iterate through the message i.e. not
+        accumulating them in memory =&gt; low memory footprint because we only
+        have details of the current order + current order-item in memory
+        at any given time (i.e. we never have a full order in memory)...
+    --&gt;
+
+    &lt;!--
+        Bind the main order details....
+    --&gt;
+    &lt;jb:bindings beanId="orderDetail" class="java.util.HashMap" createOnElement="order"&gt;
+        &lt;jb:value property="orderNum" data="header/order-id"     decoder="Long" /&gt;
+        &lt;jb:value property="uname"    data="customer-details/username" /&gt;
+        &lt;jb:value property="date"     data="header/date"         decoder="Date"&gt;
+            &lt;jb:decodeParam name="format"&gt;EEE MMM dd HH:mm:ss z yyyy&lt;/jb:decodeParam&gt;
+        &lt;/jb:value&gt;
+    &lt;/jb:bindings&gt;
+
+    &lt;!--
+        Bind each order-item.  Not building a list of order items because we only want to have
+        one order-item in memory at any one time.  This way, we can handle a huge orders with many
+        many order items..
+    --&gt;
+    &lt;jb:bindings beanId="orderItem" class="java.util.HashMap" createOnElement="order-item"&gt;
+        &lt;jb:value property="position"  data="order-item/position" decoder="Integer" /&gt;
+        &lt;jb:value property="quantity"  data="order-item/quantity" decoder="Integer" /&gt;
+        &lt;jb:value property="productId" data="order-item/product-id" /&gt;
+    &lt;/jb:bindings&gt;
+
+&lt;/smooks-resource-list&gt;</pre>
+
+        Once this data is bound into the bean context (under the beanIds of "orderDetail" and "orderItem"),
+        it is available to all other resources executing under the same Smooks ExecutionContext.  The key to
+        processing huge messages is the fact that we can keep the memory footprint associated with the
+        ExecutionContext to a minimum.  We do this by only maintaining the current Order Item in memory at
+        at any one time i.e. we don't accumulate a list of the Order Items.  This also means that
+        we need to be able to use the Order Item data (for splitting, routing etc) while we have it in
+        memory and before we throw it away in place of the next Order Item in the message event stream.
+        In other words, we can't wait for the whole message to be processed before processing the Order Item data;
+        everything is done while we are processing the message event stream i.e. binding, templating/transforming,
+        routing etc.  We do this by targeting these other resources at the same events in the message event stream
+        i.e. the &lt;order-item&gt; events.
+        <p/>
+        This is the most difficult part of Smooks to get your head around i.e. the idea that multiple things are
+        conceptually happening in parallel.  On the other side, this is where the power of Smooks lies.  For this
+        reason, Smooks provides a HtmlReportGenerator class to help you visualise Smooks processes.  It generates
+        a Smooks Execution Report and is the nearest thing to a debugging tool that Smooks currently has.  See
+        the Smooks User Guide for details.
+
+        <h5 id="routing-02_Low_Price">routing/route-to-02_Low_Price_Service.xml</h5>
+        This resource configuration file defines the routing resources for the "02_Low_Price"
+        Service:
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                     xmlns:ftl="http://www.milyn.org/xsd/smooks/freemarker-1.1.xsd"
+                     xmlns:esbr="http://www.jboss.org/xsd/jbossesb/smooks/routing-1.0.xsd"&gt;
+
+    &lt;!--
+        At the end of every order-item, route the order item XML ("02_XML_OrderItem") to the
+        "02_Low_Price" Service, if the total is 20 or less...
+    --&gt;
+    &lt;esbr:routeBean beanIdRef="02_XML_OrderItem" toServiceCategory="HugeQS" toServiceName="02_Low_Price" routeOnElement="order-item"&gt;
+        &lt;condition&gt;
+            &lt;!--<i class="commentedcode">
+            product.LISTPRICE * orderItem.quantity &lt;= 17.00
+            </i>--&gt;
+        &lt;/condition&gt;
+    &lt;/esbr:routeBean&gt;
+
+    &lt;!--
+        At the end of every order-item, generate an &lt;ord&gt; split message for the "02_XML" Service
+        and bind it back into the bean context under a bean ID of "02_XML_OrderItem".  02_XML_OrderItem
+        will be router by the FragmentRouter (configured above)..
+     --&gt;
+    &lt;ftl:freemarker applyOnElement="order-item"&gt;
+        &lt;ftl:template&gt;&lt;!--<i class="commentedcode">&lt;ord id="${orderDetail.orderNum?c}" date="${orderDetail.date?string("yyyy-MM-dd")}"&gt;
+    &lt;customer&gt;
+        &lt;name&gt;${accounts[0].LASTNAME}, ${accounts[0].FIRSTNAME}&lt;/name&gt;
+        &lt;addr1&gt;${accounts[0].ADDR1}&lt;/addr1&gt;
+        &lt;addr2&gt;${accounts[0].ADDR2}&lt;/addr2&gt;
+        &lt;city&gt;${accounts[0].CITY}&lt;/city&gt;
+        &lt;state&gt;${accounts[0].STATE}&lt;/state&gt;
+        &lt;zip&gt;${accounts[0].ZIP}&lt;/zip&gt;
+    &lt;/customer&gt;
+    &lt;productid&gt;${orderItem.productId}&lt;/productid&gt;
+    &lt;quantity&gt;${orderItem.quantity?c}&lt;/quantity&gt;
+    &lt;price&gt;${product.LISTPRICE?c}&lt;/price&gt;
+    &lt;title&gt;${product.NAME} (${product.ATTR1})&lt;/title&gt;
+&lt;/ord&gt;</i>--&gt;&lt;/ftl:template&gt;
+        &lt;ftl:use&gt;
+                &lt;ftl:bindTo id="<span style="color: crimson;">02_XML_OrderItem</span>" /&gt;
+        &lt;/ftl:use&gt;
+    &lt;/ftl:freemarker&gt;
+
+&lt;/smooks-resource-list&gt;
+</pre>
+    So the first resource listed in this configuration simply routes the XML data (generated by the second resource)
+    to the "02_Low_Price" Service.  The resource is only applied if the specified condition is met. The second resource
+    generates the XML message to be routed by applying a FreeMarker template to the data in the bean context.  As can be
+    seen above, the template sucks in Customer and Product data bound to the bean context <a href="#refdata">from the
+    database ("accounts[0]" and "product")</a>, as well as data bound into the bean context <a href="#bindings">from the
+    source message itself ("orderDetail" and "orderItem")</a>.
+    <p/>
+    Both of these resource fire on the visitAfter event of the &lt;order-item&gt;
+    element.  The order in which they fire depends on the order in which they appear in the resource configs, with the
+    visitBefore events firing "first-to-last" and the visitAfter events firing "last-to-first".  This is why the templating
+    resource is positioned after the routing resource i.e. because we want it's visitAfter to be applied before the
+    FragmentRouter visitAfter (uses the ServiceInvoker to route the messages).  This all seems a bit complex, but is
+    actually intuitive enough if you use the Smooks Execution Report during development because you can see the resources
+    and the order in which they are being applied.
+    <p/>
+    The following illustration shows the resources applied on the visitAfter event for the &lt;order-item&gt; element.
+    It shows the FreeMarker template resource being applied before the <code>FragmentRouter</code> resource.
+    <p/>
+    <a href="docs/02_Low_Price.gif"><img src="docs/02_Low_Price.gif" width="40%" height="40%" alt="Click to Enlarge..." /></a>
+    <p/>
+
+    <h5 id="routing-03_High_Price">routing/route-to-03_High_Price_Service.xml</h5>
+    This resource configuration file defines the routing resources for the "03_High_Price"
+    Service:
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.1.xsd"
+                      xmlns:esbr="http://www.jboss.org/xsd/jbossesb/smooks/routing-1.0.xsd"&gt;
+    &lt;!--
+        At the end of every order-item, route the order item Java Objects ("03_order") to the
+        "03_High_Price" Service, if the price per item is 190 or more...
+    --&gt;
+    &lt;esbr:routeBean beanIdRef="03_order" toServiceCategory="HugeQS" toServiceName="03_High_Price" routeOnElement="order-item"&gt;
+        &lt;condition&gt;
+            &lt;!--<i class="commentedcode">
+            product.LISTPRICE &gt; 190.00
+            </i>--&gt;
+        &lt;/condition&gt;
+    &lt;/esbr:routeBean&gt;
+
+    &lt;!--
+        At the end of every order-item, bind together the orderDetail with the current
+        order item in a new HashMap and asign it under the beanId "03_order" in the bean
+        context.  The data is pulled into the "highprice" Java object model using java
+        binding configs that pull the data from the bean context, which contains data from
+        the database, as well as data bound in for the input message.  We use MVEL
+        expressions to access this info (expression bindings).
+
+        03_order gets routed by the above config..
+    --&gt;
+    &lt;jb:bindings beanId="<span style="color: crimson;">03_order</span>" class="org.jboss.soa.esb.example.highprice.Order" createOnElement="order-item"&gt;
+        &lt;jb:wiring property="address" beanIdRef="03_address" /&gt;
+        &lt;jb:wiring property="product" beanIdRef="03_product" /&gt;
+        &lt;jb:expression property="firstName"&gt;accounts[0].FIRSTNAME&lt;/jb:expression&gt;
+        &lt;jb:expression property="lastName"&gt;accounts[0].LASTNAME&lt;/jb:expression&gt;
+        &lt;jb:expression property="date"&gt;orderDetail.date&lt;/jb:expression&gt;
+        &lt;jb:expression property="quantity"&gt;orderItem.quantity&lt;/jb:expression&gt;
+    &lt;/jb:bindings&gt;
+
+    &lt;jb:bindings beanId="03_address" class="org.jboss.soa.esb.example.highprice.Address" createOnElement="order-item"&gt;
+        &lt;jb:expression property="email"&gt;accounts[0].EMAIL&lt;/jb:expression&gt;
+        &lt;jb:expression property="address1"&gt;accounts[0].ADDR1&lt;/jb:expression&gt;
+        &lt;jb:expression property="address2"&gt;accounts[0].ADDR2&lt;/jb:expression&gt;
+        &lt;jb:expression property="city"&gt;accounts[0].CITY&lt;/jb:expression&gt;
+        &lt;jb:expression property="state"&gt;accounts[0].STATE&lt;/jb:expression&gt;
+    &lt;/jb:bindings&gt;
+
+    &lt;jb:bindings beanId="03_product" class="org.jboss.soa.esb.example.highprice.Product" createOnElement="order-item"&gt;
+        &lt;jb:expression property="id"&gt;product.PRODUCTID&lt;/jb:expression&gt;
+        &lt;jb:expression property="title"&gt;product.NAME&lt;/jb:expression&gt;
+        &lt;jb:expression property="category"&gt;product.CATEGORY&lt;/jb:expression&gt;
+        &lt;jb:expression property="price"&gt;product.LISTPRICE&lt;/jb:expression&gt;
+    &lt;/jb:bindings&gt;
+
+&lt;/smooks-resource-list&gt;</pre>
+
+    The first resource specifies the <code>FragmentRouter</code> resource for routing the contents of the "03_order" bean to
+    the "03_High_Price" Service, where the product price is greater than 190.00.  The other resources specify the <code>BeanPopulator</code>
+    resources required for creating and populating the the "03_order" bean Object Model.
+    <p/>
+    This configuration differs from the <a href="#routing-02_Low_Price">routing/route-to-02_Low_Price_Service.xml</a> configuration
+    in that this configuration is routing a Java Object Model as opposed to an XML blob.  Also, the binding configurations defined
+    in this configuration are different to those defined in the <a href="#bindings">bindings.xml</a> configuration because:
+    <ol>
+        <li>The data is being bound to a "Physical Object Model" Vs a "Virtual Object Model" i.e.
+            <a href="03_High_Price/src/org/jboss/soa/esb/example/highprice/Order.java">the Order class</a> Vs a simple HashMap.</li>
+        <li>They are "Expression Based Bindings" i.e. the values being bound into the Object Model are coming from expression evaluations defined
+            as the child text of the &lt;binding&gt; elements.  The bindings defined in <a href="#bindings">bindings.xml</a> are pulling
+            their values from the source message.  In the case of the expressions defined in this configuration, they are selecting  values from
+            the bean context.  The values being selected were bound to the context by the <a href="#refdata">database/ref-data.xml</a>
+            resources.</li>
+    </ol>
+
+    <h5 id="routing-04_Reptiles_notify_webservice_proxy">routing/route-to-04_Reptiles_notify_webservice_proxy.xml</h5>
+    This resource configuration file defines the routing resources for the "04_Reptiles_notify_webservice_proxy"
+    Service where the product category is "REPTILES":
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                     xmlns:ftl="http://www.milyn.org/xsd/smooks/freemarker-1.1.xsd"
+                     xmlns:esbr="http://www.jboss.org/xsd/jbossesb/smooks/routing-1.0.xsd"&gt;
+
+    &lt;!--
+        At the end of every order-item, route the "Reptiles Notification" SOAP message ("04_SOAP_OrderItem") to the
+        "04_Reptiles_notify_webservice_proxy" Service, if the order item product.CATEGORY is "REPTILES"...
+    --&gt;
+    &lt;esbr:routeBean beanIdRef="04_SOAP_OrderItem" toServiceCategory="HugeQS" toServiceName="04_Reptiles_notify_webservice_proxy" routeOnElement="order-item"&gt;
+        &lt;condition&gt;
+            &lt;!--
+            product.CATEGORY == "REPTILES"
+            --&gt;
+        &lt;/condition&gt;
+    &lt;/esbr:routeBean&gt;
+
+    &lt;!--
+        At the end of every order-item, generate an &lt;ord&gt; split message for the "02_XML" Service
+        and bind it back into the bean context under a bean ID of "02_XML_OrderItem"...
+     --&gt;
+    &lt;ftl:freemarker applyOnElement="order-item"&gt;
+        &lt;ftl:template&gt;&lt;!--<i class="commentedcode">&lt;soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ord="http://ordermanagement/ReptilesNotifyWS"&gt;
+   &lt;soapenv:Header/&gt;
+   &lt;soapenv:Body&gt;
+      &lt;ord:notify&gt;
+         &lt;notification&gt;
+            &lt;date&gt;${orderDetail.date?string("yyyy-MM-dd'T'HH:mm:ss")}&lt;/date&gt;
+            &lt;email&gt;${accounts[0].EMAIL}&lt;/email&gt;
+            &lt;firstName&gt;${accounts[0].FIRSTNAME}&lt;/firstName&gt;
+            &lt;lastName&gt;${accounts[0].LASTNAME}&lt;/lastName&gt;
+            &lt;product&gt;${product.NAME} (${product.ATTR1})&lt;/product&gt;
+            &lt;quantity&gt;${orderItem.quantity}&lt;/quantity&gt;
+            &lt;totalPrice&gt;${product.LISTPRICE?c}&lt;/totalPrice&gt;
+         &lt;/notification&gt;
+      &lt;/ord:notify&gt;
+   &lt;/soapenv:Body&gt;
+&lt;/soapenv:Envelope&gt;</i>--&gt;&lt;/ftl:template&gt;
+        &lt;ftl:use&gt;
+            &lt;ftl:bindTo id="<span style="color: crimson;">04_SOAP_OrderItem</span>" /&gt;
+        &lt;/ftl:use&gt;
+    &lt;/ftl:freemarker&gt;
+
+&lt;/smooks-resource-list&gt;</pre>
+
+    This routing configuration is nearly identical to that defined in <a href="#routing-02_Low_Price">routing/route-to-02_Low_Price_Service.xml</a>.
+    The only difference is the format of the XML, the destination Service and the condition under which the message is to be routed.
+    <p/>
+    As can be seen in the <a href="#high-level">04_Reptiles_notify_webservice_proxy Service configuration</a>, these SOAP messages are routed to the
+    ReptilesNotifyWS Webservice using the <code>HttpRouter</code>.
+
+    <h5 id="routing-05_Database">routing/route-to-05_Database.xml</h5>
+    This resource configuration file defines the routing resources for routing Order Item data to the Database:
+<pre>
+&lt;?xml version="1.0"?&gt;
+&lt;smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                   xmlns:db="http://www.milyn.org/xsd/smooks/db-routing-1.1.xsd"&gt;
+
+    &lt;!--
+        The "OrderManagement" datasource is configured in the database/datasources.xml config file.
+    --&gt;
+
+    &lt;!--
+        This resource is needed because we only want to limit the number or orders inserted into the database,
+        so we need to count them...
+    --&gt;
+    &lt;db:executor executeOnElement="order-item" datasource="OrderManagement" executeBefore="true"&gt;
+        &lt;db:statement&gt;<i class="commentedcode">select count(*) as "numOrders" from orders</i>&lt;/db:statement&gt;
+        &lt;db:resultSet name="<span style="color: crimson;">orderCountRS</span>" /&gt;
+    &lt;/db:executor&gt;
+
+    &lt;!--
+        At the end of every order-item, insert the order details for that order item...
+     --&gt;
+    &lt;db:executor executeOnElement="order-item" datasource="OrderManagement" executeBefore="false"&gt;
+        &lt;condition&gt;
+            &lt;!--
+            <span style="color: crimson;">orderCountRS</span>[0].numOrders &lt; 10
+            --&gt;
+        &lt;/condition&gt;
+        &lt;db:statement&gt;<i class="commentedcode">INSERT INTO ORDERS VALUES(${orderDetail.orderNum + "-" + product.PRODUCTID}, ${accounts[0].USERID}, ${orderDetail.date}, ${accounts[0].ADDR1}, ${accounts[0].ADDR2}, ${accounts[0].CITY}, ${accounts[0].STATE},'30253','USA', ${accounts[0].ADDR1}, ${accounts[0].ADDR2}, ${accounts[0].CITY}, ${accounts[0].STATE},'30253','USA','UPS',22.23, ${accounts[0].FIRSTNAME}, ${accounts[0].LASTNAME}, ${accounts[0].FIRSTNAME}, ${accounts[0].LASTNAME},'999 9999 9999 9999','12/03','Visa','CA')</i>&lt;/db:statement&gt;
+    &lt;/db:executor&gt;
+
+&lt;/smooks-resource-list&gt;</pre>    
+
+    The first resource simply queries the Orders table in the database to get a row count.  It binds the result to the bean context
+    under the resultSetName (beanId) of "orderCountRS".  This row count is then used as the condition on the second <code>SQLExecutor</code> resource,
+    which performs the inserts on the orders table. 
+
+    </div>
+</div>
+
+</body>
+</html>

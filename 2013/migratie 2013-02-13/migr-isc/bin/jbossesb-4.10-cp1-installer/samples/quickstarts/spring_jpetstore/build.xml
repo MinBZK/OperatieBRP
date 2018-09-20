@@ -1,0 +1,51 @@
+<project name="spring_jpetstore" default="runtest" basedir=".">
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+        <property name="additional.deploys" value="applicationContext.xml dataAccessContext-local.xml jdbc.properties sql-map-config.xml"/>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml" />
+
+	<property name="spring.lib.dir" value="./lib" />
+	<property name="spring.xml.dir" value="./xml" />
+	
+	<target name="quickstart-specific-dependencies">
+		<path id="quickstart-dependencies-classpath">
+			<fileset dir="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/lib" includes="hsqldb.jar"/>
+		</path>
+	</target>
+
+	<target name="runtest" depends="compile" description="sends a JMS message to the ESB">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.spring_jpetstore.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="./sample-order.xml" />
+			<classpath refid="exec-classpath" />
+		</java>
+	</target>
+
+	<target name="quickstart-specific-clean">
+		<delete file="${basedir}/hsqldb/jpetstore.log"/>
+		<delete file="${basedir}/hsqldb/jpetstore.properties"/>
+	</target>
+
+	<target name="start-hsqldb-server" depends="classpath-dependencies-as4, classpath-dependencies-as5">
+		<java classname="org.hsqldb.Server" dir="hsqldb" fork="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="-database" />
+			<arg value="jpetstore" />
+			<classpath refid="exec-classpath" />
+		</java>
+	</target>
+
+	<target name="start-hsqldb-manager" depends="classpath-dependencies-as4, classpath-dependencies-as5">
+		<java classname="org.hsqldb.util.DatabaseManager" dir="hsqldb" fork="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<classpath refid="exec-classpath" />
+		</java>
+	</target>
+
+</project>

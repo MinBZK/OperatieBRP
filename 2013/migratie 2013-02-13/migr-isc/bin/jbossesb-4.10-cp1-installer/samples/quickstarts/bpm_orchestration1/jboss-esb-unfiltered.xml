@@ -1,0 +1,130 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>        
+         <fs-provider name="FSprovider1">
+          	<fs-bus busid="startGwChannel" >
+          		<fs-message-filter
+          			directory="@INPUT_DIR@"
+          			input-suffix=".startProcessGW"
+          			work-suffix=".startProcessGWWorking"
+          			post-delete="true"
+          			error-delete="true"
+          		/>
+          	</fs-bus>   
+          	<fs-bus busid="startEsbChannel" >
+          		<fs-message-filter
+          			directory="@INPUT_DIR@"
+          			input-suffix=".startProcessESB"          			
+          			post-delete="true"
+          			error-delete="true"
+          		/>
+          	</fs-bus>
+         </fs-provider>
+         <jms-provider name="JMSProvider" connection-factory="ConnectionFactory">
+            <jms-bus busid="service1EsbChannel" >
+               <jms-message-filter dest-type="QUEUE"
+                  dest-name="queue/quickstart_bpm_orchestration1_service1_Request_esb"/>
+            </jms-bus>   
+            <jms-bus busid="service2EsbChannel" >
+               <jms-message-filter dest-type="QUEUE"
+                  dest-name="queue/quickstart_bpm_orchestration1_service2_Request_esb"/>
+            </jms-bus> 
+            <jms-bus busid="service3EsbChannel" >
+               <jms-message-filter dest-type="QUEUE"
+                  dest-name="queue/quickstart_bpm_orchestration1_service3_Request_esb"/>
+            </jms-bus>    
+            <jms-bus busid="resultsService" >
+               <jms-message-filter dest-type="QUEUE"
+                  dest-name="queue/quickstart_bpm_orchestration1_results_Request_esb"/>
+            </jms-bus>       	          	        	   	
+         </jms-provider>
+      </providers>
+
+      <services>
+        
+        <service category="BPM_Orchestration_Starter_Service" name="Starter_Service"
+                 description="BPM Orchestration Sample 1: Use this service to start a process instance">
+            <listeners>
+                <fs-listener name="Gateway" busidref="startGwChannel"
+                    is-gateway="true">
+                    <property name="composer-class" value="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration1.composer.GatewayMessageComposer"/>
+                </fs-listener>
+                <fs-listener name="ESB-Listener" busidref="startEsbChannel"/>
+            </listeners>
+            <actions mep="OneWay">
+                <action name="spy1" 
+                    class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration1.esb_actions.MessageSpy"/>
+		        <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+                <!-- move the body.getContents() into jBPM -->    
+                <action name="create_new_process_instance" 
+                    class="org.jboss.soa.esb.services.jbpm.actions.BpmProcessor">
+                    <property name="command" value="StartProcessInstanceCommand" />
+                    <property name="process-definition-name" value="processDefinition2"/>   
+                    <property name="actor" value="FrankSinatra"/>                                                 
+                    <property name="esbToBpmVars">
+                      <!-- esb-name maps to getBody().get("eVar1") -->
+                        <mapping esb="eVar1" bpm="counter" value="45" />
+                        <mapping esb="BODY_CONTENT" bpm="theBody" />
+                    </property>             
+                 </action>
+
+                <action name="processInfo"
+                  class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration1.esb_actions.ProcessInfo"/>
+                 <action name="spy2"
+                   class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration1.esb_actions.MessageSpy"/>
+
+              </actions>
+        </service>
+        
+        <service category="BPM_Orchestration_Service1" name="Service1"
+                 description="BPM Orchestration Sample 1: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service1EsbChannel"/>
+            </listeners>
+            <actions>
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service1.groovy" />
+                </action>                                
+            </actions>
+        </service>
+        <service category="BPM_Orchestration_Service2" name="Service2"
+                 description="BPM Orchestration Sample 1: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service2EsbChannel"/>
+            </listeners>
+            <actions>
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service2.groovy" />
+                </action>  
+		<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>              
+            </actions>
+        </service>
+        <service category="BPM_Orchestration_Service3" name="Service3"
+                 description="BPM Orchestration Sample 1: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service3EsbChannel"/>
+            </listeners>
+            <actions>
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service3.groovy" />
+                </action>
+		<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+        <service category="BPM_Orchestration_ResultsService" name="ResultsService"
+                 description="BPM Orchestration Sample 1: Sends outbound results of the process flow">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="resultsService"/>
+            </listeners>
+            <actions>
+                <action name="spy" 
+                    class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration1.esb_actions.MessageSpy"/>
+		<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+      </services>
+</jbossesb>

@@ -1,0 +1,45 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+		<jms-provider name="JBossMQ"
+			connection-factory="ConnectionFactory">
+			<jms-bus busid="quickstartGwChannel">
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_edi_groovy_xslt_gw" />
+			</jms-bus>
+			<jms-bus busid="quickstartEsbChannel">
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_edi_groovy_xslt_esb" />
+			</jms-bus>
+
+		</jms-provider>
+	</providers>
+
+	<services>
+
+		<service category="FirstServiceESB" name="SimpleListener"
+			description="Hello World">
+			<listeners>
+				<jms-listener name="JMS-Gateway" busidref="quickstartGwChannel" is-gateway="true"/>
+				<jms-listener name="quickstart" busidref="quickstartEsbChannel"/>
+			</listeners>
+			<actions mep="OneWay">
+				<action name="print-before" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="[transform_EDI2XML_Groovy_XSLT] Message before transformation" />
+				</action>
+				<action name="transform" class="org.jboss.soa.esb.smooks.SmooksAction">
+                    <property name="smooksConfig" value="/smooks-res.xml" />
+                    <!-- property name="reportPath" value="/zap/smooks-report.html" / -->
+				</action>
+				<action name="print-after" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="[transform_EDI2XML_Groovy_XSLT] Message after transformation" />
+				</action>
+                                <!-- The next action is for Continuous Integration testing -->
+				<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+			</actions>
+		</service>
+	</services>
+
+</jbossesb>

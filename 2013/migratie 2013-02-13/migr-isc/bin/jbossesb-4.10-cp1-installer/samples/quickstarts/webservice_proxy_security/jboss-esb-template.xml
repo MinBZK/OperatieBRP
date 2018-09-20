@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    parameterReloadSecs="5">
+
+	<globals>
+		<!-- Security setting for all http-providers and all EBWSs in this jboss-esb.xml file.-->
+		<war-security method="BASIC" domain="JBossWS" /> <!-- uname: "kermit" pw: "thefrog" -->
+	</globals>
+
+	<providers>
+		<http-provider name="HTTP-PROVIDER">
+			<http-bus busid="HTTP-BUS" transportGuarantee="CONFIDENTIAL">
+				<allowed-roles>
+					<role name="friend" />
+				</allowed-roles>
+			</http-bus>
+		</http-provider>
+	</providers>
+
+	<services>
+		<service category="Proxy_Security" name="Proxy"
+				 description="Security WebService Proxy"
+				 invmScope="GLOBAL">
+			<listeners>
+				<http-gateway name="HTTP-GATEWAY" busidref="HTTP-BUS" urlPattern="ProxyWS/*" />
+			</listeners>
+			<actions mep="RequestResponse">
+				<action name="echo-request"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message before SOAPProxy" />
+				</action>
+				<action name="proxy"
+						class="org.jboss.soa.esb.actions.soap.proxy.SOAPProxy">
+						<property name="wsdl" value="internal://jboss.ws:context=webservice_proxy_security,endpoint=HelloWorldWS"/>
+						<property name="endpointUrl" value="https://localhost:8443/webservice_proxy_security/HelloWorldWS"/>
+						<property name="file" value="/META-INF/httpclient-8443.properties"/>
+				</action>
+				<action name="echo-response"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message after SOAPProxy" />
+				</action>
+			</actions>
+		</service>
+	</services>
+
+</jbossesb>

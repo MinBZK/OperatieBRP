@@ -1,0 +1,93 @@
+<project name="Quickstart_webservice_producer" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+			
+	<property name="quickstart.classes.excludes" value="**/webserviceproducer/webservice/*"/>
+	<property name="quickstart.deployment.excludes" value="${ant.project.name}.war ${ant.project.name}_alternate.war"/>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+    <target name="quickstart-specific-checks" depends="assert-ws-available"/>
+
+    <target name="quickstart-specific-dependencies">
+        <path id="quickstart-dependencies-classpath">
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jbossws-client.jar,jboss-remoting.jar" />
+        </path>
+    </target>
+
+    <target name="quickstart-specific-assemblies">
+        <!-- Overriden from the target of the same name in base-build.xml. -->
+        <!-- Called by the "deploy" target.  Don't call directly!! -->
+        <!-- Build the webservice... -->
+        <war warfile="build/${ant.project.name}.war"
+             webxml="${basedir}/war/resources/WEB-INF/web.xml">
+			<webinf dir="${basedir}/war/resources/WEB-INF">
+                <include name="jboss-web.xml"/>
+            </webinf>
+            <classes dir="${build.dir}/classes">
+                <include name="**/webserviceproducer/webservice/GoodbyeWorldWS.class"/>
+            </classes>
+        </war>
+
+        <!-- Build the webservice... -->
+        <war warfile="build/${ant.project.name}_alternate.war"
+             webxml="${basedir}/war/resources-alternate/WEB-INF/web.xml">
+			<webinf dir="${basedir}/war/resources-alternate/WEB-INF">
+                <include name="jboss-web.xml"/>
+            </webinf>
+            <classes dir="${build.dir}/classes">
+                <include name="**/webserviceproducer/webservice/HelloWorldWS.class"/>
+            </classes>
+        </war>
+    </target>
+
+    <target name="quickstart-specific-deploys">
+        <copy todir="${org.jboss.esb.server.deploy.dir}" file="${build.dir}/${ant.project.name}.war"/>
+        <copy todir="${org.jboss.esb.server.deploy.dir}" file="${build.dir}/${ant.project.name}_alternate.war"/>
+    </target>
+
+    <target name="quickstart-specific-undeploys">
+        <delete verbose="true" quiet="true" file="${org.jboss.esb.server.deploy.dir}/${ant.project.name}.war"/>
+        <delete verbose="true" quiet="true" file="${org.jboss.esb.server.deploy.dir}/${ant.project.name}_alternate.war"/>
+    </target>
+
+    <target name="runtest" depends="compile" description="run tests over jms, http, and socket">
+        <antcall target="saygoodbye_over_jms" />
+        <antcall target="saygoodbye_over_http" />
+        <antcall target="saygoodbye_over_socket" />
+    </target>
+
+    <target name="saygoodbye_over_jms" depends="compile">
+        <echo>Invoking a JBossWS Endpoint over JMS (via JBoss ESB).</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.webserviceproducer.test.SendMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="jms" />
+            <classpath refid="exec-classpath" />
+        </java>
+    </target>
+
+    <target name="saygoodbye_over_http" depends="compile">
+        <echo>Invoking a JBossWS Endpoint over HTTP (via JBoss ESB).</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.webserviceproducer.test.SendMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="http" />
+            <arg value="8765" />
+            <classpath refid="exec-classpath" />
+        </java>
+    </target>
+
+    <target name="saygoodbye_over_socket" depends="compile">
+        <echo>Invoking a JBossWS Endpoint over a raw socket connection (via JBoss ESB).</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.webserviceproducer.test.SendMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="socket" />
+            <arg value="8888" />
+            <classpath refid="exec-classpath" />
+        </java>
+    </target>
+
+</project>

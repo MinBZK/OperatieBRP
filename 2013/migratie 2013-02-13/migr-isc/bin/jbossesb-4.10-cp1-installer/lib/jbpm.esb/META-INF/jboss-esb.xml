@@ -1,0 +1,34 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd" parameterReloadSecs="5">
+     <!--  
+     		jbossesb internal services 
+     -->
+     <providers>
+     	  <!-- change the following element to jms-jca-provider to enable transactional context  -->
+          <jms-jca-provider name="CallbackQueue-JMS-Provider" connection-factory="ConnectionFactory">          
+              <jms-bus busid="jBPMCallbackBus">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/CallbackQueue"
+                  />
+              </jms-bus>
+          </jms-jca-provider>
+      </providers>
+      
+	<services>   
+		<service category="JBossESB-Internal"
+				name="JBpmCallbackService"
+				description="Service which makes Callbacks into jBPM">
+			<listeners>
+				<jms-listener name="JMS-DCQListener"
+							busidref="jBPMCallbackBus"
+							maxThreads="1"
+				/>
+			</listeners>
+			<actions mep="OneWay">
+				<action name="action" class="org.jboss.soa.esb.services.jbpm.actions.JBpmCallback"/>
+			</actions>
+		</service>
+	</services>
+		
+</jbossesb>

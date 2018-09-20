@@ -1,0 +1,79 @@
+<project name="Quickstart_webservice_proxy_routed" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<property name="additional.deploys" value="Proxy_Routed_Rules.drl wsbarrier-service.xml"/>
+
+	<!-- Import the base Ant build script... -->
+    <import file="../conf/base-build.xml"/>
+
+    <property name="war.build.dir" location="${build.dir}/war/classes"/>
+
+    <target name="quickstart-specific-checks" depends="assert-ws-available"/>
+
+    <target name="quickstart-specific-assemblies" depends="makewar"/>
+
+    <target name="quickstart-specific-predeploys">
+		<copy todir="${org.jboss.esb.server.deploy.dir}"
+			file="build/predeploy/${ant.project.name}_ws.war"/>
+		<!-- sleep seconds="3"/ -->
+	</target>
+
+    <target name="quickstart-specific-undeploys">
+		<delete file="${org.jboss.esb.server.deploy.dir}/${ant.project.name}_ws.war"/>
+	</target>
+
+    <target name="makewar" description="make war">
+        <!-- Compile... -->
+        <mkdir dir="${war.build.dir}" />
+        <javac srcdir="war/src" destdir="${war.build.dir}" debug="true">
+            <classpath refid="compile-classpath" />
+        </javac>
+
+        <!-- War... -->
+		<mkdir dir="build/predeploy"/>
+        <war warfile="build/predeploy/${ant.project.name}_ws.war"
+             webxml="${basedir}/war/resources/WEB-INF/web.xml">
+            <webinf dir="${basedir}/war/resources/WEB-INF">
+                <include name="jboss-web.xml"/>
+            </webinf>
+            <classes dir="${war.build.dir}" includes="**/*.class"/>
+            <fileset dir="${basedir}/war/view">
+                <include name="**/*"/>
+            </fileset>
+        </war>
+    </target>
+
+	<target name="run">
+		<echo>standalone mode is not available for this quickstart.</echo>
+    </target>
+
+	<target name="runinternal" depends="compile">
+	    <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.webservice_proxy_routed.test.SendWSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="${runtest.arg.url}"/>
+	    	<arg value="${user.name}"/>
+			<arg value="${runtest.arg.msg}"/>
+			<classpath refid="exec-classpath"/>
+	    </java>
+	 </target>  
+
+	<target name="runhello">
+		<echo>Calling hello JBossWS webservice via Http Gateway and SOAPProxy.</echo>
+		<property name="runtest.arg.url" value="http://localhost:8080/Quickstart_webservice_proxy_routed/http/Proxy_Routed/Proxy_CBR"/>
+		<property name="runtest.arg.msg" value="hello"/>
+		<antcall target="runinternal"/>
+	</target>
+	<target name="runtest" depends="runhello"/>
+
+	<target name="rungoodbye">
+		<echo>Calling goodbye JBossWS webservice via Http Gateway and SOAPProxy.</echo>
+		<property name="runtest.arg.url" value="http://localhost:8080/Quickstart_webservice_proxy_routed/http/Proxy_Routed/Proxy_CBR"/>
+		<property name="runtest.arg.msg" value="goodbye"/>
+		<antcall target="runinternal"/>
+	</target>
+
+</project>

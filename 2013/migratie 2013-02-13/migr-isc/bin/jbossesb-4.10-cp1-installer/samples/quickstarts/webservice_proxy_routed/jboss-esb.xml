@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+
+		<jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+			<jms-bus busid="Proxy_CBR-EsbChannel">
+				<jms-message-filter
+					dest-type="QUEUE"
+					dest-name="queue/quickstart_webservice_proxy_routed_cbr_esb"
+				/>
+			</jms-bus>
+			<jms-bus busid="Proxy_Hello-EsbChannel">
+				<jms-message-filter
+					dest-type="QUEUE"
+					dest-name="queue/quickstart_webservice_proxy_routed_hello_esb"
+				/>
+			</jms-bus>
+			<jms-bus busid="Proxy_Goodbye-EsbChannel">
+				<jms-message-filter
+					dest-type="QUEUE"
+					dest-name="queue/quickstart_webservice_proxy_routed_goodbye_esb"
+				/>
+			</jms-bus>
+		</jms-provider>
+
+	</providers>
+
+	<services>
+
+		<service category="Proxy_Routed" name="Proxy_CBR"
+				 description="Routed WebService Proxy: CBR">
+			<listeners>
+				<http-gateway name="Proxy_CBR-GwListener"/>
+				<jms-listener
+					name="Proxy_CBR-EsbListener"
+					busidref="Proxy_CBR-EsbChannel"
+				/>
+			</listeners>
+			<actions>
+				<action name="proxy_cbr_echo_request"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message before ContentBasedRouter" />
+				</action>
+				<action name="proxy_cbr"
+						class="org.jboss.soa.esb.actions.ContentBasedRouter">
+						<property name="ruleSet" value="Proxy_Routed_Rules.drl"/>
+						<property name="ruleLanguage" value="XPathLanguage.dsl"/>
+						<property name="destinations">
+							<route-to
+								destination-name="hello"
+								service-category="Proxy_Routed"
+								service-name="Proxy_Hello" />
+							<route-to
+								destination-name="goodbye"
+								service-category="Proxy_Routed"
+								service-name="Proxy_Goodbye" />
+						</property>
+				</action>
+			</actions>
+		</service>
+
+		<service category="Proxy_Routed" name="Proxy_Hello"
+				 description="Routed WebService Proxy: Hello">
+			<listeners>
+				<jms-listener
+					name="Proxy_Hello-EsbListener"
+					busidref="Proxy_Hello-EsbChannel"
+				/>
+			</listeners>
+			<actions>
+				<action name="proxy_hello_echo_request"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message before Hello SOAPProxy" />
+				</action>
+				<action name="proxy_hello_proxy"
+						class="org.jboss.soa.esb.actions.soap.proxy.SOAPProxy">
+						<property name="wsdl" value="internal://jboss.ws:context=Quickstart_webservice_proxy_routed_ws,endpoint=HelloWS"/>
+				</action>
+				<action name="proxy_hello_echo_response"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message after Hello SOAPProxy" />
+				</action>
+			</actions>
+		</service>
+
+		<service category="Proxy_Routed" name="Proxy_Goodbye"
+				 description="Routed WebService Proxy: Goodbye">
+			<listeners>
+				<jms-listener
+					name="Proxy_Goodbye-EsbListener"
+					busidref="Proxy_Goodbye-EsbChannel"
+				/>
+			</listeners>
+			<actions>
+				<action name="proxy_goodbye_echo_request"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message before Goodbye SOAPProxy" />
+				</action>
+				<action name="proxy_goodbye_proxy"
+						class="org.jboss.soa.esb.actions.soap.proxy.SOAPProxy">
+						<property name="wsdl" value="internal://jboss.ws:context=Quickstart_webservice_proxy_routed_ws,endpoint=GoodbyeWS"/>
+				</action>
+				<action name="proxy_goodbye_echo_response"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message after Goodbye SOAPProxy" />
+				</action>
+			</actions>
+		</service>
+
+	</services>
+
+</jbossesb>

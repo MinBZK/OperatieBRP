@@ -1,0 +1,97 @@
+<project name="Quickstart_bpm_orchestration4" default="run" basedir=".">
+
+	<description>
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+  <property name="deploy.exploded" value="true"/>
+  
+	<property name="additional.deploys" value="Priority_Rules.drl,Discount_Rules.drl,CBRRules.drl,smooks-config.xml,scripts/**,transforms/**"/>
+	
+  <!-- Import the base Ant build script... -->
+  <import file="../conf/base-build.xml"/>
+  
+  <property name="project.process.dir" value="processDefinition"/>
+	
+  <target name="quickstart-specific-checks" depends="assert-jbpm-secured"/>
+
+  <target name="quickstart-specific-assemblies">   
+    <copy overwrite="true" file="${project.process.dir}/processdefinition.xml" todir="${classes}/${project.process.dir}" />
+    <copy todir="${classes}">
+      <fileset dir="${basedir}" includes="scripts/**/*"/>
+    </copy>
+  </target>
+  
+  <target name="run">
+	<echo>Follow the instructions in the readme.</echo>
+  </target>
+	
+  <target name="runtest">
+	<echo>Follow the instructions in the readme.</echo>
+  </target>
+	
+  <target name="deployProcess" description="deploys the process definition" depends="dependencies">
+    <echo>Deploy the process definition</echo>
+	<taskdef name="deployToServer" classname="org.jbpm.ant.DeployProcessToServerTask">
+		<classpath refid="exec-classpath"/>
+	</taskdef>
+	<deployToServer username="${jbpm.console.username}" password="${jbpm.console.password}" serverDeployer="${org.jboss.esb.jbpm.console.upload.url}">
+		<fileset dir="${basedir}/processDefinition" includes="*"/>
+	</deployToServer>
+  </target>
+	
+  <target name="startProcess" depends="compile" description="Sends a message to start the process instance">
+  	<echo>Sends a message to start the process instance</echo>
+    <java fork="yes" classname="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.test.SendJMSMessageStart" failonerror="true">
+      <sysproperty key="log4j.configuration" value="${log4j.xml}"/>      
+      <arg value="SampleOrder.xml"/>
+      <classpath refid="exec-classpath"/>
+    </java>  
+  </target>	 
+
+    <target name="startProcessSync" depends="compile" description="Sends a message to start the process instance.">
+        <echo>Sends a message to start the process instance</echo>
+      <java fork="yes" classname="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.test.SendEsbStartMessage" failonerror="true">
+          <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+          <arg value="SampleOrder.xml"/>
+          <classpath refid="exec-classpath"/>
+      </java>
+    </target>
+
+    <target name="queryProcessSync" depends="compile" description="Sends a message to query a process instance.">
+      <input addproperty="processId" message="Please enter the Process Instance ID of the process to be queried > " />
+      <java fork="yes" classname="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.test.SendEsbQueryMessage" failonerror="true">
+          <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+          <arg value="${processId}"/>
+          <classpath refid="exec-classpath"/>
+      </java>
+    </target>
+
+  <target name="startProcessPets" depends="compile" description="Sends a message to start the process instance">
+  	<echo>Sends a message to start the process instance</echo>
+    <java fork="yes" classname="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.test.SendJMSMessageStart" failonerror="true">
+      <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+      <arg value="SamplePetsOrder.xml"/>
+      <classpath refid="exec-classpath"/>
+    </java>  
+  </target>	 
+
+  <target name="startMonitor" depends="compile" description="Sends a message to start the process instance">
+  	<echo>Starting the Swing-based Service Monitor</echo>
+    <java fork="yes" classname="ServiceAlertMonitor" failonerror="true">
+      <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+      <arg value="Monitor"/>
+      <arg value="quickstart_bpm_orchestration4_monitor"/>
+      <arg value="images/gear1.gif"/>
+      <classpath refid="exec-classpath"/>
+    </java>  
+  </target>	 
+  	
+  <target name="display-instructions">
+    <echo message='${line.separator}******************' />
+    <echo>Quickstart deployed to target JBoss ESB/App Server at '${org.jboss.esb.server.deploy.dir}'.</echo>
+    <echo>1.  Carefully review the Readme.</echo>
+    <echo message='******************' />
+  </target>
+</project>

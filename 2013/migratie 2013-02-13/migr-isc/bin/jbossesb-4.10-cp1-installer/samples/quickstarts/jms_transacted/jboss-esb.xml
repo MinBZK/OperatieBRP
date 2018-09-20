@@ -1,0 +1,75 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+		<jms-jca-provider name="JBossMessaging" connection-factory="XAConnectionFactory">
+
+			<jms-bus busid="quickstartGwChannel">
+				<jms-message-filter
+					dest-type="QUEUE"
+					dest-name="queue/quickstart_jms_transacted_Request_gw"
+					transacted="true"
+			/>
+			</jms-bus>
+			<jms-bus busid="quickstartEsbChannel">
+				<jms-message-filter
+					dest-type="QUEUE"
+					dest-name="queue/quickstart_jms_transacted_Request_esb"
+					transacted="true"
+			/>
+			</jms-bus>
+			<activation-config>
+				<!-- The maximum number of times a message is redelivered before it is sent to the DLQ -->
+				<property name="dLQMaxResent" value="5"/>
+			</activation-config>
+
+		</jms-jca-provider>
+	</providers>
+
+	<services>
+		<service 
+			category="JMSSecuredESB" 
+			name="SimpleListener" 
+			description="JMS Secured quickstart sample">
+			<listeners>
+				<jms-listener name="JMS-Gateway"
+					busidref="quickstartGwChannel"
+					is-gateway="true"/>
+				<jms-listener name="jmssecured"
+					busidref="quickstartEsbChannel"/>
+			</listeners>
+			<actions mep="OneWay">
+
+				<action name="printMessage" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="JMS Transacted Quickstart entered. Message body"/>
+					<property name="printfull" value="false"/>
+				</action>
+
+				<action name="insertDBAction" class="org.jboss.soa.esb.samples.quickstart.jmstransacted.test.DBInsertAction">
+					<property name="datasource-name" value="java:JmsTransactedDB"/>
+					<property name="db-insert-sql" value="insert into jms_transacted_table(data_column) values(?)"/>
+				</action>
+
+				<!-- 
+					Will throw an Exception for the configured number of rollbacks. This should trigger the transaction to be 
+					rolledback and the message placed back onto the JMS queue.
+				-->
+				<action name="throwExceptionAction" class="org.jboss.soa.esb.samples.quickstart.jmstransacted.test.ThrowExceptionAction">
+					<property name="rollbacks" value="5"/> <!-- if greater than dLQMaxResent then message goes to the JMS DLQ -->
+				</action>
+
+				<action name="printMessageDone" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="JMS Transacted Quickstart processed successfully. Message body"/>
+					<property name="printfull" value="false"/>
+				</action>
+
+				<!-- The next action is for Continuous Integration testing -->
+				<action name="testStore" class="org.jboss.soa.esb.actions.StoreMessageToFile"/>
+			</actions>
+		</service>
+	</services>
+     
+</jbossesb>

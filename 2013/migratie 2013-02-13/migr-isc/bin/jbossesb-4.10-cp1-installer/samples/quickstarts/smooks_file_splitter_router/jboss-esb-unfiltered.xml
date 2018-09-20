@@ -1,0 +1,64 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.1.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.1.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.1.0.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+        <fs-provider name="FSprovider1">
+            <fs-bus busid="smooksFileChannel">
+                <fs-message-filter
+                        directory="@INPUTDIR@"
+                        input-suffix=".xml"
+                        work-suffix=".esbWorking"
+                        post-delete="true"
+                        post-directory="@OUTPUTDIR@"
+                        post-suffix=".sentToEsb"
+                        error-delete="false"
+                        error-directory="@ERRORDIR@"
+                        error-suffix=".IN_ERROR"
+                        />
+            </fs-bus>
+        </fs-provider>
+
+    </providers>
+
+    <services>
+
+        <!--
+            Splitter Service...
+        -->
+        <service category="QS" name="Splitter" description="Splitter Service" invmScope="GLOBAL">
+            <listeners>
+                <!-- Splitting the message at the gateway via the FileStreamSplitter composer class allows us to
+                     handle huge messages... -->
+                <fs-listener name="FileGateway" busidref="smooksFileChannel" is-gateway="true" schedule-frequency="2">
+                    <property name="composer-class" value="org.jboss.soa.esb.smooks.splitting.FileStreamSplitter"/>
+                    <property name="splitterConfig" value="/smooks-config.xml"/>
+                    <!-- property name="reportPath" value="/zap/report.html"/ -->
+                </fs-listener>
+            </listeners>
+            <actions mep="OneWay">
+                <action name="print" class="org.jboss.soa.esb.actions.SystemPrintln">
+                    <property name="message" value="[Splitter] Message Split complete"/>
+                </action>
+
+                <!-- The next action is for Continuous Integration testing -->
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+
+        <!--
+            Receiver Service...
+        -->
+        <service category="QS" name="Receiver" description="Receiver Service" invmScope="GLOBAL">
+            <actions mep="OneWay">
+                <action name="print" class="org.jboss.soa.esb.actions.SystemPrintln">
+                    <property name="message" value="[Receiver] Message Fragment Received"/>
+                </action>
+            </actions>
+        </service>
+
+    </services>
+
+</jbossesb>

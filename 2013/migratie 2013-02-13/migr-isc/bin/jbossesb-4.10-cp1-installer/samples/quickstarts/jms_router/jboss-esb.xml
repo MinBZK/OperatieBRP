@@ -1,0 +1,66 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMessaging" connection-factory="ConnectionFactory">
+                      
+              <jms-bus busid="quickstartGwChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_jms_router_Request_gw"
+                   />
+              </jms-bus>
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_jms_router_Request_esb"
+                  />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+        <service 
+        	category="JMSSecuredESB" 
+        	name="SimpleListener" 
+        	description="JMS Secured quickstart sample">
+            <listeners>
+                <jms-listener name="JMS-Gateway" busidref="quickstartGwChannel" is-gateway="true" >
+				</jms-listener>
+                <jms-listener name="jmssecured"
+                              busidref="quickstartEsbChannel"/>
+            </listeners>
+            <actions mep="OneWay">
+            
+                    <action name="printMessage" class="org.jboss.soa.esb.actions.SystemPrintln">
+                      <property name="message" value="JMS Secured Quickstart message"/>
+                      <property name="printfull" value="false"/>
+                    </action>
+					<action name="routeToReplyQueue" class="org.jboss.soa.esb.actions.routing.JMSRouter">
+						<!--property name="jndi-context-factory" value="org.jnp.interfaces.NamingContextFactory"/>
+						<property name="jndi-URL" value="127.0.0.1:1099"/>
+						<property name="jndi-pkg-prefix" value="org.jboss.naming:org.jnp.interfaces"/ -->
+						<property name="connection-factory" value="ConnectionFactory"/>
+						<property name="jndiName" value="queue/quickstart_jms_router_routeTo"/>
+						<property name="unwrap" value="true"/>
+						<property name="security-principal" value="guest"/>
+						<property name="security-credential" value="guest"/>
+
+						<!-- Example of adding Extension properties -->
+						<!-- comma separated list of prefixes -->
+						<property name="jndi-prefixes" value="org.xyz."/>
+						<property name="org.xyz.propertyName" value="propertyValue"/>
+
+						<!-- All properties with prefix 'java.naming' will be added -->
+						<property name="java.naming.someproperty" value="propertyValue"/>
+				   </action>                
+                    
+            </actions>
+        </service>
+      </services>
+     
+</jbossesb>

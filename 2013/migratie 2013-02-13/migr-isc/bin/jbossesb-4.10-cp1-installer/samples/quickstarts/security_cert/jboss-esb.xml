@@ -1,0 +1,44 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+        <jms-provider name="JBossMessageing" connection-factory="ConnectionFactory">
+            <jms-bus busid="quickstartEsbChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_security_cert_esb"/>
+            </jms-bus>
+        </jms-provider>
+
+        <jbr-provider name="JBR-Http" protocol="http" host="localhost">
+            <jbr-bus busid="Http-1" port="8765" />
+        </jbr-provider>
+
+    </providers>
+
+    <services>
+
+        <service category="MyServiceCategory" name="MyWSProducerService" description="WS Frontend speaks natively to the ESB">
+			<security moduleName="CertLogin" rolesAllowed="worker" callbackHandler="org.jboss.soa.esb.services.security.auth.login.CertCallbackHandler">
+				<property name="alias" value="certtest"/>
+			</security>
+
+            <listeners>
+                <jbr-listener name="Http-Gateway" busidref="Http-1" is-gateway="true"/>
+                <jms-listener name="JMS-ESBListener" busidref="quickstartEsbChannel"/>
+            </listeners>
+            <actions>
+
+                <action name="print-before" class="org.jboss.soa.esb.samples.quickstart.securitycert.PrintSubjectAction"/>
+
+                <action name="JBossWSAdapter" class="org.jboss.soa.esb.actions.soap.SOAPProcessor">
+                    <property name="jbossws-endpoint" value="GoodbyeWorldWS"/>
+                </action>
+				<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>	
+            </actions>
+        </service>
+
+    </services>
+
+</jbossesb>

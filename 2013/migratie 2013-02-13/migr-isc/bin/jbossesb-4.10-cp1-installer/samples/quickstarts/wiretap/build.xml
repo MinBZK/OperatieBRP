@@ -1,0 +1,67 @@
+<project name="Quickstart_wiretap" default="runtest" basedir=".">
+	
+    <description> 
+            ${ant.project.name}
+            ${line.separator}
+    </description>
+
+    <property name="additional.deploys" value="MyESBRules-XPath.drl"/>
+
+    <!-- Import the base Ant build script... -->
+    <import file="../conf/base-build.xml"/>
+
+    <target name="runtest-cbr" depends="compile">
+        <echo>Runs Content Based Router Test</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.wiretap.test.SendCBRJMSMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="ESB wiretap pattern quickstart - content based router test"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+    <target name="runtest" depends="compile">
+        <echo>Runs JMS Sender - to destination channel</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.wiretap.test.SendJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="ESB wiretap pattern quickstart - message to destination channel"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>  
+
+    <target name="wiretap" depends="compile">
+        <echo>Runs JMS Sender - to wiretap channel</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.wiretap.test.SendWiretapJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="ESB wiretap pattern quickstart - message to wiretap channel"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+    <target name="static-router" depends="compile">
+        <echo>Runs Static-Router Test</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.wiretap.test.SendStaticRouterJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="ESB wiretap pattern quickstart - static router test"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+    <target name="receive-wiretap" depends="compile">
+	        <echo>Runs Test Wiretap message receiver</echo>
+	        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.wiretap.test.ReceiveJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	            <arg value="queue/qswiretap_wire_out_Request"/>  
+	            <classpath refid="exec-classpath"/>
+	        </java>
+	    </target>	
+
+    <target name="receive-destination" depends="compile">
+	        <echo>Runs Test Wiretap destination message receiver</echo>
+	        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.wiretap.test.ReceiveJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	            <arg value="queue/qswiretap_regular_Request"/>  
+	            <classpath refid="exec-classpath"/>
+	        </java>
+	    </target>	
+	
+</project>

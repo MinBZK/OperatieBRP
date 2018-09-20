@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                   xmlns:db="http://www.milyn.org/xsd/smooks/db-routing-1.1.xsd">
+
+    <!--
+        The "OrderManagement" datasource is configured in the database/datasources.xml config file.
+    -->
+    
+    <!--                                
+        At the start of the message, select the list of products and bind it into the bean context
+        under the beanId of "products".  We only want to do this lookup once Smooks instance i.e. not for
+        every message, otherwise we'd kill memory performance.  To control this, we set the "resultSetScope"
+        param to "APPLICATION".  The actual order item product row will be selected from the resultset by
+        the ResultsetRowSelector config (below)...
+    -->
+    <db:executor executeOnElement="$document" datasource="OrderManagement" executeBefore="true">
+        <db:statement>select productid, name, attr1, listprice, category from product p, item i where p.productid = i.productid</db:statement>
+        <db:resultSet name="products" scope="APPLICATION" />
+    </db:executor>
+
+    <!--
+        For every order-item, select the appropriate product row from the in-mem "products" reference data
+        resultset, using the ResultsetRowSelector. Bind the selected product row back into the
+        bean context under a beanId of "product"...
+    -->
+    <db:resultSetRowSelector selectRowOnElement="order-item/product-id" resultSetName="products" beanId="product" executeBefore="false">
+        <db:where>row.PRODUCTID == orderItem.productId</db:where>
+        <db:failedSelectError>Unknown Order Item product ID '${orderItem.productId}' on order '${orderDetail.orderNum?c}'.</db:failedSelectError>
+    </db:resultSetRowSelector>
+
+    <!--
+        At the end of the customer-details/username, select the user account and bind it into the bean context
+        under the beanId of "accounts".  The users account should be the only entry in this list....
+    -->
+    <db:executor executeOnElement="customer-details" datasource="OrderManagement">
+        <db:statement>select * from ACCOUNT where userid = ${orderDetail.uname}</db:statement>
+        <db:resultSet name="accounts" />
+    </db:executor>
+
+</smooks-resource-list>

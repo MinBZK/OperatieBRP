@@ -1,0 +1,22 @@
+<project name="Quickstart_JMS_Router" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="runtest" depends="compile" 
+		description="sends a JMS message to queue/quickstart_jms_router_Request_gw">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.jmsrouter.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="JMS Router Message dummy Content"/>
+			<arg value="queue/quickstart_jms_router_routeTo"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+	
+</project>

@@ -1,0 +1,35 @@
+<project name="Quickstart_messagefilter" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<property name="additional.deploys" value="FilterRules.drl"/>
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	
+	<target name="runtest" depends="compile" 
+		description="sends a JMS message to queue/quickstart_messagefilter_Request_gw">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.messagefilter.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="10"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+	
+	<target name="sendesb" depends="compile"
+		description="Will send an esb Message">
+		<echo>Runs Test ESB Message Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.messagefilter.test.SendEsbMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="FirstServiceESB"/> <!--  service category -->
+			<arg value="MessageFilterListener"/>  <!--  service name -->
+			<arg value="9"/> <!--  quantity -->
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>
+	
+</project>

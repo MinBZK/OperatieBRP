@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.3.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.3.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.3.0.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+		<camel-provider name="provider1">
+			<camel-bus busid="bus1">
+				<from uri="file://@INPUTDIR1@?delete=true"/>
+				<from uri="file://@INPUTDIR2@?delete=true"/>
+			</camel-bus>
+		</camel-provider>
+	</providers>
+
+	<services>
+		<service category="camel_helloworld" name="service1" description="Hello World" invmScope="GLOBAL">
+			<listeners>
+				<camel-gateway name="gateway1" busidref="bus1"/>
+			</listeners>
+			<actions>
+				<action name="action1" class="org.jboss.soa.esb.actions.SystemPrintln"/>
+			</actions>
+		</service>
+	</services>
+
+</jbossesb>

@@ -1,0 +1,56 @@
+<project name="Quickstart_business_ruleservice_ruleAgent" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+		
+	<property name="additional.deploys" value="ruleAgent/brmsdeployedrules.properties ruleAgent/package/org.jboss.soa.esb.services.rules.pkg smooks-res.xml"/>
+
+	<target name="check-package-file">
+	    <available file="${basedir}/ruleAgent/package/org.jboss.soa.esb.services.rules.pkg" property="package.exists"/>
+	</target>
+
+	<target name="quickstart-specific-assemblies" depends="check-package-file, generatePackageFile">
+        <pathconvert targetos="unix" property="basedir_unix">
+            <path><pathelement location="${basedir}"/></path>
+        </pathconvert>
+
+        <copy file="${basedir}/ruleAgent/brmsdeployedrules-unfiltered.properties" tofile="${basedir}/ruleAgent/brmsdeployedrules.properties" overwrite="true" filtering="true">
+                <filterset>
+                    <filter token="quickstart.dir" value="${basedir_unix}"/>
+            </filterset>
+        </copy>
+    </target>
+
+	<target name="config" depends="dependencies,quickstart-specific-assemblies"/>
+
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="quickstart-specific-clean">
+		<delete file="${basedir}/ruleAgent/brmsdeployedrules.properties"/>
+	</target>
+	
+  <target name="runtest" depends="compile"
+	description="will receive JMS message to trigger the actions in the ESB">
+     <echo>Runs Test JMS Sender</echo>
+     <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.ruleagent.businessrules.test.SendJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		<classpath refid="exec-classpath" />
+     </java>
+  </target>  
+
+	<target name="generatePackageFile" depends="compile" unless="package.exists"
+    	description="Will compile ruleAgent/Original.drl and generate a pkg file for it. Can be used when upgrading Drools which can make packages that were generated with an older version invalid.">
+    	<echo message="Going to regenerate ruleAgent/org.jboss.soa.esb.services.rules.pkg"/>
+        <java fork="yes" classname="org.jboss.internal.soa.esb.services.rules.util.PackageFileGenerator" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+        	<arg value="${basedir}/ruleAgent/Original.drl"/>
+        	<arg value="${basedir}/ruleAgent/package/org.jboss.soa.esb.services.rules.pkg"/>
+            <classpath refid="exec-classpath" />
+        </java>
+    </target>
+	
+</project>

@@ -1,0 +1,52 @@
+<project name="Quickstart_dynamic_router" default="runtest" basedir=".">
+	
+    <description> 
+            ${ant.project.name}
+            ${line.separator}
+    </description>
+
+    <property name="additional.deploys" value="MyESBRules-XPath.drl"/>
+
+    <!-- Import the base Ant build script... -->
+    <import file="../conf/base-build.xml"/>
+
+    <target name="runtest" depends="compile">
+        <echo>Runs JMS Sender - to destination channels</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.dynamicRouter.test.SendJMSMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="ESB dynamic router pattern quickstart - sending message to destination channels"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>  
+
+    <target name="receive-destination1" depends="compile">
+	        <echo>Runs Test destination 1 message receiver</echo>
+	        <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.dynamicRouter.test.ReceiveJMSMessage" failonerror="true">
+		    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	            <arg value="queue/qsdynamicrouter_1_Request"/>  
+	            <arg value=":OK"/>
+	            <classpath refid="exec-classpath"/>
+	        </java>
+	    </target>		
+	
+	   <target name="receive-destination2" depends="compile">
+		        <echo>Runs Test destination 2 message receiver</echo>
+		        <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.dynamicRouter.test.ReceiveJMSMessage" failonerror="true">
+			    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		            <arg value="queue/qsdynamicrouter_2_Request"/>  
+		            <arg value=":OK"/>
+		            <classpath refid="exec-classpath"/>
+		        </java>
+		    </target>		
+
+    <target name="receive-destination3" depends="compile">
+	        <echo>Runs Test destination message receiver</echo>
+	        <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.dynamicRouter.test.ReceiveJMSMessage" failonerror="true">
+		    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	            <arg value="queue/qsdynamicrouter_3_Request"/>  
+	            <arg value=":OK"/>
+	            <classpath refid="exec-classpath"/>
+	        </java>
+	    </target>	
+	
+</project>

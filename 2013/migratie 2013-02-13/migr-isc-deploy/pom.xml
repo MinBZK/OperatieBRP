@@ -1,0 +1,103 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>nl.moderniseringgba</groupId>
+    <artifactId>migr-modules</artifactId>
+    <version>0.0.32-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Migratie</name>
+	
+	<properties>
+		<jboss.username>jboss</jboss.username>
+		<jboss.password>jboss</jboss.password>
+		<jboss.server>migr-s04.modernodam.nl</jboss.server>
+		<jboss.bin>/usr/local/jboss/bin</jboss.bin>
+		<jboss.deploy>/usr/local/jboss/server/default/deploy</jboss.deploy>
+		<jboss.stop>./shutdown.sh -S</jboss.stop>
+		<jboss.start>nohup ./run.sh -c default -b 0.0.0.0 > output.txt 2>&amp;1 &amp;</jboss.start>
+		<esb.build>../lastSuccessful</esb.build>
+		<console.build>../lastSuccessful</console.build>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<id>install</id>
+						<phase>install</phase>
+						<configuration>
+							<target>
+								<echo message="Jboss username: ${jboss.username}"  />
+								<echo message="Jboss server: ${jboss.server}"  />
+								<echo message="ESB: ${esb.build}"  />
+								<echo message="Console: ${console.build}"  />
+
+								<echo message="Stopping JBoss (and sleeping 15s)" />
+								<sshexec host="${jboss.server}"
+									 trust="true" 
+									username="${jboss.username}"
+									password="${jboss.password}"
+									command="cd ${jboss.bin}; ${jboss.stop}; sleep 15s; tail  -n 100 ../server/default/log/server.log"/>
+								
+								<echo message="Undeploy ESB" />
+								<sshexec host="${jboss.server}"
+									 trust="true" 
+									username="${jboss.username}"
+									password="${jboss.password}"
+									command="cd ${jboss.deploy}; rm -f migr-isc*.esb"/>
+							
+								<echo message="Deploying ESB build (${esb.build})" />
+								<scp todir="jboss:jboss@${jboss.server}:${jboss.deploy}" 
+									 trust="true" 
+									 failonerror="true"
+									 verbose="true">
+										<fileset dir="${project.build.directory}/../../../Migr - ISC - ISC ESB Package/builds/${esb.build}/archive/target">
+											<include name="**/migr-isc*.esb"/>
+										</fileset>
+								</scp>
+
+								<echo message="Deploying Console build (${console.build})" />
+								<scp todir="jboss:jboss@${jboss.server}:${jboss.deploy}/jbpm.esb" 
+									 trust="true" 
+									 failonerror="true"
+									 verbose="true">
+										<fileset dir="${project.build.directory}/../../../Migr - ISC - jBPM 3 Console/builds/${console.build}/archive/target">
+											<include name="**/jsf-console.war"/>
+										</fileset>
+								</scp>
+								
+								<echo message="Starting JBoss" />
+								<sshexec host="${jboss.server}"
+									 trust="true" 
+									username="${jboss.username}"
+									password="${jboss.password}"
+									command="cd ${jboss.bin}; ${jboss.start}"/>
+							 </target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-jsch</artifactId>
+						<version>1.8.4</version>
+					</dependency>
+					<dependency>
+						<groupId>com.jcraft</groupId>
+						<artifactId>jsch</artifactId>
+						<version>0.1.49</version>
+					</dependency>
+				</dependencies>			
+			</plugin>
+		</plugins>
+	</build>
+</project>
+		

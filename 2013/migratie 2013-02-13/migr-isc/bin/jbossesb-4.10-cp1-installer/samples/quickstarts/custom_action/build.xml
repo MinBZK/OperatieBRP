@@ -1,0 +1,29 @@
+<project name="Quickstart_custom_action" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	
+  <target name="runtest" description="sends a JMS Message to the ESB" depends="compile">
+     <echo>Runs Test JMS Sender</echo>
+     <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.customaction.test.SendJMSMessage" failonerror="true">
+        <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+     	<arg value="Via Gateway"/>
+		<classpath refid="exec-classpath"/>
+     </java>
+  </target>  
+	
+  <target name="sendesb" depends="compile"
+		description="Will send an esb Message">
+		<echo>Runs Test ESB Message Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.customaction.test.SendEsbMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="NO Gateway"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>	
+</project>

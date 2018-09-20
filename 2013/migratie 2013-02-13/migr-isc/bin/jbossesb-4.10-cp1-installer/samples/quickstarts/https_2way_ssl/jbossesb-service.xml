@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+
+    <mbean code="org.jboss.remoting.security.SSLSocketBuilder" name="jboss.remoting:service=SocketBuilder,type=SSL" display-name="SSL Server Socket Factory Builder">
+       <!-- IMPORTANT - If making ANY customizations, this MUST be set to false. -->
+       <!-- Otherwise, will used default settings and the following attributes will be ignored. -->
+       <attribute name="UseSSLServerSocketFactory">false</attribute>
+       <!-- This is the url string to the key store to use -->
+       <attribute name="KeyStoreURL">${jboss.home.dir}/https_2way_ssl.keystore</attribute>
+       <!-- The password for the key store -->
+       <attribute name="KeyStorePassword">https_2way_ssl_pass</attribute>
+       <!-- The password for the keys (will use KeystorePassword if this is not set explicitly. -->
+       <attribute name="KeyPassword">https_2way_ssl_pass</attribute>
+    </mbean>
+
+    <mbean code="org.jboss.remoting.security.SSLServerSocketFactoryService" name="jboss.remoting:service=ServerSocketFactory,type=SSL" display-name="SSL Server Socket Factory">
+       <depends optional-attribute-name="SSLSocketBuilder" proxy-type="attribute">jboss.remoting:service=SocketBuilder,type=SSL</depends>
+    </mbean>
+
+</server>

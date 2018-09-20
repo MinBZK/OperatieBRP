@@ -1,0 +1,36 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+             <jms-bus busid="AggregatorListenQueue">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Aggregator_Service"/>
+             </jms-bus>             
+          </jms-provider>
+      </providers>
+      
+      <services>
+          <service 
+              category="Aggregation" name="OrderAggregrator" 
+              description="Aggregates messages">
+              <listeners>
+                  <jms-listener name="AggregatorListenQueue" busidref="AggregatorListenQueue">
+                  </jms-listener>
+              </listeners>
+              <actions mep="OneWay">
+                  <action class="org.jboss.soa.esb.actions.Aggregator" name="Aggregator">
+                      <property name="timeoutInMillies" value="60000"/>
+                  </action>
+
+                  <!-- add transformation action to aggregate the attachments into 1 message -->
+                  <action name="assemble" class="org.jboss.soa.esb.samples.quickstart.aggregator.AggregatedMessageAssembler" />
+
+                  <action name="print-after" class="org.jboss.soa.esb.actions.SystemPrintln">
+                      <property name="message" value="An aggregated message was created (see attachments)" />
+                  </action>
+              </actions>
+          </service>	         
+	    </services>
+</jbossesb>

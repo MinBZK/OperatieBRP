@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd">
+
+    <!--
+        Populate the OrderHeader
+    -->
+    <jb:bean beanId="orderHeader" class="org.jboss.soa.esb.dvdstore.OrderHeader" createOnElement="order">
+        <jb:value property="orderId"     data="order/@orderId" />
+        <jb:value property="orderDate"   data="order/@orderDate" />
+        <jb:value property="statusCode"  data="order/@statusCode" />
+        <jb:value property="netAmount"   data="order/@netAmount" />
+        <jb:value property="totalAmount" data="order/@totalAmount" />
+        <jb:value property="tax"         data="order/@tax" />
+    </jb:bean>
+
+    <!--
+        Populate the Customer
+    -->
+    <jb:bean beanId="customer" class="org.jboss.soa.esb.dvdstore.Customer" createOnElement="customer">
+        <jb:value property="userName"  data="customer/@userName" />
+        <jb:value property="firstName" data="customer/@firstName" />
+        <jb:value property="lastName"  data="customer/@lastName" />
+        <jb:value property="state"     data="customer/@state" />
+    </jb:bean>
+
+    <!-- Populate the OrderItem list -->
+    <jb:bean beanId="orderItemList" class="java.util.ArrayList" createOnElement="orderlines">
+        <jb:wiring beanIdRef="orderItem" />
+    </jb:bean>
+
+    <!-- Populate the OrderItem instance -->
+    <jb:bean beanId="orderItem" class="org.jboss.soa.esb.dvdstore.OrderItem" createOnElement="orderlines/orderline">
+        <jb:value property="position"  data="orderline/@position" />
+        <jb:value property="quantity"  data="orderline/@quantity" />
+        <jb:value property="productId" data="orderline/product/@productId" />
+        <jb:value property="title"     data="orderline/product/@title" />
+        <jb:value property="price"     data="orderline/product/@price" />
+    </jb:bean>
+
+    <resource-config selector="order orderlines orderline">
+        <resource>/org/jboss/soa/esb/dvdstore/orderitem.st</resource>
+    </resource-config>
+
+</smooks-resource-list>

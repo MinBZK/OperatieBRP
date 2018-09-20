@@ -1,0 +1,60 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="quickstartGwChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_transform_pojo2_gw"
+                   />
+              </jms-bus>
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_transform_pojo2_esb"
+                  />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+        <service 
+        	category="MyTransformationServicesESB" 
+        	name="MyXML2POJO2TransformationService" 
+        	description="ESB: Takes XML in and produces a POJO">
+            <listeners>
+                <jms-listener name="JMS-Gateway"
+                    busidref="quickstartGwChannel"
+                    is-gateway="true"
+                />
+                <jms-listener name="jmsTransformer"
+                              busidref="quickstartEsbChannel"
+                />                
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="displayBeforeTransformer"
+                  	class="org.jboss.soa.esb.samples.quickstart.transformxml2pojo2.MyAction" 
+                   	process="displayMessage" 
+                />
+
+                <action name="discover-message-origin" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                     <property name="script" value="/scripts/check-origin.groovy" />
+                </action>
+
+                <action name="transform" class="org.jboss.soa.esb.smooks.SmooksAction">
+                    <property name="smooksConfig" value="/smooks-config.xml" />
+                    <property name="resultType" value="JAVA" />                    
+                </action>
+
+                <action name="convertPOJO2Message" class="org.jboss.soa.esb.store.StoreAction"	/>
+                <action name="displayAfterTransformer" class="org.jboss.soa.esb.samples.quickstart.transformxml2pojo2.MyAction" process="displayMessage" />  
+            </actions>
+        </service>
+      </services>
+     
+</jbossesb>

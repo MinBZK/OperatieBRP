@@ -1,0 +1,63 @@
+<project name="Quickstart_smooks_file_splitter_router" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<!-- Additional files to be deployed in the sar. -->
+	<property name="additional.deploys" value="smooks-config.xml,orderitem-split.ftl " />
+	
+	<import file="../conf/base-build.xml"/>
+  
+	<property name="jbossesb.name" value="jboss-esb.xml"/>
+	<property name="jbossesb.rootdir" location="${build.dir}/dirs"/>
+	<property name="jbossesb.inputdir" location="${jbossesb.rootdir}/input"/>
+	<property name="jbossesb.outputdir" location="${jbossesb.rootdir}/output"/>
+	<property name="jbossesb.errordir" location="${jbossesb.rootdir}/error"/>
+	
+	<target name="runtest" depends="compile"
+		description="will create a testfile which in turn will trigger the ESB">
+		<property name="order.xml" value="${basedir}/SampleOrder.xml"/>
+		<input 
+			message="Please enter nr of line-items to generate:"
+			addproperty="nr.lineItems"/>
+		<echo message="Nr of items: ${nr.lineItems}"/>
+		<java fork="no" 
+			classname="org.jboss.soa.esb.sample.quickstart.smooksfilesplitterrouter.InputOrderGenerator" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="${order.xml}"/>
+            <arg value="${nr.lineItems}"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+
+		<move file="${order.xml}" todir="${jbossesb.inputdir}"/>
+
+	</target>  
+
+	<target name="quickstart-specific-clean">
+		<delete file="${basedir}/${jbossesb.name}"/>
+	</target>  
+
+	<target name="config">
+			<delete dir="${jbossesb.rootdir}" quiet="true"/>
+			<mkdir dir="${jbossesb.rootdir}"/>
+			<mkdir dir="${jbossesb.inputdir}"/>
+			<mkdir dir="${jbossesb.outputdir}"/>
+			<mkdir dir="${jbossesb.errordir}"/>
+		
+			<antcall target="filter_jboss-esb.xml"/>
+			<copy file="log4j.xml" tofile="build/log4j.xml"/>
+		</target>
+	
+	<target name="filter_jboss-esb.xml">
+		<copy file="jboss-esb-unfiltered.xml" tofile="${basedir}/${jbossesb.name}" overwrite="true" filtering="true">
+				<filterset>
+					<filter token="INPUTDIR" value="${jbossesb.inputdir}"/>
+					<filter token="OUTPUTDIR" value="${jbossesb.outputdir}"/>
+					<filter token="ERRORDIR" value="${jbossesb.errordir}"/>
+			</filterset>
+		</copy>
+	</target>
+
+</project>

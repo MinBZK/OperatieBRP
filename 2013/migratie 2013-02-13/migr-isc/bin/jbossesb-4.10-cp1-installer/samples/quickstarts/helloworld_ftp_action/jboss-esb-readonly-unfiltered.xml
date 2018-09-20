@@ -1,0 +1,66 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <ftp-provider name="FTPprovider" hostname="@FTP_HOSTNAME@" >
+          	<ftp-bus busid="helloFTPChannel" >
+          		<ftp-message-filter
+          			username="@FTP_USERNAME@"
+          			password="@FTP_PASSWORD@"
+					read-only="true"
+          			passive="false"
+          			directory="@FTP_DIRECTORY@"
+          			input-suffix=".dat"
+          			work-suffix=".esbWorking"
+          			post-delete="false"
+          			post-suffix=".COMPLETE"
+          			error-delete="false"
+          			error-suffix=".HAS_ERROR"
+          		/>
+          	</ftp-bus>
+          </ftp-provider>
+          
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+            
+			    <jms-bus busid="quickstartEsbChannel">
+			        <jms-message-filter
+			            dest-type="QUEUE"
+			            dest-name="queue/quickstart_helloworld_ftp_esb"
+			            selector="source='fromHelloworldFTPAction'"
+			        />
+			    </jms-bus>
+			
+		   </jms-provider>
+
+      </providers>
+      
+      <services>  
+        <service 
+			category="myCategory"
+			name="myFileListener"
+        	description="Hello World File Action (esb listener)" >
+            <listeners>
+            	<ftp-listener name="FtpGateway"
+            		busidref="helloFTPChannel"
+            		is-gateway="true"
+                    schedule-frequency="5">
+            		<property name="remoteFileSystemStrategy-configFile" value="/ftpfile-cache-config.xml"/>
+            		<property name="remoteFileSystemStrategy-cacheListener" value="org.jboss.soa.esb.listeners.gateway.remotestrategies.cache.DeleteOnEvictTreeCacheListener"/> 
+            	</ftp-listener>
+                <jms-listener name="helloWorldFileAction"
+                              busidref="quickstartEsbChannel"
+                />
+            </listeners>
+            <actions>
+                   <action name="action1" 
+                   	class="org.jboss.soa.esb.samples.quickstart.helloworldftpaction.MyAction" 
+                   	process="displayMessage,playWithMessage" 
+                   	/>      
+            </actions>
+        </service>
+      </services>
+     
+</jbossesb>

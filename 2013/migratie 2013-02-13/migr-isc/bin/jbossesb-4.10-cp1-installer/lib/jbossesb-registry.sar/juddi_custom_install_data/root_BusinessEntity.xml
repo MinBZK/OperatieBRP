@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+ * Copyright 2001-2009 The Apache Software Foundation.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */ -->
+ <!-- 
+  This file contains the root business entity structure that represents your registry.  The key chosen (or generated) for this entity will serve
+  as the node id for all entities published within the registry.  The services contained within this business entity reflect the UDDI APIs that
+  you wish to support (adding or subtracting the services here will not enable/disable them, simply add/omit them from being discovered via UDDI).
+  
+  The top-level business entity and sub-entities all use keys as unique identifiers.  They are left blank by default which means the system will
+  generate a key (generated as root partition with GUID appended).  You can choose to create your own, human-readable keys but they must match
+  the root key generator created in the root_tModelKeyGen.xml file.  Matching means they must equal the root key generator with the keyword
+  "keygenerator" replaced by your own string.
+  
+  Example:
+  
+  root_tModelKeyGen.xml key is uddi:www.mycompany.com:registry:keygenerator
+  
+  Legal user-defined keys are:
+  
+  uddi:www.mycompany.com:registry:ubr-node (for the businessKey)
+  uddi:www.mycompany.com:registry:inquiry-service (for the inquiry service service key)
+  uddi:www.mycompany.com:registry:inquiry-service-wsdlDeployment (for the inquiry service binding template that represents the WSDL)
+  
+  
+  See below for other fields that you may want to edit...
+  -->
+<businessEntity xmlns="urn:uddi-org:api_v3" xmlns:xml="http://www.w3.org/XML/1998/namespace" businessKey="uddi:juddi.apache.org:businesses-asf">
+  <!-- Change the name field to represent the name of your registry -->
+  <name xml:lang="en">An Apache jUDDI Node</name>
+  <!-- Change the description field to provided a brief description of your registry -->
+  <description xml:lang="en">This is a UDDI v3 registry node as implemented by Apache jUDDI.</description>
+  <discoveryURLs>
+    <!-- This discovery URL should point to the home installation URL of jUDDI -->
+    <discoveryURL useType="home">${juddi.server.baseurl}/juddiv3</discoveryURL>
+  </discoveryURLs>
+  <categoryBag>
+    <keyedReference tModelKey="uddi:uddi.org:categorization:nodes" keyValue="node" />
+  </categoryBag>
+  <businessServices>
+    <!-- As mentioned above, you may want to provide user-defined keys for these (and the services/bindingTemplates below.  Services that you
+    don't intend to support should be removed entirely -->
+    <businessService serviceKey="uddi:juddi.apache.org:services-inquiry" businessKey="uddi:juddi.apache.org:businesses-asf">
+      <name xml:lang="en">UDDI Inquiry Service</name>
+      <description xml:lang="en">Web Service supporting UDDI Inquiry API</description>
+      <bindingTemplates>
+        <bindingTemplate bindingKey="uddi:juddi.apache.org:servicebindings-inquiry-ws" serviceKey="uddi:juddi.apache.org:services-inquiry">
+          <description>UDDI Inquiry API V3</description>
+          <!-- This should be changed to the WSDL URL of the inquiry API.  An access point inside a bindingTemplate will be found for every service
+          in this file.  They all must point to their API's WSDL URL -->
+          <accessPoint useType="wsdlDeployment">${juddi.server.baseurl}/juddiv3/services/inquiry?wsdl</accessPoint>
+          <tModelInstanceDetails>
+            <tModelInstanceInfo tModelKey="uddi:uddi.org:v3_inquiry">
+              <instanceDetails>
+                <instanceParms>
+                <![CDATA[
+                  <?xml version="1.0" encoding="utf-8" ?>
+                  <UDDIinstanceParmsContainer xmlns="urn:uddi-org:policy_v3_instanceParms">
+                    <defaultSortOrder>
+                      uddi:uddi.org:sortorder:binarysort
+                    </defaultSortOrder>
+                  </UDDIinstanceParmsContainer>
+                ]]>
+                </instanceParms>
+              </instanceDetails>
+            </tModelInstanceInfo>
+          </tModelInstanceDetails>
+          <categoryBag>
+            <keyedReference keyName="uddi-org:types:wsdl" keyValue="wsdlDeployment" tModelKey="uddi:uddi.org:categorization:types"/>
+          </categoryBag>
+        </bindingTemplate>
+      </bindingTemplates>
+    </businessService>
+    <businessService serviceKey="uddi:juddi.apache.org:services-publish" businessKey="uddi:juddi.apache.org:businesses-asf">
+      <name xml:lang="en">UDDI Publish Service</name>
+      <description xml:lang="en">Web Service supporting UDDI Publish API</description>
+      <bindingTemplates>
+        <bindingTemplate bindingKey="uddi:juddi.apache.org:servicebindings-publish-ws" serviceKey="uddi:juddi.apache.org:services-publish">
+          <description>UDDI Publication API V3</description>
+          <accessPoint useType="wsdlDeployment">${juddi.server.baseurl}/juddiv3/services/publish?wsdl</accessPoint>
+          <tModelInstanceDetails>
+            <tModelInstanceInfo tModelKey="uddi:uddi.org:v3_publication">
+              <instanceDetails>
+                <instanceParms>
+                <![CDATA[
+                  <?xml version="1.0" encoding="utf-8" ?>
+                  <UDDIinstanceParmsContainer xmlns="urn:uddi-org:policy_v3_instanceParms">
+                    <authInfoUse>required</authInfoUse>
+                  </UDDIinstanceParmsContainer>
+                ]]>
+                </instanceParms>
+              </instanceDetails>
+            </tModelInstanceInfo>
+          </tModelInstanceDetails>
+          <categoryBag>
+            <keyedReference keyName="uddi-org:types:wsdl" keyValue="wsdlDeployment" tModelKey="uddi:uddi.org:categorization:types"/>
+          </categoryBag>
+        </bindingTemplate>
+      </bindingTemplates>
+    </businessService>
+    <businessService serviceKey="uddi:juddi.apache.org:services-security" businessKey="uddi:juddi.apache.org:businesses-asf">
+      <name xml:lang="en">UDDI Security Service</name>
+      <description xml:lang="en">Web Service supporting UDDI Security API</description>
+      <bindingTemplates>
+        <bindingTemplate bindingKey="uddi:juddi.apache.org:servicebindings-security-ws" serviceKey="uddi:juddi.apache.org:services-security">
+          <description>UDDI Security API V3</description>
+          <accessPoint useType="wsdlDeployment">${juddi.server.baseurl}/juddiv3/services/security?wsdl</accessPoint>
+          <tModelInstanceDetails>
+            <tModelInstanceInfo tModelKey="uddi:uddi.org:v3_security" />
+          </tModelInstanceDetails>
+          <categoryBag>
+            <keyedReference keyName="uddi-org:types:wsdl" keyValue="wsdlDeployment" tModelKey="uddi:uddi.org:categorization:types"/>
+          </categoryBag>
+        </bindingTemplate>
+      </bindingTemplates>
+    </businessService>
+    <businessService serviceKey="uddi:juddi.apache.org:services-custodytransfer" businessKey="uddi:juddi.apache.org:businesses-asf">
+      <name xml:lang="en">UDDI Custody and Ownership Transfer Service</name>
+      <description xml:lang="en">Web Service supporting UDDI Custody and Ownership Transfer API</description>
+      <bindingTemplates>
+        <bindingTemplate bindingKey="uddi:juddi.apache.org:servicebindings-custodytransfer-ws" serviceKey="uddi:juddi.apache.org:services-custodytransfer">
+          <description>UDDI Custody and Ownership Transfer API V3</description>
+          <accessPoint useType="wsdlDeployment">${juddi.server.baseurl}/juddiv3/services/custody-transfer?wsdl</accessPoint>
+          <tModelInstanceDetails>
+            <tModelInstanceInfo tModelKey="uddi:uddi.org:v3_ownership_transfer">
+              <instanceDetails>
+                <instanceParms>
+                <![CDATA[
+                <?xml version="1.0" encoding="utf-8" ?>
+                <UDDIinstanceParmsContainer
+                 xmlns="urn:uddi-org:policy_v3_instanceParms">
+                  <authInfoUse>required</authInfoUse>
+                </UDDIinstanceParmsContainer>
+                ]]>
+                </instanceParms>
+              </instanceDetails>
+            </tModelInstanceInfo>
+          </tModelInstanceDetails>
+          <categoryBag>
+            <keyedReference keyName="uddi-org:types:wsdl" keyValue="wsdlDeployment" tModelKey="uddi:uddi.org:categorization:types"/>
+          </categoryBag>
+        </bindingTemplate>
+      </bindingTemplates>
+    </businessService>
+    <businessService serviceKey="uddi:juddi.apache.org:services-subscription" businessKey="uddi:juddi.apache.org:businesses-asf">
+      <name xml:lang="en">UDDI Subscription Service</name>
+      <description xml:lang="en">Web Service supporting UDDI Subscription API</description>
+      <bindingTemplates>
+        <bindingTemplate bindingKey="uddi:juddi.apache.org:servicebindings-subscription-ws" serviceKey="uddi:juddi.apache.org:services-subscription">
+          <description>UDDI Subscription API V3</description>
+          <accessPoint useType="wsdlDeployment">${juddi.server.baseurl}/juddiv3/services/subscription?wsdl</accessPoint>
+          <tModelInstanceDetails>
+            <tModelInstanceInfo tModelKey="uddi:uddi.org:v3_subscription">
+              <instanceDetails>
+                <instanceParms>
+                <![CDATA[
+                <?xml version="1.0" encoding="utf-8" ?>
+                <UDDIinstanceParmsContainer
+                xmlns="urn:uddi-org:policy_v3_instanceParms">
+                <authInfoUse>required</authInfoUse>
+                <filterUsingFindAPI>supported</filterUsingFindAPI>
+                </UDDIinstanceParmsContainer>
+                ]]>
+                </instanceParms>
+              </instanceDetails>
+            </tModelInstanceInfo>
+          </tModelInstanceDetails>
+          <categoryBag>
+            <keyedReference keyName="uddi-org:types:wsdl" keyValue="wsdlDeployment" tModelKey="uddi:uddi.org:categorization:types"/>
+          </categoryBag>
+        </bindingTemplate>
+      </bindingTemplates>
+    </businessService>
+    <businessService serviceKey="uddi:juddi.apache.org:services-subscriptionlistener" businessKey="uddi:juddi.apache.org:businesses-asf">
+      <name xml:lang="en">UDDI Subscription Listener Service</name>
+      <description xml:lang="en">Web Service supporting UDDI Subscription Listener API</description>
+      <bindingTemplates>
+        <bindingTemplate bindingKey="uddi:juddi.apache.org:servicebindings-subscriptionlistener-ws" serviceKey="uddi:juddi.apache.org:services-subscriptionlistener">
+          <description>UDDI Subscription Listener API V3</description>
+          <accessPoint useType="wsdlDeployment">${juddi.server.baseurl}/juddiv3/services/subscription-listener?wsdl</accessPoint>
+          <tModelInstanceDetails>
+            <tModelInstanceInfo tModelKey="uddi:uddi.org:v3_subscriptionlistener" />
+          </tModelInstanceDetails>
+          <categoryBag>
+            <keyedReference keyName="uddi-org:types:wsdl" keyValue="wsdlDeployment" tModelKey="uddi:uddi.org:categorization:types"/>
+          </categoryBag>
+        </bindingTemplate>
+      </bindingTemplates>
+    </businessService>
+  </businessServices>
+</businessEntity>
+
+
+
+

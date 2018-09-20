@@ -1,0 +1,41 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd">
+
+    <!-- Populate the OrderHeader -->
+    <jb:bean beanId="orderHeader" class="org.jboss.soa.esb.dvdstore.OrderHeader" createOnElement="order">
+        <jb:value property="orderId"     data="Order/@orderId" />
+        <jb:value property="orderDate"   data="Order/@orderDate" decoder="Calendar">
+            <jb:decodeParam name="format">EEE MMM dd HH:mm:ss z yyyy</jb:decodeParam>
+			<jb:decodeParam name="locale-language">en</jb:decodeParam>
+            <jb:decodeParam name="locale-country">US</jb:decodeParam> 
+        </jb:value>
+        <jb:value property="statusCode"  data="Order/@statusCode" />
+        <jb:value property="netAmount"   data="Order/@netAmount" />
+        <jb:value property="totalAmount" data="Order/@totalAmount" />
+        <jb:value property="tax"         data="Order/@tax" />
+    </jb:bean>
+
+    <!-- Populate the Customer -->
+    <jb:bean beanId="customer" class="org.jboss.soa.esb.dvdstore.Customer" createOnElement="customer">
+        <jb:value property="userName"  data="customer/@userName" />
+        <jb:value property="firstName" data="customer/@firstName" />
+        <jb:value property="lastName"  data="customer/@lastName" />
+        <jb:value property="state"     data="customer/@state" />
+    </jb:bean>
+
+    <!-- Populate the OrderItem list -->
+    <jb:bean beanId="orderItemList" class="java.util.ArrayList" createOnElement="orderlines">
+        <jb:wiring beanIdRef="orderItem" />
+    </jb:bean>
+
+    <!-- Populate the OrderItem instance -->
+    <jb:bean beanId="orderItem" class="org.jboss.soa.esb.dvdstore.OrderItem" createOnElement="orderlines/orderline">
+        <jb:value property="position"  data="orderline/@position" />
+        <jb:value property="quantity"  data="orderline/@quantity" />
+        <jb:value property="productId" data="orderline/product/@productId" />
+        <jb:value property="title"     data="orderline/product/@title" />
+        <jb:value property="price"     data="orderline/product/@price" />
+    </jb:bean>
+    
+</smooks-resource-list>

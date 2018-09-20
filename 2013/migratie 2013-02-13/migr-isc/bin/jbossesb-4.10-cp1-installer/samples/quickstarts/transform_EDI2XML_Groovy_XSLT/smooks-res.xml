@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:edi="http://www.milyn.org/xsd/smooks/edi-1.2.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd"
+                      xmlns:g="http://www.milyn.org/xsd/smooks/groovy-1.1.xsd">
+
+    <!-- Parse the EDI stream... -->
+    <edi:reader mappingModel="/org/jboss/xtrans/edi-to-xml-order-mapping.xml" />
+
+    <!-- Capture and decode the date field into the bean context and then use a groovy
+         scriptlet to replace the single date field with multiple date fields (<time>,
+         <day> etc) that can then be used by the XSLT... -->
+    <jb:bean beanId="dataCapture" class="java.util.HashMap" createOnElement="#document">
+        <jb:value property="date" data="date" decoder="Date">
+            <jb:decodeParam name="format">EEE MMM dd HH:mm:ss z yyyy</jb:decodeParam>
+        </jb:value> 
+    </jb:bean>
+    <g:groovy executeOnElement="date">
+        <g:script>
+            <!--
+            // Get the decoded Date from the "dataCapture" bean (see above).
+            // This is used in the addDateField closure below...
+            def date = getBean("dataCapture").date;
+
+            // Clear the child contents of the element...
+            DomUtils.removeChildren(element);
+            
+            // Define a closure that we'll use for adding formatted date fields
+            // from the captured date...
+            def addDateField = { fieldName, fieldFormat ->
+                Document doc = element.getOwnerDocument();
+                Element newElement = doc.createElement(fieldName);
+                def dateFormatter = new java.text.SimpleDateFormat(fieldFormat);
+                dateFormatter.setTimeZone(java.util.TimeZone.getTimeZone("America/New_York"));
+
+                element.appendChild(newElement);
+                newElement.appendChild(doc.createTextNode(dateFormatter.format(date)));
+            }
+
+            // Apply the "addDateField" closure to the date components...
+            addDateField("time", "HH:mm");
+            addDateField("day", "dd");
+            addDateField("month", "MM");
+            addDateField("year", "yy");
+            -->
+        </g:script>
+    </g:groovy>
+
+    <!-- Convert the US State code into its fully qualified State name... -->
+    <resource-config selector="state">
+        <resource>/org/jboss/xtrans/EnrichmentProcessor.groovy</resource>
+		<param name="enrichments-uri">/org/jboss/xtrans/us-state-codes.properties</param>
+	</resource-config>
+
+    <!-- Use XSLT to transform the order to the desired XML... -->
+    <resource-config selector="order">
+        <resource>org/jboss/xtrans/dispatch-to-handling.xsl</resource>
+		<param name="is-xslt-templatelet">false</param>
+	</resource-config>
+
+</smooks-resource-list>

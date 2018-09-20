@@ -1,0 +1,27 @@
+<project name="transformation-CSV2XML-quickstart" default="deploy" basedir=".">
+
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<property name="additional.deploys" value="smooks-res.xml" />
+			
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	
+	
+	<!-- The ESB itself is started by the default "run" target - defined in base-build.xml  -->
+	
+	<!-- Target for injecting the sample order message for transformation... -->
+	<target name="runtest" depends="compile" 
+		description="runs Test JMS Sender">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.transformcsv2xml.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="SampleOrder.csv" />
+			<classpath refid="exec-classpath" />
+		</java>
+	</target>
+
+</project>

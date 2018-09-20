@@ -1,0 +1,3 @@
+// Capture the original XML message and store it on the message
+// under "entireOrderAsXML"...
+message.getBody().add("entireOrderAsXML", message.getBody().get());

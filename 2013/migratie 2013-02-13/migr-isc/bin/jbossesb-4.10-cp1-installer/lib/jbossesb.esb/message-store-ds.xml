@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<datasources>
+   <local-tx-datasource>
+         <jndi-name>JBossESBDS</jndi-name>
+         <!-- use for in-process db -->
+         <connection-url>jdbc:hsqldb:${jboss.server.data.dir}${/}hypersonic${/}jbossesb</connection-url>
+         <!-- use for server mode (over tcp)
+         <connection-url>jdbc:hsqldb:hsql://${jboss.esb.bind.address}:9001/</connection-url>
+         -->
+         <driver-class>org.hsqldb.jdbcDriver</driver-class>
+         <user-name>sa</user-name>
+         <password></password>
+         <min-pool-size>5</min-pool-size>
+         <max-pool-size>20</max-pool-size>
+         <idle-timeout-minutes>0</idle-timeout-minutes>
+         <prepared-statement-cache-size>32</prepared-statement-cache-size>
+         <depends>jboss:service=Hypersonic,database=jbossesb</depends>
+   </local-tx-datasource>
+   <!-- use for in-process db -->
+   <mbean code="org.jboss.jdbc.HypersonicDatabase" 
+        name="jboss:service=Hypersonic,database=jbossesb">
+        <attribute name="Database">jbossesb</attribute>
+        <attribute name="InProcessMode">true</attribute>
+   </mbean>
+   <!-- use for server mode (over tcp)
+   <mbean code="org.jboss.internal.soa.esb.dependencies.HypersonicDatabase" 
+     name="jboss:service=Hypersonic,database=jbossesb">
+     <attribute name="Port">9001</attribute>
+     <attribute name="BindAddress">${jboss.esb.bind.address}</attribute>     
+     <attribute name="Silent">true</attribute>
+     <attribute name="Database">jbossesb</attribute>
+     <attribute name="Trace">false</attribute>
+     <attribute name="No_system_exit">true</attribute>
+   </mbean>
+   -->
+</datasources>

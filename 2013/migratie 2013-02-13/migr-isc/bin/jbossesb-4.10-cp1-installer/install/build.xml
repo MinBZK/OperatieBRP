@@ -1,0 +1,646 @@
+<project name="JBESB_Installer" default="deploy" basedir=".">
+
+	<!-- Set deployment properties filename -->
+	<property name="org.jboss.esb.deployment.properties" location="deployment.properties"/>
+	<property name="org.jboss.esb.deployment.deploy" location="deploy"/>
+
+	<!-- Load Build Properties File -->
+	<property file="${org.jboss.esb.deployment.properties}"/>
+	
+        <property name="server.dir" value="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}"/>
+        <property name="client.dir" value="${org.jboss.esb.server.home}/client"/>
+	<property name="install.dir" value="${basedir}"/>
+        <property name="conf.dir" value="${server.dir}/conf"/>
+        <property name="deploy.dir" value="${server.dir}/deploy"/>
+        <property name="server.lib.dir" value="${server.dir}/lib"/>
+        <property name="hadeploy.dir" value="${server.dir}/deploy-hasingleton"/>
+
+        <property name="jopr.console.dir" location="${deploy.dir}/admin-console.war"/>
+        <property name="jopr.plugin.base" value="rhq-jbossesb-plugin-"/>
+        <property name="jopr.console.base" value="jopr-embedded-"/>
+
+        <property name="product.dir" location=".."/>
+
+        <property name="registry.config" value="META-INF/persistence.xml, META-INF/esb-juddi-orm.xml"/>
+
+        <!-- Are we embedded in a source hierarchy? -->
+        <condition property="hierarchy.source">
+          <available file="${product.dir}/build-distr.xml"/>
+        </condition>
+        <!-- Are we embedded in a jbossesb distribution hierarchy? -->
+        <condition property="hierarchy.jbossesb">
+          <available file="${product.dir}/Contributors.txt"/>
+        </condition>
+
+        <condition property="hierarchy.recognised">
+          <or>
+            <isset property="hierarchy.source"/>
+            <isset property="hierarchy.jbossesb"/>
+          </or>
+        </condition>
+	
+        <property name="wise.excludes" value="jaxb-xjc-*.jar"/>
+        <property name="wise.includes" value="jaxb-xjc.jar"/>
+
+	<!-- Check for JBossAS5 -->
+    <condition property="jbossas6">
+        <available file="${server.dir}/deployers/weld.deployer"/>
+    </condition>
+
+    <condition property="jbossas5">
+        <available file="${server.dir}/deployers"/>
+    </condition>
+    <!-- Check for JBossAS4.x -->
+    <condition property="jbossas4">
+        <not>
+            <available file="${server.dir}/deployers"/>
+        </not>
+    </condition>
+
+        <fail unless="hierarchy.recognised" message="Cannot determine build hierarchy"/>
+
+        <target name="dependencies.jbossesb" if="hierarchy.jbossesb">
+            <property name="org.jboss.esb.dist" location="${product.dir}"/>
+            <property name="org.jboss.esb.dist.lib" location="${org.jboss.esb.dist}/lib"/>
+        </target>
+
+        <target name="dependencies.source" if="hierarchy.source">
+            <available file="${product.dir}/build/jbossesb" property="dist.exists"/>
+            <fail unless="dist.exists"
+                  message="JBossESB must be built. Please run 'ant dist' in ${product.dir}"/>
+
+            <property name="org.jboss.esb.dist" location="${product.dir}/build/jbossesb"/>
+            <property name="org.jboss.esb.dist.lib" location="${org.jboss.esb.dist}/lib"/>
+            
+        </target>
+
+        <target name="dependencies" depends="dependencies.source, dependencies.jbossesb">
+            <condition property="jopr.console.exists">
+                <available file="${jopr.console.dir}"/>
+            </condition>
+
+            <path id="jopr.as4.plugin">
+                <fileset dir="${org.jboss.esb.dist.lib}" includes="${jopr.plugin.base}*as4.jar"/>
+            </path>
+            <property name="jopr.as4.plugin" refid="jopr.as4.plugin"/>
+            <path id="jopr.as4.console">
+                <fileset dir="${org.jboss.esb.dist.lib}" includes="${jopr.console.base}jbas4*.war"/>
+            </path>
+            <property name="jopr.as4.console" refid="jopr.as4.console"/>
+
+            <path id="jopr.as5.plugin">
+                <fileset dir="${org.jboss.esb.dist.lib}" includes="${jopr.plugin.base}*as5.jar"/>
+            </path>
+            <property name="jopr.as5.plugin" refid="jopr.as5.plugin"/>
+            <path id="jopr.as5.console">
+                <fileset dir="${org.jboss.esb.dist.lib}" includes="${jopr.console.base}jbas5*.war"/>
+            </path>
+            <property name="jopr.as5.console" refid="jopr.as5.console"/>
+
+            <condition property="jopr.plugin.jar" value="${jopr.as5.plugin}" else="${jopr.as4.plugin}">
+                <isset property="jbossas5"/>
+            </condition>
+            <condition property="jopr.console.war" value="${jopr.as5.console}" else="${jopr.as4.console}">
+                <isset property="jbossas5"/>
+            </condition>
+        </target>
+
+        <target name="install.base.console" depends="dependencies" unless="jopr.console.exists">
+            <mkdir dir="${jopr.console.dir}"/>
+            <unzip dest="${jopr.console.dir}" src="${jopr.console.war}"/>
+        </target>
+
+        <target name="deploy.console" depends="install.base.console">
+            <path id="plugin.location">
+                <fileset dir="${jopr.console.dir}" includes="**/jopr-jboss-as-*plugin*.jar"/>
+            </path>
+            <property name="plugin.location" refid="plugin.location"/>
+            <dirname property="plugin.dir" file="${plugin.location}"/>
+            <copy todir="${plugin.dir}" file="${jopr.plugin.jar}"/>
+        </target>
+
+	<target name="deploy" depends="undeploy, internal.deploy, internal.deploy.jbossas5, internal.deploy.jbossas6,
+		deploy.console, deploy.bindings, update.modfilter"   description="Wrapper for internal.deploy"/>
+
+	<target name="check.tomcat.props">
+		<fail unless="org.jboss.esb.tomcat.home" message="Cannot determine target deployment, please check deployment.properties"/>
+	</target>
+	
+	<target name="tomcat"   depends="check.tomcat.props, dependencies, tomcat.compile, tomcat.war.all.deploy"  description="Wrapper for tomcat.war.all.deploy"/>
+	
+        <target name="jms.config.check">
+			<echo message="deploy.dir : ${deploy.dir}"/>
+          <available property="jbm.present"
+            file="${deploy.dir}/jboss-messaging"/>
+          <available property="jbm.present"
+            file="${deploy.dir}/jboss-messaging.sar"/>
+          <available property="jbm.present"
+            file="${deploy.dir}/messaging"/>
+          <available property="jbmq.present"
+            file="${deploy.dir}/jms/jbossmq-service.xml"/>
+          <available property="jbmq.present"
+            file="${hadeploy.dir}/jms/jbossmq-service.xml"/>
+          <available property="hornetq.present"
+              file="${deploy.dir}/hornetq"/>
+          <fail message="Could not determine JMS provider">
+            <condition>
+              <not>
+                <or>
+                  <isset property="jbm.present"/>
+                  <isset property="jbmq.present"/>
+                  <isset property="hornetq.present"/>
+                </or>
+              </not>
+            </condition>
+          </fail>
+        </target>
+
+        <target name="jbmq.config" if="jbmq.present">
+          <property name="messaging.excludes" value="jbm-queue-service.xml,hornetq-jms.xml,no-service.xml"/>
+          <property name="messaging.provider" value="jbmq"/>
+        </target>
+
+        <target name="jbm.config" if="jbm.present">
+          <property name="messaging.excludes" value="jbmq-queue-service.xml,hornetq-jms.xml,no-service.xml"/>
+          <property name="messaging.provider" value="jbm"/>
+        </target>
+
+	    <target name="hornetq.config" if="hornetq.present">
+	      <!-- no-service.xml is included (not excluded) for hornetq because of https://jira.jboss.org/browse/JBAS-7438 -->
+	      <property name="messaging.excludes" value="jbm-queue-service.xml,jbmq-queue-service.xml"/>
+          <property name="messaging.provider" value="hornetq"/>
+	    </target>
+
+        <target name="jms.config" depends="jms.config.check, jbmq.config, jbm.config, hornetq.config"/>
+
+	<target name="check.deploy.props">
+		<condition property="esb.server.configured">
+			<and>
+				<isset property="org.jboss.esb.server.home"/>
+				<isset property="org.jboss.esb.server.config"/>
+			</and>
+		</condition>
+
+		<fail unless="esb.server.configured" message="Cannot determine target deployment, please check deployment.properties"/>
+	</target>
+	
+	<target name="internal.deploy" if="jbossas4" depends="check.deploy.props, dependencies, jms.config" description="Deploys Internal Services to the server">
+	        
+	        <!-- jbossesb.sar -->
+	        <copy todir="${deploy.dir}/jbossesb.sar">
+	            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb.sar"/>
+	        </copy>
+
+	        <!-- jbossesb-registry.sar -->
+	        <copy todir="${deploy.dir}/jbossesb-registry.sar">
+	            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb-registry.sar" excludes="esb.juddi.xml"/>
+	        </copy>
+	        <copy todir="${conf.dir}">
+	            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb-registry.sar" includes="esb.juddi.xml"/>
+	        </copy>
+
+		    <antcall target="deployEsbModules" />
+
+	        <!-- soapui-client.sar -->
+	        <copy todir="${deploy.dir}/soapui-client.sar">
+	            <fileset dir="${org.jboss.esb.dist.lib}/soapui-client.sar" excludes="${messaging.excludes}, META-INF/jboss-service-as5.xml"/>
+	        </copy>
+
+	        <!-- contracts app -->
+	        <copy file="${org.jboss.esb.dist.lib}/contract.war" todir="${deploy.dir}" />
+
+	        <!-- install h2 jar -->
+	        <copy file="${org.jboss.esb.dist.lib}/h2-1.2.124.jar" todir="${server.lib.dir}" overwrite="true"/>
+		
+	        <!-- copy JBoss Identity jars -->
+                <copy todir="${server.lib.dir}" overwrite="true">
+	            <fileset dir="${org.jboss.esb.dist.lib}">
+	                <include name="picketlink-*.jar"/>
+	            </fileset>
+	        </copy>
+		
+	        <ant dir="jbpm-patch" target="replace">
+	            <property name="org.jboss.esb.server.home" value="${org.jboss.esb.server.home}"/>
+	            <property name="org.jboss.esb.server.config" value="${org.jboss.esb.server.config}"/>
+	        </ant> 
+	
+	        <!-- licence file -->
+	        <copy file="${org.jboss.esb.dist.lib}/Licenses.txt" tofile="${org.jboss.esb.server.home}/EsbLicences.txt"/>
+	    </target>
+
+	<target name="internal.deploy.jbossas5.only" if="jbossas5" unless="jbossas6">
+		<property name="deployers.dir" value="${server.dir}/deployers"/>
+
+		<copy file="${org.jboss.esb.dist.lib}/ext/jbossws-native-core.jar" todir="${deployers.dir}/jbossws.deployer" overwrite="true"/>	
+	</target>
+
+	<target name="internal.deploy.jbossas5" if="jbossas5" depends="check.deploy.props, dependencies, jms.config, internal.deploy.jbossas5.only" description="Deploys Internal Services to the JBossAS5">
+	<echo message="Deploy to JBossAS5"/>
+		
+	<!-- jbossesb deployer -->
+        <property name="deployers.dir" value="${server.dir}/deployers"/>
+        <mkdir dir="${deployers.dir}/esb.deployer"/>
+		 
+        <copy todir="${deployers.dir}/esb.deployer/lib" overwrite="true">
+            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb.sar/lib">
+                <include name="jbossesb-rosetta.jar"/>
+            	<include name="jbossesb-config-model-*.jar"/>
+                <include name="camel-core-*.jar"/>
+                <include name="commons-management-*.jar"/>
+                <include name="commons-lang-*.jar"/>
+                <include name="commons-net-*.jar"/>
+                <include name="commons-ssl-*.jar"/>
+                <include name="commons-io-*.jar"/>
+                <include name="groovy-all-*.jar"/>
+                <include name="jsch-*.jar"/>
+		<include name="mvel2-*"/>
+                <include name="mina-core-*.jar"/>
+                <include name="mina-filter-ssl-*.jar"/>
+                <include name="milyn*.jar"/>
+                <include name="freemarker*.jar"/>
+                <include name="ognl*.jar"/>
+                <include name="opencsv*.jar"/>
+                <include name="stringtemplate*.jar"/>
+                <include name="scout-*.jar"/>
+                <include name="stax-api-*.jar"/>
+                <include name="wstx-asl-*.jar"/>
+                <include name="xbean-*.jar"/>
+                <include name="xstream-*.jar"/>
+                <include name="sxc-*.jar"/>
+		
+                <!-- JUDDI V3 dependencies -->
+                <include name="juddi-core-*.jar"/>
+                <include name="juddi-client-*.jar"/>
+                <include name="commons-configuration-*.jar"/>
+                <include name="uddi-ws-*.jar"/>
+            </fileset>
+            <fileset dir="${org.jboss.esb.dist.lib}">
+                <include name="commons-codec-*.jar"/>
+                <include name="jackson-core*jar"/>
+            </fileset>
+        </copy>
+		
+	<copy todir="${deployers.dir}/esb.deployer/META-INF" overwrite="true">
+            <fileset dir="${basedir}">
+                <include name="esb-deployers-jboss-beans.xml"/>
+                <include name="jboss-structure.xml"/>
+            </fileset>
+        </copy>
+		
+	<copy todir="${deployers.dir}/esb.deployer" overwrite="true">
+            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb.sar">
+                <include name="actionArtifactMap.properties"/>
+                <include name="jbossesb-properties.xml"/>
+                <include name="privateKeyStore"/>
+                <include name="publicKeyStore"/>
+            </fileset>
+		</copy>
+		
+        <copy todir="${server.lib.dir}" overwrite="true">
+            <fileset dir="${org.jboss.esb.dist.lib}">
+                <include name="picketlink-*.jar"/>
+                <include name="commons-httpclient-*.jar"/>
+            </fileset>
+        </copy>
+        <property name="org.jboss.esb.server.home" value="${org.jboss.esb.server.home}"/>
+		
+        <!-- jbossesb.sar -->
+        <copy todir="${deploy.dir}/jbossesb.sar" includeemptydirs="false" overwrite="true">
+            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb.sar">
+            	<exclude name="lib/jbossesb-rosetta.jar"/>
+            	<exclude name="lib/jbossesb-config-model-*.jar"/>
+            	<exclude name="lib/camel-core-*.jar"/>
+            	<exclude name="lib/commons-management-*.jar"/>
+		<exclude name="lib/commons-codec-*.jar"/>
+            	<exclude name="lib/commons-lang-*.jar"/>
+            	<exclude name="lib/commons-net-*.jar"/>
+            	<exclude name="lib/commons-ssl-*.jar"/>
+                <exclude name="lib/commons-io-*.jar"/>
+            	<exclude name="lib/groovy-all-*.jar"/>
+            	<exclude name="lib/jsch-*.jar"/>
+            	<exclude name="lib/mina-core-*.jar"/>
+            	<exclude name="lib/mina-filter-ssl-*.jar"/>
+            	<exclude name="lib/milyn-*.jar"/>
+            	<exclude name="lib/ognl-*.jar"/>
+            	<exclude name="lib/freemarker-*.jar"/>
+            	<exclude name="lib/stringtemplate-*.jar"/>
+            	<exclude name="lib/opencsv-*.jar"/>
+            	<exclude name="lib/mvel*.jar"/>
+            	<exclude name="lib/slf4j-api-*.jar"/>
+            	<exclude name="lib/slf4j-log4j12-*.jar"/>
+            	<exclude name="lib/stax-api-*.jar"/>
+            	<exclude name="lib/wstx-asl-*.jar"/>
+            	<exclude name="lib/xbean-*.jar"/>
+            	<exclude name="lib/xstream-*.jar"/>
+		<exclude name="lib/xpp3*.jar"/>
+            	<exclude name="META-INF/jboss-service.xml"/>
+            	<exclude name="actionArtifactMap.properties"/>
+            	<exclude name="jbossesb-properties.xml"/>
+            	<exclude name="privateKeyStore"/>
+            	<exclude name="publicKeyStore"/>
+                <!-- JUDDI V3 dependencies -->
+                <exclude name="lib/juddi-core-*.jar"/>
+                <exclude name="lib/juddi-client-*.jar"/>
+            	<exclude name="lib/scout-*.jar"/>
+                <exclude name="lib/commons-configuration-*.jar"/>
+                <exclude name="lib/uddi-ws-*.jar"/>
+            </fileset>
+        </copy>
+
+	<copy todir="${deploy.dir}"
+		file="${product.dir}/lib/juddiv3.war"/>
+
+
+	<copy tofile="${deploy.dir}/jbossesb.sar/META-INF/jboss-service.xml" file="${basedir}/jboss-service-jbossas5.xml" overwrite="true"/>
+
+        <copy todir="${deploy.dir}/jbossesb-registry.sar" includeemptydirs="false" overwrite="true">
+            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb-registry.sar" excludes="${registry.config}"/>
+        </copy>
+        <copy todir="${deploy.dir}/jbossesb-registry.sar/juddi_config" includeemptydirs="false" overwrite="true">
+            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb-registry.sar" includes="${registry.config}"/>
+        </copy>
+        <copy tofile="${deploy.dir}/jbossesb-registry.sar/META-INF/jboss-service.xml" file="${basedir}/registry-jboss-service-jbossas5.xml" overwrite="true"/>
+        <copy tofile="${deploy.dir}/jbossesb-registry.sar/META-INF/jboss-structure.xml" file="${basedir}/registry-jboss-structure.xml" overwrite="true"/>
+
+		    <antcall target="deployEsbModules" />
+
+	        <!-- soapui-client.sar  -->
+	        <copy todir="${deploy.dir}/soapui-client.sar">
+	            <fileset dir="${org.jboss.esb.dist.lib}/soapui-client.sar" excludes="${messaging.excludes} META-INF/jboss-service-as5.xml"/>
+	        </copy>
+	        <copy tofile="${deploy.dir}/soapui-client.sar/META-INF/jboss-service.xml" file="${org.jboss.esb.dist.lib}/soapui-client.sar/META-INF/jboss-service-as5.xml" overwrite="true"/>
+
+	        <!-- contracts app  -->
+	        <copy file="${org.jboss.esb.dist.lib}/contract.war" todir="${deploy.dir}" />
+
+	        <!-- install h2 jar -->
+	        <copy file="${org.jboss.esb.dist.lib}/h2-1.2.124.jar" todir="${server.lib.dir}" overwrite="true"/>
+		
+	        <ant dir="jbpm-patch" target="replace">
+	            <property name="org.jboss.esb.server.home" value="${org.jboss.esb.server.home}"/>
+	            <property name="org.jboss.esb.server.config" value="${org.jboss.esb.server.config}"/>
+	        </ant> 
+	        
+	        <!-- licence file -->
+	        <copy file="${org.jboss.esb.dist.lib}/Licenses.txt" tofile="${org.jboss.esb.server.home}/EsbLicences.txt"/>
+	    </target>
+	
+	<target name="deployEsbModules">
+        <!-- jbossesb.esb -->
+	    <antcall target="deployEsbModule">
+	    	<param name="esbModuleName" value="jbossesb.esb" />
+	    </antcall>
+	
+        <!-- jbpm.esb -->
+	    <antcall target="deployEsbModule">
+	    	<param name="esbModuleName" value="jbpm.esb" />
+	    </antcall>
+
+        <!-- jbrules.esb -->
+	    <antcall target="deployEsbModule">
+	    	<param name="esbModuleName" value="jbrules.esb" />
+	    </antcall>
+
+        <!-- smooks.esb -->
+	    <antcall target="deployEsbModule">
+	    	<param name="esbModuleName" value="smooks.esb" />
+	    </antcall>
+
+        <!-- spring.esb -->
+	    <antcall target="deployEsbModule">
+	    	<param name="esbModuleName" value="spring.esb" />
+	    </antcall>
+
+        <!-- soap.esb -->
+	    <antcall target="deployEsbModule">
+	    	<param name="esbModuleName" value="soap.esb" />
+	    </antcall>
+            
+        <!-- slsb.esb -->
+	    <antcall target="deployEsbModule">
+	    	<param name="esbModuleName" value="slsb.esb" />
+	    </antcall>
+	</target>
+
+	<target name="deployEsbModule">
+		<echo>Deploying ESB ${esbModuleName} to ${deploy.dir}</echo>
+        
+		<copy todir="${deploy.dir}/${esbModuleName}">
+            <fileset dir="${org.jboss.esb.dist.lib}/${esbModuleName}" excludes="${messaging.excludes}"/>
+        </copy>
+		
+		<xslt style="deployment-xml.xsl" in="${deploy.dir}/${esbModuleName}/META-INF/deployment.xml" out="${deploy.dir}/${esbModuleName}/META-INF/deployment.xml.transformed">
+			<param name="jmsProvider" expression="${messaging.provider}"/>
+		</xslt>
+		
+		<delete file="${deploy.dir}/${esbModuleName}/META-INF/deployment.xml" failonerror="false" />
+		<move file="${deploy.dir}/${esbModuleName}/META-INF/deployment.xml.transformed" tofile="${deploy.dir}/${esbModuleName}/META-INF/deployment.xml" />
+	</target>	
+
+    <target name="internal.deploy.jbossas6" if="jbossas6" description="Deploys Internal Services to the JBossAS6">
+	<copy tofile="${deployers.dir}/esb.deployer/META-INF/esb-deployers-jboss-beans.xml" overwrite="true"
+		file="esb-deployers-jboss-beans-as6.xml"/>
+	<copy todir="${deployers.dir}/esb.deployer/lib">
+		<fileset dir="${org.jboss.esb.dist.lib}/ext" includes="jbossts-common.jar"/>
+	</copy>
+	<move file="${deploy.dir}/jbossesb.sar"
+		tofile="${deploy.dir}/jboss-esb.sar"/> 	
+
+	<!-- Remove old jbpm-identity.jar, replace with the one 
+	     built against hibernate-3.6.0 			-->
+	<delete file="${deploy.dir}/jbpm.esb/jbpm-identity.jar"/>
+	<copy todir="${deploy.dir}/jbpm.esb"
+		file="${org.jboss.esb.dist}/install/as6-extras/jbpm/jbpm-identity-3.2.7.jar"/>
+
+	<!-- Need to copy the velocity JAR into the ws deployer -->
+	<copy todir="${deployers.dir}/jbossws.deployer"
+		file="${org.jboss.esb.server.home}/client/velocity.jar"
+		overwrite="true"/>
+
+	<mkdir dir="${server.dir}/data"/>
+    </target>
+	
+    <target name="undeploy" depends="check.deploy.props, undeploy.bindings, undeploy.jbossas5, undeploy.jbossas6" description="Undeploy ESB components.">
+        <delete dir="${deploy.dir}/jbossesb.sar" quiet="true"/>
+        <delete dir="${deploy.dir}/jbossesb-registry.sar" quiet="true"/>
+        <delete dir="${deploy.dir}/jbossesb.esb" quiet="true"/>
+        <delete dir="${deploy.dir}/jbpm.esb" quiet="true"/>
+        <delete dir="${deploy.dir}/jbrules.esb" quiet="true"/>
+        <delete dir="${deploy.dir}/slsb.esb" quiet="true"/>
+        <delete dir="${deploy.dir}/smooks.esb" quiet="true" />
+        <delete dir="${deploy.dir}/spring.esb" quiet="true"/>
+        <delete dir="${deploy.dir}/soap.esb" quiet="true"/>
+        <delete dir="${deploy.dir}/soapui-client.sar" quiet="true"/>
+        <delete file="${deploy.dir}/contract.war" quiet="true"/>
+        <delete file="${deploy.dir}/esb-console.war" quiet="true" />
+        <delete quiet="true">
+            <fileset dir="${deploy.dir}/admin-console.war" includes="**/rhq-jbossesb-plugin-*.jar"/>
+        </delete>
+        <delete dir="${conf.dir}/action-templates.xml" quiet="true"/>
+        <delete quiet="false">
+			<fileset dir="${server.lib.dir}" >
+                <include name="picketlink-*.jar"/>
+            </fileset>
+        </delete>
+    </target>
+	
+    <target name="undeploy.jbossas5" if="jbossas5" >
+        <delete dir="${server.dir}/deployers/esb.deployer" quiet="true"/>
+        <delete quiet="false">
+            <fileset dir="${server.lib.dir}" >
+                <include name="commons-httpclient-*.jar"/>
+            </fileset>
+        </delete>
+    </target>
+
+    <target name="undeploy.jbossas6" if="jbossas6" >
+        <delete dir="${server.dir}/jboss-esb.sar" quiet="true"/>
+    </target>
+
+
+        <property name="org.jboss.esb.tomcat.55lib"
+            location="${org.jboss.esb.tomcat.home}/common/lib"/>
+        <property name="org.jboss.esb.tomcat.60lib"
+            location="${org.jboss.esb.tomcat.home}/lib"/>
+
+        <available property="org.jboss.esb.tomcat.lib"
+            file="${org.jboss.esb.tomcat.55lib}"
+            value="${org.jboss.esb.tomcat.55lib}"/>
+        <available property="org.jboss.esb.tomcat.lib"
+            file="${org.jboss.esb.tomcat.60lib}"
+            value="${org.jboss.esb.tomcat.60lib}"/>
+
+	<!-- Tomcat war deployment -->
+	<path id="classpath">
+		<fileset dir="${org.jboss.esb.dist.lib}" includes="**/*jar"/>
+		<fileset dir="${org.jboss.esb.tomcat.lib}" includes="**/*jar"/>
+	</path>
+	
+    <target name="tomcat.compile">
+    	<mkdir dir="build"/>
+    	<javac srcdir="./tomcat/src"
+    		   debug="true"
+    		   destdir="tomcat/war/WEB-INF/classes/">
+    	    <classpath refid="classpath"/>
+    	</javac>
+	</target>
+	
+	<target name="tomcat.war.all.deploy" description="Deploys a jbossesb.war to tomcat">
+		<!-- conf -->
+		<copy todir="${org.jboss.esb.tomcat.home}/conf" overwrite="true">
+			<fileset dir="tomcat" includes="jbossesb-properties.xml, jboss-esb.xml, juddi.properties" />
+		</copy>
+		
+		<mkdir dir="${org.jboss.esb.tomcat.home}/webapps/jbossesb"/>
+		<copy todir="${org.jboss.esb.tomcat.home}/webapps/jbossesb" overwrite="true">
+			<fileset dir="tomcat/war/" includes="**/*" />
+		</copy>
+
+		<mkdir dir="${org.jboss.esb.tomcat.home}/webapps/jbossesb/META-INF"/>
+		<copy  file="tomcat/context.xml" overwrite="true"
+			   todir="${org.jboss.esb.tomcat.home}/webapps/jbossesb/META-INF/" />
+
+		<copy todir="${org.jboss.esb.tomcat.home}/webapps/jbossesb/WEB-INF/classes">
+			<fileset dir="tomcat" includes="log4j.xml"/>
+			<fileset dir="${org.jboss.esb.dist.lib}/jbossesb.sar" includes="repository.xml"/>
+		</copy>
+
+		<copy todir="${org.jboss.esb.tomcat.home}/webapps/jbossesb/WEB-INF/lib" overwrite="true">
+            <!-- lib jar files -->
+            <fileset dir="${org.jboss.esb.dist.lib}" includes="juddi-*.jar,jbossall-client-*.jar, log4j.jar,
+                commons-logging-*.jar, xercesImpl-*.jar"/>
+            <!-- ext jar files -->
+            <fileset dir="${org.jboss.esb.dist.lib}/ext" includes="jaxr-api-1.0-SNAPSHOT.jar, commons-discovery.jar,
+            	juddi-*.jar, commons-discovery.jar"/>
+            <!-- jbossesb.sar jar files -->
+            <fileset dir="${org.jboss.esb.dist.lib}/jbossesb.sar/lib" includes="*.jar"
+				excludes="jbossesb-dependencies.jar" />
+		</copy>
+	</target>
+
+    <target name="deployIntros">
+		<echo message="***** DEPRECATED: Sorry, this target has been deprecated.  Please run the 'patch-jbossws' target." />
+	</target>
+	
+	<target name="patch-jbossws" depends="check.deploy.props, dependencies" description="Deploys JAXB Intros to the application server">
+        <echo message="***** DEPRECATED: Patch no longer required!" />
+        <!--
+        <property name="jbossws.location" location="${deploy.dir}/jbossws.sar"/>
+		<property name="jbossws.beans.location" location="${jbossws.location}/jbossws.beans/META-INF/jboss-beans.xml"/>
+		<property name="jbossws.beans.tmp.location" location="${jbossws.location}/jbossws.beans/META-INF/jboss-beans.new.xml"/>
+
+		<property name="jaxb.intros.jar" value="jboss-jaxb-intros.jar"/>
+		<property name="jbossesb.soap.jar" value="jbossesb-soap.jar"/>
+		
+        <available property="jbossws.exists" file="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/lib/jbossws-spi.jar"/>
+		<fail unless="jbossws.exists" message="Please install JBossWS into the Application Server"/>
+		
+		<available property="jaxb.intros.exist" file="${jbossws.location}/${jaxb.intros.jar}" type="file"/>
+		<copy todir="${jbossws.location}">
+			<fileset dir="${org.jboss.esb.dist.lib}" includes="${jaxb.intros.jar}"/>
+			<fileset dir="${org.jboss.esb.dist.lib}/soap.esb" includes="${jbossesb.soap.jar}"/>
+		</copy>
+		
+		<antcall target="apply-jbossws-xslt" />
+		-->
+	</target>
+
+	<target name="apply-jbossws-xslt" unless="jaxb.intros.exist">
+		<xslt style="jaxb.xslt" in="${jbossws.beans.location}" out="${jbossws.beans.tmp.location}"/>
+		<move file="${jbossws.beans.tmp.location}" tofile="${jbossws.beans.location}"/>
+	</target>
+
+	<target name="init.bindings.props" depends="check.deploy.props, dependencies">
+	        <condition property="bindings.dir" value="${org.jboss.esb.server.home}/docs/examples/binding-manager" else="${conf.dir}/bindingservice.beans/META-INF">
+	            <available file="${org.jboss.esb.server.home}/docs/examples/binding-manager"/>
+	        </condition>
+	   
+	        <condition property="bindings.location" value="${bindings.dir}/sample-bindings.xml" else="${bindings.dir}/bindings-jboss-beans.xml">
+	            <available file="${org.jboss.esb.server.home}/docs/examples/binding-manager"/>
+	        </condition> 
+
+	        <property name="bindings.tmp.location" location="${bindings.location}.tmp"/>
+	        <property name="bindings.backup.location" location="${bindings.location}.bak"/>
+	        <available property="bindings.exist" file="${bindings.backup.location}" type="file"/>
+	    </target>
+
+	<target name="deploy.bindings" depends="init.bindings.props, deploy.bindings.as4, deploy.bindings.as5" unless="bindings.exist" description="Deploys ESB Bindings into the application server"/>
+	
+	<target name="deploy.bindings.as4" if="jbossas4" description="Deploys ESB Bindings into the AS 4.x application server">
+		<xslt style="bindings.xslt" in="${bindings.location}" out="${bindings.tmp.location}"/>
+		<move file="${bindings.location}" tofile="${bindings.backup.location}"/>
+		<move file="${bindings.tmp.location}" tofile="${bindings.location}"/>
+	</target>
+	
+	<target name="deploy.bindings.as5" if="jbossas5" description="Deploys ESB Bindings into the AS 5 application server">
+        <xslt style="bindings-as5.xslt" in="${bindings.location}" out="${bindings.tmp.location}"/>
+        <move file="${bindings.location}" tofile="${bindings.backup.location}"/>
+        <move file="${bindings.tmp.location}" tofile="${bindings.location}"/>
+    </target>
+
+	<target name="undeploy.bindings" depends="init.bindings.props" if="bindings.exist" description="Undeploy ESB Bindings from the application server">
+		<move file="${bindings.backup.location}" tofile="${bindings.location}"/>
+	</target>
+
+	<target name="update.modfilter" if="jbossas5" description="Update the ModificationCheckerFilter in the profile.xml to include the jboss-esb.xml file">
+		<property name="profile.xml.file" location="${server.dir}/conf/bootstrap/profile.xml" />        
+		<property name="profile.xml.file.pre.update" location="${profile.xml.file}.pre.esb.modfilter.update" />  
+		
+		<!-- Only apply the search and replace if not done already, which is signaled by the presence of the file named "profile.xml.pre.esb.modfilter.update" -->
+		<condition property="apply.modfilter.update">
+			<and>
+	            <available file="${profile.xml.file}"/>
+	            <not><available file="${profile.xml.file.pre.update}"/></not>
+		    </and>
+        </condition>
+		<antcall target="apply.modfilter.replace" />
+	</target>
+	<target name="apply.modfilter.replace" if="apply.modfilter.update" description="Apply the ModificationCheckerFilter search and replace on the profile.xml to include the jboss-esb.xml file">
+		<!-- Backup the original profile.xml -->
+		<copy file="${profile.xml.file}" tofile="${profile.xml.file.pre.update}" />
+		
+		<!-- Apply the search and replace -->
+		<replace file="${profile.xml.file}" token=".*/(application|web|ejb-jar|" value=".*/(application|web|ejb-jar|jboss-esb|" />
+	</target>
+	
+</project>

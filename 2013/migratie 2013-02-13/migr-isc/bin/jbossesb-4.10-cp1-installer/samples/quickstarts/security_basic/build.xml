@@ -1,0 +1,50 @@
+<project name="Quickstart_SecurityBasic" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+    <property name="username" value="esbuser" />
+    <property name="password" value="esbpassword" />
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="runtest" depends="compile" 
+		description="sends a HTTP request to the JBossRemoting gateway">
+		<echo>Http Client</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.securitybasic.test.HttpClient" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="http"/>
+			<arg value="localhost"/>
+			<arg value="9888"/>
+			<arg value="${username}"/>
+			<arg value="${password}"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+
+	 <target name="sendesb" depends="compile" description="send esb Message to esb service">
+        <echo>Send esb message to esb service and get response</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.securitybasic.test.SendEsbMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="Security"/> <!--  service category -->
+            <arg value="SimpleListenerSecured"/>  <!--  service name -->
+            <arg value="Hello Secured World"/> <!--  Message text -->
+            <arg value="${username}"/> <!--  username text -->
+            <arg value="${password}"/> <!--  password text -->
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+	<target name="quickstart-specific-deploys">
+        <copy todir="${org.jboss.esb.server.server}/conf/props" overwrite="true">
+            <fileset dir="${basedir}">
+                <include name="esb-users.properties"/>
+                <include name="esb-roles.properties"/>
+            </fileset>
+        </copy>
+    </target>
+	
+</project>

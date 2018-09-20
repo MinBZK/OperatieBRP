@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="uc311">
+
+	<!--  -->
+	<!--  -->
+	<!-- START -->
+	<!--  -->
+	<!--  -->
+	
+	<start-state name="START">
+		<transition to="OPVRAGEN PERSOONSLIJST">
+			<script>
+				<expression>
+					bronGemeente = input.getBrpGemeente().getFormattedStringCode();
+				</expression>
+				<variable name='bronGemeente' access='write' />
+				<variable name='input' access='read' />
+			</script>
+		</transition>
+	</start-state>
+
+	<!--  -->
+	<!--  -->
+	<!-- OPVRAGEN PL -->
+	<!--  -->
+	<!--  -->
+
+	<node name="OPVRAGEN PERSOONSLIJST">
+		<transition to="2-1. Maak opvragen PL bericht">
+			<script>
+				<expression>
+					functioneleStap="uc311.opvragen.stap";
+					leesUitBrpVerzoekHerhalingTimeout=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("sync.timeout");
+					leesUitBrpVerzoekHerhalingMaxHerhalingen=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsInteger("sync.herhalingen");
+				</expression>
+				<variable name='functioneleStap' access='write' />
+				<variable name='leesUitBrpVerzoekHerhalingTimeout' access='write' />
+				<variable name='leesUitBrpVerzoekHerhalingMaxHerhalingen' access='write' />
+			</script>
+		</transition>
+	</node>
+
+	<node name="2-1. Maak opvragen PL bericht">
+	    <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				uc311MaakLeesUitBrpVerzoekAction
+			</bean>
+		</action>
+		<transition to="2-2. Opvragen PL">
+			<script>
+				<expression>
+					leesUitBrpVerzoekDueDate = nl.moderniseringgba.isc.jbpm.TimerUtil.getDueDate(leesUitBrpVerzoekHerhalingTimeout);
+				</expression>
+				<variable name='leesUitBrpVerzoekDueDate' access='write' />
+				<variable name='leesUitBrpVerzoekHerhalingTimeout' access='read' />
+			</script>
+		</transition>
+	</node>
+
+	<node name="2-2. Opvragen PL">
+		<action class="org.jboss.soa.esb.services.jbpm.actionhandlers.EsbActionHandler">
+			<esbServiceName>
+				Sync-Outbound
+			</esbServiceName>
+			<esbCategoryName>
+				ISC
+			</esbCategoryName>
+			<bpmToEsbVars>
+				<mapping bpm="leesUitBrpVerzoekBericht" esb="BODY_CONTENT"></mapping>
+			</bpmToEsbVars>
+			<esbToBpmVars>
+				<mapping bpm="syncBericht" esb="BODY_CONTENT"></mapping>
+			</esbToBpmVars>
+		</action>
+		<timer name="herhaalbericht" transition="timeout" duedate="#{leesUitBrpVerzoekDueDate}"></timer>
+		<transition to="2-4. Bepaal antwoord opvragen PL"></transition>
+		<transition to="2-3. Controleer herhalingen opvragen PL" name="timeout">
+			<script>
+				<expression>
+				    if(leesUitBrpVerzoekHerhaling == null) {
+				    	leesUitBrpVerzoekHerhaling = 1;
+				    } else {
+				        leesUitBrpVerzoekHerhaling = leesUitBrpVerzoekHerhaling + 1;
+				    }
+				</expression>
+				<variable name='leesUitBrpVerzoekHerhaling' access='read,write' />
+			</script>
+		</transition>
+	</node>
+
+	<decision name="2-3. Controleer herhalingen opvragen PL">
+		<transition to="2-1. Maak opvragen PL bericht"></transition>
+		<transition to="Foutafhandeling" name="2a. Maximum herhalingen">
+			<condition expression="#{leesUitBrpVerzoekHerhaling &gt; leesUitBrpVerzoekHerhalingMaxHerhalingen}"></condition>
+			<script>
+				<expression>
+				    foutafhandelingFout="uc311.opvragen.maximumherhalingen";
+				    foutafhandelingFoutmelding=null;
+				    
+					foutafhandelingIndicatieBeheerder=true;
+					foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					foutafhandelingPaden.put("end", "Proces (foutief) beeindigen", true, true, false);
+					foutafhandelingPaden.put("restartAtOpvragen", "Opnieuw PL opvragen", false, false, false);
+				</expression>
+				<variable name='foutafhandelingFout' access='write' />
+				<variable name='foutafhandelingFoutmelding' access='write' />
+				<variable name='foutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='foutafhandelingPaden' access='write' />
+			</script>		
+		</transition>
+	</decision>
+
+	<decision name="2-4. Bepaal antwoord opvragen PL">
+		<transition to="2-5. Controleer antwoord opvragen PL">
+		    <condition expression="#{syncBericht.berichtType == 'LeesUitBrpAntwoord'}"></condition>
+			<script>
+				<expression >
+					leesUitBrpAntwoordBericht=syncBericht;
+				</expression>
+				<variable name='leesUitBrpAntwoordBericht' access='write' />
+				<variable name='syncBericht' access='read' />
+			</script>			
+		</transition>
+		<transition to="Foutafhandeling" name="2b. Technische fout">
+			<script>
+				<expression>
+				    foutafhandelingFout="uc301.opvragen.technischefout";
+				    foutafhandelingFoutmelding=syncBericht.toString();
+				    
+					foutafhandelingIndicatieBeheerder=true;
+					foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					foutafhandelingPaden.put("end", "Proces (foutief) beeindigen", true, true, false);
+					foutafhandelingPaden.put("restartAtOpvragen", "Opnieuw PL opvragen", false, false, false);
+				</expression>
+				<variable name='foutafhandelingFout' access='write' />
+				<variable name='syncBericht' access='read' />
+				<variable name='foutafhandelingFoutmelding' access='write' />
+				<variable name='foutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='foutafhandelingPaden' access='write' />
+			</script>		
+		</transition>
+	</decision>
+	
+	<decision name="2-5. Controleer antwoord opvragen PL">
+		<handler class="nl.moderniseringgba.isc.jbpm.spring.SpringDecisionHandler" config-type="bean">
+			<bean>
+				uc311ControleerLeesUitBrpAntwoordDecision
+			</bean>
+		</handler>		
+		<transition to="2-6. Bepaal gemeenten"></transition>
+		<transition to="Foutafhandeling" name="2c. Fout">
+			<script>
+				<expression>
+				    foutafhandelingFout="uc311.opvragen.fout";
+				    foutafhandelingFoutmelding=leesUitBrpAntwoordBericht.getFoutmelding();
+				    
+					foutafhandelingIndicatieBeheerder=true;
+					foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					foutafhandelingPaden.put("end", "Proces (foutief) beeindigen", true, true, false);
+					foutafhandelingPaden.put("restartAtOpvragen", "Opnieuw PL opvragen", false, false, false);
+				</expression>
+				<variable name='foutafhandelingFout' access='write' />
+				<variable name='leesUitBrpAntwoordBericht' access='read' />
+				<variable name='foutafhandelingFoutmelding' access='write' />
+				<variable name='foutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='foutafhandelingPaden' access='write' />
+			</script>		
+		</transition>
+	</decision>
+
+	<process-state name="Foutafhandeling">
+		<sub-process name="foutafhandeling" binding="late"></sub-process>
+		<variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+		<variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+		<variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+		<variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+		<variable access="read" mapped-name="lo3Bericht" name="lo3Bericht"></variable>
+		<variable access="read" mapped-name="blokkeringBericht" name="blokkeringBericht"></variable>
+		<variable access="read" mapped-name="brpBericht" name="input"></variable>
+		<variable access="read,write"  mapped-name="restart" name="restart"></variable>
+		<variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+		<transition to="RESTART"></transition>
+	</process-state>
+
+	<decision name="RESTART">
+		<transition to="Incorrect afgerond">
+			<condition expression="#{restart == 'end'}"></condition>
+		</transition>
+		<transition to="OPVRAGEN PERSOONSLIJST" name="Opnieuw persoonslijst opvragen">
+			<condition expression="#{restart == 'restartAtOpvragen'}"></condition>
+		</transition>
+	</decision>
+
+	<end-state name="Incorrect afgerond"></end-state>
+
+	<!--  -->
+	<!--  -->
+	<!-- GEMEENTEN FORK -->
+	<!--  -->
+	<!--  -->
+
+	<node name="2-6. Bepaal gemeenten">
+	    <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				uc311BepaalGemeentenAction
+			</bean>
+		</action>		
+		<transition to="WA01 (PER GEMEENTE)" name="gemeente"></transition>
+		<transition to="Controleer alle gemeenten verwerkt" name="controle"></transition>
+	</node>
+
+	<!--  -->
+	<!--  -->
+	<!-- WA01 -->
+	<!--  -->
+	<!--  -->
+
+	<node name="WA01 (PER GEMEENTE)">
+		<transition to="3-1. Maak Wa01 bericht">
+			<script>
+				<expression>
+					functioneleStap="uc311.wa01.stap";
+					wa01HerhalingTimeout=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("vospg.timeout");
+					wa01HerhalingMaxHerhalingen=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsInteger("vospg.herhalingen");
+				</expression>
+				<variable name='functioneleStap' access='write' />
+				<variable name='wa01HerhalingTimeout' access='write' />
+				<variable name='wa01HerhalingMaxHerhalingen' access='write' />
+			</script>
+		</transition>
+	</node>
+
+	<node name="3-1. Maak Wa01 bericht">
+		<action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				uc311MaakWa01BerichtAction
+			</bean>
+		</action>
+		<transition to="3-2. Verstuur Wa01">
+			<script>
+				<expression>
+					wa01DueDate = nl.moderniseringgba.isc.jbpm.TimerUtil.getDueDate(wa01HerhalingTimeout);
+				</expression>
+				<variable name='wa01DueDate' access='write' />
+				<variable name='wa01HerhalingTimeout' access='read' />
+			</script>
+		</transition>
+	</node>
+
+	<node name="3-2. Verstuur Wa01">
+		<action class="org.jboss.soa.esb.services.jbpm.actionhandlers.EsbActionHandler">
+			<esbServiceName>
+				VOSPG-Outbound
+			</esbServiceName>
+			<esbCategoryName>
+				ISC
+			</esbCategoryName>
+			<bpmToEsbVars>
+				<mapping bpm="wa01Bericht" esb="BODY_CONTENT"></mapping>
+			</bpmToEsbVars>
+			<esbToBpmVars>
+				<mapping bpm="vospgBericht" esb="BODY_CONTENT"></mapping>
+			</esbToBpmVars>
+		</action>
+		<timer name="herhaalbericht" transition="timeout" duedate="#{wa01DueDate}"></timer>
+		<transition to="4-2. Bepaal antwoord Wa01"></transition>
+		<transition to="4-1. Controleer herhalingen Wa01" name="timeout">
+			<script>
+				<expression>
+				    if(wa01Herhaling == null) {
+				    	wa01Herhaling = 1;
+				    } else {
+				        wa01Herhaling = wa01Herhaling + 1;
+				    }
+				</expression>
+				<variable name='wa01Herhaling' access='read,write' />
+			</script>
+		</transition>
+	</node>
+
+	<decision name="4-1. Controleer herhalingen Wa01">
+		<handler class="nl.moderniseringgba.isc.jbpm.spring.SpringDecisionHandler" config-type="bean">
+			<bean>
+				uc311ControleerHerhalingenWa01Decision
+			</bean>
+		</handler>		
+		<transition to="3-1. Maak Wa01 bericht"></transition>
+		<transition to="Beoordeel situatie" name="4a. Maximum herhalingen">
+			<!-- 
+			<condition expression="#{wa01Herhaling &gt; wa01HerhalingMaxHerhalingen}"></condition>
+			 -->
+			<script>
+				<expression>
+				    foutafhandelingFout="uc301.wa01.maximumherhalingen";
+				    foutafhandelingFoutmelding=null;
+				    
+					foutafhandelingIndicatieBeheerder=true;
+					foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					foutafhandelingPaden.put("end", "Proces (foutief) beeindigen", true, true, false);
+					foutafhandelingPaden.put("restartAtWa01", "Opnieuw Wa01 versturen", false, false, false);
+				</expression>
+				<variable name='foutafhandelingFout' access='write' />
+				<variable name='foutafhandelingFoutmelding' access='write' />
+				<variable name='foutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='foutafhandelingPaden' access='write' />
+			</script>		
+		</transition>
+	</decision>
+
+	<decision name="4-2. Bepaal antwoord Wa01">
+	
+		<transition to="EINDE">
+		    <condition expression="#{vospgBericht.berichtType == 'Null'}"></condition>
+			<script>
+				<expression >
+					nullBericht=vospgBericht;
+				</expression>
+				<variable name='nullBericht' access='write' />
+				<variable name='vospgBericht' access='read' />
+			</script>			
+		</transition>
+		<transition to="Beoordeel situatie" name="4b. Technische fout">
+			<script>
+				<expression>
+				    foutafhandelingFout="uc311.wa01.technischefout";
+					vospgBericht=nl.moderniseringgba.isc.jbpm.FoutUtil.technischeFout(vospgBericht);
+				    foutafhandelingFoutmelding=vospgBericht.getMelding();
+				    
+					foutafhandelingIndicatieBeheerder=true;
+					foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					foutafhandelingPaden.put("end", "Proces (foutief) beeindigen", true, true, false);
+				</expression>
+				<variable name='foutafhandelingFout' access='write' />
+				<variable name='foutafhandelingFoutmelding' access='write' />
+				<variable name='foutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='foutafhandelingPaden' access='write' />
+			</script>		
+		</transition>
+		<transition to="Beoordeel situatie" name="4c. Protocol fout">
+			<condition expression="#{vospgBericht.berichtType == 'Pf01' || vospgBericht.berichtType == 'Pf02' || vospgBericht.berichtType == 'Pf03'}"></condition>
+			<script>
+				<expression>
+				    foutafhandelingFout="uc311.wa01.protocolfout";
+				    foutafhandelingFoutmelding=null;
+				    
+					foutafhandelingIndicatieBeheerder=true;
+					foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					foutafhandelingPaden.put("end", "Proces (foutief) beeindigen", false, true, false);
+				</expression>
+				<variable name='foutafhandelingFout' access='write' />
+				<variable name='foutafhandelingFoutmelding' access='write' />
+				<variable name='foutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='foutafhandelingPaden' access='write' />
+			</script>		
+		</transition>
+	</decision>
+
+	<process-state name="Beoordeel situatie">
+		<sub-process name="foutafhandeling" binding="late"></sub-process>
+		<variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+		<variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+		<variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+		<variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+		<variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+		<variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+		<variable access="read" mapped-name="lo3Bericht" name="lo3Bericht"></variable>
+		<variable access="read" mapped-name="blokkeringBericht" name="blokkeringBericht"></variable>
+		<variable access="read" mapped-name="brpBericht" name="input"></variable>
+		<variable access="read,write"  mapped-name="restart" name="restart"></variable>
+		<variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+		<transition to="BEOORDELING"></transition>
+	</process-state>
+
+	<decision name="BEOORDELING">
+		<transition to="EINDE">
+			<condition expression="#{restart == 'end'}"></condition>
+		</transition>
+		<transition to="3-1. Maak Wa01 bericht" name="8a. Opnieuw Wa01 versturen">
+			<condition expression="#{restart == 'restartAtWa01'}"></condition>
+		</transition>
+	</decision>
+
+	<node name="EINDE">
+		<transition to="Controleer alle gemeenten verwerkt"></transition>
+	</node>
+	
+	<!--  -->
+	<!--  -->
+	<!-- GEMEENTEN JOIN -->
+	<!--  -->
+	<!--  -->
+
+	<node name="Controleer alle gemeenten verwerkt">
+	    <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				uc311ControleerGemeentenAction
+			</bean>
+		</action>		
+		<transition to="Afgerond"></transition>
+	</node>
+
+	<!--  -->
+	<!--  -->
+	<!-- EINDE -->
+	<!--  -->
+	<!--  -->
+
+	<end-state name="Afgerond"></end-state>
+
+
+</process-definition>

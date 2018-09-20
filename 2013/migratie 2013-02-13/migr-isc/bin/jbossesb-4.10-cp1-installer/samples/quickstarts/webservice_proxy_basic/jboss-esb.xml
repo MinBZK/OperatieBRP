@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    parameterReloadSecs="5">
+
+	<services>
+		<service category="Proxy_Basic" name="Proxy"
+				 description="Basic WebService Proxy"
+				 invmScope="GLOBAL">
+			<listeners>
+				<http-gateway name="Proxy_Basic-GwListener" />
+			</listeners>
+			<actions mep="RequestResponse">
+				<action name="echo-request"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message before SOAPProxy" />
+				</action>
+				<action name="proxy"
+						class="org.jboss.soa.esb.actions.soap.proxy.SOAPProxy">
+						<property name="wsdl" value="internal://jboss.ws:context=Quickstart_webservice_proxy_basic_ws,endpoint=HelloWorldWS"/>
+				</action>
+				<action name="echo-response"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message after SOAPProxy" />
+				</action>
+			</actions>
+		</service>
+	</services>
+
+</jbossesb>

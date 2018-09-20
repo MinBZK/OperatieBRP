@@ -1,0 +1,112 @@
+<project name="Quickstart_Aggregator" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+			
+	<property name="additional.deploys" value="smooks-res.xml" />
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+  <target name="run" depends="compile"
+	description="runs the inbound Router/splitter">	  
+       <echo>Inbound Router/Splitter:</echo>
+			 <java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">  
+				<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		  	   	<arg value="${basedir}/inbound_splitter/jbossesb.xml"/>
+		  		<classpath refid="exec-classpath"/>
+		   </java>
+  </target>
+	
+  <target name="runRedService" depends="compile"
+	description="run Red Service">	  
+ 	     <echo>Red Service:</echo>
+			 <java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">  
+				<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		  	   	<arg value="${basedir}/red_service/jbossesb.xml"/>
+		  		<classpath refid="exec-classpath"/>
+		   </java>
+  </target>
+	
+  <target name="runBlueService" depends="compile"
+	description="run Blue service">	  
+ 	     <echo>Blue Service:</echo>
+			 <java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true"> 
+				<sysproperty key="log4j.configuration" value="${log4j.xml}"/>	 
+		  	   	<arg value="${basedir}/blue_service/jbossesb.xml"/>
+		  		<classpath refid="exec-classpath"/>
+		   </java>
+  </target>
+	
+  <target name="runGreenService" depends="compile"
+	description="run Green Service">	  
+ 	     <echo>Green Service:</echo>
+			 <java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">  
+				<sysproperty key="log4j.configuration" value="${log4j.xml}"/>	
+		  	   	<arg value="${basedir}/green_service/jbossesb.xml"/>
+		  		<classpath refid="exec-classpath"/>
+		   </java>
+  </target>
+  
+  <target name="runAggregatorService" depends="compile">	  
+ 	     <echo>Aggregator Service:</echo>
+			 <java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">
+				<sysproperty key="log4j.configuration" value="${log4j.xml}"/>  
+		  	   	<arg value="${basedir}/aggregation_service/jbossesb.xml"/>
+		  		<classpath refid="exec-classpath"/>
+                 <!-- jvmarg value="-Xdebug"/>
+                 <jvmarg value="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y"/ -->
+		   </java>
+  </target>
+  	
+  <target name="runtest" depends="compile"
+  	description="will send an JMS message to the ESB">
+     <echo>Runs Test JMS Sender</echo>
+     <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.aggregator.test.SendJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+  		<classpath refid="exec-classpath"/>
+     </java>
+  </target>  
+	
+  <target name="receiveBlue" depends="compile"
+	description="receiveBlue">
+	 <echo>Runs Test JMS Receiver</echo>
+	 <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.aggregator.test.ReceiveJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	  	<arg value="queue/quickstart_Aggregator_Blue_Alert"/>
+  		<classpath refid="exec-classpath"/>
+	 </java>
+  </target>  
+	
+  <target name="receiveRed" depends="compile"
+	description="receiveRed">
+	 <echo>Runs Test JMS Receiver</echo>
+	 <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.aggregator.test.ReceiveJMSMessage" failonerror="true">
+	        <sysproperty key="log4j.configuration" value="${log4j.xml}"/>	
+	   	<arg value="queue/quickstart_Aggregator_Red_Alert"/>
+  		<classpath refid="exec-classpath"/>
+	 </java>
+   </target>  
+	
+  <target name="receiveGreen" depends="compile"
+	description="receiveGreen">
+	 <echo>Runs Test JMS Receiver</echo>
+	 <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.aggregator.test.ReceiveJMSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>	
+	   	<arg value="queue/quickstart_Aggregator_Green_Alert"/>
+  		<classpath refid="exec-classpath"/>
+	 </java>
+   </target> 
+	
+	<target name="deploy">
+		<echo>
+				######################################################################
+				This quickstart can only run in standalone mode. 
+				Please run 'ant help' for information about how to run this quickstart
+				######################################################################
+		</echo>
+	</target>
+	
+</project>

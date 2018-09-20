@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN" "http://www.springframework.org/dtd/spring-beans.dtd">
+
+<beans>
+
+    <!-- The ConfigurationBeanPostProcessor will merge all SystemProperties instances into one encompassing instance. -->
+    <bean class="nl.gba.gbav.impl.util.configuration.ConfigurationBeanPostProcessor" id="configurationBeanPostProcessor"/>
+  
+  
+    <!-- Configure from which .properties file Spring gets its information -->
+    <bean id="propertyConfigurer"
+        class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations">
+            <list>
+                <value>classpath:ggo-viewer.properties</value>
+            </list>
+        </property>
+    </bean>
+  
+    <bean class="nl.ictu.spg.common.util.SystemProperties" id="CheckerPropertiesExtra">
+        <property name="properties">
+            <props>
+                <prop key="bcmEnabled">${ggoviewer.bcm.enabled}</prop>
+                    <prop key="bcmDescriptionsPath">${ba.bcm.descriptions.path}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <import resource="classpath:checkerProps.xml" />
+</beans>

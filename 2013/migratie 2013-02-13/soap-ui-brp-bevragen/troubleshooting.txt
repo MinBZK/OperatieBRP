@@ -1,0 +1,38 @@
+Dit document beschrijft enkele oplossingen voor het geval de BRP Bevraag Service op server migr-mgmt01.modernodam.nl niet functioneert. Er wordt ingegaan op de infrastructuur van de certificaten, de configuratie in de database, het herstarten van de server.
+
+Keystores.
+De servercertificaten voor SOAP-UI en de BRP server zijn reeds gemaakt. Mochten deze opnieuw gegenereerd moeten worden (bijvoorbeeld als ze verlopen), is deze sectie interessant.
+
+* verwijder de bestaande privatestore.jks (of maak een backup)
+* voer het volgende commando uit om een nieuw keypair te maken en in een nieuwe keystore te plaatsen. Het is hier belangrijk om RSA te gebruiken als algoritme.
+   keytool -genkeypair -keystore privatestore.jks -alias serverkey -keyalg RSA
+   
+   De gevraagde namen kunnen naar wens worden ingevuld. Als wachtwoord is het handig om dit gelijk te houden aan de soap-ui configuratie. ('privatestore' voor de keystore en 'serverkeypassword' voor de key). 
+* exporteer het publieke deel van het sleutelpaar naar een certificaat:
+   keytool -exportcert -keystore privatestore.jks -alias serverkey -file soapui-public.crt
+* kopieer het geexporteerde certificaat naar de server (bijv. met WinSCP) en importeer het daar in de publicstore.jks.
+  De publicstore.jks moet te vinden zijn op de volgende locatie. Let er op dat de keystores niet alleen in submap 'attic' staan:
+    /usr/local/tomcat/webapps/webservice-0.3.1/WEB-INF/classes
+  Om het certificaat te importeren:
+    keytool -import -keystore publicstore.jks -file <verwijzing naar soapui-public.crt> -alias soapui
+  Hierbij maakt het gekozen alias niet zo veel uit, het gaat er om dat de server het certificaat vertrouwd.
+* Verwijder eventueel de logging in /usr/local/tomcat/logs en herstart de server: /ect/init.d/tomcat restart
+
+
+Installeren van het certificaat in de BRP database.
+De voorbeeldquery hieronder dient te worden aangepast. Subject, Serial en Signature kunnen allen uit het soapui-public.crt gehaald worden:
+
+INSERT INTO autaut.certificaat (subject, serial, signature) VALUES ('CN=Whitebox, L=Den Haag, ST=Zuid-Holland, C=NL, EMAILADDRESS=support@modernodam.nl, OU=BRP, O=BZK', 9496652140080262580, '5775aa17439357ce8b096c6e2436e495995afc8b2b68defc5a8885c1c85ce2055002e34e3c1d7d32fb052fce7a35a2548e6cdaaf01e249752beb6e84aa912adb3a1beba55ca0056167d1067eca6d86be484d5bcb6f0d49bf372e910f7c7120ae4c5c0cd79aea31c4a2930fb171afdbca2440c8021a9368b31d39c879e7ec738116dd5f31c2513f92acbdc36f518fbb79f2ea091acd14f7030c532cc7677655763a6b4c28548c39c54f5ab38130c204704dcd860cf2b7f35290485d071f6f8c94b0007363839fb487913fd529163d855b4413141576bcc028aacf1e088b59f2b71e684bc03d177a403e8ab62646f8ed16def1874fd7d6007e866829be708f67af');
+
+Overige databaseproblemen:
+* Voor een nuttige vulling die het mogelijk maakt voor een afnemer om persoonsgegevens op te halen via de webservice, dient het brp-vulling.sql script te worden uitgevoerd op de
+  database (migr-conversie.modernodam.nl).
+* foreign keys op partij dienen te worden verwijderd uit alle schema's behalve Kern. Als deze aan blijven staan kunnen problemen optreden in Jenkins, omdat hier tests op de database
+  draaien die het kern schema leeg maken voordat de test wordt uitgevoerd.
+  
+Uitzetten van lockingmechanisme.
+Als de webservice op een normale manier bevraagd kan worden, maar er komen geen resultaten terug, zou dit kunnen komen doordat BRP locks zet op de database in een postgres 9.1 specifieke manier. Omdat project Migratie de BRP Bevraag Service op een manier gebruikt, waarvoor locks niet nodig zijn, kan dit uitgezet worden. In de spring configuratie van business-0.3.1 wordt een aantal stappen gedefinieerd. De stap die de locking doet kan worden uitgecommentarieerd. In de bijgeleverde jar business-0.3.1.jar is dit reeds gedaan. Overschrijf de file in /usr/local/tomcat/webapps/webservice-0.3.1/WEB-INF/lib met de business-0.3.1.jar in de root van dit project.
+
+Overige tips:
+De logging kan worden aangepast in /usr/local/tomcat/lib/log4j.xml. Als de levels hier op trace worden gezet kan worden nagegaan welke database queries worden uitgevoerd. (Inclusief welke waarden worden gebind aan de prepared statements, welke op debug level niet worden getoond).
+

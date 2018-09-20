@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                     xmlns:ftl="http://www.milyn.org/xsd/smooks/freemarker-1.1.xsd"
+                     xmlns:esbr="http://www.jboss.org/xsd/jbossesb/smooks/routing-1.0.xsd">
+
+    <!--
+        At the end of every order-item, generate an <ord> split message for the "02_XML" Service
+        and bind it back into the bean context under a bean ID of "02_XML_OrderItem".  02_XML_OrderItem
+        will be router by the bean router (configured below)..
+     -->
+    <ftl:freemarker applyOnElement="order-item">
+        <ftl:template><!--<ord id="${orderDetail.orderNum?c}" date="${orderDetail.date?string("yyyy-MM-dd")}">
+    <customer>
+        <name>${accounts[0].LASTNAME}, ${accounts[0].FIRSTNAME}</name>
+        <addr1>${accounts[0].ADDR1}</addr1>
+        <addr2>${accounts[0].ADDR2}</addr2>
+        <city>${accounts[0].CITY}</city>
+        <state>${accounts[0].STATE}</state>
+        <zip>${accounts[0].ZIP}</zip>
+    </customer>
+    <productid>${orderItem.productId}</productid>
+    <quantity>${orderItem.quantity?c}</quantity>
+    <price>${product.LISTPRICE?c}</price>
+    <title>${product.NAME} (${product.ATTR1})</title>
+</ord>--></ftl:template>
+        <ftl:use>
+            <ftl:bindTo id="02_XML_OrderItem" />
+        </ftl:use>
+    </ftl:freemarker>
+
+    <!--
+        At the end of every order-item, route the order item XML ("02_XML_OrderItem") to the
+        "02_Low_Price" Service, if the total is 20 or less...
+    -->
+    <esbr:routeBean beanIdRef="02_XML_OrderItem" toServiceCategory="HugeQS" toServiceName="02_Low_Price" routeOnElement="order-item">
+        <condition><!-- product.LISTPRICE * orderItem.quantity <= 17.00 --></condition>
+    </esbr:routeBean>
+
+</smooks-resource-list>

@@ -1,0 +1,48 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_publish_as_webservice_inonly_Request_esb"
+                      selector="serviceName='HelloWorldPubService'"
+                  />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+        <service 
+        	category="ESBServiceSample" 
+        	name="HelloWorldPubServiceInOnly" 
+        	description="Hello world ESB Service">
+            <listeners>
+                <jms-listener name="helloWorld"
+                              busidref="quickstartEsbChannel"
+                              maxThreads="1"
+                />
+            </listeners>
+            <actions mep="OneWay" inXsd="/request.xsd" faultXsd="/fault.xsd" >
+                   <action name="action" class="org.jboss.soa.esb.samples.quickstart.publishAsWebservice.ESBWSListenerAction" process="displayMessage"/>  
+            </actions>
+        </service>
+
+        <service
+			category="ESBServiceSample"
+			name="FaultService"
+			description="Hello world ESB Fault Service"
+			invmScope="GLOBAL">
+            <actions mep="OneWay">
+                   <action name="action" class="org.jboss.soa.esb.samples.quickstart.publishAsWebservice.FaultHandlerAction" />
+            </actions>
+        </service>
+        
+     </services>
+     
+</jbossesb>

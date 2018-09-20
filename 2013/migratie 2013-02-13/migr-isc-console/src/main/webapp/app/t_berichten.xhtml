@@ -1,0 +1,86 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://moderniseringgba.nl/migratie"
+        >
+<ui:component>
+
+<ga:responseActions>
+    <ga:parameter name="page" target="#{page}">
+        <f:convertNumber integerOnly="true"/>
+    </ga:parameter>
+    <gd:pager value="#{berichten}" target="#{berichten_pager}" page="#{page}" pageSize="25" />
+</ga:responseActions>
+<table class="results">
+<thead>
+    <tr>
+        <th colspan="5">
+            <ui:decorate template="t_pager.xhtml">
+                <ui:define name="pager_params">
+                    <ui:insert name="params"/>
+                </ui:define>
+                <ui:param name="pager" value="#{berichten_pager}"/>
+            </ui:decorate>
+            <ui:insert name="berichten_title">#{msgs['bericht.heading']}</ui:insert>
+        </th>
+    </tr>
+    <tr>
+        <td style="width:150px;">
+            #{msgs['bericht.heading.tijdstip']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['bericht.heading.kanaal']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['bericht.heading.type']}
+        </td>
+        <td style="width:300px;">
+            #{msgs['bericht.heading.messageid']}
+        </td>
+        <td style="width:300px;">
+            #{msgs['menu.actions']}
+        </td>
+    </tr>
+</thead>
+
+<h:outputText>
+    <ga:attribute name="rendered" value="#{! empty berichten}"/>
+    <tbody class="results">
+        <gd:repeat value="#{berichten}" var="bericht" idVar="rid" first="#{berichten_pager.first}" limit="#{berichten_pager.limit}">
+            <gs:tr>
+                <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                <td>
+                    #{bericht.tijdstip}
+                </td>
+                <td>
+                    #{bericht.kanaal} (#{bericht.richting})
+                </td>
+                <td>
+                    #{bericht.naam}
+                </td>
+                <td>
+                    #{bericht.messageId}
+                </td>
+                <td>
+                    <h:outputLink value="bericht.jsf?id=#{bericht.id}">
+                        #{msgs['action.examine']}
+                    </h:outputLink>
+                </td>
+
+            </gs:tr>
+        </gd:repeat>
+    </tbody>
+</h:outputText>
+</table>
+</ui:component>
+
+</html>

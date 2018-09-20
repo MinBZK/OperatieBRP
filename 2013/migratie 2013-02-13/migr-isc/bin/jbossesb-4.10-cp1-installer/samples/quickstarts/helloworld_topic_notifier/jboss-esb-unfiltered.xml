@@ -1,0 +1,58 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+                      
+              <jms-bus busid="quickstartNotifierChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_helloworld_topic_notifier_Request_gw"
+                   />
+		</jms-bus>				   
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_helloworld_topic_notifier_Request_esb"
+                  />
+              </jms-bus>
+          </jms-provider>
+      </providers>
+      
+      <services>
+	<service
+		category="routerToFile"
+		name="FileRouterListener"
+		description="Static route file destination">
+		<listeners>
+		                <jms-listener name="helloWorldNotifier"
+                              busidref="quickstartNotifierChannel"
+							  is-gateway="true"
+						/>
+						<jms-listener name="helloWorld"
+                              busidref="quickstartEsbChannel"
+						/>
+		</listeners>
+	    <actions mep="OneWay">
+				<action name="notificationAction" class="org.jboss.soa.esb.actions.Notifier">    
+					<property name="okMethod" value="notifyOK" />
+					<property name="notification-details"> 
+                       	<NotificationList type="ok">
+							<target class="NotifyConsole"/>
+                        	<target class="NotifyFiles">
+								<file append="false" URI="@results.dir@/results.log"/>
+								<file append="false" URI="@tmp.dir@/HelloWorldFileNotifierTest.log"/>
+							</target>
+							<target class="NotifyTopics">
+								<topic jndiName="topic/helloworldtopic"/>
+							</target>	
+						</NotificationList>
+					</property>
+				</action>
+        </actions>
+	</service>
+  </services>
+</jbossesb>

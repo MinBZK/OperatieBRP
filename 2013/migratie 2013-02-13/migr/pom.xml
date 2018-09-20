@@ -1,0 +1,273 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.moderniseringgba</groupId>
+	<artifactId>migratie</artifactId>
+	<version>0.0.33</version>
+	<packaging>pom</packaging>
+	<name>Migr - Root POM</name>
+    
+	<build>
+		<pluginManagement>
+			<plugins>	
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-assembly-plugin</artifactId>
+					<version>2.3</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-compiler-plugin</artifactId>
+					<version>2.5.1</version>				
+				</plugin>				
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.4</version>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-source-plugin</artifactId>
+					<version>2.1.2</version>				
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-surefire-plugin</artifactId>
+					<version>2.10</version>				
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>cobertura-maven-plugin</artifactId>
+					<version>2.5.1</version>				
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>exec-maven-plugin</artifactId>
+					<version>1.2.1</version>
+				</plugin>
+			</plugins>
+		</pluginManagement>
+			
+		<plugins>
+			<!-- Default compiler settings -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>1.6</source>
+					<target>1.6</target>
+					<optimize>false</optimize>
+					<showWarnings>true</showWarnings>
+					<encoding>UTF-8</encoding>
+					<debug>true</debug>
+				</configuration>
+			</plugin>
+			
+			<!-- Create JAR with sources -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			
+			<!-- Create instrumented classes -->
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<executions>
+				  <execution>
+				  <id>instrument</id>
+					<phase>package</phase>
+					<goals>
+					  <goal>instrument</goal>
+					</goals>
+				  </execution>
+				</executions>
+			</plugin>	
+			
+			<!-- Create JAR with test classes -->
+			<!-- Create JAR with instrumented classes -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>jar-test-jar</id>
+						<goals>
+							<goal>test-jar</goal>
+						</goals>
+						<configuration>
+							<skipIfEmpty>true</skipIfEmpty>
+						</configuration>
+					</execution>
+					<execution>
+						<id>jar-cobertura-instrumented</id>
+						<phase>package</phase>
+						<goals>
+						  <goal>jar</goal>
+						</goals>
+						<configuration>
+							<skipIfEmpty>true</skipIfEmpty>
+							<classifier>cobertura-instrumented</classifier>
+							<classesDirectory>${project.build.directory}/generated-classes/cobertura/</classesDirectory>
+							<excludes>
+								<exclude>cobertura.properties</exclude>
+							</excludes>
+						</configuration>
+					  </execution>
+					<execution>
+						<id>jar-cobertura-datafile</id>
+						<phase>package</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+						<configuration>
+							<skipIfEmpty>true</skipIfEmpty>
+							<classifier>cobertura-datafile</classifier>
+							<classesDirectory>${project.build.directory}/cobertura/</classesDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>			
+		</plugins>
+	</build>
+	
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Project -->
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie</groupId>
+				<artifactId>migr-utils</artifactId>
+				<version>0.0.33</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie.conversie</groupId>
+				<artifactId>migr-conversie-model</artifactId>
+				<version>0.0.33</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie.conversie</groupId>
+				<artifactId>migr-conversie-model</artifactId>
+				<version>0.0.33</version>
+				<type>test-jar</type>
+			</dependency>
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie.conversie</groupId>
+				<artifactId>migr-conversie-regels</artifactId>
+				<version>0.0.33</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie.conversie</groupId>
+				<artifactId>migr-conversie-regels</artifactId>
+				<version>0.0.33</version>
+				<type>test-jar</type>
+			</dependency>
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie.synchronisatie</groupId>
+				<artifactId>migr-sync-dal</artifactId>
+				<version>0.0.33</version>
+				<type>jar</type>
+			</dependency>
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie.synchronisatie</groupId>
+				<artifactId>migr-sync-dal</artifactId>
+				<version>0.0.33</version>
+				<type>test-jar</type>
+			</dependency>
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie.isc</groupId>
+				<artifactId>migr-isc-bericht</artifactId>
+				<version>0.0.33</version>
+			</dependency>
+			<dependency>
+				<groupId>nl.moderniseringgba.migratie.isc</groupId>
+				<artifactId>migr-isc-excel</artifactId>
+				<version>0.0.33</version>
+			</dependency>
+			<dependency>
+                <groupId>nl.moderniseringgba.migratie.isc</groupId>
+                <artifactId>migr-isc-db</artifactId>
+                <version>0.0.33</version>
+            </dependency>
+            <dependency>
+	            <groupId>nl.moderniseringgba.migratie.init</groupId>
+	            <artifactId>migr-init-logging</artifactId>
+	            <version>0.0.33</version>
+	        </dependency>
+            
+			<!-- Logging -->
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-api</artifactId>
+				<version>1.6.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>slf4j-log4j12</artifactId>
+				<version>1.6.4</version>
+			</dependency>
+			<dependency>
+				<groupId>log4j</groupId>
+				<artifactId>log4j</artifactId>
+				<version>1.2.16</version>
+			</dependency>
+			
+			<!-- junit -->
+			<dependency>
+				<groupId>junit</groupId>
+				<artifactId>junit</artifactId>
+				<version>4.10</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+
+	<repositories>
+	    <repository>
+			<id>central</id>
+		    <name>Central Repository</name>
+		    <url>http://repo.maven.apache.org/maven2</url>
+            <!-- Fallback maven central mirror
+            <url>http://mirrors.ibiblio.org/maven2</url>
+            -->
+		</repository>	
+	    <repository>
+	        <id>jboss-public</id>
+	        <name>JBoss Public Repository Group</name>
+	        <url>http://repository.jboss.org/nexus/content/groups/public/</url>
+	    </repository>
+	    <repository>
+	        <id>jboss-deprecated</id>
+	        <name>JBoss Deprecated</name>
+	        <url>https://repository.jboss.org/nexus/content/repositories/deprecated/</url>
+	    </repository>
+		<!--
+		<repository>
+			<id>libs-release-migratie</id>
+			<name>mGBA Artifactory-releases voor Migratie</name>
+			<url>https://www.modernodam.nl/artifactory/libs-release-migratie</url>
+		</repository>
+		<repository>
+			<id>libs-snapshot-migratie</id>
+			<name>mGBA Artifactory-snapshots voor Migratie</name>
+			<url>https://www.modernodam.nl/artifactory/libs-snapshot-migratie</url>
+		</repository>	    
+		-->
+	</repositories>		 
+</project>

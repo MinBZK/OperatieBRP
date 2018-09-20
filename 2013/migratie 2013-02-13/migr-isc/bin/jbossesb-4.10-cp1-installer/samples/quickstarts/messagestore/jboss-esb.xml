@@ -1,0 +1,63 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="quickstartGwChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_messagestore_Request_gw"
+                   />
+              </jms-bus>
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_messagestore_Request_esb"
+                  />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+        <service 
+        	category="FirstServiceESB" 
+        	name="MessageStoreListener" 
+        	description="Hello World, and write message to message store">
+            <listeners>
+                <jms-listener name="JMS-Gateway"
+                    busidref="quickstartGwChannel"
+                    is-gateway="true"
+                />
+                <jms-listener name="helloWorld"
+                              busidref="quickstartEsbChannel"
+                />
+            </listeners>
+            <actions mep="OneWay">
+            	<!-- Print the message to the console -->
+                <action name="notificationAction" class="org.jboss.soa.esb.actions.Notifier">
+               		<property name="okMethod" value="notifyOK" />
+               		<property name="notification-details">
+   	 				   <NotificationList type="OK"> 
+      				     <target class="NotifyConsole" />
+	    		   	   </NotificationList> 
+	    		   </property>
+   	   	</action>
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore">
+                    <property name="logSuccess" value="true"/>
+                </action>
+              	<!-- Check that the message is really there (executes on success of pipeline) -->
+              	<action name="CheckMessageStore" class="org.jboss.soa.esb.samples.quickstart.messagestore.CheckMessageStoreAction" />
+                <!-- Add a copy of the message to the message store under categorization 'test' -->
+                <action name="PersistAction" class="org.jboss.soa.esb.actions.MessagePersister" >
+              		<property name="classification" value="test"/>
+              		<property name="message-store-class" value="org.jboss.internal.soa.esb.persistence.format.db.DBMessageStoreImpl"/>
+              	</action>
+            </actions>
+        </service>
+      </services>
+     
+</jbossesb>

@@ -1,0 +1,110 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="LostMessageServiceGW">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+   									  dest-name="queue/quickstart_exceptions_faults_GW"  
+   									  selector="serviceName='LostMessageService'" 									  
+                  />
+                  
+              </jms-bus>
+              <jms-bus busid="LostMessageServiceESB">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_exceptions_faults_ESB"
+                      selector="serviceName='LostMessageService'"
+                  />
+              </jms-bus>
+
+              <jms-bus busid="ExceptionCaughtServiceGW">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+   									  dest-name="queue/quickstart_exceptions_faults_GW"  
+   									  selector="serviceName='ExceptionCaughtService'" 									  
+                  />
+                  
+              </jms-bus>
+              <jms-bus busid="ExceptionCaughtServiceESB">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_exceptions_faults_ESB"
+                      selector="serviceName='ExceptionCaughtService'"
+                  />
+              </jms-bus>
+          </jms-provider>
+      </providers>
+      
+      <services>
+          
+        <service category="ExceptionalServices" 
+                 name="LostMessageService" 
+                 description="The uncaught exception causes message loss" >
+            <listeners>
+                <jms-listener name="JMS-Gateway"
+                    busidref="LostMessageServiceGW"                         
+                    is-gateway="true"
+                />
+                <jms-listener name="JMS-ESBListener"
+                              busidref="LostMessageServiceESB"
+                />                
+            </listeners>
+            <actions mep="OneWay">
+					   <action name="A Good Action"  class="org.jboss.soa.esb.samples.quickstart.exceptions.MyBasicAction"  
+					     process="displayMessage" >				  
+					   </action>					   
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore">
+                    <property name="logException" value="true"/>
+                </action>
+ 					   <action name="Bad Action"  class="org.jboss.soa.esb.samples.quickstart.exceptions.MyBasicAction"  
+					     process="causesMyException" >				  
+					   </action>
+					   <action name="Final Good Action"  class="org.jboss.soa.esb.samples.quickstart.exceptions.JustAnotherAction"  
+					     process="displayMessage" >				  
+					   </action>
+            </actions>     
+                   
+        </service>
+                <service category="ExceptionalServices" 
+                 name="ExceptionCaughtService" 
+                 description="The caught exception allows you to react" >
+            <listeners>
+                <jms-listener name="JMS-Gateway"
+                    busidref="ExceptionCaughtServiceGW"                         
+                    is-gateway="true"
+                />
+                <jms-listener name="JMS-ESBListener"
+                              busidref="ExceptionCaughtServiceESB"
+                />                
+            </listeners>
+            <actions>
+					   <action name="A Good Action"  class="org.jboss.soa.esb.samples.quickstart.exceptions.MyBasicAction"  
+					     process="displayMessage" >				  
+					   </action>					   
+					   <action name="JustAnotherAction"  class="org.jboss.soa.esb.samples.quickstart.exceptions.JustAnotherAction"  
+					     process="displayMessage" >				  
+					     <property name="exceptionMethod" value="exceptionHandler" />
+					   </action>					   
+					   <action name="Exception Handling Action"  class="org.jboss.soa.esb.samples.quickstart.exceptions.MyExceptionHandlingAction"  
+					     process="displayMessage" >				  
+					     <property name="exceptionMethod" value="catchesException" />
+					   </action>	
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore">
+                    <property name="logException" value="true"/>
+                </action>
+ 					   <action name="Bad Action"  class="org.jboss.soa.esb.samples.quickstart.exceptions.MyBasicAction"  
+					     process="causesException"/> 
+					   <action name="Never Reached"  class="org.jboss.soa.esb.samples.quickstart.exceptions.MyBasicAction"  
+					     process="displayMessage"/>
+            </actions>            
+        </service>
+        
+        
+      </services>
+     
+</jbossesb>

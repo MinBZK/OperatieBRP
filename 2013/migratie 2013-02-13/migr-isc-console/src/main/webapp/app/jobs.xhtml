@@ -1,0 +1,209 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+<ui:composition template="t_loggedin.xhtml">
+    <ui:define name="menu">
+        <ga:checkRole roles="#{access.role.jobs}" message="#{msgs.unauthorized}">
+            <table class="leftmenu">
+                <tbody>
+                    <tr class="leftmenuheader">
+                        <th colspan="2">Actions</th>
+                    </tr>
+                    <tr class="leftmenu" style="height:80px">
+                        <td colspan="2">
+                            <h:form>
+                            </h:form>
+                        </td>
+                    </tr>
+                    <tr class="leftmenuheader">
+                        <th colspan="2" class="nf">Views</th>
+                    </tr>
+                    <tr class="leftmenu">
+                        <td colspan="2">
+                            <gs:ul>
+                                <gs:li>
+                                    <h:outputLink style="#{viewMode == 'all' ? 'font-weight:bold' : ''}">
+                                        <f:param name="view" value="all"/>
+                                        All Jobs
+                                    </h:outputLink>
+                                </gs:li>
+                                <gs:li>
+                                    <h:outputLink style="#{viewMode == 'timers' ? 'font-weight:bold' : ''}">
+                                        <f:param name="view" value="timers"/>
+                                        Timers
+                                    </h:outputLink>
+                                </gs:li>
+                                <gs:li>
+                                    <h:outputLink style="#{viewMode == 'action' ? 'font-weight:bold' : ''}">
+                                        <f:param name="view" value="action"/>
+                                        Execute Action Jobs
+                                    </h:outputLink>
+                                </gs:li>
+                                <gs:li>
+                                    <h:outputLink style="#{viewMode == 'node' ? 'font-weight:bold' : ''}">
+                                        <f:param name="view" value="node"/>
+                                        Execute Node Jobs
+                                    </h:outputLink>
+                                </gs:li>
+                            </gs:ul>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </ga:checkRole>
+
+    </ui:define>
+
+    <ui:define name="actions">
+        <ga:responseActions>
+            <ga:parameter name="view" target="#{viewMode}" default="all"/>
+            <ga:parameter name="page" target="#{page}" default="1"/>
+
+            <j4j:listJobs target="#{jobs}"/>
+            <f:setPropertyActionListener 
+            value="#{viewMode == 'timers' ? 12 : viewMode == 'action' ? 9 : viewMode == 'node' ? 9 : 10}" 
+            target="#{colspan}"/>
+            <gd:filter if="#{viewMode == 'timers'}" entryVar="e" source="#{jobs}" target="#{jobs}" 
+            test="#{e.class.name == 'org.jbpm.job.Timer'}"/>
+            <gd:filter if="#{viewMode == 'action'}" entryVar="e" source="#{jobs}" target="#{jobs}" 
+            test="#{e.class.name == 'org.jbpm.job.ExecuteActionJob'}"/>
+            <gd:filter if="#{viewMode == 'node'}" entryVar="e" source="#{jobs}" target="#{jobs}" 
+            test="#{e.class.name == 'org.jbpm.job.ExecuteNodeJob'}"/>
+            <gd:pager target="#{pager}" value="#{jobs}" page="#{page}"/>
+        </ga:responseActions>
+    </ui:define>
+
+    <ui:define name="body">
+        <table class="results">
+            <thead>
+                <tr>
+                    <th colspan="#{colspan}">
+                        <ui:decorate template="t_pager.xhtml">
+                        </ui:decorate>
+                        <h:outputText 
+                        value="#{viewMode == 'timers' ? 'Timers' : viewMode == 'action' ? 'Execute Action Jobs' : viewMode == 'node' ? 'Execute Node Jobs' : 'All Jobs'}"/>
+                    </th>
+                </tr>
+                <tr>
+                    <td>ID</td>
+                    <h:outputText rendered="#{viewMode == 'timers'}">
+                        <td>Name</td>
+                        <td>Repeat</td>
+                        <td>Transition Name</td>
+                    </h:outputText>
+                    <h:outputText rendered="#{viewMode == 'all'}">
+                        <td>Type</td>
+                    </h:outputText>
+                    <td>Due</td>
+                    <td>Status</td>
+                    <td>Process Instance</td>
+                    <td>Token</td>
+                    <td>Task Instance</td>
+                    <td>Exception</td>
+                    <td>Retries</td>
+                    <td>Actions</td>
+                </tr>
+            </thead>
+            <h:outputText>
+                <ga:attribute name="rendered" value="#{! empty jobs}"/>
+                <tbody class="results">
+                    <gd:repeat var="job" idVar="rid">
+                        <ga:attribute name="value" value="#{jobs}"/>
+                        <gs:tr>
+                            <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                            <td>
+                                <h:outputText value="#{job.id}"/>
+                            </td>
+                            <h:outputText rendered="#{viewMode == 'timers'}">
+                                <td>
+                                    <h:outputText value="#{job.name}"/>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{job.repeat}"/>
+                                </td>
+                                <td>
+                                    <h:outputText value="#{job.transitionName}"/>
+                                </td>
+                            </h:outputText>
+                            <h:outputText rendered="#{viewMode == 'all'}">
+                                <td>
+                                    <h:outputText 
+                                    value="#{job.class.name == 'org.jbpm.job.Timer' ? 'Timer' : job.class.name == 'org.jbpm.job.ExecuteActionJob' ? 'Execute Action' : job.class.name == 'org.jbpm.job.ExecuteNodeJob' ? 'Execute Node' : job.class.name}"/>
+                                </td>
+                            </h:outputText>
+                            <td>
+                                <h:outputText value="#{job.dueDate}">
+                                    <f:convertDateTime type="both" timeZone="#{j4j:getServerTimeZone()}"/>
+                                </h:outputText>
+                            </td>
+                            <td>
+                                <h:outputText value="Running" rendered="#{! job.suspended}" styleClass="statusRunning"/>
+                                <h:outputText value="Suspended" rendered="#{job.suspended}" styleClass="statusSuspended"/>
+                            </td>
+                            <td>
+                                <h:outputLink value="procins.jsf" rendered="#{job.processInstance != null}">
+                                    <f:param name="id" value="#{job.processInstance.id}"/>
+                                    <gs:b>
+                                        <h:outputText value="#{job.processInstance.processDefinition.name}"/>
+                                    </gs:b>
+                                    <h:outputText value=" ID #{job.processInstance.id}"/>
+                                </h:outputLink>
+                            </td>
+                            <td>
+                                <h:outputLink value="token.jsf" rendered="#{job.token != null}">
+                                    <f:param name="id" value="#{job.token.id}"/>
+                                    <h:outputText value="#{job.token.name}" rendered="#{! empty job.token.name}"/>
+                                    <h:outputText value="(Unnamed)" rendered="#{empty job.token.name}"/>
+                                    <h:outputText value=" ID #{job.token.id}"/>
+                                </h:outputLink>
+                            </td>
+                            <td>
+                                <h:outputLink value="task.jsf" rendered="#{job.taskInstance != null}">
+                                    <f:param name="id" value="#{job.taskInstance.id}"/>
+                                    <h:outputText value="#{job.taskInstance.name}"/>
+                                </h:outputLink>
+                            </td>
+                            <td>
+                                <h:outputText value="#{job.exception}"/>
+                            </td>
+                            <td>
+                                <h:outputText value="#{job.retries}"/>
+                            </td>
+                            <td>
+                                <h:form>
+                                    <h:commandLink 
+                                    onclick="return confirm('Are you sure you want to delete this job?  The operation cannot be undone.');">
+                                        <h:outputText value="Delete"/>
+                                        <j4j:loadJob id="#{job.id}" target="#{xjob}"/>
+                                        <j4j:delete value="#{xjob}"/>
+                                        <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                        <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                    </h:commandLink>
+                                </h:form>
+                            </td>
+                        </gs:tr>
+                    </gd:repeat>
+                </tbody>
+            </h:outputText>
+            <h:outputText rendered="#{empty jobs}">
+                <tbody class="filter">
+                    <tr>
+                        <td colspan="#{colspan}" style="text-align:center;">No results in view.</td>
+                    </tr>
+                </tbody>
+            </h:outputText>
+        </table>
+    </ui:define>
+</ui:composition>
+
+</html>

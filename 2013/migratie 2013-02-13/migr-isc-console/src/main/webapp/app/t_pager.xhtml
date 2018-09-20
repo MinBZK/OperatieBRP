@@ -1,0 +1,45 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+<ui:component>
+    <span style="float:right">
+        <h:outputText value="#{msgs['pager.null']}" rendered="#{pager == null}"/>
+        <h:outputText value="#{msgs['pager.empty']}" rendered="#{pager != null and pager.totalPages == 0}"/>
+        <h:outputText rendered="#{pager != null and pager.totalPages != 0}">
+            <h:outputLink styleClass="pager" disabled="#{pager.firstPage}">
+                <ui:insert name="pager_params"/>
+                <f:param name="page" value="1"/>
+                <h:outputText value="#{msgs['pager.first']}"/>
+            </h:outputLink>
+            <h:outputText value=" "/>
+            <h:outputLink styleClass="pager" disabled="#{pager.firstPage}">
+                <ui:insert name="pager_params"/>
+                <f:param name="page" value="#{pager.page - 1}"/>
+                <h:outputText value="#{msgs['pager.previous']}"/>
+            </h:outputLink>
+            <h:outputText value=" - #{msgs['pager.page']} #{pager.page} #{msgs['pager.of']} #{pager.totalPages} - "/>
+            <h:outputLink styleClass="pager" disabled="#{pager.lastPage}">
+                <ui:insert name="pager_params"/>
+                <f:param name="page" value="#{pager.page + 1}"/>
+                <h:outputText value="#{msgs['pager.next']}"/>
+            </h:outputLink>
+            <h:outputText value=" "/>
+            <h:outputLink styleClass="pager" disabled="#{pager.lastPage}">
+                <ui:insert name="pager_params"/>
+                <f:param name="page" value="#{pager.totalPages}"/>
+                <h:outputText value="#{msgs['pager.last']}"/>
+            </h:outputLink>
+        </h:outputText>
+    </span>
+</ui:component>
+</html>

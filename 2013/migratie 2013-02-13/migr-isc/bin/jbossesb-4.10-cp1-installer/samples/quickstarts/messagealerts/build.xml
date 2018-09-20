@@ -1,0 +1,33 @@
+<project name="Quickstart_messagealerts" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	
+	<target name="runtest" depends="compile" 
+		description="sends a JMS message to queue/quickstart_messagealerts_Request_gw">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.messagealerts.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="Message Alerts"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+	
+	<target name="sendesb" depends="compile"
+		description="Will send an esb Message">
+		<echo>Runs Test ESB Message Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.messagealerts.test.SendEsbMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>	
+			<arg value="FirstServiceESB"/> <!--  service category -->
+			<arg value="SimpleListener"/>  <!--  service name -->
+			<arg value="Message Alerts - Straight to ESB listener - no Gateway"/> <!--  Message text -->
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>
+	
+</project>

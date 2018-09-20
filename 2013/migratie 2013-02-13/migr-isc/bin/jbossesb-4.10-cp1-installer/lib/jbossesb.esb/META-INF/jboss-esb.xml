@@ -1,0 +1,63 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd" parameterReloadSecs="5">
+     <!--  
+     		jbossesb internal services 
+     -->
+     
+     <providers>
+     	  <!-- change the following element to jms-jca-provider to enable transactional context  -->
+          <jms-provider name="DeadMessageQueue-JMS-Provider" connection-factory="ConnectionFactory">          
+              <jms-bus busid="DeadMessageQueue">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/DeadMessageQueue"
+                  />
+              </jms-bus>
+          </jms-provider>
+           <schedule-provider name="schedule">
+            <simple-schedule scheduleid="5-min-trigger" frequency="300" execCount="-1"/>
+        </schedule-provider>
+      </providers>
+      
+	<services>   
+        <service category="JBossESB-Internal" 
+                 name="DeadLetterService" 
+                 description="Dead Messages can be send to this service, which is configured to store and/or
+                 notify" >
+            <listeners>
+                <jms-listener name="JMS-DLQListener"
+                              busidref="DeadMessageQueue"
+                              maxThreads="1"
+                />                
+            </listeners>
+            <actions mep="OneWay">
+               <action name="notificationAction" 
+               		class="org.jboss.soa.esb.actions.Notifier">
+               		<property name="okMethod" value="notifyOK" />
+               		<property name="notification-details">
+   	 				   <NotificationList> 
+      				     <target class="NotifyConsole" />
+	    		   	   </NotificationList> 
+	    		   </property>
+   	   			</action>    
+               <action name="PersistAction" 
+               		class="org.jboss.soa.esb.actions.MessagePersister" >
+               		<property name="classification" value="DLQ"/>
+               		<property name="message-store-class" value="org.jboss.internal.soa.esb.persistence.format.db.DBMessageStoreImpl"/>
+               </action>
+            </actions>
+        </service>
+        <service category="JBossESB-Internal" name="RedeliverService" description="Scheduled Service to Redeliver Messages">
+            <listeners>
+                <!--  add  transacted="true" attribute to enable transacted redelivery -->
+                <scheduled-listener name="redeliver-scheduled-listener" scheduleidref="5-min-trigger"
+                    event-processor="org.jboss.soa.esb.schedule.RedeliverEventMessageComposer"/>
+            </listeners>
+            <actions mep="OneWay">
+                <action name="RedeliverMessagesAction" class="org.jboss.soa.esb.actions.MessageRedeliverer">
+                	<property name="max-redeliveries" value="20"/>
+                </action>
+            </actions>			
+        </service>
+      </services>
+</jbossesb>

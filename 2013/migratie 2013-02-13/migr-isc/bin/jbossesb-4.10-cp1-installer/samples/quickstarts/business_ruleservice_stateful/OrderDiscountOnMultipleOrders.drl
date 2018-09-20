@@ -1,0 +1,36 @@
+#created on: Oct 22, 2007
+package org.jboss.soa.esb.services.rules
+
+#list any import classes here.
+import org.jboss.soa.esb.samples.quickstart.businessrulesstateful.dvdstore.Customer;
+import org.jboss.soa.esb.samples.quickstart.businessrulesstateful.dvdstore.OrderHeader;
+
+import org.jboss.soa.esb.message.Message;
+
+import java.util.Arrays;
+
+#declare any global variables here
+global org.jboss.soa.esb.message.Message message;
+
+
+rule "Apply 10% discount to customer if totalPrice of all their orders is over 100"	
+	dialect "mvel"		
+    when
+		$c : Customer() from entry-point "CustomerEntryPoint"
+		$i : Number(intValue >= 100) from accumulate ( OrderHeader( customer.userName == $c.userName, $totalAmount : totalAmount), 
+		                                                            sum( $totalAmount ) );
+    then
+  		$c.setOrderDiscount( 10 );
+		System.out.println( "Customer " + $c.getUserName() + " now has a shopping total of " + $i );
+end
+
+rule "apply customer discount to latest order"
+	when
+		$c : Customer() from entry-point "CustomerEntryPoint"
+		$o : OrderHeader(customer.userName == $c.userName)
+	then
+		$o.setOrderDiscount($c.getOrderDiscount());
+		System.out.println("set discount of " + $o.getOrderDiscount() + 
+			" on order " + $o.getOrderId() +
+			" for customer " + $c.getUserName());
+end

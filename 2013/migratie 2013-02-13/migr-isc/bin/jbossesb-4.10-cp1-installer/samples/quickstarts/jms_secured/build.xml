@@ -1,0 +1,80 @@
+<project name="Quickstart_JMS_Secured" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+    <target name="quickstart-specific-assemblies" depends="filter" />
+
+	<target name="filter">
+		<property name="password.file" value="${basedir}/jmssecured.password"/>
+		<echo message="${password.file}"/>
+		<copy file="jboss-esb.xml" tofile="${build.dir}/META-INF/jboss-esb.xml" filtering="true" overwrite="true">
+            <filterset>
+                <filter token="password.file" value="${password.file}" />
+            </filterset>
+        </copy>
+	</target>
+
+    <target name="package-deployment" depends="jbm-msg-users,jbmq-msg-users,hornetq-msg-users">
+    	<!-- Overridden the base task as part of https://jira.jboss.org/browse/JBESB-3421 -->
+    	<!-- Could probably have generalised this a little better, but didn't want to risk breaking other quickstarts. -->
+    	
+	    <mkdir dir="lib"/>
+        <jar destfile="${build.dir}/${ant.project.name}.esb">
+                   <fileset dir="${build.dir}/classes" excludes="${quickstart.classes.excludes}" includes="${quickstart.classes.includes}"/>
+                   <fileset dir="${build.dir}" includes="*.jar,*.war"/>
+                   <fileset dir="${build.dir}" includes="deployment.xml"/>
+                   <fileset dir="${build.dir}" includes="META-INF/**" />
+                   <fileset dir="${basedir}/src" excludes="**/*.java" /> <!-- Please leave the src dir in here! -->
+                   <fileset dir="${basedir}" includes="${jms.service.file} ${no.service.file} ${msg-users}" excludes="build/**" />
+                   <fileset dir="${basedir}/lib" includes="*.jar"/>
+        </jar>
+    </target>	
+	<target name="jbm-msg-users" if="messaging.present">
+		<property name="msg-users" value="messaging-db-users-service.xml" />
+	</target>
+	<target name="jbmq-msg-users" if="jbossmq.present">
+		<property name="msg-users" value="messaging-db-users-service.xml" />
+	</target>
+	<target name="hornetq-msg-users" if="hornetq.present">
+		<property name="msg-users" value="" />
+	</target>
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	
+    <target name="quickstart-specific-deploys" depends="messaging-config">
+		<antcall target="jbm-deploys"/>
+		<antcall target="jbmq-deploys"/>
+    </target>
+
+	<target name="jbm-deploys" if="messaging.present">
+        <echo message="Copy message-roles.properties and message-user-properties to conf/props dir" />
+        <echo message="This will require a server restart unless running the jbossesb-server!"/>
+		<property name="org.jboss.esb.server.server.props" location="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/conf/props"/>
+		<copy todir="${org.jboss.esb.server.server.props}">
+			<fileset dir="${basedir}" includes="messaging-roles.properties" />
+			<fileset dir="${basedir}" includes="messaging-users.properties" />
+		</copy>
+    </target>
+
+	<target name="jbmq-deploys" if="jbossmq.present">
+		<property name="org.jboss.esb.server.jbmq.dir" location="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/deploy/jms"/>
+		<copy todir="${org.jboss.esb.server.jbmq.dir}" overwrite="true">
+			<fileset dir="${basedir}" includes="hsqldb-jdbc-state-service.xml" />
+		</copy>
+	</target>
+
+	<target name="runtest" depends="compile" 
+		description="sends a JMS message to queue/quickstart_jms_secured_Request_gw">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.jmssecured.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="Hello Secured JMS World"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+	
+</project>

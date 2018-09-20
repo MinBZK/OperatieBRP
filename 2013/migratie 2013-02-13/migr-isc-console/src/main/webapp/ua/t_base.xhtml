@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+
+<f:loadBundle var="msgs" basename="messages"/>
+
+<head>
+  <title><h:outputText value="#{msgs['title']}"/></title>
+  <link rel="stylesheet" type="text/css" href="../ua/jbpm.css" />
+  <!--[if lt IE 7]>
+  <style type="text/css">
+    select {
+      position:relative;
+      top:-2px;
+    }
+  </style>
+  <![endif]-->
+</head>
+
+<body>
+<script type="text/javascript">//<![CDATA[
+
+function onload() {
+}
+
+function keypress(event,cid) {
+  if (event.keyCode != null) {
+    if (event.keyCode == 13) {
+      if (cid != null) {
+        var elem = document.getElementById(cid);
+        if (elem != null) {
+          elem.onclick();
+        }
+      }
+    }
+  }
+}
+
+function copyinput(src,dst) {
+    document.getElementsByName(dst)[0].value=document.getElementsByName(src)[0].value;
+}
+
+function copycheck(src,dst) {
+    document.getElementsByName(dst)[0].value=document.getElementById(src).checked?'true':'false';
+}
+
+//]]></script>
+
+<ui:insert name="root_actions"/>
+
+<ui:insert name="javascript">
+</ui:insert>
+
+    <table class="layout">
+        <tbody>
+        <tr>
+            <td colspan="2" class="layouttop">
+                <ui:insert name="top"/>
+                <img src="../images/background.gif" alt=""/>
+            </td>
+        </tr>
+            <tr>
+                <td colspan="2" class="layoutheader"><ui:insert name="header"/></td>
+            </tr>
+            <tr>
+                <td class="layoutmenu">
+                    <ui:insert name="menu" />
+                </td>
+                <td class="layoutbody">
+                    <ga:responseActions>
+                        <ga:message target="#{msgs_fatal}" severity="fatal"/>
+                        <ga:message target="#{msgs_error}" severity="error"/>
+                        <ga:message target="#{msgs_warn}" severity="warn"/>
+                        <ga:message target="#{msgs_info}" severity="info"/>
+                    </ga:responseActions>
+                    <h:outputText>
+                        <ga:attribute name="rendered" value="#{! empty msgs_fatal}"/>
+                        <table class="msgs fatal">
+                            <thead>
+                                <tr>
+                                    <th><h:outputText value="#{msgs['msg.fatal']}"/></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <gd:repeat value="#{msgs_fatal}" var="msg">
+                                    <tr>
+                                        <td>
+                                            <h:outputText value="#{msg.summary}"/>
+                                            <h:outputText rendered="#{msg.detail != null and msg.detail != msg.summary}" 
+                                            value=": #{msg.detail}"/>
+                                        </td>
+                                    </tr>
+                                </gd:repeat>
+                            </tbody>
+                        </table>
+                    </h:outputText>
+                    <h:outputText>
+                        <ga:attribute name="rendered" value="#{! empty msgs_error}"/>
+                        <table class="msgs error">
+                            <thead>
+                                <tr>
+                                    <th><h:outputText value="#{msgs['msg.error']}"/></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <gd:repeat value="#{msgs_error}" var="msg">
+                                    <tr>
+                                        <td>
+                                            <h:outputText value="#{msg.summary}"/>
+                                            <h:outputText rendered="#{msg.detail != null and msg.detail != msg.summary}" 
+                                            value=": #{msg.detail}"/>
+                                        </td>
+                                    </tr>
+                                </gd:repeat>
+                            </tbody>
+                        </table>
+                    </h:outputText>
+                    <h:outputText>
+                        <ga:attribute name="rendered" value="#{! empty msgs_warn}"/>
+                        <table class="msgs warn">
+                            <thead>
+                                <tr>
+                                    <th><h:outputText value="#{msgs['msg.warn']}"/></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <gd:repeat value="#{msgs_warn}" var="msg">
+                                    <tr>
+                                        <td>
+                                            <h:outputText value="#{msg.summary}"/>
+                                            <h:outputText rendered="#{msg.detail != null and msg.detail != msg.summary}" 
+                                            value=": #{msg.detail}"/>
+                                        </td>
+                                    </tr>
+                                </gd:repeat>
+                            </tbody>
+                        </table>
+                    </h:outputText>
+                    <h:outputText>
+                        <ga:attribute name="rendered" value="#{! empty msgs_info}"/>
+                        <table class="msgs info">
+                            <thead>
+                                <tr>
+                                    <th><h:outputText value="#{msgs['msg.info']}"/></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <gd:repeat value="#{msgs_info}" var="msg">
+                                    <tr>
+                                        <td>
+                                            <h:outputText value="#{msg.summary}"/>
+                                            <h:outputText rendered="#{msg.detail != null and msg.detail != msg.summary}" 
+                                            value=": #{msg.detail}"/>
+                                        </td>
+                                    </tr>
+                                </gd:repeat>
+                            </tbody>
+                        </table>
+                    </h:outputText>
+                    <ui:insert name="body" />
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2" class="layoutfooter"><h:outputText value="#{msgs['title']}"/></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>

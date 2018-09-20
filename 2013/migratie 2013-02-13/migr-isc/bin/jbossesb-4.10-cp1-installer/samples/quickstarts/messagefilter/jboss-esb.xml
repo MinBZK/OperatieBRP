@@ -1,0 +1,82 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMessaging" connection-factory="ConnectionFactory">
+              <jms-bus busid="quickstartGwChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_messagefilter_Request_gw"
+                   />
+              </jms-bus>
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_messagefilter_Request_esb"
+                  />
+              </jms-bus>
+              <jms-bus busid="quickstartNextEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_messagefilter_next_Request_esb"
+                  />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+        <service 
+        	category="FirstServiceESB" 
+        	name="MessageFilterListener" 
+        	description="Filter a Message Based on Content">
+            <listeners>
+                <jms-listener name="gw-channel"
+                    busidref="quickstartGwChannel"
+                    is-gateway="true"
+                />
+                <jms-listener name="esb-channel"
+                              busidref="quickstartEsbChannel"
+                />
+            </listeners>
+            <actions mep="OneWay">
+                <action class="org.jboss.soa.esb.actions.MessageFilter" name="MessageFilter">
+                    <property name="ruleSet" value="FilterRules.drl"/>
+                    <property name="ruleReload" value="true"/>
+                    <property name="destinations">
+                        <route-to destination-name="DemoDestination" service-category="Test" service-name="NextService"/>
+                    </property> 
+                    <property name="object-paths">
+                    	<object-path esb="body.'org.jboss.soa.esb.message.defaultEntry'" />
+                    </property>
+                </action>
+            </actions>
+        </service>
+        <service
+  	      category="Test"
+  	      name="NextService"
+  	      description="Demo Destination">
+  	      <listeners>
+  	        <jms-listener name="esb-channel"
+                              busidref="quickstartNextEsbChannel"
+                />
+  	      </listeners>
+  	      <actions mep="OneWay">
+               <!-- Print the message to the console -->
+                <action name="notificationAction" class="org.jboss.soa.esb.actions.Notifier">
+               		<property name="okMethod" value="notifyOK" />
+               		<property name="notification-details">
+ 	 		 <NotificationList type="OK"> 
+      			 	<target class="NotifyConsole" />
+			 </NotificationList> 
+	    		 </property>
+   	   	</action>
+		<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/> 
+	      </actions>
+  	    </service>
+      </services>
+     
+</jbossesb>

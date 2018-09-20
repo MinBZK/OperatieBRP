@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://mvi.vospg.gbav.gba.nl/pl_sync"
+	elementFormDefault="qualified" xmlns="http://www.w3.org/2001/XMLSchema"
+	xmlns:tns="http://mvi.vospg.gbav.gba.nl/pl_sync">
+	<element name="pl_sync" type="tns:pl_sync_type" />
+	
+	<complexType name="pl_sync_type">
+		<sequence>
+			<element name="sync_header" type="tns:pl_sync_header" maxOccurs="1" minOccurs="1"/>
+			<element name="sync_payload" type="base64Binary" maxOccurs="1" minOccurs="1">
+				<annotation>
+					<documentation>
+						Standaard Lg01/La01 bericht base64 encoded.
+                    </documentation>
+				</annotation>
+			</element>
+		</sequence>
+	</complexType>
+
+	<complexType name="pl_sync_header">
+		<sequence>
+			<element name="originatorOrRecipient" type="string" maxOccurs="1" minOccurs="1"/>
+			<element name="berichtnummer" type="string" maxOccurs="1" minOccurs="1" />
+			<element name="datumtijdLaatsteWijzigingInBron" type="dateTime" maxOccurs="1" minOccurs="1" />
+			<element name="berichttype" type="tns:berichttypeEnum" maxOccurs="1" minOccurs="1"/>
+		</sequence>
+	</complexType>
+
+	<simpleType name="berichttypeEnum">
+		<restriction base="string">
+			<enumeration value="La01"/>
+			<enumeration value="Lg01"/>
+		</restriction>
+	</simpleType>
+</schema>

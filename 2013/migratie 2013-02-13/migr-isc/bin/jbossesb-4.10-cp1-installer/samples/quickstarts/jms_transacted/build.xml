@@ -1,0 +1,70 @@
+<project name="Quickstart_JMS_Transacted" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<property name="additional.deploys" value="jbossesb-service.xml quickstart-ds.xml" />
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="runtest" depends="compile" 
+		description="sends a JMS message to queue/quickstart_jms_transacted_Request_gw">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.jmstransacted.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="Hello Transacted JMS World]"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+		<sleep milliseconds="10000"/>
+		<antcall target="select"/>
+		<antcall target="truncate"/>
+	</target>  
+
+	<target name="db.lib.dir">
+        <condition property="db.lib.dir" value="${org.jboss.esb.server.home}/common/lib" else="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/lib">
+            <and>
+                <isset property="jbossas5"/>
+            </and>
+        </condition>
+    </target>
+
+	 <target name="select" depends="dependencies, db.lib.dir">
+        <property name="hsqldb.jar" value="${db.lib.dir}/hsqldb.jar"/>
+        <echo>Select * from jms_transacted_table</echo>
+        <sql
+            print="true"
+            driver="org.hsqldb.jdbcDriver"
+            url="jdbc:hsqldb:hsql://localhost:1706"
+            userid="sa"
+            autocommit="true"
+            password="">
+            <classpath>
+                <pathelement path="${hsqldb.jar}"/>
+            </classpath>
+            <transaction>
+            select data_column from jms_transacted_table
+            </transaction>
+            </sql>
+
+    </target>
+
+	<target name="truncate" depends="dependencies, db.lib.dir">
+        <property name="hsqldb.jar" value="${db.lib.dir}/hsqldb.jar"/>
+        <echo>(clean up) Delete from jms_transacted_table </echo>
+        <sql
+            print="true"
+            driver="org.hsqldb.jdbcDriver"
+            url="jdbc:hsqldb:hsql://localhost:1706"
+            userid="sa"
+            autocommit="true"
+            password="">
+            <classpath>
+                <pathelement path="${hsqldb.jar}"/>
+            </classpath>
+            <transaction>delete from jms_transacted_table</transaction>
+            </sql>
+    </target>
+</project>

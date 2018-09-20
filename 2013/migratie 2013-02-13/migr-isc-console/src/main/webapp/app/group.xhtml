@@ -1,0 +1,250 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:id="http://jbpm.org/jbpm4jsf/identity"
+>
+<ui:composition template="t_loggedin.xhtml">
+<ui:define name="menu">
+<ga:responseActions>
+    <ga:checkRole roles="#{access.role.identities}">
+        <ga:checkRole roles="#{access.role.identities.group}">
+            <ga:parameter name="id" target="#{id}" required="true">
+                <f:validateLongRange minimum="0"/>
+                <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+            </ga:parameter>
+            <ga:parameter name="view" target="#{viewMode}" default="children"/>
+            <ga:parameter name="page" target="#{page}" default="1"/>
+            <id:loadGroup id="#{id}" target="#{group}"/>
+            <gd:sort source="#{group.memberships}" target="#{members}" entryVar="e" 
+            argument="#{e.role == null ? '' : e.role}"/>
+            <gd:sort source="#{members}" target="#{members}" entryVar="e" 
+            argument="#{e.user.name == null ? '' : e.user.name}"/>
+            <gd:pager target="#{members_pager}" value="#{members}" page="#{page}"/>
+            <gd:sort source="#{group.children}" target="#{children}" entryVar="e" argument="#{e.name}"/>
+            <gd:pager target="#{children_pager}" value="#{children}" page="#{page}"/>
+        </ga:checkRole>
+    </ga:checkRole>
+</ga:responseActions>
+<gs:div style="padding:0;margin:0">
+    <ga:attribute name="rendered" value="#{group != null}"/>
+    <table class="leftmenu">
+        <tbody>
+            <tr class="leftmenuheader">
+                <th colspan="2">Group Summary</th>
+            </tr>
+            <tr class="leftmenu">
+                <th>Group Link</th>
+                <td>
+                    <h:outputLink style="font-weight:bold">
+                        <f:param name="id" value="#{id}"/>
+                        <h:outputText value="#{group.name} (ID #{id})"/>
+                    </h:outputLink>
+                </td>
+            </tr>
+            <gs:tr styleClass="leftmenu">
+                <ga:attribute name="rendered" value="#{! empty group.parent}"/>
+                <th>Parent Group</th>
+                <td>
+                    <h:outputText value="#{group.parent.name}"/>
+                </td>
+            </gs:tr>
+            <tr class="leftmenu">
+                <th>Group Name</th>
+                <td>
+                    <h:outputText value="#{group.name}"/>
+                </td>
+            </tr>
+            <tr class="leftmenu">
+                <th>Group Type</th>
+                <td>
+                    <h:outputText value="#{group.type}"/>
+                </td>
+            </tr>
+            <tr class="leftmenuheader">
+                <th colspan="2" class="nf">Views</th>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <gs:ul>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'children' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="children"/>
+                                Children
+                            </h:outputLink>
+                        </gs:li>
+                        <ga:checkRole roles="#{access.role.identities.user}">
+                            <gs:li>
+                                <h:outputLink style="#{viewMode == 'members' ? 'font-weight:bold' : ''}">
+                                    <f:param name="id" value="#{id}"/>
+                                    <f:param name="view" value="members"/>
+                                    Members
+                                </h:outputLink>
+                            </gs:li>
+                        </ga:checkRole>
+                    </gs:ul>
+                </td>
+            </tr>
+            <tr class="leftmenuheader">
+                <th colspan="2" class="nf">Actions</th>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <h:form>
+                        <h:inputHidden value="#{id}"/>
+                        <gs:ul>
+                            <gs:li>
+                                <h:commandLink value="Delete" 
+                                onclick="return confirm('#{msgs['identities.groups.confirm.delete']}');">
+                                    <f:param name="xid">
+                                        <ga:attribute name="value" value="#{group.id}"/>
+                                    </f:param>
+                                    <ga:parameter name="xid" target="#{xid}"/>
+                                    <id:loadGroup id="#{xid}" target="#{xgroup}"/>
+                                    <id:deleteGroup group="#{xgroup}"/>
+                                    <f:setPropertyActionListener value="#{null}" target="#{xuser}"/>
+                                    <n:nav outcome="success" url="identities.jsf?view=users" storeMessages="true"/>
+                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                </h:commandLink>
+                                <h:outputText value=" this group"/>
+                            </gs:li>
+                        </gs:ul>
+                    </h:form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</gs:div>
+</ui:define>
+
+<ui:define name="body">
+    <h:outputText>
+        <ga:attribute name="rendered" value="#{viewMode == 'children'}"/>
+        <table class="results">
+            <thead>
+                <tr>
+                    <th colspan="3">
+                        <ui:decorate template="t_pager.xhtml">
+                            <ui:define name="pager_params">
+                                <f:param name="id" value="#{id}"/>
+                            </ui:define>
+                            <ui:param name="pager" value="#{children_pager}"/>
+                        </ui:decorate>
+                        <h:outputText value="Children"/>
+                    </th>
+                </tr>
+                <tr>
+                    <td style="width:160px">Group Name</td>
+                    <td style="width:160px">Group Type</td>
+                    <td style="width:100px">Actions</td>
+                </tr>
+            </thead>
+            <tbody class="results">
+                <gd:repeat value="#{children}" var="child" idVar="rid" first="#{children_pager.first}" 
+                limit="#{children_pager.limit}">
+                    <gs:tr>
+                        <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                        <td>
+                            <h:outputText value="#{child.name}"/>
+                        </td>
+                        <td>
+                            <h:outputText value="#{child.type}"/>
+                        </td>
+                        <td>
+                            <h:form>
+                                <h:commandLink value="Remove" 
+                                onclick="return confirm('#{msgs['identities.groups.confirm.delete']}')">
+                                    <f:param name="xgid">
+                                        <ga:attribute name="value" value="#{child.id}"/>
+                                    </f:param>
+                                    <ga:parameter name="xgid" target="#{xgid}"/>
+                                    <id:loadGroup id="#{xgid}" target="#{xgroup}"/>
+                                    <id:deleteGroup group="#{xgroup}"/>
+                                    <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                </h:commandLink>
+                            </h:form>
+                        </td>
+                    </gs:tr>
+                </gd:repeat>
+            </tbody>
+        </table>
+    </h:outputText>
+    <h:outputText>
+        <ga:attribute name="rendered" value="#{viewMode == 'members'}"/>
+        <table class="results">
+            <thead>
+                <tr>
+                    <th colspan="3">
+                        <ui:decorate template="t_pager.xhtml">
+                            <ui:define name="pager_params">
+                                <f:param name="id" value="#{id}"/>
+                            </ui:define>
+                            <ui:param name="pager" value="#{members_pager}"/>
+                        </ui:decorate>
+                        <h:outputText value="Members"/>
+                    </th>
+                </tr>
+                <tr>
+                    <td style="width:160px">User Name</td>
+                    <td style="width:160px">Role in Group</td>
+                    <td style="width:100px">Actions</td>
+                </tr>
+            </thead>
+            <gs:tbody styleClass="results">
+                <ga:attribute name="rendered" value="#{! empty members}"/>
+                <gd:repeat value="#{members}" var="member" idVar="rid" first="#{members_pager.first}" 
+                limit="#{members_pager.limit}">
+                    <gs:tr>
+                        <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                        <td>
+                            <h:outputLink value="user.jsf">
+                                <h:outputText value="#{member.user.name}"/>
+                                <f:param name="id">
+                                    <ga:attribute name="value" value="#{member.user.id}"/>
+                                </f:param>
+                            </h:outputLink>
+                        </td>
+                        <td>
+                            <h:outputText value="#{member.role}"/>
+                        </td>
+                        <td>
+                            <h:form>
+                                <h:commandLink value="Remove">
+                                    <f:param name="xuid">
+                                        <ga:attribute name="value" value="#{member.user.id}"/>
+                                    </f:param>
+                                    <f:param name="xmid">
+                                        <ga:attribute name="value" value="#{member.id}"/>
+                                    </f:param>
+                                    <ga:parameter name="xuid" target="#{xuid}"/>
+                                    <ga:parameter name="xmid" target="#{xmid}"/>
+                                    <id:loadUser id="#{xuid}" target="#{xuser}"/>
+                                    <id:deleteMembership user="#{xuser}" membershipId="#{xmid}"/>
+                                    <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                </h:commandLink>
+                            </h:form>
+                        </td>
+                    </gs:tr>
+                </gd:repeat>
+            </gs:tbody>
+        </table>
+
+    </h:outputText>
+</ui:define>
+
+
+</ui:composition>
+
+</html>

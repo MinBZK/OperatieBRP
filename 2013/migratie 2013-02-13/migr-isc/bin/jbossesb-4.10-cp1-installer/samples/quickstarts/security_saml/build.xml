@@ -1,0 +1,84 @@
+<project name="Quickstart_Security_Saml" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<!-- additional deploys -->
+    <property name="additional.deploys" value="jboss-wsse-client.xml, smooks/*.xml, sts-client.properties, jboss-service.xml, login-config.xml"/>
+    <property name="quickstart.deployment.excludes" value="picketlink-sts.war"/>
+
+	<target name="quickstart-specific-checks" depends="assert-ws-available, assert-as5"/>
+
+	<target name="quickstart-specific-predeploys">
+		<copy file="${build.dir}/picketlink-sts.war" todir="${org.jboss.esb.server.deploy.dir}"/>
+    </target>
+
+	 <target name="quickstart-specific-undeploys">
+		<delete file="${org.jboss.esb.server.deploy.dir}/picketlink-sts.war"/>
+    </target>
+			
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+    <property name="picketlink.classes" location="${build.dir}/picketlink-classes"/>
+    <property name="picketlink.src" location="picketlink/src"/>
+    <property name="picketlink.resources" location="picketlink/resources"/>
+
+    <target name="quickstart-specific-dependencies">
+        <path id="quickstart-dependencies-classpath">
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jbossws-client.jar,jboss-remoting.jar" />
+            <fileset dir="${org.jboss.esb.server.server}/lib" includes="picketlink-fed-core-*.jar" />
+        </path>
+    </target>
+	
+    <target name="quickstart-specific-assemblies">
+        <!-- Overriden from the target of the same name in base-build.xml. -->
+        <!-- Called by the "deploy" target.  Don't call directly!! -->
+
+        <!-- Build the webservice... -->
+        <war warfile="build/${ant.project.name}.war"
+             webxml="${basedir}/war/resources/WEB-INF/web.xml">
+            <fileset dir="${basedir}/war/view">
+                <include name="**/*"/>
+            </fileset>
+        </war>
+
+        <delete dir="${picketlink.classes}" quiet="true"/>
+        <mkdir dir="${picketlink.classes}"/>
+
+        <javac srcdir="${picketlink.src}" destdir="${picketlink.classes}" debug="true">
+            <classpath refid="compile-classpath"/>
+        </javac>
+
+        <war destfile="${build.dir}/picketlink-sts.war" webxml="${picketlink.resources}/WEB-INF/web.xml">
+            <zipfileset dir="picketlink-sts-war"/>
+            <zipfileset dir="${picketlink.classes}" prefix="WEB-INF/classes" />
+        </war>
+
+        <copy file="${basedir}/login-config-unfiltered.xml" tofile="${basedir}/login-config.xml" filtering="true" overwrite="true">
+			<filterset>
+				<filter token="STS_CONFIG_FILE_PATH" value="${basedir}/sts-client.properties"/>
+			</filterset>
+		</copy>
+    </target>
+
+	<target name="quickstart-specific-clean">
+		<delete file="${basedir}/login-config.xml"/>
+    </target>
+
+	 <target name="runtest" depends="compile"
+        description="sends a HTTP request to the JBossRemoting gateway">
+        <echo>Http Client</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.securitysaml.test.HttpClient" failonerror="true">
+            <sysproperty key="log4j.configuration" value="${log4j.xml}"/>	
+            <arg value="http"/>
+            <arg value="localhost"/>
+            <arg value="9888"/>
+            <arg value="soap-request.xml"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+</project>

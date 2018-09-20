@@ -1,0 +1,25 @@
+<project name="Quickstart_spring_aop" default="runtest" basedir=".">
+
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<property name="additional.deploys" value="spring-context.xml"/>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml" />
+	
+	<target name="runtest" depends="compile" description="sends a JMS message to the ESB">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.spring_aop.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="Hello World From JMS" />
+			<classpath refid="exec-classpath" />
+		</java>
+	</target>
+
+	<target name="spring-hotdeploy">
+		<touch file="jboss-esb.xml" />
+	</target>
+</project>

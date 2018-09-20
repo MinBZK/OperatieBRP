@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd">
+
+    <params>
+        <param name="stream.filter.type">SAX</param>
+    </params>
+
+    <jb:bean beanId="ExternalObject" createOnElement="$document" class="org.jboss.soa.esb.samples.quickstart.webservice_consumer_wise2.ExternalObject">
+        <jb:expression property="date">
+            decoder = java.util.Calendar.getInstance();
+            decoder.set(messageDate.year, messageDate.month, messageDate.day, 0, 0, 0);
+            return decoder.getTime();
+        </jb:expression>
+        <jb:wiring property="internal" beanIdRef="InternalObject" />
+    </jb:bean>
+
+    <!-- Wired onto the 'internal' property of 'ExternalObject' (above) -->
+    <jb:bean beanId="InternalObject" createOnElement="$document" class="org.jboss.soa.esb.samples.quickstart.webservice_consumer_wise2.InternalObject">
+        <jb:value property="number" data="integerField" decoder="Integer" />
+        <jb:value property="text" data="stringField" />
+    </jb:bean>
+
+    <!-- Capture the date fields in a Map.  Used in 'date' expression binding on 'ExternalObject' (above) -->
+    <jb:bean beanId="messageDate" createOnElement="calendarField" class="java.util.HashMap">
+        <jb:value property="day" data="calendarField/day" default="0" />
+        <jb:value property="month" data="calendarField/month" default="0" />
+        <jb:value property="year" data="calendarField/year" default="0" />
+    </jb:bean>
+
+</smooks-resource-list>

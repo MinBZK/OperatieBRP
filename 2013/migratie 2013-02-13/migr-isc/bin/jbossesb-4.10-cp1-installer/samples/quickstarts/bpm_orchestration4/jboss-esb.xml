@@ -1,0 +1,351 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+		<jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+
+			<jms-bus busid="startGwChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_bpm_orchestration4_start_gw" />
+					<!-- quickstart_bpm_orchestration4_start_gw -->
+					<!-- This queue is used for JPetstore's order -->
+					<!-- queue/quickstart_simple_cbr_Request -->
+			</jms-bus>
+			<jms-bus busid="startEsbChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_bpm_orchestration4_start_esb" />
+			</jms-bus>
+            <jms-bus busid="startEsbChannel_sync">
+                <jms-message-filter dest-type="QUEUE"
+                    dest-name="queue/quickstart_bpm_orchestration4_start_sync_esb" />
+            </jms-bus>
+            <jms-bus busid="queryEsbChannel_sync">
+                <jms-message-filter dest-type="QUEUE"
+                    dest-name="queue/quickstart_bpm_orchestration4_query_sync_esb" />
+            </jms-bus>
+			<jms-bus busid="intakeServiceEsbChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_bpm_orchestration4_intake_service_esb" />
+			</jms-bus>
+			<jms-bus busid="discountServiceEsbChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_bpm_orchestration4_discount_service_esb" />
+			</jms-bus>
+			<jms-bus busid="shippingServiceEsbChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_bpm_orchestration4_shipping_service_esb" />
+			</jms-bus>
+			<jms-bus busid="conciergeServiceEsbChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_bpm_orchestration4_ConciergeManager" />
+			</jms-bus>
+			<jms-bus busid="distributionServiceEsbChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_bpm_orchestration4_DistributionManager" />
+			</jms-bus>
+			<jms-bus busid="basicShippingServiceEsbChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_bpm_orchestration4_BasicShipping" />
+			</jms-bus>
+
+		</jms-provider>
+	</providers>
+
+	<services>
+		<!-- removed the deploy service, the process definition needs to be deployed by a .par and/or from
+			the graphical process designer -->
+		<service category="BPM_orchestration4_Starter_Service"
+			name="Starter_Service"
+			description="BPM Orchestration Sample 4: Use this service to start a process instance">
+			<listeners>
+				<jms-listener name="JMS-Gateway"
+					busidref="startGwChannel" is-gateway="true" />
+				<jms-listener name="ESB-Listener"
+					busidref="startEsbChannel"/>
+			</listeners>
+				<actions mep="OneWay">
+				<action name="setup_key"
+						class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+						<property name="script"
+							value="/scripts/setup_key.groovy" />
+				</action>
+				<action name="start_a_new_order_process"
+					class="org.jboss.soa.esb.services.jbpm.actions.BpmProcessor">
+					<property name="command"
+						value="StartProcessInstanceCommand" />
+					<property name="process-definition-name"
+						value="bpm4_ESBOrderProcess" />
+					<property name="key" value="body.businessKey" />
+					<property name="esbToBpmVars">
+						<mapping esb="BODY_CONTENT"	bpm="entireOrderAsXML" />
+					</property>
+	
+				</action>
+				<action name="dump2" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="After" />
+					<property name="printfull" value="false"/>
+				</action>
+			</actions>
+		</service>
+
+        <service category="BPM_orchestration4_Starter_Service" name="Starter_Service_Sync"
+                 description="BPM Orchestration Sample 4: Use this service to start a process instance" >
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="startEsbChannel_sync"/>
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="setup_key" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                        <property name="script"
+                            value="/scripts/setup_key.groovy" />
+                </action>
+                <action name="start_a_new_order_process"
+                    class="org.jboss.soa.esb.services.jbpm.actions.BpmProcessor">
+                    <property name="command"
+                        value="StartProcessInstanceCommand" />
+                    <property name="process-definition-name"
+                        value="bpm4_ESBOrderProcess" />
+                    <property name="key" value="body.businessKey" />
+                    <property name="esbToBpmVars">
+                        <mapping esb="BODY_CONTENT"	bpm="entireOrderAsXML" />
+                    </property>
+
+                </action>
+                <action name="dump2" class="org.jboss.soa.esb.actions.SystemPrintln">
+                    <property name="message" value="After" />
+                    <property name="printfull" value="false"/>
+                </action>
+            </actions>
+        </service>
+
+        <service category="BPM_orchestration4_Starter_Service" name="Get_Service_Vars_Sync"
+                 description="BPM Orchestration Sample 4: Use this service to query the Service Variables" >
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="queryEsbChannel_sync"/>
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="GetVariables" class="org.jboss.soa.esb.services.jbpm.actions.BpmProcessor">
+                    <property name="command" value="GetProcessInstanceVariablesCommand"/>
+                    <property name="bpmToEsbVars">
+                        <mapping bpm="entireCustomerAsObject" esb="body.customer" />
+                        <mapping bpm="customer_firstName" esb="body.customer.firstName" />
+                        <mapping bpm="customer_lastName" esb="body.customer.lastName" />
+                        <mapping bpm="customer_status" esb="body.customer.status" />
+                        <mapping bpm="entireOrderAsObject" esb="orderHeader" />
+                        <mapping bpm="entireOrderAsXML" esb="BODY_CONTENT" />
+                    </property>
+                </action>
+            </actions>
+        </service>
+
+		<service category="BPM_Orchestration4" name="IntakeService"
+			description="IntakeService: transforms, massages, calculates priority">
+			<listeners>
+				<jms-listener name="ESB-Listener"
+					busidref="intakeServiceEsbChannel"/>
+			</listeners>
+			<actions>
+				
+				<action name="dump1" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="INTAKE START" />
+					<property name="printfull" value="false"/>
+				</action>
+				
+				<action name="groovy"
+					class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+					<property name="script"
+						value="/scripts/intake_service.groovy" />
+				</action>
+				
+				<action name="dump" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="printfull" value="false"/>
+				</action>
+
+        <action name="capture-original-message" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+          <property name="script" value="/scripts/capture_original.groovy" />
+        </action>
+
+				<!--  Initialise message profile... -->
+				<action name="discover-message-origin" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+          <property name="script" value="/scripts/check-origin.groovy" />
+        </action>
+
+        <!--  Transform XML to POJOs... -->
+        <action name="transform" class="org.jboss.soa.esb.smooks.SmooksAction">
+           <property name="smooksConfig" value="/smooks-config.xml" />
+           <property name="resultType" value="JAVA" />
+        </action>
+
+				<action name="SetupMessage"
+					class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.esb_actions.SetupMessage">
+					<property name="status" value="40" />
+					<!--  status was not in order XML, this is just for demo purposes -->
+				</action>
+				
+				<action name="display" 
+					class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+					<property name="script"
+						value="/scripts/display.groovy" />
+				</action>
+				     
+				<!--  Use the BRP to calculate the order priority -->
+				
+				<action
+					class="org.jboss.soa.esb.actions.BusinessRulesProcessor"
+					name="BRP">
+					<property name="ruleSet"
+						value="Priority_Rules.drl" />
+					<property name="ruleReload" value="true" />
+					<property name="object-paths">
+						<object-path esb="body.orderHeader" />
+						<object-path esb="body.customer" />
+					</property>
+				</action>
+				<action name="setupPriority"
+					class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+					<property name="script"
+						value="/scripts/setup_priority.groovy" />
+				</action>
+		        <action name="monitor" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.esb_actions.SimpleJMSNotifier">
+							  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration4_monitor" />     
+							  <property name="PREPENDED_TEXT" value="Priority" />     
+							  <property name="BODY_KEY" value="order_orderPriority" />
+		        </action>		
+			</actions>
+		</service>
+		
+		<service category="BPM_Orchestration4" name="DiscountService"
+			description="DiscountService">
+			<listeners>
+				<jms-listener name="ESB-Listener"
+					busidref="discountServiceEsbChannel"  />
+			</listeners>
+			<actions>
+				<action name="groovy"
+					class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+					<property name="script"
+						value="/scripts/discount_service.groovy" />
+				</action>
+				<action name="display"
+					class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+					<property name="script"
+						value="/scripts/display.groovy" />
+				</action>
+								
+				<action
+					class="org.jboss.soa.esb.actions.BusinessRulesProcessor"
+					name="discount_calc">
+					<property name="ruleSet"
+						value="Discount_Rules.drl" />
+					<property name="ruleReload" value="true" />
+					<property name="object-paths">
+						<object-path esb="body.orderHeader" />
+						<object-path esb="body.customer" />
+					</property>
+				</action>
+				
+				<action name="setupDiscount"
+					class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+					<property name="script"
+						value="/scripts/setup_discount.groovy" />
+				</action>				
+
+		        <action name="monitor" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.esb_actions.SimpleJMSNotifier">
+						  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration4_monitor" />     
+						  <property name="PREPENDED_TEXT" value="Discount Service" />
+						  <property name="BODY_KEY" value="order_orderDiscount" />
+		        </action>
+        
+			</actions>
+		</service>
+		
+		<service category="BPM_Orchestration4" name="ShippingService"
+			description="ShippingService">
+			<listeners>
+				<jms-listener name="ESB-Listener"
+					busidref="shippingServiceEsbChannel"/>
+			</listeners>
+			<actions>
+				<action name="groovy"
+					class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+					<property name="script"
+						value="/scripts/shipping_service.groovy" />
+				</action>
+				
+				<action
+					class="org.jboss.soa.esb.actions.ContentBasedRouter"
+					name="ContentBasedRouter">
+					<property name="ruleSet" value="CBRRules.drl" />
+					<property name="ruleReload" value="true" />
+					<property name="destinations">
+						<route-to
+							destination-name="SuperSpecialCustomerService"
+							service-category="ConciergeManager" service-name="ConciergeService" />
+						<route-to
+							destination-name="SpecialCustomerService"
+							service-category="DistributionManager" service-name="DistributionService" />
+						<route-to
+							destination-name="RegularCustomerService"
+							service-category="BasicShipping" service-name="ShipperService" />
+					</property>
+					<property name="object-paths">
+						<object-path esb="body.orderHeader" />
+						<object-path esb="body.customer" />
+					</property>
+				</action>
+				
+			</actions>
+		</service>
+
+		<service category="ConciergeManager"
+			name="ConciergeService" description="For highest priority customers">
+			<listeners>
+				<jms-listener name="conciergeServiceEsbChannel"
+					busidref="conciergeServiceEsbChannel">
+				</jms-listener>
+			</listeners>
+			<actions mep="OneWay">                
+                <action name="monitor" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration4_monitor" />     
+								  <property name="PREPENDED_TEXT" value="Concierge:Highest Priority Customers/Orders" />     
+								  <property name="BODY_KEY" value="orderHeader" />
+                </action>
+			</actions>
+		</service>
+
+		<service category="DistributionManager"
+			name="DistributionService" description="For medium priority customers">
+			<listeners>
+				<jms-listener name="distributionServiceEsbChannel"
+					busidref="distributionServiceEsbChannel">
+				</jms-listener>
+			</listeners>
+			<actions mep="OneWay">
+               <action name="monitor" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration4_monitor" />     
+								  <property name="PREPENDED_TEXT" value="Distribution Manager:Medium Priority Customers/Orders" />     
+								  <property name="BODY_KEY" value="orderHeader" />
+                </action>
+			</actions>
+		</service>
+		<service category="BasicShipping"
+			name="ShipperService" description="For low priority customers">
+			<listeners>
+				<jms-listener name="basicShippingServiceEsbChannel"
+					busidref="basicShippingServiceEsbChannel">
+				</jms-listener>
+			</listeners>
+			<actions mep="OneWay">
+                <action name="monitor" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration4.esb_actions.SimpleJMSNotifier">
+				  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration4_monitor" />     
+				  <property name="PREPENDED_TEXT" value="Basic:Lowest Priority Customers/Orders" />     
+				  <property name="BODY_KEY" value="orderHeader" />
+                </action>
+			</actions>
+		</service>				
+
+	</services>
+
+</jbossesb>

@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                   xmlns:db="http://www.milyn.org/xsd/smooks/db-routing-1.1.xsd">
+
+    <!--
+        The "OrderManagement" datasource is configured in the database/datasources.xml config file.
+    -->
+
+    <!--
+        This resource is needed because we only want to limit the number or orders inserted into the database,
+        so we need to count them...
+    -->
+    <db:executor executeOnElement="order-item" datasource="OrderManagement" executeBefore="true">
+        <db:statement>select count(*) as "numOrders" from orders</db:statement>
+        <db:resultSet name="orderCountRS" />
+    </db:executor>
+    
+    <!--
+        At the end of every order-item, insert the order details for that order item...
+     -->
+    <db:executor executeOnElement="order-item" datasource="OrderManagement" executeBefore="false">
+        <condition>
+            <!--
+            orderCountRS[0].numOrders < 10
+            -->
+        </condition>
+        <db:statement>INSERT INTO ORDERS VALUES(${orderDetail.orderNum + "-" + product.PRODUCTID}, ${accounts[0].USERID}, ${orderDetail.date}, ${accounts[0].ADDR1}, ${accounts[0].ADDR2}, ${accounts[0].CITY}, ${accounts[0].STATE},'30253','USA', ${accounts[0].ADDR1}, ${accounts[0].ADDR2}, ${accounts[0].CITY}, ${accounts[0].STATE},'30253','USA','UPS',22.23, ${accounts[0].FIRSTNAME}, ${accounts[0].LASTNAME}, ${accounts[0].FIRSTNAME}, ${accounts[0].LASTNAME},'999 9999 9999 9999','12/03','Visa','CA')</db:statement>
+    </db:executor>
+
+</smooks-resource-list>

@@ -1,0 +1,70 @@
+<project name="Quickstart_Security_Cert" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+			
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+    <target name="quickstart-specific-checks" depends="assert-ws-available"/>
+
+    <target name="quickstart-specific-dependencies">
+        <path id="quickstart-dependencies-classpath">
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jbossws-client.jar,jboss-remoting.jar" />
+        </path>
+    </target>
+	
+    <target name="quickstart-specific-assemblies">
+        <!-- Overriden from the target of the same name in base-build.xml. -->
+        <!-- Called by the "deploy" target.  Don't call directly!! -->
+
+        <!-- Build the webservice... -->
+        <war warfile="build/${ant.project.name}.war"
+             webxml="${basedir}/war/resources/WEB-INF/web.xml">
+            <fileset dir="${basedir}/war/view">
+                <include name="**/*"/>
+            </fileset>
+        </war>
+    </target>
+
+    <target name="runtest" depends="compile" description="run tests over jms, http, and socket">
+        <antcall target="saygoodbye_over_http" />
+    </target>
+
+    <target name="saygoodbye_over_http" depends="compile">
+        <echo></echo>
+        <echo>Invoke JBR Gateway with successful login</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.securitycert.test.SendMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="01" />
+            <arg value="8765" />
+            <classpath refid="exec-classpath" />
+        </java>
+        <echo></echo>
+        <echo></echo>
+        <echo>Invoke JBR Gateway with unsuccessful login</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.securitycert.test.SendMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="02" />
+            <arg value="8765" />
+            <classpath refid="exec-classpath" />
+        </java>
+    </target>
+
+	<target name="quickstart-specific-deploys">
+        <copy todir="${build.dir}" filtering="true" overwrite="true">
+
+			<filterset>
+				<filter token="KEYSTORE_PATH" value="${basedir}/keystore"/>
+				<filter token="ROLES_FILE_PATH" value="${basedir}/roles.properties"/>
+			</filterset>
+            <fileset dir="${basedir}">
+                <include name="login-config.xml"/>
+            </fileset>
+        </copy>
+    </target>
+
+
+</project>

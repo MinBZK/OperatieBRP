@@ -1,0 +1,134 @@
+<project name="Quickstart_helloworld_TX_SQL_action" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<property name="additional.deploys" value="jbossesb-service.xml quickstart-ds.xml dummy-service.xml" />
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="quickstart-specific-assemblies" description="Quickstart specific assemblies">
+	</target>
+
+	<target name="quickstart-specific-checks">
+		<property name="driver" value="org.h2.Driver"/>
+		<property name="driver.jar" value="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/lib/h2-1.2.124.jar"/>	
+		<property name="url" value="jdbc:h2:tcp://localhost:9095/HelloworldTxSqlDB"/>
+	</target>
+	
+	<target name="runtest" depends="dependencies" description="Insert row data into sql table polled by gateway">
+		<echo>Insert row data into sql table polled by gateway</echo>
+		<sql
+			driver="${driver}"
+			url="${url}"
+			userid="sa"	
+			autocommit="true"
+			password="">
+			<classpath>
+				<pathelement path="${driver.jar}"/>
+			</classpath>
+			<transaction src="populate.sql"/>
+		</sql>
+	</target>  
+
+	<target name="create" depends="dependencies" description="create table tx_esb_messages">
+		<echo>create table tx_esb_messages</echo>
+		<sql	
+			print="true"
+			driver="${driver}"
+			url="${url}"
+			userid="sa"
+			autocommit="true"
+			password="">
+			<classpath>
+				<pathelement path="${driver.jar}"/>
+			</classpath>
+			<transaction>
+				create table tx_esb_messages(MESSAGE_ID varchar, STATUS_COL varchar NOT NULL, TIMESTAMP_COL bigint, DATA_COL varchar NOT NULL);
+			</transaction>
+		</sql>
+	</target>  
+
+	<target name="drop" depends="dependencies" description="drop table tx_esb_messages">
+		<echo>drop table tx_esb_messages</echo>
+		<sql	
+			print="true"
+			driver="${driver}"
+			url="${url}"
+			userid="sa"
+			autocommit="true"
+			password="">
+			<classpath>
+				<pathelement path="${driver.jar}"/>
+			</classpath>
+			<transaction>
+				drop table tx_esb_messages
+			</transaction>
+		</sql>
+	</target>
+
+	<target name="drop2" depends="dependencies" description="drop table gateway_table">
+		<echo>drop table tx_esb_messages</echo>
+		<echo>drop table gateway_table</echo>
+		<sql	
+			print="true"
+			driver="${driver}"
+			url="${url}"
+			userid="sa"
+			autocommit="true"
+			password="">
+			<classpath>
+				<pathelement path="${driver.jar}"/>
+			</classpath>
+			<transaction>
+				drop table gateway_table
+			</transaction>
+		</sql>
+	</target>  
+
+	<target name="select" depends="dependencies" description="select * from gateway_table">
+		<echo>Select * from tx_esb_messages</echo>
+		<sql	
+			print="true"
+			driver="${driver}"
+			url="${url}"
+			userid="sa"
+			autocommit="true"
+			password="">
+			<classpath>
+				<pathelement path="${driver.jar}"/>
+			</classpath>
+			<transaction>
+				select * from tx_esb_messages
+			</transaction>
+		</sql>
+
+		<echo>Select * from gateway_table</echo>
+		<sql	
+			print="true"
+			driver="${driver}"
+			url="${url}"
+			userid="sa"
+			autocommit="true"
+			password="">
+			<classpath>
+				<pathelement path="${driver.jar}"/>
+			</classpath>
+			<transaction>
+				select * from gateway_table where DATA_COLUMN like 'data%' and upper(STATUS_COL) like 'P%' order by DATA_COLUMN
+			</transaction>
+		</sql>
+	</target>  
+
+	<target name="deploy-jms-dests">
+		<echo message="This quickstart doesn't use any JMS Destinations.  No JMS deployments required." />
+    </target>
+	
+    <target name="undeploy-jms-dests">
+        <echo message="This quickstart doesn't use any JMS Destinations.  No JMS undeployments required." />
+    </target>
+
+</project>

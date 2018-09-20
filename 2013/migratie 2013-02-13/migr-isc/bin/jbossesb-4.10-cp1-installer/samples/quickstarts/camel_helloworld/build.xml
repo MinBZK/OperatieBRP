@@ -1,0 +1,47 @@
+<project name="Quickstart_camel_helloworld" default="run" basedir=".">
+
+	<description>
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<property name="jbossesb.inputdir1" location="${build.dir}/input1"/>
+	<property name="jbossesb.inputdir2" location="${build.dir}/input2"/>
+
+	<target name="filter_jboss-esb.xml">
+		<pathconvert targetos="unix" property="jbossesb.inputdir1.unix">
+			<path location="${jbossesb.inputdir1}"/>
+		</pathconvert>
+		<pathconvert targetos="unix" property="jbossesb.inputdir2.unix">
+			<path location="${jbossesb.inputdir2}"/>
+		</pathconvert>
+		<copy file="${basedir}/jboss-esb-unfiltered.xml" tofile="${basedir}/jboss-esb.xml" overwrite="true" filtering="true">
+			<filterset>
+				<filter token="INPUTDIR1" value="${jbossesb.inputdir1.unix}"/>
+				<filter token="INPUTDIR2" value="${jbossesb.inputdir2.unix}"/>
+			</filterset>
+		</copy>
+	</target>
+
+	<target name="config">
+		<delete dir="${jbossesb.inputdir1}" quiet="true"/>
+		<delete dir="${jbossesb.inputdir2}" quiet="true"/>
+		<mkdir dir="${jbossesb.inputdir1}"/>
+		<mkdir dir="${jbossesb.inputdir2}"/>
+		<antcall target="filter_jboss-esb.xml"/>
+		<copy file="log4j.xml" tofile="build/log4j.xml"/>
+	</target>
+	
+	<target name="quickstart-specific-clean">
+		<delete file="${basedir}/jboss-esb.xml"/>
+	</target>
+
+	<target name="runtest" depends="compile" description="Runs test">
+		<echo message="Hello ${user.name}! (1)" file="${jbossesb.inputdir1}/test.txt"/>
+		<echo message="Hello ${user.name}! (2)" file="${jbossesb.inputdir2}/test.txt"/>
+	</target>
+
+</project>

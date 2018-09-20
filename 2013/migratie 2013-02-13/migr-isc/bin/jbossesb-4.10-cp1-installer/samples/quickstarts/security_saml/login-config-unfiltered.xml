@@ -1,0 +1,24 @@
+<policy>
+	<application-policy name="saml-issue-token">
+        <authentication>
+            <login-module code="org.picketlink.identity.federation.core.wstrust.auth.STSIssuingLoginModule" flag="required">
+                <module-option name="configFile">@STS_CONFIG_FILE_PATH@</module-option>
+                <module-option name="endpointURI">http://security_saml/goodbyeworld</module-option>
+                <module-option name="password-stacking">true</module-option>
+            </login-module>
+            <login-module code="org.picketlink.identity.federation.core.wstrust.auth.STSValidatingLoginModule" flag="required">
+                <module-option name="configFile">@STS_CONFIG_FILE_PATH@</module-option>
+                <module-option name="password-stacking">useFirstPass</module-option>
+            </login-module>
+        </authentication>
+    </application-policy>
+
+    <application-policy name="saml-validate-token">
+        <authentication>
+            <login-module code="org.picketlink.identity.federation.core.wstrust.auth.STSValidatingLoginModule" flag="required">
+                <module-option name="configFile">@STS_CONFIG_FILE_PATH@</module-option>
+                <module-option name="useOptionsCredentials">true</module-option>
+            </login-module>
+        </authentication>
+    </application-policy>
+</policy>

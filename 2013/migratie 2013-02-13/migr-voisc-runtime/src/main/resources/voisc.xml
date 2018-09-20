@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd">
+
+    <tx:annotation-driven />
+
+    <context:component-scan base-package="nl.moderniseringgba.isc.voisc" />
+
+    <bean id="voiscProperties" class="nl.moderniseringgba.isc.voisc.VoiscPropertyPlaceHolder">
+        <property name="configFile" value="config.properties" />
+    </bean>
+
+    <bean name="voaJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+        <property name="jobClass" value="nl.moderniseringgba.isc.voisc.quartz.VoaJob" />
+        <property name="jobDataAsMap">
+            <map>
+                <entry key="voiscDbProxy" value-ref="voiscDbProxy" />
+                <entry key="gemeenteRepo" value-ref="gemeenteRepositoryImpl" />
+                <entry key="voiscService" value-ref="voiscService" />
+            </map>
+        </property>
+    </bean>
+
+	<bean name="toQueueJob" class="org.springframework.scheduling.quartz.JobDetailBean">
+		<property name="jobClass"
+			value="nl.moderniseringgba.isc.voisc.quartz.ToQueueJob" />
+		<property name="jobDataAsMap">
+			<map>
+				<entry key="voiscService" value-ref="voiscService" />
+			</map>
+		</property>
+	</bean>
+
+	<bean id="toQueueCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="toQueueJob" />
+		<property name="cronExpression" value="${toqueue.cron.expression}" />
+	</bean>
+
+	<bean id="voaCronTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail" ref="voaJob" />
+		<property name="cronExpression" value="${voajob.cron.expression}" />
+	</bean>
+
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
+		destroy-method="destroy">
+		<property name="waitForJobsToCompleteOnShutdown" value="true" />
+		<property name="triggers">
+			<list>
+				<ref bean="toQueueCronTrigger" />
+			</list>
+		</property>
+	</bean>
+
+	<bean id="voiscService" class="nl.moderniseringgba.isc.voisc.VoaServiceImpl" />
+    
+    <bean id="voiscDbProxy" class="nl.moderniseringgba.isc.voisc.mailbox.impl.VoiscDbProxyImpl">
+       <property name="databaseReconnects" value="${voisc.database.reconnects}" />
+       <property name="emergencySleepTime" value="${voisc.database.sleepTime}" />
+    </bean>
+
+	<bean id="mbsProxy"
+		class="nl.moderniseringgba.isc.voisc.mailbox.impl.MailboxServerProxyImpl" >
+        <property name="erefPrefix" value="${voisc.eref.prefix}" />
+    </bean>
+
+	<bean id="sslConnection"
+		class="nl.moderniseringgba.isc.voisc.mailbox.impl.SslConnectionImpl">
+		<property name="hostname" value="${voisc.mailbox.hostname}" />
+		<property name="portNumber" value="${voisc.mailbox.portnumber}" />
+	</bean>
+</beans>

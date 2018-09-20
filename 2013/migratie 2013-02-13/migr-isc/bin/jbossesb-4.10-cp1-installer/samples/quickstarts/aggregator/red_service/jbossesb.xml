@@ -1,0 +1,59 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd">
+
+  <providers>
+     <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+        <jms-bus busid="Aggregator_ToRed">
+              <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Aggregator_ToRed"/>
+        </jms-bus>
+     </jms-provider>
+  </providers>
+  <services>          
+        <!-- Red -->
+      <service category="RedTeam" name="GoRed"
+  	      description="Send to the Red Team">
+  	     <listeners>
+  	        <jms-listener
+  	       	  name="Aggregator_ToRed"
+  	       	  busidref="Aggregator_ToRed"
+  	        />
+  	     </listeners>
+  	     <actions mep="OneWay">
+  	            <action name="transform" 
+                          class="org.jboss.soa.esb.smooks.SmooksAction">
+                      <property name="smooksConfig" value="/smooks-res.xml"/>
+                      <property name="resultType" value="JAVA"/>
+                      <property name="javaResultBeanId" value="customer"/>
+ 								</action>
+ 							  <action name="ripCustomer" 
+   										class="org.jboss.soa.esb.dvdstore.RetrieveCustomerAction"	/>	
+ 								<action name="displayAfterTransformer" 
+   										class="org.jboss.soa.esb.samples.quickstart.aggregator.MyJMSListenerAction" process="displayMessage" />  
+
+  	        	  <action name="notificationAction" 
+               		class="org.jboss.soa.esb.actions.Notifier">
+               		<property name="okMethod" value="notifyOK" />
+               		<property name="notification-details">
+   	 			   	    <NotificationList type="OK">       				       
+				    	       <target class="NotifyQueues">
+				   	             <queue jndiName="queue/quickstart_Aggregator_Red_Alert">
+					         	       <messageProp name="quickstart" value="Aggregator_Red_Alert" />
+					               </queue> 
+			 	     	       </target>
+	    		   	    </NotificationList> 
+	    		        </property>
+   	   			    </action>     
+   	   			  <!-- Add an action to route to aggregator -->
+   	   			  <action name="routeToAggregator" class="org.jboss.soa.esb.actions.StaticRouter">
+                 <property name="destinations">        		      
+        	        <route-to destination-name="aggregatorService"   
+        	          service-category="Aggregation"  
+        	        	service-name="OrderAggregrator" /> 
+                 </property> 
+             </action>
+         </actions>
+  	  </service>
+	</services>
+</jbossesb>

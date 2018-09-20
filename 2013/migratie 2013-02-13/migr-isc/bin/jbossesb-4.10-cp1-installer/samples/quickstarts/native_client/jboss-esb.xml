@@ -1,0 +1,49 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_native_client_esb"
+                  />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+          
+        <service category="MyServiceCategory" 
+                 name="MyNativeClientService" 
+                 description="A WS Frontend speaks natively to the ESB" invmScope="GLOBAL">
+            <listeners>
+                <jms-listener name="JMS-ESBListener"
+                              busidref="quickstartEsbChannel"
+                />                
+            </listeners>
+            <actions>
+               <action name="displayAction" 
+               		class="org.jboss.soa.esb.samples.quickstart.nativeclient.MyAction" 
+               		process="displayMessage">
+               		<property name="exceptionMethod" value="exceptionHandler"/>
+               </action>
+  			       <action name="playAction" 
+  			   	    	class="org.jboss.soa.esb.samples.quickstart.nativeclient.MyAction" 
+  			   		    process="playWithMessage">  	               
+               		<property name="exceptionMethod" value="exceptionHandler"/>
+  			       </action> 
+  			       <action name="finalDisplayAction" 
+               		class="org.jboss.soa.esb.samples.quickstart.nativeclient.MyAction" 
+               		process="displayMessage">
+               		<property name="exceptionMethod" value="exceptionHandler"/>
+               </action> 			       
+            </actions>
+        </service>
+      </services>
+     
+</jbossesb>

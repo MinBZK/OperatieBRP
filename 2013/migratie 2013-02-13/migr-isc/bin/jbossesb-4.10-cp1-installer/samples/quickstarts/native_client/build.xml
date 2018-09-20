@@ -1,0 +1,58 @@
+<project name="Quickstart_native_client" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+			
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+    <property name="war.build.dir" location="${build.dir}/war/classes"/>
+
+    <target name="quickstart-specific-assemblies" depends="assert-ws-available, makewar"/>
+
+    <target name="makewar" depends="dependencies" description="make war">
+        <!-- Compile... -->
+        <mkdir dir="${war.build.dir}" />
+        <javac srcdir="war/src" destdir="${war.build.dir}" debug="true">
+            <classpath>
+                <path refid="compile-classpath" />
+                <fileset dir="${org.jboss.esb.server.home}/client" includes="jbossws-client.jar" />
+            </classpath>
+        </javac>
+
+        <!-- War... -->
+        <war warfile="build/${ant.project.name}.war"
+             webxml="${basedir}/war/resources/WEB-INF/web.xml">
+            <webinf dir="${basedir}/war/resources/WEB-INF">
+                <include name="jboss-web.xml"/>
+            </webinf>
+            <classes dir="${war.build.dir}" includes="**/*.class"/>
+            <fileset dir="${basedir}/war/view">
+                <include name="**/*"/>
+            </fileset>
+        </war>
+    </target>
+
+    <target name="deploy-war" depends="prepare-deployment">
+        <copy todir="${org.jboss.esb.server.deploy.dir}"
+            file="${build.dir}/${ant.project.name}.war"/>
+    </target>
+
+    <target name="undeploy-war" depends="dependencies">
+        <delete verbose="true" quiet="true"
+          file="${org.jboss.esb.server.deploy.dir}/${ant.project.name}.war"/>
+    </target>
+
+    <target name="display-instructions">
+        <echo message='${line.separator}******************' />
+        <echo>Quickstart deployed to target JBoss ESB/App Server at '${org.jboss.esb.server.deploy.dir}'.</echo>
+        <echo>1.  Check your ESB Server console to make sure the deployment was executed without errors.</echo>
+        <echo>2.  Use your favorite Web Service testing tool to test the webservice.</echo>
+        <echo>3.  Check your ESB Server console again.  The Quickstart should have produced some output.</echo>
+        <echo message='******************' />
+    </target>
+
+	<target name="runtest" depends="display-instructions"/>
+</project>

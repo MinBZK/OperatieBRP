@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<server>
+
+   <mbean code="org.jboss.internal.soa.esb.dependencies.DatabaseInitializer"
+       name="jboss.esb:service=JBPMDatabaseInitializer">
+      <attribute name="Datasource">java:/JbpmDS</attribute>
+      <attribute name="ExistsSql">select count(*) from JBPM_ID_USER</attribute>
+      <attribute name="SqlFiles">
+      jbpm-sql/jbpm.jpdl.hsqldb.sql,
+      jbpm-sql/import.sql
+      </attribute>
+      <depends>jboss.jca:service=DataSourceBinding,name=JbpmDS</depends>
+      <attribute name="UseEOL">true</attribute>
+   </mbean>
+
+   <mbean code="org.jboss.soa.esb.services.jbpm.configuration.JbpmService"
+      name="jboss.esb:service=JbpmService">
+      <depends>jboss.esb:service=JBPMDatabaseInitializer</depends>
+      <depends>jboss:service=ClientUserTransaction</depends>
+   </mbean>
+</server>

@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+  - Application context definition for JPetStore's business layer.
+  - Contains bean references to the transaction manager and to the DAOs in
+  - dataAccessContext-local/jta.xml (see web.xml's "contextConfigLocation").
+  -->
+<beans xmlns="http://www.springframework.org/schema/beans"
+	     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	     xmlns:aop="http://www.springframework.org/schema/aop"
+	     xmlns:tx="http://www.springframework.org/schema/tx"
+	     xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+
+	<!-- ========================= GENERAL DEFINITIONS ========================= -->
+
+	<!-- Configurer that replaces ${...} placeholders with values from properties files -->
+	<!-- (in this case, mail and JDBC related properties) -->
+	<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations">
+			<list>
+				<value>jdbc.properties</value>
+			</list>
+		</property>
+	</bean>
+    
+	<!-- MailSender used by EmailAdvice -->
+	<!--
+	<bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
+		<property name="host" value="${mail.host}"/>
+	</bean>
+	-->
+
+
+	<!-- ========================= BUSINESS OBJECT DEFINITIONS ======================== -->
+
+	<!-- Generic validator for Account objects, to be used for example by the Spring web tier -->
+	<bean id="accountValidator" class="org.springframework.samples.jpetstore.domain.logic.AccountValidator"/>
+
+	<!-- Generic validator for Order objects, to be used for example by the Spring web tier -->
+	<bean id="orderValidator" class="org.springframework.samples.jpetstore.domain.logic.OrderValidator"/>
+
+	<!--
+	  - JPetStore primary business object (default implementation).
+		- Transaction advice gets applied through the AOP configuration below.
+		-->
+	<bean id="petStore" class="org.springframework.samples.jpetstore.domain.logic.PetStoreImpl">
+		<property name="accountDao" ref="accountDao"/>
+		<property name="categoryDao" ref="categoryDao"/>
+		<property name="productDao" ref="productDao"/>
+		<property name="itemDao" ref="itemDao"/>
+		<property name="orderDao" ref="orderDao"/>
+	</bean>
+
+
+	<!-- ========================= ASPECT CONFIGURATION ======================== -->
+
+	<aop:config>
+		<!--
+			This definition creates auto-proxy infrastructure based on the given pointcut,
+			expressed in AspectJ pointcut language. Here: applying the advice named
+			"txAdvice" to all methods on classes named PetStoreImpl.
+		-->
+		<aop:advisor pointcut="execution(* *..PetStoreFacade.*(..))" advice-ref="txAdvice"/>
+
+		<!--
+			This definition creates auto-proxy infrastructure based on the given pointcut,
+			expressed in AspectJ pointcut language. Here: applying the advice named
+			"emailAdvice" to insertOrder(Order) method of PetStoreImpl
+		-->
+		<!--
+		<aop:advisor pointcut="execution(* *..PetStoreFacade.insertOrder(*..Order))" advice-ref="emailAdvice"/>
+		-->
+	</aop:config>
+
+	<!--
+		Transaction advice definition, based on method name patterns.
+		Defaults to PROPAGATION_REQUIRED for all methods whose name starts with
+		"insert" or "update", and to PROPAGATION_REQUIRED with read-only hint
+		for all other methods.
+	-->
+	<tx:advice id="txAdvice">
+		<tx:attributes>
+			<tx:method name="insert*"/>
+			<tx:method name="update*"/>
+			<tx:method name="*" read-only="true"/>
+		</tx:attributes>
+	</tx:advice>
+
+	<!-- AOP advice used to send confirmation email after order has been submitted -->
+	<!--
+	<bean id="emailAdvice" class="org.springframework.samples.jpetstore.domain.logic.SendOrderConfirmationEmailAdvice">
+		<property name="mailSender" ref="mailSender"/>
+	</bean>-->
+
+
+	<!-- ========================= REMOTE EXPORTER DEFINITIONS ======================== -->
+
+	<!-- RMI exporter for the JPetStore OrderService -->
+	<!-- Commented out by default to avoid conflicts with EJB containers -->
+	<!--
+	<bean id="order-rmi" class="org.springframework.remoting.rmi.RmiServiceExporter">
+		<property name="service" ref="petStore"/>
+		<property name="serviceInterface" value="org.springframework.samples.jpetstore.domain.logic.OrderService"/>
+		<property name="serviceName" value="order"/>
+		<property name="registryPort" value="1099"/>
+	</bean>
+	-->
+
+</beans>

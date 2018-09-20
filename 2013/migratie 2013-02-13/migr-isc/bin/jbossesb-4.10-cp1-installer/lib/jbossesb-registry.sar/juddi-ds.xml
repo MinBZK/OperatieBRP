@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<datasources>
+   <local-tx-datasource>
+         <jndi-name>juddiDB</jndi-name>
+         <connection-url>jdbc:hsqldb:${jboss.server.data.dir}${/}hypersonic${/}juddiDB</connection-url>
+         <driver-class>org.hsqldb.jdbcDriver</driver-class>
+         <user-name>sa</user-name>
+         <password></password>
+         <min-pool-size>5</min-pool-size>
+         <max-pool-size>20</max-pool-size>
+         <idle-timeout-minutes>0</idle-timeout-minutes>
+         <prepared-statement-cache-size>32</prepared-statement-cache-size>
+         <depends>jboss:service=Hypersonic,database=juddiDB</depends>
+   </local-tx-datasource>
+   <mbean code="org.jboss.jdbc.HypersonicDatabase"
+        name="jboss:service=Hypersonic,database=juddiDB">
+        <attribute name="Database">juddiDB</attribute>
+        <attribute name="InProcessMode">true</attribute>
+   </mbean>
+   <mbean code="org.jboss.internal.soa.esb.dependencies.DatabaseInitializer"
+      name="jboss.esb:service=JUDDIDatabaseInitializer">
+      <attribute name="Datasource">java:/juddiDB</attribute>
+      <attribute name="ExistsSql">select count(*) from  j3_publisher</attribute>
+      <attribute name="SqlFiles">
+         juddi-sql/hsqldb/import.sql
+      </attribute>
+      <depends>jboss.jca:service=DataSourceBinding,name=juddiDB</depends>
+   </mbean>
+</datasources>

@@ -1,0 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+
+    <ui:composition template="t_base.xhtml">
+        <ui:define name="header">
+            <h:outputText value="#{msgs['login.welcome']}" style="margin-left:30px;margin-right:10px"/>
+        </ui:define>
+
+        <ui:define name="menu">
+            <ga:responseActions>
+                <ga:parameter name="error" target="#{error}"/>
+            </ga:responseActions>
+            <gs:div style="padding:0;margin:0">
+                <form name="loginform" method="post" action="j_security_check">
+                    <table class="leftmenu">
+                    <tbody>
+                            <tr class="leftmenuheader">
+                                <th colspan="2">#{msgs['login.header']}</th>
+                            </tr>
+                            <tr class="leftmenu">
+                                <th>#{msgs['login.username']}</th>
+                                <td>
+                                    <input name="j_username" type="text"/>
+                                </td>
+                            </tr>
+                            <tr class="leftmenu">
+                                <th>#{msgs['login.password']}</th>
+                                <td>
+                                    <input name="j_password" type="password"/>
+                                </td>
+                            </tr>
+                            <tr class="leftmenu">
+                                <th/>
+                                <td>
+                                    <input type="submit" value="#{msgs['login.button']}" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </form>
+            </gs:div>
+        </ui:define>
+
+        <ui:define name="body">
+			<div class="fillerDiv" style="width:800px">&nbsp;</div>
+		
+            <gs:div rendered="#{error}">
+                <table class="msgs error">
+                    <thead>
+                        <tr>
+                            <th>#{msgs['msg.error']}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>
+                                <h:outputText value="#{msgs['login.failure']}"/>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </gs:div>
+        </ui:define>
+    </ui:composition>
+
+</html>

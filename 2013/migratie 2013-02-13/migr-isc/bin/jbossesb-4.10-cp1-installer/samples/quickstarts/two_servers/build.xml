@@ -1,0 +1,152 @@
+<project name="Quickstart_twoservers" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<property file="server.properties"/>
+
+	<property name="server.dir" value="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.orig.config}"/>
+	
+        <!-- Check for JBossAS5 -->
+	<condition property="jbossas5">
+        	<available file="${server.dir}/deployers"/>
+    	</condition>
+	<!-- Check for JBossAS4.x -->
+	<condition property="jbossas4">
+        	<not>
+			<available file="${server.dir}/deployers"/>
+		</not>
+	</condition>
+
+ 	<target name="setup-jbossas5" if="jbossas5">
+		<input message="The following task is going to delete the directories ${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.first} and ${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second} and replace them.    Continue (Y/N)?" validargs="Y,N" addproperty="input.response"/>
+		<condition property="exit.setup" value="blah">
+			<matches string="${input.response}" pattern="^Y$"/>
+		</condition>
+
+		<fail unless="exit.setup"/>
+			
+		<delete dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.first}"/>
+		<delete dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second}"/>
+
+		<copy todir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.first}">
+			<fileset dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.orig.config}" includes="**"/>
+		</copy>
+		<copy todir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second}">
+			<fileset dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.orig.config}" includes="**"/>
+		</copy>
+
+	</target>	
+	
+	<target name="setup-jbossas4" if="jbossas4">
+		<echo>SERVER.DIR=${server.dir}</echo>
+		<input message="The following task is going to delete the directories ${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.first} and ${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second} and replace them.    Continue (Y/N)?" validargs="Y,N" addproperty="input.response"/>
+		<condition property="exit.setup" value="blah">
+			<matches string="${input.response}" pattern="^Y$"/>
+		</condition>
+
+		<fail unless="exit.setup"/>
+			
+		<delete dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.first}"/>
+		<delete dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second}"/>
+
+		<copy todir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.first}">
+			<fileset dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.orig.config}" includes="**"/>
+		</copy>
+		<copy todir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second}">
+			<fileset dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.orig.config}" includes="**"/>
+		</copy>
+
+		<copy overwrite="true" file="resources/jboss-service.xml" todir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.first}/conf">
+			<filterset>
+				<filter token="server.name" value="ports-01"/> 
+			</filterset>
+		</copy>
+
+		<copy overwrite="true" file="resources/jboss-service.xml" todir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second}/conf">
+			<filterset>
+				<filter token="server.name" value="ports-02"/>
+			</filterset>
+		</copy>
+
+	</target>
+
+	<target name="setup-servers" depends="setup-jbossas4, setup-jbossas5">
+	</target>
+
+	<!-- This Quickstart requires two different .esb packages, one for each
+		server, so we need to override the deploy-esb and package-deployment
+		targets -->
+	<target name="package-deployment">
+
+        <copy overwrite="true" file="jboss-esb.xml.first" tofile="build/META-INF/jboss-esb.xml"/>
+
+        <jar destfile="${build.dir}/${ant.project.name}-first.esb">
+			<fileset dir="${build.dir}/classes" />
+			<fileset dir="${build.dir}" includes="*.jar,*.war"/>
+			<fileset dir="${build.dir}" includes="deployment.xml"/>
+			<fileset dir="${build.dir}" includes="META-INF/**" />
+			<fileset dir="${basedir}/src" excludes="**/*.java" /> <!-- Please leave the src dir in here! -->
+			<fileset dir="${basedir}" includes="${jms.service.file} ${additional.deploys}" excludes="build/**" />
+			<fileset dir="${basedir}/lib" includes="*.jar"/>
+        </jar>
+
+        <copy overwrite="true" file="jboss-esb.xml.second" tofile="build/META-INF/jboss-esb.xml"/>
+
+        <jar destfile="${build.dir}/${ant.project.name}-second.esb">
+			<fileset dir="${build.dir}/classes" />
+			<fileset dir="${build.dir}" includes="*.jar,*.war"/>
+			<fileset dir="${build.dir}" includes="deployment.xml"/>
+			<fileset dir="${build.dir}" includes="META-INF/**" />
+			<fileset dir="${basedir}/src" excludes="**/*.java" /> <!-- Please leave the src dir in here! -->
+			<fileset dir="${basedir}" includes="${jms.service.file} ${additional.deploys}" excludes="build/**" />
+			<fileset dir="${basedir}/lib" includes="*.jar"/>
+        </jar>
+	
+	</target>
+
+	<target name="deploy-esb">
+		<copy todir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.first}/deploy">
+			<fileset dir="build" includes="${ant.project.name}-first.esb"/>
+		</copy>
+
+		<copy todir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second}/deploy">
+			<fileset dir="build" includes="${ant.project.name}-second.esb"/>
+		</copy>
+	</target>
+
+	<target name="quickstart-specific-undeploys">
+        <delete verbose="true" includeemptydirs="true" quiet="true"
+          dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second}/deploy/${ant.project.name}-first.esb"/>
+        <delete verbose="true" includeemptydirs="true" quiet="true"
+          dir="${org.jboss.esb.twoservers.home}/server/${org.jboss.esb.twoservers.dest.second}/deploy/${ant.project.name}-second.esb"/>
+	</target>
+	
+	<target name="runtest" depends="compile" 
+		description="sends a JMS message to queue/quickstart_twoservers_Request_gw">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.twoservers.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="Hello World"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+	
+	<target name="sendesb" depends="compile"
+		description="Will send an esb Message">
+		<echo>Runs Test ESB Message Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.twoservers.test.SendEsbMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="FirstServiceESB"/> <!--  service category -->
+			<arg value="SimpleListener"/>  <!--  service name -->
+			<arg value="Hello World - Straight to ESB listener - no Gateway"/> <!--  Message text -->
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>
+	
+</project>

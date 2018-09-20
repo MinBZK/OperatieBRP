@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+    <context:property-placeholder/>
+
+    <!-- Datasource Definitie -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName:org.postgresql.Driver}"/>
+        <property name="url" value="${jdbc.url:jdbc:postgresql://localhost/spg}"/>
+        <property name="username" value="${jdbc.username:postgres}"/>
+        <property name="password" value="${jdbc.password:postgres}"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive" value="200"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxIdle" value="5"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="true"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="false"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+        <property name="timeBetweenEvictionRunsMillis" value="5000"/>
+        <property name="poolPreparedStatements" value="true"/>
+    </bean>
+    
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+</beans>

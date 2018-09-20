@@ -1,0 +1,53 @@
+#created on: Oct 30, 2006
+package com.jboss.soa.esb.routing.cbr
+
+#list any import classes here.
+import org.jboss.soa.esb.message.Message;
+import org.jboss.soa.esb.message.format.MessageType;
+import org.jboss.soa.esb.store.OrderHeader;
+import org.jboss.soa.esb.store.Customer;
+
+global java.util.List destinations;
+
+
+rule "Logging"
+salience 20
+when 
+   order: OrderHeader()
+   customer: Customer()
+then
+   order.setOrderPriority(1);
+end
+
+rule "Customer Silver Status"
+salience 10
+ when
+   customer: Customer(status > 10)
+   order: OrderHeader(totalAmount > 25)
+ then   
+   order.setOrderPriority(2);   
+end 
+
+rule "Customer Gold Status"
+salience 5
+ when
+   customer: Customer(status >= 40) 
+   order: OrderHeader(totalAmount > 50)
+ then   
+   order.setOrderPriority(3);
+end 
+
+rule "Customer Diamond Status"
+salience 1
+ when
+   customer: Customer(status >= 40) 
+   order: OrderHeader(totalAmount > 150)
+ then   
+   order.setOrderPriority(4);
+end 
+
+
+
+
+
+   

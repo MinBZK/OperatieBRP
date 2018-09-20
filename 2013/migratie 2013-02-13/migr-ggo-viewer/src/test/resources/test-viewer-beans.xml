@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                             http://www.springframework.org/schema/beans/spring-beans.xsd
+                             http://www.springframework.org/schema/context 
+                             http://www.springframework.org/schema/context/spring-context.xsd
+                             http://www.springframework.org/schema/mvc
+                             http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+    <import resource="classpath:conversie-beans.xml" />
+    <import resource="classpath:excel-adapter-beans.xml" />
+
+    <bean id="viewerController" class="nl.moderniseringgba.migratie.conversie.viewer.ViewerController" />
+    <bean id="demoMode" class="nl.moderniseringgba.migratie.conversie.viewer.DemoMode" />
+    <bean id="leesService" class="nl.moderniseringgba.migratie.conversie.viewer.service.impl.LeesServiceImpl" />
+    <bean id="viewerService" class="nl.moderniseringgba.migratie.conversie.viewer.service.impl.ViewerServiceImpl" />
+    <bean id="permissionsService" class="nl.moderniseringgba.migratie.conversie.viewer.service.impl.PermissionServiceImpl" />
+
+    <!-- Mock de DB (dat is het eigenlijke doel van dit hele bestand) -->
+    <bean id="dbService" class="nl.moderniseringgba.migratie.conversie.viewer.service.DbService" factory-bean="mockFactory" factory-method="createDbService" />
+
+    <!-- Mock de BCM Service ook, omdat deze op Jenkins niet enabled / geconfigureerd is, maar misschien op de developer PC weer wel -->
+    <bean id="bcmService" class="nl.moderniseringgba.migratie.conversie.viewer.service.BcmService" factory-bean="mockFactory" factory-method="createBcmService" />
+
+    <bean id="mockFactory" class="nl.moderniseringgba.migratie.conversie.viewer.MockFactory" />
+
+    <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver" />
+        
+    <!-- This component will check the PL data according to the GBA business rules. -->
+    <bean id="checker" class="nl.gba.gbav.impl.checker.Checker"/>
+
+    <bean id="conversietabelFactory" class="nl.moderniseringgba.migratie.conversie.tabel.ConversietabelFactoryImpl" />
+
+    <!-- Configure from which .properties file Spring gets its information -->
+    <context:property-placeholder location="classpath:ggo-viewer.properties" />
+</beans>

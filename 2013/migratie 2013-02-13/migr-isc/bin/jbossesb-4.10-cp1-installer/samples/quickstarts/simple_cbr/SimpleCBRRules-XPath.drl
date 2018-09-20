@@ -1,0 +1,33 @@
+#created on: Nov 8, 2006
+package com.jboss.soa.esb.routing.cbr
+
+#list any import classes here.
+import org.jboss.soa.esb.message.Message;
+import org.jboss.soa.esb.message.format.MessageType;
+
+expander XPathLanguage.dsl
+
+#declare any global variables here
+global java.util.List destinations;
+
+rule "Routing Rule using XPATH"
+	
+	when
+		xpathGreaterThan "/Order/@totalAmount", "50.0"
+	then 
+	    Log : "EXPRESS";
+		Log : "EXPRESS";
+		Log : "Really It's EXPRESS Shipping";
+		Destination : "express";
+		
+end
+
+rule "Routing Rule using XPATH less"
+    when
+        xpathLessThan "/Order/@totalAmount", "50.0"
+    then
+	    Log : "NORMAL";
+		Log : "NORMAL";
+		Log : "Really It's NORMAL Shipping";
+		Destination : "normal";
+end

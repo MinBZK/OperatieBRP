@@ -1,0 +1,74 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+                      
+              <jms-bus busid="quickstartGwChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_helloworld_action_Request"
+                  />
+              </jms-bus>
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter
+                      dest-type="QUEUE"
+                      dest-name="queue/quickstart_helloworld_action_esb"
+                  />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+          
+        <service category="HelloWorld_ActionESB" 
+                 name="SimpleListener" 
+                 description="Hello World" >
+            <listeners>
+                <jms-listener name="JMS-Gateway"
+                    busidref="quickstartGwChannel"                         
+                    is-gateway="true"
+                />
+                <jms-listener name="JMS-ESBListener"
+                              busidref="quickstartEsbChannel"
+                />                
+            </listeners>
+            <actions mep="OneWay">
+            <action name="action2"
+                    class="org.jboss.soa.esb.actions.SystemPrintln"
+                    />
+               <action name="displayAction" 
+               		class="org.jboss.soa.esb.samples.quickstart.helloworldaction.MyJMSListenerAction" 
+               		process="displayMessage">
+               		<property name="exceptionMethod" value="exceptionHandler"/>
+               </action>
+  			   <action name="playAction" 
+  			   		class="org.jboss.soa.esb.samples.quickstart.helloworldaction.MyJMSListenerAction" 
+  			   		process="playWithMessage">
+  	               
+               		<property name="exceptionMethod" value="exceptionHandler"/>
+  			   </action>
+               <action name="notificationAction" 
+               		class="org.jboss.soa.esb.actions.Notifier">
+               		<property name="okMethod" value="notifyOK" />
+               		<property name="notification-details">
+   	 				   <NotificationList type="OK"> 
+      				     <target class="NotifyConsole" />
+				    	 <target class="NotifyQueues">
+				    	       <messageProp name="quickstart" value="hello_world_action" />
+				   	       <queue jndiName="queue/quickstart_helloworld_action_Response"/>
+			 	     	 </target>
+	    		   	   </NotificationList> 
+	    		   </property>
+   	  	</action>    
+                <!-- The next action is for Continuous Integration testing -->
+		<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+      </services>
+     
+</jbossesb>

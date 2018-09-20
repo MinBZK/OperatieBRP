@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
+
+    <!-- Hornet queue -->
+    <bean name="queueConnectionFactory" class="org.hornetq.jms.client.HornetQXAConnectionFactory">
+        <constructor-arg value="false"/>
+        <constructor-arg>
+            <bean name="transportConfiguration" class="org.hornetq.api.core.TransportConfiguration">
+                <constructor-arg value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory"/>
+                <constructor-arg>
+                    <map key-type="java.lang.String" value-type="java.lang.Object">
+                        <entry key="host" value="${initQueue.host}"/>
+                        <entry key="port" value="${initQueue.port}"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <!-- Cache for JMS connection -->
+    <bean id="cachedConnectionFactory"
+          class="org.springframework.jms.connection.CachingConnectionFactory"
+          p:targetConnectionFactory-ref="queueConnectionFactory"
+          p:sessionCacheSize="10"/>
+
+    <bean name="destination" class="org.hornetq.jms.client.HornetQQueue">
+        <constructor-arg value="${initQueue.name}"/>
+    </bean>
+
+    <!-- jmsTemplate -->
+    <bean name="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cachedConnectionFactory"/>
+        <property name="receiveTimeout" value="30000"/>
+        <property name="sessionTransacted" value="true"/>
+    </bean>
+</beans>

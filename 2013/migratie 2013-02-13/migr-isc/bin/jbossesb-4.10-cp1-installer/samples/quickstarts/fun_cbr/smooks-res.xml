@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.0.xsd">
+
+    <!-- Populate the OrderHeader -->
+	<resource-config selector="order">
+        <resource>org.milyn.javabean.BeanPopulator</resource>
+        <param name="beanId">orderHeader</param>
+		<param name="beanClass">org.jboss.soa.esb.dvdstore.OrderHeader</param>
+        <param name="bindings">
+            <binding property="orderId" selector="Order @orderId" />
+            <binding property="orderDate" selector="Order @orderDate" type="LongDate"/>
+            <binding property="statusCode" selector="Order @statusCode" type="Integer" />
+            <binding property="netAmount" selector="Order @netAmount" type="Double" />
+            <binding property="totalAmount" selector="Order @totalAmount" type="Double" />
+            <binding property="tax" selector="Order @tax" type="Double" />
+        </param>
+    </resource-config>
+
+    <!-- Populate the Customer -->
+    <resource-config selector="order customer">
+        <resource>org.milyn.javabean.BeanPopulator</resource>
+		<param name="beanId">customer</param>
+		<param name="beanClass">org.jboss.soa.esb.dvdstore.Customer</param>
+        <param name="bindings">
+            <binding property="userName" selector="order customer @userName" />
+            <binding property="firstName" selector="order customer @firstName" />
+            <binding property="lastName" selector="order customer @lastName" />
+            <binding property="state" selector="order customer @state" />
+        </param>
+	</resource-config>
+
+    <!-- Populate the OrderItem list -->
+	<resource-config selector="order orderlines orderline">
+        <resource>org.milyn.javabean.BeanPopulator</resource>
+		<param name="beanId">orderItem</param>
+		<param name="beanClass">org.jboss.soa.esb.dvdstore.OrderItem</param>
+		<param name="addToList">true</param>
+        <param name="bindings">
+            <binding property="position"  selector="order orderlines orderline @position" type="Integer" />
+            <binding property="quantity"  selector="order orderlines orderline @quantity" type="Integer" />
+            <binding property="productId" selector="order orderlines orderline product @productId" />
+            <binding property="title"     selector="order orderlines orderline product @title" />
+            <binding property="price"     selector="order orderlines orderline product @price" type="Double" />
+        </param>
+	</resource-config>
+
+	<resource-config selector="order orderlines orderline">
+        <resource>/org/jboss/soa/esb/dvdstore/orderitem.st</resource>
+	</resource-config>
+
+    <resource-config selector="decoder:LongDate">
+        <resource>org.milyn.javabean.decoders.CalendarDecoder</resource>
+        <param name="format">EEE MMM dd HH:mm:ss z yyyy</param>
+    </resource-config>
+    
+</smooks-resource-list>

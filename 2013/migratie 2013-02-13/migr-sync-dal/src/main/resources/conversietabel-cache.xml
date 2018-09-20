@@ -1,0 +1,27 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+	  	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+		http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<!-- cache definitions -->
+	<cache:advice id="conversieTabelCacheAdvice" cache-manager="cacheManager">
+		<cache:caching cache="conversietabellen">
+			<cache:cacheable method="*" key="#root.methodName"/>
+		</cache:caching>
+	</cache:advice>
+	
+	<!-- apply the cacheable behaviour to all BookService interfaces -->
+	<aop:config>
+		<aop:advisor advice-ref="conversieTabelCacheAdvice" pointcut="execution(* nl.moderniseringgba.migratie.synchronisatie.domein.conversietabel.DalConversietabelFactory.*(..))"/>
+	</aop:config>
+
+	<!-- the cache -->
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cache-manager-ref="ehcache"/>
+	
+	<!-- Ehcache library setup -->
+	<bean id="ehcache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:config-location="ehcache.xml"/>	
+</beans>

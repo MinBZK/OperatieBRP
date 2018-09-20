@@ -1,0 +1,50 @@
+<project name="Quickstart_transform_XML2POJO2" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+			
+	<!-- Additional files to be deployed in the sar. -->
+	<property name="additional.deploys" value="smooks-config.xml,scripts/**,transforms/**" />
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	
+
+	<target name="runtest" depends="compile" description="runs test JMS Sender">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.transformxml2pojo2.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="SampleOrder.xml"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+	
+	<target name="runtest2" depends="compile" description="runs test JMS Sender">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.transformxml2pojo2.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		  <arg value="SamplePetsOrder.xml"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>    
+
+	<target name="sendesb" depends="compile" description="runs test JMS Sender">
+		<echo>Runs Native Client</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.transformxml2pojo2.test.SendEsbMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		  <arg value="SampleOrder.xml"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>    
+	
+	<target name="sendesb2" depends="compile" description="runs test JMS Sender">
+		<echo>Runs Native Client</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.transformxml2pojo2.test.SendEsbMessage" failonerror="true">
+		  <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		  <arg value="SamplePetsOrder.xml"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+</project>

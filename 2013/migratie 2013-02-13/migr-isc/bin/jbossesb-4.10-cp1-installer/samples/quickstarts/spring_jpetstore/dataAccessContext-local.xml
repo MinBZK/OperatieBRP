@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN 2.0//EN" "http://www.springframework.org/dtd/spring-beans-2.0.dtd">
+
+<!--
+  - Application context definition for JPetStore's data access layer.
+  - Accessed by business layer objects defined in "applicationContext.xml"
+  - (see web.xml's "contextConfigLocation").
+  -
+  - This version of the data access layer works on a combined database,
+  - using a local DataSource with DataSourceTransactionManager. It does not
+  - need any JTA support in the container: It will run as-is in plain Tomcat.
+  -->
+<beans>
+
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+
+	<!-- Local Apache Commons DBCP DataSource that refers to a combined database -->
+	<!-- (see dataAccessContext-jta.xml for an alternative) -->
+	<!-- The placeholders are resolved from jdbc.properties through -->
+	<!-- the PropertyPlaceholderConfigurer in applicationContext.xml -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+		<property name="driverClassName" value="${jdbc.driverClassName}"/>
+		<property name="url" value="${jdbc.url}"/>
+		<property name="username" value="${jdbc.username}"/>
+		<property name="password" value="${jdbc.password}"/>
+	</bean>
+
+	<!-- Transaction manager for a single JDBC DataSource -->
+	<!-- (see dataAccessContext-jta.xml for an alternative) -->
+	<bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+	<!-- SqlMap setup for iBATIS Database Layer -->
+	<bean id="sqlMapClient" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation" value="sql-map-config.xml"/>
+		<property name="dataSource" ref="dataSource"/>
+	</bean>
+
+
+	<!-- ========================= DAO DEFINITIONS: IBATIS IMPLEMENTATIONS ========================= -->
+
+	<bean id="accountDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapAccountDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+	</bean>
+
+	<bean id="categoryDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapCategoryDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+	</bean>
+
+	<bean id="productDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapProductDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+	</bean>
+
+	<bean id="itemDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapItemDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+	</bean>
+
+	<!-- Refers to the combined database here -->
+	<!-- (see dataAccessContext-jta.xml for an alternative) -->
+	<bean id="orderDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapOrderDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+		<property name="sequenceDao" ref="sequenceDao"/>
+	</bean>
+
+	<!-- OrderDao definition for MS SQL Server -->
+	<!-- (to be used instead of the default orderDao) -->
+	<!--
+	<bean id="orderDao" class="org.springframework.samples.jpetstore.dao.ibatis.MsSqlOrderDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+		<property name="sequenceDao" ref="sequenceDao"/>
+	</bean>
+	-->
+
+	<!-- Refers to the combined database here -->
+	<!-- (see dataAccessContext-jta.xml for an alternative) -->
+	<bean id="sequenceDao" class="org.springframework.samples.jpetstore.dao.ibatis.SqlMapSequenceDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+	</bean>
+
+	<!-- SequenceDao definition for Oracle databases -->
+	<!-- (to be used instead of the default sequenceDao) -->
+	<!--
+	<bean id="sequenceDao" class="org.springframework.samples.jpetstore.dao.ibatis.OracleSequenceDao">
+		<property name="sqlMapClient" ref="sqlMapClient"/>
+	</bean>
+	-->
+
+</beans>

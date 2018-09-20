@@ -1,0 +1,104 @@
+<project name="Quickstart_helloworld_hibernate_action" 
+	default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<property name="additional.deploys" value="jbossesb-service.xml quickstart-ds.xml" />
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<path id="hibernate-classpath">
+		<pathelement location="${basedir}/build/classes"/>
+		<fileset dir="${basedir}/lib" includes="*.jar"/>
+	</path>	
+
+	<target name="package-deployment">
+	</target>
+
+	<target name="deploy" depends="build-archives">
+		<copy file="${build.dir}/esbhibernate-helloworld.jar"
+			todir="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/lib"/>
+		<copy file="${build.dir}/${ant.project.name}.esb"
+			todir="${org.jboss.esb.server.deploy.dir}"/>
+	</target>
+
+	<target name="undeploy" depends="dependencies">
+		<delete file="${org.jboss.esb.server.deploy.dir}/${ant.project.name}.esb"/>
+	</target>
+
+	<target name="config" depends="compile">
+		<mkdir dir="build/classes/org/jboss/soa/esb/samples/quickstart/hibernateaction"/>
+		<copy file="hibernate.cfg.xml"
+                        todir="build/classes"/>
+                <copy file="esb-mappings.hbm.xml"
+                        todir="build/classes/org/jboss/soa/esb/samples/quickstart/hibernateaction"/>	
+	</target>
+
+	<target name="build-archives" depends="compile, config, package-deployment">
+		<jar destfile="${build.dir}/esbhibernate-helloworld.jar">
+			<fileset dir="${build.dir}/classes">
+				<exclude name="**/MyAction.class"/>
+			</fileset>
+			<fileset dir="${basedir}">
+				<include name="hibernate.cfg.xml"/>
+				<include name="esb-mappings.hbm.xml"/>
+			</fileset>
+			<fileset dir="${basedir}/src">
+				<include name="**/*.xml"/>
+			</fileset>
+		</jar>
+
+		<jar destfile="${build.dir}/action.jar">
+			<fileset dir="${build.dir}/classes">
+				<include name="org/jboss/soa/esb/samples/quickstart/hibernateaction/MyAction.class"/>
+			</fileset>
+		</jar>
+
+		<war warfile="${build.dir}/hibernateaction.war"
+			webxml="${basedir}/resources/WEB-INF/web.xml">                        		<fileset dir="${basedir}/view">
+				<include name="**/*"/>
+			</fileset>
+		</war>
+
+		<mkdir dir="${build.dir}/META-INF"/>
+		<copy file="jboss-esb.xml" todir="${build.dir}/META-INF"/>
+		<copy file="deployment.xml" todir="${build.dir}/META-INF"/>
+		<delete file="${build.dir}/${ant.project.name}.esb"/>
+		<jar destfile="${build.dir}/${ant.project.name}.esb">
+			<fileset dir="${build.dir}">
+				<include name="META-INF/*"/>	
+				<include name="*.war"/>
+				<include name="action.jar"/>
+			</fileset>	
+			<fileset dir="${basedir}/src">
+				<include name="**/*.sql"/>
+			</fileset>
+			<fileset dir="${basedir}" includes="${additional.deploys} ${jms.service.file} ${no.service.file}"/>
+		</jar>	
+	</target>
+
+	<target name="select" depends="dependencies" description="select * from gateway_table">
+		<property name="hsqldb.jar" 
+			value="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/lib/hsqldb.jar"/>
+		<echo>Select * from orders</echo>
+		<sql	
+			print="true"
+			driver="org.hsqldb.jdbcDriver"
+			url="jdbc:hsqldb:hsql://localhost:1703"
+			userid="sa"
+			autocommit="true"
+			password="">
+			<classpath>
+				<pathelement path="${hsqldb.jar}"/>
+			</classpath>
+			<transaction>
+			select * from orders
+			</transaction>
+			</sql>
+	</target>  
+
+</project>

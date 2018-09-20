@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.4" xmlns="http://java.sun.com/xml/ns/j2ee"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd">
+	  
+	<!-- RESTEASY CONFIG FOR REPORTS -->  
+   <context-param>
+      <param-name>javax.ws.rs.core.Application</param-name>
+      <param-value>nl.moderniseringgba.isc.console.report.jaxrs.ReportApplication</param-value>
+   </context-param>
+
+   <context-param>
+      <param-name>resteasy.servlet.mapping.prefix</param-name>
+      <param-value>/rs</param-value>
+   </context-param>
+
+   <context-param>
+      <param-name>resteasy.providers</param-name>
+      <param-value>nl.moderniseringgba.isc.console.report.jaxrs.FileWriter</param-value>
+   </context-param>
+
+   <listener>
+      <listener-class>
+         org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap
+      </listener-class>
+   </listener>
+
+   <servlet>
+      <servlet-name>Resteasy</servlet-name>
+      <servlet-class>
+         org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
+      </servlet-class>
+   </servlet>
+
+   <servlet-mapping>
+      <servlet-name>Resteasy</servlet-name>
+      <url-pattern>/rs/*</url-pattern>
+   </servlet-mapping>
+	<!-- END:RESTEASY CONFIG -->  
+  
+  <servlet>
+    <description>Enable the JSF servlet, see also faces-config.xml</description>
+    <servlet-name>Faces Servlet</servlet-name>
+    <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <!-- Mapping for all plain pages -->
+  <servlet-mapping>
+    <servlet-name>Faces Servlet</servlet-name>
+    <url-pattern>*.jsf</url-pattern>
+  </servlet-mapping>
+
+  <!-- This mapping is for the process images -->
+  <servlet-mapping>
+    <servlet-name>Faces Servlet</servlet-name>
+    <url-pattern>/app/pi/*</url-pattern>
+  </servlet-mapping>
+
+  <context-param>
+    <description>Use documents saved as *.xhtml</description>
+    <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+    <param-value>.xhtml</param-value>
+  </context-param>
+
+  <context-param>
+    <description>Facelets debug output</description>
+    <param-name>facelets.DEVELOPMENT</param-name>
+    <param-value>false</param-value>
+  </context-param>
+
+  <!-- Redirection to the basic search page -->
+  <welcome-file-list>
+    <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+  <!-- This role list can be adjusted to the target environment. -->
+  <security-role>
+    <role-name>admin</role-name>
+  </security-role>
+  <security-role>
+    <role-name>user</role-name>
+  </security-role>
+
+  <!--
+    Security constraints. Optionally change the role name required to gain access.
+    Edit jboss-web.xml to set the security domain if you are deploying to JBoss AS.
+  -->
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Secure Area</web-resource-name>
+      <url-pattern>/app/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>user</role-name>
+    </auth-constraint>
+  </security-constraint>
+
+  <!-- Example login page -->
+  <login-config>
+    <auth-method>FORM</auth-method>
+    <form-login-config>
+      <form-login-page>/ua/login.jsf</form-login-page>
+      <form-error-page>/ua/login.jsf?error=true</form-error-page>
+    </form-login-config>
+  </login-config>
+  <!-- Example login page -->
+
+  <resource-ref>
+    <description>Data source providing JDBC connections to the persistence service. Must match
+      the connection.datasource property in the Hibernate configuration.</description>
+    <res-ref-name>jdbc/JbpmDataSource</res-ref-name>
+    <res-type>javax.sql.DataSource</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+
+  <resource-ref>
+    <description>Factory providing JMS connections to the message service. Required for
+      processes that contain asynchronous continuations.</description>
+    <res-ref-name>jms/JbpmConnectionFactory</res-ref-name>
+    <res-type>javax.jms.ConnectionFactory</res-type>
+    <res-auth>Container</res-auth>
+  </resource-ref>
+
+  <message-destination-ref>
+    <description>The message service sends job messages to the queue referenced here. Must match
+      the queue from which JobListenerBean receives messages.</description>
+    <message-destination-ref-name>jms/JobQueue</message-destination-ref-name>
+    <message-destination-type>javax.jms.Queue</message-destination-type>
+    <message-destination-usage>Produces</message-destination-usage>
+  </message-destination-ref>
+</web-app>

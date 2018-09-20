@@ -1,0 +1,65 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <sql-provider name="SQLprovider" 
+          			url="jdbc:hsqldb:hsql://localhost:1704"
+          			driver="org.hsqldb.jdbcDriver"
+          			username="sa"
+          			password="">
+          	<sql-bus busid="helloSQLChannel" >
+          		<sql-message-filter
+          			tablename="GATEWAY_TABLE"
+          			status-column="STATUS_COL"
+				order-by="DATA_COLUMN"	
+				where-condition="DATA_COLUMN like 'data%'"
+					message-column="message"
+          			message-id-column="UNIQUE_ID"
+          			insert-timestamp-column="TIMESTAMP_COL"
+          		/>
+          	</sql-bus>
+          </sql-provider>
+          
+          <jms-provider name="JBossMQ" 
+          		connection-factory="ConnectionFactory">
+			    <jms-bus busid="quickstartEsbChannel">
+			        <jms-message-filter
+			            dest-type="QUEUE"
+			            dest-name="queue/quickstart_sql_action_Request_esb"
+			            selector="source='fromHelloworldSQLAction'"
+			        />
+			    </jms-bus>
+			
+		   </jms-provider>
+
+      </providers>
+      
+      <services>
+        <service 
+			category="myCategory"
+			name="mySqlListener"
+        	description="Hello World SQL Action (esb jdbc listener)">
+            <listeners>
+            	<sql-listener name="SqlGateway"
+            		busidref="helloSQLChannel"
+            		is-gateway="true"/>
+                <jms-listener name="helloWorldJmsAction"
+                              busidref="quickstartEsbChannel"
+                />
+            </listeners>
+            <actions mep="OneWay">
+		       <action name="action1" 
+                   	class="org.jboss.soa.esb.samples.quickstart.helloworldsqlaction.MyAction" 
+                   	process="displayMessage" 
+                   	/> 
+	               <action name="action2" class="org.jboss.soa.esb.actions.SystemPrintln" />    
+            </actions>
+
+        </service>
+      </services>
+     
+</jbossesb>
+

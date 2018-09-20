@@ -1,0 +1,45 @@
+#created on: Oct 30, 2006
+package com.jboss.soa.esb.routing.cbr
+
+#list any import classes here.
+import org.jboss.soa.esb.message.Message;
+import org.jboss.soa.esb.samples.quickstart.businessrules.dvdstore.OrderHeader;
+import org.jboss.soa.esb.samples.quickstart.businessrules.dvdstore.Customer;
+
+global java.util.List destinations;
+
+
+
+rule "Logging"
+salience 10
+when 
+   order: OrderHeader()
+   customer: Customer()
+then
+   System.out.println("Customer Status: " + customer.getStatus());
+   System.out.println("Order Total: " + order.getTotalAmount());
+end
+
+rule "Customer Platinum Status"
+salience 20
+ when
+   customer: Customer(status > 50)
+   order: OrderHeader(orderPriority == 3)
+ then
+   System.out.println("Platinum Customer - High Priority - Higher discount");
+   order.setOrderDiscount(8.5);
+end 
+
+rule "Customer Gold Status"
+salience 20
+ when
+   customer: Customer(status > 10, status <= 50)
+   order: OrderHeader(orderPriority == 2)
+ then
+   System.out.println("Gold Customer - Medium Priority - discount ");
+   order.setOrderDiscount(3.4);
+end 
+
+
+
+   

@@ -1,0 +1,33 @@
+<project name="scripting-chain-quickstart" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+    <property name="additional.deploys" value="scripts/**" />
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="quickstart-specific-deploys">
+		<copy todir="${org.jboss.esb.server.server}/lib">
+			<fileset dir="${basedir}/lib">
+				<include name="jruby.jar"/>
+				<include name="js.jar"/>
+				<include name="jython.jar"/>
+			</fileset>
+		</copy>
+	</target>
+
+	<!-- Target for injecting the sample order message for transformation... -->
+	<target name="runtest" description="sends a JMS message to the ESB" depends="compile">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.scriptingchain.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="(chain)"/>
+			<classpath refid="exec-classpath" />
+		</java>
+	</target>
+
+</project>

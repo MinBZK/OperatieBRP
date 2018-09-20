@@ -1,0 +1,74 @@
+<project name="Quickstart_fun_cbr" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+		
+	<property name="additional.deploys" value="FunCBRRules-XPath.drl,regex-rules.properties,smooks-res.xml"/>
+	<property name="deploy.exploded" value="true"/>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	
+	
+    <target name="runtest" depends="runtestXPath" description="Send JMS message to tigger the actions in the ESB" />
+
+    <target name="runtestXPath" depends="compile" description="Send JMS message to tigger the actions in the ESB">
+       <echo>Runs XPath Example</echo>
+       <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.funcbr.test.SendJMSMessage" failonerror="true">
+          <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+          <classpath refid="exec-classpath" />
+          <arg value="quickstart_Fun_XPathCBR_Request_GW" />
+       </java>
+    </target>
+
+    <target name="runtestRegex" depends="compile" description="Send JMS message to tigger the actions in the ESB">
+       <echo>Runs Regex Example</echo>
+       <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.funcbr.test.SendJMSMessage" failonerror="true">
+          <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+          <classpath refid="exec-classpath" />
+          <arg value="quickstart_Fun_RegexCBR_Request_GW" />
+       </java>
+    </target>
+
+    <target name="runtestDrools" depends="compile" description="Send JMS message to tigger the actions in the ESB">
+       <echo>Runs Drools Example</echo>
+       <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.funcbr.test.SendJMSMessage" failonerror="true">
+          <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+          <classpath refid="exec-classpath" />
+          <arg value="quickstart_Fun_DroolsCBR_Request_GW" />
+       </java>
+    </target>
+
+  <target name="receiveBlue" depends="compile"
+	description="willl receive a message from the quickstart_FunCBR_Green_Blue queue">
+	 <echo>Runs Test JMS Receiver</echo>
+	 <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.funcbr.test.ReceiveJMSMessage" failonerror="true">
+                <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	  	<arg value="queue/quickstart_Fun_CBR_Blue_Alert"/>
+		<classpath refid="exec-classpath" />
+	 </java>
+  </target>  
+	
+  <target name="receiveRed" depends="compile"
+	description="willl receive a message from the quickstart_FunCBR_Green_Red queue">
+	 <echo>Runs Test JMS Receiver</echo>
+	 <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.funcbr.test.ReceiveJMSMessage" failonerror="true">
+                <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	   	<arg value="queue/quickstart_Fun_CBR_Red_Alert"/>
+		<classpath refid="exec-classpath" />
+	 </java>
+   </target>  
+	
+  <target name="receiveGreen" depends="compile"
+	description="willl receive a message from the quickstart_FunCBR_Green_Alert queue">
+	 <echo>Runs Test JMS Receiver</echo>
+	 <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.funcbr.test.ReceiveJMSMessage" failonerror="true">
+                <sysproperty key="log4j.configuration" value="${log4j.xml}"/> 
+	   	<arg value="queue/quickstart_Fun_CBR_Green_Alert"/>
+		<classpath refid="exec-classpath" />
+	 </java>
+   </target> 
+	
+</project>

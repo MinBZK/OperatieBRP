@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+        >
+<ui:component>
+
+<ga:responseActions>
+    <ga:parameter name="page" target="#{page}">
+        <f:convertNumber integerOnly="true"/>
+    </ga:parameter>
+    <gd:pager value="#{piList}" target="#{piList_pager}" page="#{page}"/>
+</ga:responseActions>
+<table class="results">
+<thead>
+
+    <tr>
+        <th colspan="10">
+            <ui:decorate template="t_pager.xhtml">
+                <ui:define name="pager_params">
+                    <ui:insert name="params"/>
+                    <f:param name="pi_key" value="#{pi_key}"/>
+                    <f:param name="fr" value="#{filter_running}"/>
+                    <f:param name="fs" value="#{filter_suspended}"/>
+                    <f:param name="fe" value="#{filter_ended}"/>
+                </ui:define>
+                <ui:param name="pager" value="#{piList_pager}"/>
+            </ui:decorate>
+            <ui:insert name="processinstances_title">#{msgs['processinstance.heading']}</ui:insert>
+        </th>
+    </tr>
+    <tr>
+        <td>
+            #{msgs['processinstance.heading.id']}
+        </td>
+		<ga:checkRole roles="#{access.role.process.details}">
+	        <td style="width:120px;">
+	            #{msgs['processinstance.heading.key']}
+	        </td>
+	    </ga:checkRole>
+	    <td style="width:120px;">
+	    	 #{msgs['processinstance.heading.type']}
+	    </td>
+        <td style="width:110px;">
+            #{msgs['processinstance.heading.status']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['processinstance.heading.start']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['processinstance.heading.end']}
+        </td>
+        <td colspan="4" style="width:300px;">
+            #{msgs['menu.actions']}
+        </td>
+    </tr>
+</thead>
+<tbody class="filter">
+    <tr>
+        <td/>
+		<ga:checkRole roles="#{access.role.process.details}">
+	        <td>
+	            <input name="key_i" type="text" style="width:110px;" value="#{pi_key}"
+	                   onkeypress="keypress(event,'apply')"/>
+	        </td>
+	    </ga:checkRole>
+	    <td/>
+	    
+        <td style="white-space:nowrap;">
+            <h:selectBooleanCheckbox id="running_i" value="#{filter_running}"/>
+            <gs:label forId="running_i" styleClass="statusRunning">R</gs:label>
+            <h:selectBooleanCheckbox id="suspended_i" value="#{filter_suspended}"/>
+            <gs:label forId="suspended_i" styleClass="statusSuspended">S</gs:label>
+            <h:selectBooleanCheckbox id="ended_i" value="#{filter_ended}"/>
+            <gs:label forId="ended_i" styleClass="statusEnded">E</gs:label>
+        </td>
+        <td/>
+        <td/>
+        <td colspan="4" style="width:150px;">
+            <form id="sf" action="procdef.jsf">
+                <input type="hidden" name="id" value="#{id}"/>
+                <input type="hidden" name="view" value="#{viewMode}"/>
+                <input type="hidden" name="pi_key"/>
+                <input type="hidden" name="fr"/>
+                <input type="hidden" name="fs"/>
+                <input type="hidden" name="fe"/>
+            </form>
+            <a id="apply" accesskey="a"
+               onclick="document.getElementsByName('pi_key')[0].value=document.getElementsByName('key_i')[0].value;if(document.getElementById('running_i').checked) document.getElementsByName('fr')[0].value='true';if(document.getElementById('suspended_i').checked) document.getElementsByName('fs')[0].value='true';if(document.getElementById('ended_i').checked) document.getElementsByName('fe')[0].value='true';document.getElementById('sf').submit();return false;">#{msgs['filter.apply']}</a>
+            <h:outputLink style="margin-left:10px">
+                <h:outputText value="#{msgs['filter.clear']}"/>
+                <ui:insert name="params"/>
+            </h:outputLink>
+        </td>
+    </tr>
+</tbody>
+<h:outputText>
+    <ga:attribute name="rendered" value="#{! empty piList}"/>
+    <tbody class="results">
+        <gd:repeat value="#{piList}" var="pi" idVar="rid" first="#{piList_pager.first}" limit="#{piList_pager.limit}">
+            <gs:tr>
+                <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                <td>
+                    #{pi.id}
+                </td>
+				<ga:checkRole roles="#{access.role.process.details}">
+	                <td>
+	                    <h:outputText value="#{pi.key}"/>
+	                </td>
+	            </ga:checkRole>
+	            <td>
+	            	<h:outputText value="#{pi.processDefinition.name}" />
+	            </td>
+                <td>
+                    <h:outputText value="#{msgs['status.ended']}" styleClass="statusEnded">
+                        <ga:attribute name="rendered" value="#{pi.end != null}"/>
+                    </h:outputText>
+                    <h:outputText value=" #{msgs['status.ended.suspended']}" style="font-style:italic">
+                        <ga:attribute name="rendered" value="#{pi.end != null and pi.suspended}"/>
+                    </h:outputText>
+                    <h:outputText>
+                        <ga:attribute name="rendered" value="#{pi.end == null}"/>
+                        <ga:attribute name="value" value="#{pi.suspended ? msgs['status.suspended'] : msgs['status.running']}"/>
+                        <ga:attribute name="styleClass" value="#{pi.suspended ? 'statusSuspended' : 'statusRunning'}"/>
+                    </h:outputText>
+                </td>
+                <td>
+                    <h:outputText value="#{pi.start}">
+                        <f:convertDateTime type="both" timeZone="#{j4j:getServerTimeZone()}"/>
+                    </h:outputText>
+                </td>
+                <td>
+                    <h:outputText value="#{pi.end}">
+                        <f:convertDateTime type="both" timeZone="#{j4j:getServerTimeZone()}"/>
+                    </h:outputText>
+                </td>
+                <td>
+                    <h:outputLink value="procins.jsf?id=#{pi.id}">
+                        #{msgs['action.examine']}
+                    </h:outputLink>
+                </td>
+                <td>
+					<ga:checkRole roles="#{access.role.execution.delete}">
+                    <h:form>
+                        <h:commandLink
+                                onclick="return confirm('#{msgs['confirm.processinstance.delete']}')">
+                            #{msgs['action.delete']}
+                            <f:param name="pix_id" value="#{pi.id}"/>
+                            <ga:parameter name="pix_id" target="#{pix_id}">
+                                <f:convertNumber integerOnly="true"/>
+                            </ga:parameter>
+                            <j4j:loadProcessInstance id="#{pix_id}" target="#{pix}" forUpdate="false"/>
+                            <j4j:delete value="#{pix}"/>
+                            <f:setPropertyActionListener value="#{null}" target="#{pix}"/>
+                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                        </h:commandLink>
+                    </h:form>
+					</ga:checkRole>
+                </td>
+                <td>
+					<ga:checkRole roles="#{access.role.execution.signal}">
+                    <h:form>
+                        <h:commandLink onclick="return confirm('#{msgs['confirm.processinstance.end']}')">#{msgs['action.end']}
+                            <ga:attribute name="rendered" value="#{pi.end == null}"/>
+                            <f:param name="pix_id" value="#{pi.id}"/>
+                            <ga:parameter name="pix_id" target="#{pix_id}">
+                                <f:convertNumber integerOnly="true"/>
+                            </ga:parameter>
+                            <j4j:loadProcessInstance id="#{pix_id}" target="#{pix}"/>
+                            <j4j:cancel value="#{pix}"/>
+                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                        </h:commandLink>
+                    </h:form>
+					</ga:checkRole>
+                </td>
+                <td>
+					<ga:checkRole roles="#{access.role.execution.suspend}">
+                    <h:form>
+                        <h:commandLink>#{msgs['action.suspend']}
+                            <ga:attribute name="rendered" value="#{pi.end == null and ! pi.suspended}"/>
+                            <f:param name="pix_id" value="#{pi.id}"/>
+                            <ga:parameter name="pix_id" target="#{pix_id}">
+                                <f:convertNumber integerOnly="true"/>
+                            </ga:parameter>
+                            <j4j:loadProcessInstance id="#{pix_id}" target="#{pix}"/>
+                            <j4j:suspend value="#{pix}"/>
+                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                        </h:commandLink>
+                        <h:commandLink>#{msgs['action.resume']}
+                            <ga:attribute name="rendered" value="#{pi.end == null and pi.suspended}"/>
+                            <f:param name="pix_id" value="#{pi.id}"/>
+                            <ga:parameter name="pix_id" target="#{pix_id}">
+                                <f:convertNumber integerOnly="true"/>
+                            </ga:parameter>
+                            <j4j:loadProcessInstance id="#{pix_id}" target="#{pix}"/>
+                            <j4j:resume value="#{pix}"/>
+                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                        </h:commandLink>
+                    </h:form>
+					</ga:checkRole>
+                </td>
+            </gs:tr>
+        </gd:repeat>
+    </tbody>
+</h:outputText>
+</table>
+</ui:component>
+
+</html>

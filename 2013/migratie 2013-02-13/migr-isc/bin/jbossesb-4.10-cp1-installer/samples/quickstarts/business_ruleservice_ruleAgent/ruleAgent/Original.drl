@@ -1,0 +1,60 @@
+package org.jboss.soa.esb.services.rules
+
+#list any import classes here.
+import org.jboss.soa.esb.services.rules.Driver;
+import org.jboss.soa.esb.services.rules.Policy;
+
+#declare any global variables here
+global org.jboss.soa.esb.message.Message message;
+
+rule "Safe Youth"
+	
+	when
+		#conditions
+		Driver(age >= 18, age <= 24, locationRiskProfile == "LOW", priorClaims == 0)
+		policy: Policy(type == "COMPREHENSIVE")
+	then 
+		#actions
+		policy.setBasePrice(450);
+		System.out.println("Safe Youth - pay 450");
+		
+end
+
+rule "Risky Youth"
+	
+	when
+		#conditions
+		Driver(age >= 18, age <= 24, locationRiskProfile == "LOW", priorClaims >= 1)
+		policy : Policy(type == "COMPREHENSIVE")
+	then 
+		#actions
+		policy.setBasePrice(700);
+		System.out.println("Risky Youth - pay 700");
+		
+end
+
+rule "Safe Adult"
+	
+	when
+		#conditions
+		Driver(age > 24, locationRiskProfile == "LOW", priorClaims == 0)
+		policy: Policy(type == "COMPREHENSIVE")
+	then 
+		#actions
+		policy.setBasePrice(120);
+		System.out.println("Safe adult - pay 120");
+		
+end
+
+rule "Risky Adult"
+	
+	when
+		#conditions
+		Driver(age > 24, locationRiskProfile == "LOW", priorClaims >= 1)
+		policy: Policy(type == "COMPREHENSIVE")
+	then 
+		#actions
+		policy.setBasePrice(300);
+		System.out.println("Risky adult - pay 300");
+		
+end

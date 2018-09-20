@@ -1,0 +1,73 @@
+<project name="Quickstart_bpm_orchestration1" basedir=".">
+
+	<description>
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+  <property name="deploy.exploded" value="true"/>
+
+  <!-- Import the base Ant build script... -->
+  <import file="../conf/base-build.xml"/>
+
+  <property name="jbossesb.inputdir" location="${build.dir}/inputdir"/>
+
+  <property name="project.process.dir" value="processDefinition"/>
+
+  <target name="config">
+    <delete dir="${jbossesb.inputdir}" quiet="true"/>
+    <mkdir dir="${jbossesb.inputdir}"/>
+    <copy file="${basedir}/jboss-esb-unfiltered.xml" tofile="${basedir}/jboss-esb.xml" overwrite="true" filtering="true">
+      <filterset>
+        <filter token="INPUT_DIR" value="${jbossesb.inputdir}"/>
+      </filterset>
+    </copy>
+  </target>
+
+  <target name="quickstart-specific-checks" depends="assert-jbpm-secured"/>
+
+  <target name="quickstart-specific-assemblies">
+    <copy overwrite="true" file="${project.process.dir}/processdefinition.xml" todir="${classes}" />
+    <copy todir="${classes}">
+      <fileset dir="${basedir}" includes="scripts/**/*"/>
+    </copy>
+  </target>
+	
+  <target name="run">
+		<echo message="This target is not implemented for this quickstart. Please run 'ant deploy', 'ant deployProcess' and 'ant startProcess'"/>
+	</target>
+	
+  <target name="runtest">
+    <echo message="This target is not implemented for this quickstart. Please run 'ant deployProcess' and 'ant startProcess'"/>
+  </target>
+	
+  <target name="deployProcess" description="deploys the process definition" depends="dependencies">
+    <echo>Deploy the process definition</echo>
+	<taskdef name="deployToServer" classname="org.jbpm.ant.DeployProcessToServerTask">
+		<classpath refid="exec-classpath"/>
+	</taskdef>
+	<deployToServer username="${jbpm.console.username}" password="${jbpm.console.password}" serverDeployer="${org.jboss.esb.jbpm.console.upload.url}">
+		<fileset dir="${basedir}/processDefinition" includes="*"/>
+	</deployToServer>
+  </target>
+      
+  <target name="startProcess" depends="compile" description="Sends a message to start the process instance">
+	<echo>Sends a message to start the process instance</echo>
+	<java fork="yes" classname="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration1.test.SendTestMessage" failonerror="true">
+	  <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	  <arg value="${jbossesb.inputdir}"/>
+	  <arg value=".startProcessGW"/> <!-- file ext -->
+	  <arg value="Start It Up"/> <!-- the file contents -->
+	  <classpath refid="exec-classpath"/>
+	</java>
+  </target>	
+
+  <target name="display-instructions">
+    <echo message='${line.separator}******************' />
+    <echo>Quickstart deployed to target JBoss ESB/App Server at '${org.jboss.esb.server.deploy.dir}'.</echo>
+    <echo>1.  Check your ESB Server console to make sure the deployment was executed without errors.</echo>
+    <echo>2.  Run 'ant deployProcess' and 'ant startProcess' to run the Quickstart.</echo>
+    <echo>3.  Check your ESB Server console again.  The Quickstart should have produced some output.</echo>
+    <echo message='******************' />
+  </target>
+</project>

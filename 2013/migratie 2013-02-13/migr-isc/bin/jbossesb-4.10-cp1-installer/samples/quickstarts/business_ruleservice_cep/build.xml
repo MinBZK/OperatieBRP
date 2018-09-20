@@ -1,0 +1,86 @@
+<project name="Quickstart_business_ruleservice_cep" default="usage" basedir=".">
+	
+	<description>
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+    <!-- Import the base Ant build script... -->
+    <import file="../conf/base-build.xml"/>
+
+	<target name="filter-properties">
+		<property name="cep.target.dir" value="${basedir}/build/META-INF"/>
+		<pathconvert targetos="unix" property="drldir.unix">
+			<path location="${basedir}"/>
+		</pathconvert>
+		<mkdir dir="${cep.target.dir}"/>
+		<copy file="${basedir}/business_ruleservice_cep-unfiltered.properties" tofile="${cep.target.dir}/business_ruleservice_cep.properties" overwrite="true" filtering="true">
+			<filterset>
+				<filter token="DRL_DIR" value="${drldir.unix}"/>
+			</filterset>
+		</copy>
+	</target>
+
+	<target name="config">
+		<antcall target="filter-properties"/>
+		<copy file="log4j.xml" tofile="build/log4j.xml"/>
+	</target>
+
+	<target name="run">
+		<echo>standalone mode is not available for this quickstart.</echo>
+    </target>
+
+	<target name="runinternal" depends="compile">
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.business_ruleservice_cep.test.Test" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg line="${runcommand} ${runargs}"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>
+
+	<target name="startSession" description="starts the stateful rule session">
+		<property name="runcommand" value="startSession"/>
+		<property name="runargs" value=""/>
+		<antcall target="runinternal"/>
+	</target>
+
+	<target name="sendHeartbeat" description="sends a heartbeat to a spoke or list of spokes">
+		<property name="runcommand" value="sendHeartbeat"/>
+		<property name="runargs" value="${spokes}"/>
+		<antcall target="runinternal"/>
+	</target>
+
+	<target name="populateInventory" description="randomly populates the inventory">
+		<property name="runcommand" value="populateInventory"/>
+		<property name="runargs" value=""/>
+		<antcall target="runinternal"/>
+	</target>
+
+	<target name="incrementPart" description="increments a part or list of parts, per spoke">
+		<property name="runcommand" value="incrementPart"/>
+		<property name="runargs" value="${parts}"/>
+		<antcall target="runinternal"/>
+	</target>
+
+	<target name="decrementPart" description="decrements a part or list of parts, per spoke ">
+		<property name="runcommand" value="decrementPart"/>
+		<property name="runargs" value="${parts}"/>
+		<antcall target="runinternal"/>
+	</target>
+
+	<target name="stopSession" description="stops the stateful rule session">
+		<property name="runcommand" value="stopSession"/>
+		<property name="runargs" value=""/>
+		<antcall target="runinternal"/>
+	</target>
+
+	<target name="usage" description="echoes quickstart target usage">
+		<echo>Usage: ant startSession, ant populateInventory, ant stopSession</echo>
+		<echo>       ant -Dspokes="Atlanta Boulder Chicago" sendHeartbeat</echo>
+		<echo>       ant -Dparts="Atlanta:widget Boulder:sprocket Chicago:nut Atlanta:bolt" incrementPart</echo>
+		<echo>       ant -Dparts="Boulder:widget Chicago:sprocket Atlanta:nut Boulder:bolt" decrementPart</echo>
+	</target>
+
+	<target name="runtest" depends="usage"/>
+
+</project>

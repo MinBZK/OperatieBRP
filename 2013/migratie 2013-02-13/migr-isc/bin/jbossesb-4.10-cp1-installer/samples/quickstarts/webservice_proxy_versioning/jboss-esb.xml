@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    parameterReloadSecs="5">
+
+	<services>
+
+		<service category="Proxy_Versioning" name="Proxy-OldVersion"
+				 description="The old version of the WebService (legacy support)"
+				 invmScope="GLOBAL">
+			<listeners>
+				<http-gateway name="HTTP-GATEWAY-OldVersion" />
+			</listeners>
+			<actions mep="RequestResponse">
+				<action name="echo-old-request"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message before Transformation" />
+				</action>
+				<!-- we transform the OLD request to fit the NEW schema -->
+				<action name="proxy-transform-old-to-new"
+						class="org.jboss.soa.esb.actions.transformation.xslt.XsltAction">
+						<property name="templateFile" value="/Proxy_Versioning_RequestTransform.xsl"/>
+				</action>
+				<action name="echo-new-request"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message after Transformation but before SOAPProxy" />
+				</action>
+				<action name="proxy-invoke-new-version"
+						class="org.jboss.soa.esb.actions.soap.proxy.SOAPProxy">
+						<!-- this is the NEW endpoint, because we transformed the OLD request to fit it -->
+						<property name="wsdl" value="internal://jboss.ws:context=Quickstart_webservice_proxy_versioning_ws,endpoint=InvoicingWS"/>
+						<property name="wsdlTransform" value="/Proxy_Versioning_WsdlTransform.xml"/>
+				</action>
+				<action name="echo-response"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message after SOAPProxy" />
+				</action>
+				<!-- we could transform the response here, if we needed to (but we don't) -->
+			</actions>
+		</service>
+
+		<service category="Proxy_Versioning" name="Proxy-NewVersion"
+				 description="The new version of the WebService (latest and greatest)"
+				 invmScope="GLOBAL">
+			<listeners>
+				<http-gateway name="HTTP-GATEWAY-NewVersion" />
+			</listeners>
+			<actions mep="RequestResponse">
+				<action name="echo-request"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message before SOAPProxy" />
+				</action>
+				<action name="proxy-invoke-new-version"
+						class="org.jboss.soa.esb.actions.soap.proxy.SOAPProxy">
+						<!-- this is the NEW endpoint, of course -->
+						<property name="wsdl" value="internal://jboss.ws:context=Quickstart_webservice_proxy_versioning_ws,endpoint=InvoicingWS"/>
+				</action>
+				<action name="echo-response"
+						class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="Message after SOAPProxy" />
+				</action>
+			</actions>
+		</service>
+
+	</services>
+
+</jbossesb>

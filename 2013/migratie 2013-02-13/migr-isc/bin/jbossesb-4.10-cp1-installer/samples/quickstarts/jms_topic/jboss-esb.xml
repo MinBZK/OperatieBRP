@@ -1,0 +1,79 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb         xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <!--
+                             - -> MyService1 -> - |
+                             |                    |
+    -> - "quickstart-topic" -|                    |- - - MyService3
+                             |                    |
+                             - -> MyService2 -> - |
+    -->
+
+
+    <providers>
+        <jms-provider name="JMS" connection-factory="ConnectionFactory">
+            <jms-bus busid="quickstart-topic">
+                <jms-message-filter dest-type="TOPIC" dest-name="topic/quickstart_jmstopic_topic"/>
+            </jms-bus>
+
+            <jms-bus busid="quickstart-queue-s1">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_jmstopic_queue_s1"/>
+            </jms-bus>
+            <jms-bus busid="quickstart-queue-s2">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_jmstopic_queue_s2"/>
+            </jms-bus>
+
+            <jms-bus busid="quickstart-queue-response-gtw">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_jmstopic_queue_response_gtw"/>
+            </jms-bus>
+            <jms-bus busid="quickstart-queue-response-srv">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_jmstopic_queue_response_srv"/>
+            </jms-bus>
+        </jms-provider>
+    </providers>
+
+    <services>
+
+        <service category="MyServiceCategory" name="MyService1" description="Topic receiver 1">
+            <listeners>
+                <jms-listener name="JMS-Gateway" busidref="quickstart-topic" is-gateway="true"/>
+                <jms-listener name="JMS-ESBListener" busidref="quickstart-queue-s1"/>
+            </listeners>
+            <actions mep="OneWay">
+                <action name="augmentor" class="org.jboss.soa.esb.samples.quickstart.jmstopic.MessageAugmentor">
+                    <property name="addition" value="Service1-Received"/>
+                    <property name="target" value="MyServiceCategory:MyService3"/>
+                </action>
+            </actions>
+        </service>
+
+        <service category="MyServiceCategory" name="MyService2" description="Topic receiver 2">
+            <listeners>
+                <jms-listener name="JMS-Gateway" busidref="quickstart-topic" is-gateway="true"/>
+                <jms-listener name="JMS-ESBListener" busidref="quickstart-queue-s2"/>
+            </listeners>
+            <actions mep="OneWay">
+                <action name="augmentor" class="org.jboss.soa.esb.samples.quickstart.jmstopic.MessageAugmentor">
+                    <property name="addition" value="Service2-Received"/>
+                    <property name="target" value="MyServiceCategory:MyService3"/>
+                </action>
+            </actions>
+        </service>
+
+        <service category="MyServiceCategory" name="MyService3" description="Target Service">
+            <listeners>
+                <jms-listener name="JMS-Gateway" busidref="quickstart-queue-response-gtw" is-gateway="true"/>
+                <jms-listener name="JMS-ESBListener" busidref="quickstart-queue-response-srv"/>
+            </listeners>
+            <actions mep="OneWay">
+                <action name="target" class="org.jboss.soa.esb.samples.quickstart.jmstopic.TargetServiceAction" />
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+
+    </services>
+
+</jbossesb>

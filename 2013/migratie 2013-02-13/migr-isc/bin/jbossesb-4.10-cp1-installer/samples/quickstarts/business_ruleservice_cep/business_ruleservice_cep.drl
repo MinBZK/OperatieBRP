@@ -1,0 +1,96 @@
+package org.jboss.soa.esb.service.rules
+
+import java.util.List;
+import org.jboss.soa.esb.message.Message;
+import org.jboss.soa.esb.samples.quickstart.business_ruleservice_cep.status.HeartbeatStatus;
+import org.jboss.soa.esb.samples.quickstart.business_ruleservice_cep.status.InventoryStatus;
+import org.jboss.soa.esb.samples.quickstart.business_ruleservice_cep.hub.Event;
+import org.jboss.soa.esb.samples.quickstart.business_ruleservice_cep.hub.Hub;
+
+global List destinations;
+global Message message;
+
+declare Event
+	@role(event)
+	@expires(30s)
+end
+
+function void info(Object msg) {
+	Hub.getInstance().info(msg);
+}
+
+function void warn(Object msg) {
+	Hub.getInstance().warn(msg);
+}
+
+rule "heartbeat status rule"
+	when
+		status : HeartbeatStatus()
+	then
+		insert(Hub.getInstance().processStatus(status));
+end
+
+rule "heartbeat is green rule"
+	when
+		event : Event(type == Event.Type.HEARTBEAT, light == Event.Light.GREEN)
+	then
+		info("heartbeat is GREEN for " + event.getSpokeLocation() + " :)");
+end
+
+
+rule "heartbeat is red rule"
+	when
+		event : Event(type == Event.Type.HEARTBEAT, light == Event.Light.RED)
+	then
+		warn("heartbeat is RED for " + event.getSpokeLocation() + " :(");
+end
+
+rule "monitor Atlanta rule"
+	timer (int:0 30s)
+	when
+		not(Event(type == Event.Type.HEARTBEAT, light == Event.Light.GREEN, spokeLocation == "Atlanta") over window:time(30s))
+	then
+		insert(new Event(Event.Type.HEARTBEAT, Event.Light.RED, "Atlanta"));
+end
+
+rule "monitor Boulder rule"
+	timer (int:0 30s)
+	when
+		not(Event(type == Event.Type.HEARTBEAT, light == Event.Light.GREEN, spokeLocation == "Boulder") over window:time(30s))
+	then
+		insert(new Event(Event.Type.HEARTBEAT, Event.Light.RED, "Boulder"));
+end
+
+rule "monitor Chicago rule"
+	timer (int:0 30s)
+	when
+		not(Event(type == Event.Type.HEARTBEAT, light == Event.Light.GREEN, spokeLocation == "Chicago") over window:time(30s))
+	then
+		insert(new Event(Event.Type.HEARTBEAT, Event.Light.RED, "Chicago"));
+end
+
+rule "inventory status rule"
+	when
+		status : InventoryStatus()
+	then
+		insert(Hub.getInstance().processStatus(status));
+		channels["warehouse"].send(status);
+		channels["distribution"].send(status);
+end
+
+rule "inventory is green rule"
+	when
+		event : Event(type == Event.Type.INVENTORY, light == Event.Light.GREEN)
+	then
+		info("inventory is GREEN for " + event.getSpokeLocation() + " :)");
+		insert(new Event(Event.Type.HEARTBEAT, Event.Light.GREEN, event.getSpokeLocation()));
+end
+
+rule "inventory is red rule"
+	when
+		event : Event(type == Event.Type.INVENTORY, light == Event.Light.RED)
+	then
+		warn("inventory is RED for " + event.getSpokeLocation() + " :(");
+		insert(new Event(Event.Type.HEARTBEAT, Event.Light.GREEN, event.getSpokeLocation()));
+		channels["warehouse"].send(event);
+end

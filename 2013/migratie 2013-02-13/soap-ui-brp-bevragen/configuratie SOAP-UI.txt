@@ -1,0 +1,66 @@
+Dit document beschrijft de configuratie van SOAP-UI. Deze beschrijving is gebaseerd op de informatie zoals beschreven op de wiki pagina op modernodam. (https://www.modernodam.nl/confluence/display/mGBA/Signed+requests+met+SoapUI).
+
+Er wordt uitgegaan van versie 0.3.1 van de BRP Bevragen Service, die reeds (aangepast, zonder lockingmechanisme) is geinstalleerd op server migr-mgmt01.modernodam.nl, met de bijbehorende database op server migr-conversie.modernodam.nl
+
+De BRP "bevragen" service accepteert alleen signed SOAP requests. SoapUI is een populaire tool voor het testen van SOAP services. Op deze pagina wordt beschreven hoe SoapUI geconfigureerd kan worden om gesigneerde SOAP requests te versturen en gesigneerde SOAP responses te valideren. Deze beschrijving kan worden gebruikt om uit af te leiden hoe vergelijkbare tools geconfigureerd kunnen worden.
+
+Keystore file
+De gebruikte keystore bevindt zich in de root van dit project, en is genaamd privatestore.jks. De store is beveiligd met wachtwoord: privatestore
+In de privatestore.jks bevindt zich de private key waarmee berichten naar BRP worden gesigneerd. Deze key is te vinden onder alias serverkey, en is beveiligd met wachtwoord serverkeypassword. Het publieke deel van het sleutelpaar is reeds geinstalleerd op de server.
+
+SoapUI configuratie
+Keystore
+
+Om met SoapUI te werken moet eerst een project gecre�erd worden. In de root van dit project is een voorbeeld project opgenomen. Omdat dit project niet veel om het lijf heeft, kan ook een nieuw project worden aangemaakt. De beschrijving daarvan valt buiten de scope van dit document. Het project moet vervolgens geconfigureerd worden om de bovengenoemde keystore te gebruiken. Voer daarvoor de volgende stappen uit:
+
+    Selecteer het project in het Navigator panel van SoapUI, klik met de rechtermuis knop en selecteer "Show Project View".
+    Selecteer in het Project View panel het tabblad "WS-Security Configurations".
+    Selecteer in het subpanel het tabblad "Keystores / Certificates".
+    Voeg een keystore toe door op de "+" te klikken.
+    Selecteer de in de vorige paragraaf genoemde keystore file.
+    Voer het wachtwoord "privatestore" in.
+    Dubbelklik in het veld "Alias" en type daarin "serverkey".
+    Dubbelklik in het veld "Alias Password" en type daarin "serverkeypassword".
+
+Outgoing WS-Security Configurations
+
+Nu moet de configuratie voor uitgaande berichten gemaakt worden.
+
+    Selecteer in het "Show Project View" in het tabblad "WS-Security Configurations" het subtabblad "Outgoing WS-Security Configurations"
+    Voeg een configuratie toe door op de "+" te klikken en een naam te kiezen.
+    Dubbelklik in het veld "Default Username/Alias" en vul de eerdergenoemde key "serverkey" in.
+    Dubbelklik in het veld "Default password" en vul "serverkeypassword" in.
+    Selecteerd het vakje "Must Understand".
+    Klik nu op het plusje in het onderste panel om een WSS entry toe te voegen.
+    Kies als entry type "Timestamp" en klik op OK.
+    Vul in het veldje Time To Live 10 in.
+    Cre�er nog een entry met als type "Signature" en klik op OK.
+    Kies als "Keystore:" de in de vorige paragraaf toegevoegde keystore file.
+    Kies als "Alias" de in de vorige paragraaf geconfigureerde alias "serverkey".
+    Vul in het veld "Password:" het password "serverkeypassword" in.
+    Kies als "Key Identifier Type:" "Issuer Name and Serial Number".
+    Kies als "Signature Algorithm" "http://www.w3.org/2000/09/xmldsig#rsa-sha1".
+    Kies als "Signature Canonicalization:" "http://www.w3.org/2001/10/xml-exc-c14n#".
+    Kies als "Digest Algoritm:" "http://www.w3.org/2000/09/xmldsig#sha1".
+
+Incoming WS-Security Configurations
+
+Door een configuratie voor binnenkomende berichten te maken zal SoapUI de signatures van de binnenkomende SOAP responses van de server valideren.
+
+    Selecteer in het "Show Project View" in het tabblad "WS-Security Configurations" het subtabblad "Incoming WS-Security Configurations
+    Voeg een configuratie toe door op de "+" te klikken en een naam te kiezen.
+    Dubbelklik in het veld "Decrypt Keystore" en selecteer de in de eerste paragraaf toegevoegde keystore "privatekeystore.jks".
+    Dubbelklik in het veld "Signature Keystore" en selecteer de in de eerste paragraaf toegevoegde keystore "privatekeystore.jks".
+    Dubbelklik in het veld "Password" en vul het wachtwoord "privatestore" in.
+
+Request configuratie
+
+Nu kunnen de bovenbeschreven configuraties toegepast worden op individuele requests.
+
+    Dubbelklik op een request om het request panel te openen.
+    Klik linksonder op de button "Aut".
+    Kies in het veldje "Outgoing WSS:" de eerder gecre�erde outgoing configuratie.
+    Kies in het veldje "Incoming WSS:" de eerder gecre�erde incoming configuratie.
+    Klik linksonder op de button "WS-A".
+    Selecteer de checkbox " Enable WS-A addressing:".
+

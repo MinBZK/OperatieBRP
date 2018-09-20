@@ -1,0 +1,42 @@
+<project name="Quickstart_publish_as_webservice" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<!-- additional deploys -->
+	<property name="additional.deploys" value="lib/schemas.jar"/>
+
+	<target name="package-deployment" description="Quickstart specific target that does not put the jars in lib into the root of the .esb archive">
+		<mkdir dir="lib"/>
+        <jar destfile="${build.dir}/${ant.project.name}.esb">
+			   <fileset dir="${build.dir}/classes" excludes="${quickstart.classes.excludes}" includes="${quickstart.classes.includes}"/>
+			   <fileset dir="${build.dir}" includes="*.jar,*.war"/>
+			   <fileset dir="${build.dir}" includes="deployment.xml"/>
+			   <fileset dir="${build.dir}" includes="META-INF/**" />
+			   <fileset dir="${basedir}/src" excludes="**/*.java" /> <!-- Please leave the src dir in here! --> 
+			   <fileset dir="${basedir}" includes="${jms.service.file} ${additional.deploys}" excludes="build/**" />
+        </jar>
+    </target>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="runtest" depends="compile"  description="sends soap message to published web service">
+		<echo>Send soap message to published web service and receive reponse</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.publishAsWebservice.test.SOAPTest" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		      <arg value="soap-userpass-message.xml"/>	
+			  <classpath refid="exec-classpath"/>
+		</java>
+                <echo/>
+                <echo/>
+		<echo>Send soap message to published web service and receive soap fault message</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.publishAsWebservice.test.SOAPTest" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		      <arg value="error-soap-message.xml"/>	
+			  <classpath refid="exec-classpath"/>
+		</java>
+	</target> 
+</project>

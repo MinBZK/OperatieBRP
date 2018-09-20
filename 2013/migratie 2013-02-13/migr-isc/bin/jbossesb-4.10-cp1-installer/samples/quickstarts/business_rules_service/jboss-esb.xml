@@ -1,0 +1,173 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd">
+
+	<providers>
+		<jms-provider name="JBossMQ"
+			connection-factory="ConnectionFactory">
+			<jms-bus busid="quickstartGwChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_Business_Rules_Request_GW" />
+			</jms-bus>
+			<jms-bus busid="quickstartEsbChannel">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_Business_Rules_Request_ESB" />
+			</jms-bus>
+			<jms-bus busid="Business_Rules_ConciergeManager">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_Business_Rules_ConciergeManager" />
+			</jms-bus>
+			<jms-bus busid="Business_Rules_DistributionManager">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_Business_Rules_DistributionManager" />
+			</jms-bus>
+			<jms-bus busid="Business_Rules_BasicShipping">
+				<jms-message-filter dest-type="QUEUE"
+					dest-name="queue/quickstart_Business_Rules_BasicShipping" />
+			</jms-bus>
+		</jms-provider>
+	</providers>
+
+	<services>
+
+		<service category="Business_RulesServices"
+			name="Business_Rules_Service" description="The main entry point">
+			<listeners>
+				<!-- Gateway -->
+				<jms-listener name="TheGateway"
+					busidref="quickstartGwChannel" is-gateway="true" />
+				<jms-listener name="TheESBChannel"
+					busidref="quickstartEsbChannel" >
+				</jms-listener>
+			</listeners>
+			<actions mep="OneWay">
+
+			     
+				<action name="transform"
+					class="org.jboss.soa.esb.smooks.SmooksAction">
+					<property name="smooksConfig" value="/smooks-res.xml" />
+                    <property name="resultType" value="JAVA" />
+				</action>
+
+                <action name="map_order_components" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                     <property name="script" value="/map_order_components.groovy" />
+                </action>
+
+				<!-- Update Customer Status -->
+				<action name="updateCustomerStatus"
+					class="org.jboss.soa.esb.samples.quickstart.businessrules.UpdateCustomerStatus">
+					<property name="status" value="60"/>
+			     </action>
+
+                <!--  Use the BRP to calculate the order priority -->
+				<action
+					class="org.jboss.soa.esb.actions.BusinessRulesProcessor"
+					name="BRP">
+					<property name="ruleSet"
+						value="MyBusinessRules.drl" />
+					<property name="ruleReload" value="true" />
+					<property name="object-paths">
+						<object-path esb="body.orderHeader" />
+						<object-path esb="body.customer" />
+					</property>
+				</action>
+
+				<action name="reviewMessage1"
+					class="org.jboss.soa.esb.samples.quickstart.businessrules.ReviewMessage">
+					<property name="stuff" value="After Order Priority"/>
+			     </action>
+
+				<!--  Use the BRP to calculate the order discount -->
+				<action
+					class="org.jboss.soa.esb.actions.BusinessRulesProcessor"
+					name="BRP2">
+					<property name="ruleSet"
+						value="MyBusinessRulesDiscount.drl" />
+					<property name="ruleReload" value="true" />
+					<property name="object-paths">
+						<object-path esb="body.orderHeader" />
+						<object-path esb="body.customer" />
+					</property>
+				</action>
+
+				<action name="reviewMessage2"
+					class="org.jboss.soa.esb.samples.quickstart.businessrules.ReviewMessage">
+					<property name="stuff" value="After Order Discount"/>
+			     </action>
+
+                <action name="sout" class="org.jboss.soa.esb.actions.SystemPrintln" />
+
+                <!--  Use the CBR to route the "scored" order to the appropriate service team -->
+				<action
+					class="org.jboss.soa.esb.actions.ContentBasedRouter"
+					name="ContentBasedRouter">
+					<property name="ruleSet" value="MyRoutingRules.drl" />
+					<property name="ruleReload" value="true" />
+					<property name="destinations">
+						<route-to
+							destination-name="SuperSpecialCustomerService"
+							service-category="ConciergeManager" service-name="ConciergeService" />
+						<route-to
+							destination-name="SpecialCustomerService"
+							service-category="DistributionManager" service-name="DistributionService" />
+						<route-to
+							destination-name="RegularCustomerService"
+							service-category="BasicShipping" service-name="ShipperService" />
+					</property>
+					<property name="object-paths">
+						<object-path esb="body.orderHeader" />
+						<object-path esb="body.customer" />
+					</property>
+				</action>
+
+			</actions>
+		</service>
+		<service category="ConciergeManager"
+			name="ConciergeService" description="For highest priority customers">
+			<listeners>
+				<jms-listener name="Business_Rules_ConciergeManager"
+					busidref="Business_Rules_ConciergeManager">
+				</jms-listener>
+			</listeners>
+			<actions mep="OneWay">
+			  	<action name="reviewMessage"
+					class="org.jboss.soa.esb.samples.quickstart.businessrules.ReviewMessage">
+					<property name="stuff" value="Concierge"/>
+			     </action>
+			     <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+			</actions>
+		</service>
+
+		<service category="DistributionManager"
+			name="DistributionService" description="For medium priority customers">
+			<listeners>
+				<jms-listener name="Business_Rules_DistributionManager"
+					busidref="Business_Rules_DistributionManager">
+				</jms-listener>
+			</listeners>
+			<actions mep="OneWay">
+			  	<action name="reviewMessage"
+					class="org.jboss.soa.esb.samples.quickstart.businessrules.ReviewMessage">
+					<property name="stuff" value="Distribution"/>
+			     </action>
+			     <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+			</actions>
+		</service>
+		<service category="BasicShipping"
+			name="ShipperService" description="For low priority customers">
+			<listeners>
+				<jms-listener name="Business_Rules_BasicShipping"
+					busidref="Business_Rules_BasicShipping">
+				</jms-listener>
+			</listeners>
+			<actions mep="OneWay">
+			  	<action name="reviewMessage"
+					class="org.jboss.soa.esb.samples.quickstart.businessrules.ReviewMessage">
+					<property name="stuff" value="Shipping"/>
+			     </action>
+			     <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+			</actions>
+		</service>				
+	</services>
+</jbossesb>

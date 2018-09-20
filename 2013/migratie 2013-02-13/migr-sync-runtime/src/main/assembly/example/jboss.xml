@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+
+
+
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd">
+
+    <!-- BRP DATABASE -->
+    <!-- Datasource Definitie -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="url" value="jdbc:postgresql://localhost/BRP/Kern"/>
+        <property name="username" value="postgres"/>
+        <property name="password" value="postgres"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive" value="200"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxIdle" value="5"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="true"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+        <property name="timeBetweenEvictionRunsMillis" value="5000"/>
+        <property name="poolPreparedStatements" value="true"/>
+    </bean>
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQLDialect"/>
+    </bean>
+
+    <!-- JBOSS AS 5.1.0: QUEUES -->
+
+    <bean id="jndiTemplate" class="org.springframework.jndi.JndiTemplate">
+        <property name="environment">
+            <props>
+                <prop key="java.naming.provider.url">localhost:1099</prop>
+                <prop key="java.naming.factory.url.pkgs">org.jnp.interfaces:org.jboss.naming</prop>
+                <prop key="java.naming.factory.initial">org.jnp.interfaces.NamingContextFactory</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="queueConnectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiTemplate" ref="jndiTemplate"/>
+        <property name="jndiName" value="ConnectionFactory"/>
+    </bean>
+
+    <bean id="queueInbound" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiTemplate" ref="jndiTemplate"/>
+        <property name="jndiName" value="queue/sync.request"/>
+    </bean>
+
+    <bean id="queueOutbound" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiTemplate" ref="jndiTemplate"/>
+        <property name="jndiName" value="queue/sync.response"/>
+    </bean>
+
+</beans>

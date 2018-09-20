@@ -1,0 +1,143 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.2.0.xsd"
+    parameterReloadSecs="5">
+
+	<globals>
+		<!-- Security setting for all http-providers and all EBWSs in this jboss-esb.xml file.-->
+		<war-security method="BASIC" domain="JBossWS" /> <!-- uname: "kermit" pw: "thefrog" -->
+	</globals>
+
+    <providers>
+        <http-provider name="http">
+            <http-bus busid="secureFriends">
+                <!-- Only users in the "friend" role are allowed
+                     access via the "GET" method.  Unspecified
+                     methods are not protected (i.e. are allowed)... -->
+                <allowed-roles>
+                    <role name="friend" />
+                </allowed-roles>
+                <protected-methods>
+                    <method name="GET" />
+                    <method name="POST" />
+                </protected-methods>
+            </http-bus>
+
+            <!-- Global exception mappings file... -->
+            <exception mappingsFile="/http-exception-mappings.properties" />
+        </http-provider>
+    </providers>
+
+    <services>                                                  
+
+        <service category="Sales" name="List" description="" invmScope="GLOBAL">
+            <listeners>
+                <!-- Receives: http://<host>:<port>/Quickstart_http_gateway/http/sales/* but will be forced to
+                               authenticate because the "sales" bus has basic auth configured (above)... -->
+                <http-gateway name="sales" busidref="secureFriends" urlPattern="sales/*" />
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="print" class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyAction"/>
+            </actions>
+        </service>
+
+        <service category="Soap" name="List" description="" invmScope="GLOBAL">
+            <listeners>
+                <!-- 
+					Receives: http://<host>:<port>/Quickstart_http_gateway/http/soap/*
+                    Execute "ant runtest" on command line.... 
+				-->
+                <http-gateway name="soap"  busidref="secureFriends" urlPattern="soap/*">
+                    <exception>
+                        <mapping class="org.jboss.soa.esb.services.security.SecurityServiceException" status="401" />
+                    </exception>
+                </http-gateway>
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="print" class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyAction"/>
+            </actions>
+        </service>
+
+        <service category="Index" name="List" description="" invmScope="GLOBAL">
+            <listeners>
+                <!-- Receives: http://<host>:<port>/Quickstart_http_gateway/http/index/*
+                               Uses the default http bus configuration... -->
+                <http-gateway name="Index" urlPattern="index/*" />
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="print" class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyAction"/>
+            </actions>
+        </service>
+
+        <service category="PortFilter01" name="List" description="" invmScope="GLOBAL">
+            <listeners>
+                <!-- Receives: http://<host>:8081/Quickstart_http_gateway/http/ports01/*
+                               Uses the default http bus configuration
+                               The requests with http://<host>:8080/* will be returned with Status 404... -->
+                <http-gateway name="PortFilter01" urlPattern="ports01/*">
+                    <property name="allowedPorts" value="8081"/>
+                </http-gateway>
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="print" class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyAction"/>
+            </actions>
+        </service>
+
+        <service category="PortFilter02" name="List" description="" invmScope="GLOBAL">
+            <listeners>
+                <!-- Receives: http://<host>:8080/Quickstart_http_gateway/http/ports02/*
+                               Uses the default http bus configuration
+                               The requests with http://<host>:8081/* will be returned with Status 404... -->
+                <http-gateway name="PortFilter02" urlPattern="ports02/*">
+                    <property name="allowedPorts" value="8080"/>
+                </http-gateway>
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="print" class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyAction"/>
+            </actions>
+        </service>
+
+        <service category="Exceptions" name="Exception1" description="" invmScope="GLOBAL">
+            <listeners>
+                <http-gateway name="Exception2" />
+            </listeners>
+            <actions mep="RequestResponse">
+                <!-- Uses the globally defined exception mappings defined on the <http-provider>... -->
+                <action name="print" class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyExceptionAction"/>
+            </actions>
+        </service>
+
+        <service category="Exceptions" name="Exception2" description="" invmScope="GLOBAL">
+            <listeners>
+                <http-gateway name="Exception1">
+                    <!-- Override the exception mappings defined on the <http-provider>... -->
+                    <exception>
+                        <mapping class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyActionException" status="503" />
+                    </exception>
+                </http-gateway>
+            </listeners>
+            <actions mep="RequestResponse">
+                <!-- Uses the override exception mappings defined on the <http-gateway>... -->
+                <action name="print" class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyExceptionAction"/>
+            </actions>
+        </service>
+
+        <service category="Async" name="List" description="" invmScope="GLOBAL">
+            <listeners>
+                <!-- Receives: http://<host>:<port>/Quickstart_http_gateway/http/Async/List
+                               Uses the default http bus configuration... -->
+                <http-gateway name="Async">
+                    <asyncResponse statusCode="202">
+                        <payload classpathResource="/readme.txt" contentType="text/plain" characterEncoding="UTF-8" />
+                    </asyncResponse>
+                </http-gateway>
+            </listeners>
+            <actions mep="RequestResponse">
+                <action name="print" class="org.jboss.soa.esb.samples.quickstart.httpgateway.MyAction"/>
+            </actions>
+        </service>
+
+    </services>
+
+</jbossesb>

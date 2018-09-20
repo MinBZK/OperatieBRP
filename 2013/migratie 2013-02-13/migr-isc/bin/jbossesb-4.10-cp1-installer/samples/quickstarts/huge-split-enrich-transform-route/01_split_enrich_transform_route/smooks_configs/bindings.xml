@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd">
+
+    <!--
+        Virtual Model Binding Configurations for the order message elements...
+
+        Just capturing the order and order-item element details into 2
+        Maps, overwriting each order-item as we iterate through the message i.e. not
+        accumulating them in memory => low memory footprint because we only
+        have details of the current order + current order-item in memory
+        at any given time (i.e. we never have a full order in memory)...
+    -->
+
+    <!--
+        Bind the main order details....
+    -->
+    <jb:bean beanId="orderDetail" class="java.util.HashMap" createOnElement="order">
+        <jb:value property="orderNum" data="header/order-id"     decoder="Long" />
+        <jb:value property="uname"    data="customer-details/username" />
+        <jb:value property="date"     data="header/date"         decoder="Date">
+            <jb:decodeParam name="format">EEE MMM dd HH:mm:ss z yyyy</jb:decodeParam>
+        </jb:value>
+    </jb:bean>
+
+    <!--
+        Bind each order-item.  Not building a list of order items because we only want to have
+        one order-item in memory at any one time.  This way, we can handle a huge orders with many
+        many order items..
+    -->
+    <jb:bean beanId="orderItem" class="java.util.HashMap" createOnElement="order-item">
+        <jb:value property="position"  data="order-item/position" decoder="Integer" />
+        <jb:value property="quantity"  data="order-item/quantity" decoder="Integer" />
+        <jb:value property="productId" data="order-item/product-id" />
+    </jb:bean>
+
+</smooks-resource-list>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<deployment xmlns="urn:jboss:bean-deployer:2.0">
+    
+    <bean name="EsbPropertyService" class="org.jboss.soa.esb.common.JBossESBPropertyService">
+        <annotation>@org.jboss.aop.microcontainer.aspects.jmx.JMX(name="jboss.esb:service=PropertyService", exposedInterface=org.jboss.soa.esb.common.JBossESBPropertyServiceMBean.class, registerDirectly=true)</annotation>
+        <property name="propertyFile">
+            <!-- Use the ServiceBindingManager to process (xslt) jbossesb-properties.xml and set the result to the PropertyFile attribute.-->
+            <value-factory bean="ServiceBindingManager" method="getResourceBinding">
+                <!-- serviceName -->
+                <parameter>EsbPropertyService</parameter>
+                <!-- input -->
+                <parameter>jbossesb-properties.xml</parameter>
+            </value-factory>
+        </property>
+        <property name="propertiesFileDir">${jboss.server.data.dir}</property>
+    </bean>
+
+    <bean name="GroupingStructure" class="org.jboss.soa.esb.listeners.deployers.mc.GroupingStructure">
+        <property name="shortCircuitFilter">
+            <inject bean="EsbFilter"/>
+        </property>
+        <property name="metaDataPaths">
+            <array elementClass="java.lang.String">
+                <value>META-INF</value>
+                <value>.</value>
+            </array>
+        </property>
+        <property name="libs">
+            <set elementClass="java.lang.String">
+                <value>.</value>
+                <value>jars</value>
+                <value>lib</value>
+            </set>
+        </property>
+        <property name="libFilter">
+            <inject bean="JarFilter"/>
+        </property>
+        <property name="groups">
+            <set elementClass="java.lang.String">
+                <value>.</value>
+                <value>wars</value>
+            </set>
+        </property>
+        <property name="groupFilter">
+            <inject bean="WarFilter"/>
+        </property>
+    </bean>
+	
+	<bean name="EsbConfigParser" class="org.jboss.soa.esb.listeners.deployers.mc.EsbConfigParser">
+		<property name="esbArtifactName">jbossesb</property>
+		<property name="esbDeploymentPrefix">jboss.esb:deployment=</property>
+		<property name="warDeploymentPrefix">jboss.web.deployment:war=</property>
+		<property name="actionArtifactsFile">/actionArtifactMap.properties</property>
+	</bean>
+
+	<bean name="EsbDeployer" class="org.jboss.soa.esb.listeners.deployers.mc.EsbDeployer">
+		<property name="esbBeanPrefix">jboss.esb</property>
+		<property name="mainDeployer"><inject bean="MainDeployer"/></property>
+		<property name="warFilesDir">${jboss.server.temp.dir}</property>
+		<depends>EsbPropertyService</depends>
+	</bean>
+	
+	<bean name="EsbFilter" class="org.jboss.soa.esb.listeners.deployers.mc.util.VfsFileFilter">
+        <constructor>
+            <parameter>.esb</parameter>
+        </constructor>
+    </bean>
+    
+    <bean name="JarFilter" class="org.jboss.soa.esb.listeners.deployers.mc.util.VfsFileFilter">
+        <constructor>
+            <parameter>.jar</parameter>
+        </constructor>
+    </bean>
+    
+    <bean name="WarFilter" class="org.jboss.soa.esb.listeners.deployers.mc.util.VfsFileFilter">
+        <constructor>
+            <parameter>.war</parameter>
+        </constructor>
+    </bean>
+
+</deployment>

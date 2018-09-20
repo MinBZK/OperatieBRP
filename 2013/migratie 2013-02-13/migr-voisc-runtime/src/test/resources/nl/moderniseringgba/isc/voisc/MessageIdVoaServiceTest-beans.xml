@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd">
+
+	<!-- Gemeente repo -->
+	<import resource="classpath:isc-db.xml" />
+
+	<!-- Definitie van DataSource specifiek voor test -->
+	<jdbc:embedded-database id="iscDataSource" type="H2">
+		<jdbc:script location="classpath:sql/createMigratieTabel.sql" />
+		<jdbc:script location="classpath:sql/insertMigratieTabel.sql" />
+		<jdbc:script location="classpath:nl/moderniseringgba/isc/voisc/MessageIdVoaServiceTest-isc.sql" />
+	</jdbc:embedded-database>
+	
+	<bean id="iscJpaVendorAdapter"
+		class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		<property name="showSql" value="false" />
+		<property name="generateDdl" value="false" />
+		<property name="databasePlatform" value="org.hibernate.dialect.H2Dialect" />
+	</bean>
+		
+	<!-- VOISC -->
+	<import resource="classpath:voisc.xml" />
+	<bean id="voiscProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="voajob.cron.expression">0/5 * * * * ?</prop>
+				<prop key="toqueue.cron.expression">0/5 * * * * ?</prop>
+				<prop key="voisc.queue.host">localhost:1099</prop>
+				<prop key="voisc.queue.receivetimeout">30000</prop>
+				<prop key="voisc.queue.verzenden">queue/vospg.verzenden</prop>
+				<prop key="voisc.queue.ontvangst">queue/vospg.ontvangst</prop>
+				<prop key="voisc.database.reconnects">1</prop>
+				<prop key="voisc.mailbox.hostname">localhost</prop>
+				<prop key="voisc.mailbox.portnumber">1212</prop>
+				<prop key="jdbc.driverClassName">org.h2.Driver</prop>
+				<prop key="jdbc.url">jdbc:h2:mem:voiscDb</prop>
+				<prop key="jdbc.username">sa</prop>
+				<prop key="jdbc.password"></prop>
+				<prop key="voisc.database.sleepTime">30</prop>
+				<prop key="voisc.eref.prefix">AA</prop>
+			</props>
+		</property>
+	</bean>
+	
+	<!-- VOISC DB -->
+	<import resource="classpath:voisc-db.xml"/>
+	<bean id="voiscDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close" >
+		<property name="driverClass" value="org.h2.Driver" />
+		<property name="jdbcUrl" value="jdbc:h2:mem:voiscDb" />
+		<property name="user" value="sa" />
+		<property name="password" value="" />
+		<property name="minPoolSize" value="5" />
+		<property name="maxPoolSize" value="20" />
+		<property name="maxIdleTime" value="3600" />
+		<property name="idleConnectionTestPeriod" value="30" />
+		<property name="preferredTestQuery" value="select id from voisc.lo3_mailbox limit 1;" />
+	</bean>
+	
+    <bean id="voiscJpaVendorAdapter"
+        class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="false" />
+		<property name="databasePlatform" value="org.hibernate.dialect.H2Dialect" />
+    </bean>
+   
+	<jdbc:initialize-database data-source="voiscDataSource">
+		<jdbc:script location="classpath:sql/createVoa.sql" />
+		<jdbc:script location="classpath:sql/insertProperties.sql" />
+		<jdbc:script location="classpath:sql/insertMailboxen.sql" />
+	</jdbc:initialize-database>    
+	
+	<!-- VOISC JMS -->
+	<import resource="classpath:voisc-jms-mocked.xml"/>
+	
+</beans>

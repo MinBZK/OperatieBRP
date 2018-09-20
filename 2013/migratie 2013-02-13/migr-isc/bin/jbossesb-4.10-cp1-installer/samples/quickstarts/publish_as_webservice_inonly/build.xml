@@ -1,0 +1,47 @@
+<project name="Quickstart_publish_as_webservice_inonly" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<!-- additional deploys -->
+	<property name="additional.deploys" value="*.xsd"/>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	<target name="runtest" depends="compile"  description="sends soap message to published web service">
+		<echo>Send soap message to published web service and receive reponse</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.publishAsWebservice.test.SOAPTest" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		      <arg value="soap-userpass-message.xml"/>	
+			  <classpath refid="exec-classpath"/>
+		</java>
+		<echo>Send soap message to published web service and receive reponse</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.publishAsWebservice.test.SOAPTest" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		      <arg value="error-soap-message.xml"/>	
+			  <classpath refid="exec-classpath"/>
+		</java>
+	</target> 
+	
+	<target name="sendesb" depends="compile" description="send esb Message to esb service">
+		<echo>Send esb message to esb service and get response</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.publishAsWebservice.test.SendEsbMessage" failonerror="true">	
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="ESBServiceSample"/> <!--  service category -->
+			<arg value="HelloWorldPubServiceInOnly"/>  <!--  service name -->
+			<arg value="HelloWorld"/> <!--  Message text -->
+			<classpath refid="exec-classpath"/>
+		</java>
+		<echo>Send esb message to esb service and get error</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.publishAsWebservice.test.SendEsbMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="ESBServiceSample"/> <!--  service category -->
+			<arg value="HelloWorldPubServiceInOnly"/>  <!--  service name -->
+			<arg value="Error"/> <!--  Message text -->
+			<classpath refid="exec-classpath"/>
+		</java>
+
+	</target>
+</project>

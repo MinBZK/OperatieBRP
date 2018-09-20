@@ -1,0 +1,68 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+
+    <ui:composition template="../ua/t_base.xhtml">
+        <ui:define name="root_actions">
+            <gd:loadProperties path="access.properties" var="access"/>
+            <ui:insert name="actions"/>
+        </ui:define>
+        <ui:define name="top">
+            <gs:span rendered="#{! empty request.remoteUser}" style="float:right;vertical-align:bottom">
+                <h:form>
+                    <h:outputFormat value="#{msgs['top.loggedinas']}" style="margin-right:20px">
+                        <f:param value="#{request.remoteUser}"/>
+                    </h:outputFormat>
+                    <h:commandLink value="#{msgs['top.logout']}">
+                        <ga:logOut/>
+                        <n:nav outcome="default" redirect="true"/>
+                    </h:commandLink>
+                </h:form>
+            </gs:span>
+        </ui:define>
+
+        <ui:define name="header">
+            <h:outputText value="#{msgs['topmenu.caption']}" style="margin-left:30px;margin-right:10px"/>
+            <h:outputLink styleClass="headermenufirst" value="processes.jsf" 
+            style="#{view.viewId == '/app/processes.xhtml' || view.viewId == '/app/procdef.xhtml' || view.viewId == '/app/procins.xhtml'  ? 'font-weight:bold' : ''}">
+                <h:outputText value="#{msgs['topmenu.processes']}"/>
+            </h:outputLink>
+            <h:outputLink styleClass="headermenu" value="tasks.jsf" 
+            style="#{view.viewId == '/app/tasks.xhtml' ? 'font-weight:bold' : ''}">
+                <h:outputText value="#{msgs['topmenu.tasks']}"/>
+            </h:outputLink>
+            <ga:checkRole roles="#{access.role.tasks.listAll}">
+	            <h:outputLink styleClass="headermenu" value="tasks_all.jsf" style="#{view.viewId == '/app/tasks_all.xhtml' ? 'font-weight:bold' : ''}">
+	                <h:outputText value="#{msgs['topmenu.tasks_all']}"/>
+	            </h:outputLink>
+	        </ga:checkRole>
+            <h:outputLink styleClass="headermenu" value="reports.jsf" 
+            style="#{view.viewId == '/app/reports.xhtml' ? 'font-weight:bold' : ''}">
+                <h:outputText value="#{msgs['topmenu.reports']}"/>
+            </h:outputLink>
+            
+            
+            <ga:checkRole roles="#{access.role.jobs}">
+                <h:outputLink styleClass="headermenu" value="jobs.jsf" style="#{view.viewId == '/app/jobs.xhtml' ? 'font-weight:bold' : ''}">
+                    <h:outputText value="#{msgs['topmenu.jobs']}"/>
+                </h:outputLink>
+            </ga:checkRole>
+            <ga:checkRole roles="#{access.role.identities}">
+                <h:outputLink styleClass="headermenu" value="identities.jsf" style="#{view.viewId == '/app/identities.xhtml' ? 'font-weight:bold' : ''}">
+                    <h:outputText value="#{msgs['topmenu.identities']}"/>
+                </h:outputLink>
+            </ga:checkRole>
+        </ui:define>
+    </ui:composition>
+
+</html>

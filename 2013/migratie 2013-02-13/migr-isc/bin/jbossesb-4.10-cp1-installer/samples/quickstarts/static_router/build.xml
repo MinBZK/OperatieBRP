@@ -1,0 +1,77 @@
+<project name="Quickstart_static_router" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+		
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+  
+	<property name="jbossesb.name" value="jboss-esb.xml"/>
+	<property name="jbossesb.origconfig" location="${jbossesb.name}"/>
+
+	<property name="jbossesb.config" location="${build.dir}/${jbossesb.name}"/>
+
+	<property name="jbossesb.rootdir" location="${build.dir}/dirs"/>
+	<property name="jbossesb.staticrouter.dir" location="${jbossesb.rootdir}/staticrouter"/>
+	<property name="jbossesb.service1.dir" location="${jbossesb.rootdir}/service01"/>
+	<property name="jbossesb.service1.input" location="${jbossesb.service1.dir}/input"/>
+	<property name="jbossesb.service1.post" location="${jbossesb.service1.dir}/post"/>
+	<property name="jbossesb.service2.dir" location="${jbossesb.rootdir}/service02"/>
+	<property name="jbossesb.service2.input" location="${jbossesb.service2.dir}/input"/>
+	<property name="jbossesb.service2.post" location="${jbossesb.service2.dir}/post"/>
+	<property name="jbossesb.service3.dir" location="${jbossesb.rootdir}/service03"/>
+	<property name="jbossesb.service3.input" location="${jbossesb.service3.dir}/input"/>
+	<property name="jbossesb.service3.post" location="${jbossesb.service3.dir}/post"/>
+
+	<target name="config" depends="assert-ftp-config">
+		<delete dir="${jbossesb.rootdir}" quiet="true"/>
+		<mkdir dir="${jbossesb.rootdir}"/>
+		<mkdir dir="${jbossesb.staticrouter.dir}"/>
+		<mkdir dir="${jbossesb.service1.dir}"/>
+		<mkdir dir="${jbossesb.service1.input}"/>
+		<mkdir dir="${jbossesb.service1.post}"/>
+		<mkdir dir="${jbossesb.service2.dir}"/>
+		<mkdir dir="${jbossesb.service2.input}"/>
+		<mkdir dir="${jbossesb.service2.post}"/>
+	    <mkdir dir="${jbossesb.service3.dir}"/>
+		<mkdir dir="${jbossesb.service3.input}"/>
+		<mkdir dir="${jbossesb.service3.post}"/>
+		<antcall target="filter_jboss-esb.xml"/>
+		<copy file="log4j.xml" tofile="build/log4j.xml"/>
+	</target>
+	
+	<target name="runtest" depends="compile" description="runs the Test FTP file creator">
+		<echo>Runs Test FTP File creator</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.staticrouter.test.CreateTestFile" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="${quickstart.jbossesb.ftp.hostname}"/>
+			<arg value="${quickstart.jbossesb.ftp.username}"/>
+			<arg value="${quickstart.jbossesb.ftp.password}"/>
+			<arg value="${quickstart.jbossesb.ftp.directory}/StaticRouter.dat"/>
+			<arg value="Hello World In A File (for static router test)"/> <!--  File Contents -->
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+		
+	<target name="filter_jboss-esb.xml">
+		<copy file="${basedir}/jboss-esb-unfiltered.xml" tofile="${basedir}/jboss-esb.xml" overwrite="true" filtering="true">
+			<filterset>
+				<filter token="FTP_HOSTNAME" value="${quickstart.jbossesb.ftp.hostname}"/>
+		        <filter token="FTP_USERNAME" value="${quickstart.jbossesb.ftp.username}"/>
+		        <filter token="FTP_PASSWORD" value="${quickstart.jbossesb.ftp.password}"/>
+		        <filter token="FTP_DIRECTORY" value="${quickstart.jbossesb.ftp.directory}"/>
+		
+		        <filter token="STATICROUTER" value="${jbossesb.staticrouter.dir}"/>
+		        <filter token="SERVICE01" value="${jbossesb.service1.input}"/>
+		        <filter token="SERVICE01_POST" value="${jbossesb.service1.post}"/>
+		        <filter token="SERVICE02" value="${jbossesb.service2.input}"/>
+		        <filter token="SERVICE02_POST" value="${jbossesb.service2.post}"/>
+		        <filter token="SERVICE03" value="${jbossesb.service3.input}"/>
+		        <filter token="SERVICE03_POST" value="${jbossesb.service3.post}"/>
+		</filterset>
+		</copy>
+	</target>
+
+</project>

@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+        xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd"
+        xmlns:ftl="http://www.milyn.org/xsd/smooks/freemarker-1.1.xsd"
+        xmlns:g="http://www.milyn.org/xsd/smooks/groovy-1.1.xsd">
+
+	<!--
+		Using Java Binding: Capture and decode the date from the order, storing the decoded
+		date value in a simple HashMap.
+	-->
+    <jb:bean beanId="order" class="java.util.HashMap" createOnElement="#document">
+        <jb:value property="orderDate" data="Order/@orderDate" decoder="Date">
+            <jb:decodeParam name="format">EEE MMM dd HH:mm:ss yyyy</jb:decodeParam>
+        </jb:value>
+    </jb:bean>
+
+    <!--
+        Using Groovy Scripting: Remove the orderDate attribute from the Order element - it's
+        now in the message as an OrderDate element.
+    -->
+    <g:groovy executeOnElement="Order" executeBefore="false">
+        <g:script>
+            element.removeAttribute("orderDate");
+        </g:script>
+    </g:groovy>
+
+    <!--
+		Using FreeMarker Templating: Generate the new "OrderDate" element from decoded date captured in
+		the binding config above.
+	-->
+    <ftl:freemarker applyOnElement="OrderLines">
+        <ftl:template><![CDATA[    <OrderDate>
+               <day>${order.orderDate?string("dd")}</day>
+               <time>${order.orderDate?string("HH:mm")}</time>
+               <month>${order.orderDate?string("MM")}</month>
+               <year>${order.orderDate?string("yy")}</year>
+            </OrderDate>]]></ftl:template>
+        <ftl:use>
+            <ftl:inline directive="insertbefore" />
+        </ftl:use>
+    </ftl:freemarker>
+
+</smooks-resource-list>

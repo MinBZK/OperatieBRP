@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd"
+                      xmlns:ftl="http://www.milyn.org/xsd/smooks/freemarker-1.1.xsd"
+                      xmlns:esbr="http://www.jboss.org/xsd/jbossesb/smooks/routing-1.0.xsd">
+
+    <params>        
+        <param name="stream.filter.type">SAX</param>
+    </params>
+
+    <conditions>
+        <!-- route the even numbered order items -->
+        <condition id="routeItem"><!-- orderItem.itemId % 2 == 0 --></condition>
+    </conditions>
+
+    <!-- Capture some data from the message into the bean context... -->
+    <jb:bean beanId="header" class="java.util.Hashtable" createOnElement="order">
+        <jb:value property="orderId" data="order/@id"/>
+        <jb:value property="customerNumber" data="header/customer/@number"/>
+        <jb:value property="customerName" data="header/customer"/>
+    </jb:bean>
+    <jb:bean beanId="orderItem" class="java.util.Hashtable" createOnElement="order-item">
+        <jb:value property="itemId" data="order-item/@id"/>
+        <jb:value property="productId" data="order-item/product"/>
+        <jb:value property="quantity" data="order-item/quantity"/>
+        <jb:value property="price" data="order-item/price"/>
+    </jb:bean>
+
+    <!-- On each order-item, apply a template to the data captured into the bean context,
+         binding the templating result back into the bean context under the
+         beanId "orderItemFragment" to be routed by the following ESB Router... -->
+    <ftl:freemarker applyOnElement="order-item">
+        <condition idRef="routeItem" />
+        <ftl:template>/orderitem-split.ftl</ftl:template>
+        <ftl:use>
+            <ftl:bindTo id="orderItemFragment" />
+        </ftl:use>
+    </ftl:freemarker>
+
+    <!-- On each order-item, route the "orderItemFragment" bean to the  -->
+    <esbr:routeBean beanIdRef="orderItemFragment" toServiceCategory="QS" toServiceName="Receiver" routeOnElement="order-item">
+        <condition idRef="routeItem" />
+    </esbr:routeBean>
+
+</smooks-resource-list>

@@ -1,0 +1,438 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum:22-06-2012 Status:Concept -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:sync="http://www.moderniseringgba.nl/SYNC/0001"
+    targetNamespace="http://www.moderniseringgba.nl/SYNC/0001" elementFormDefault="qualified" attributeFormDefault="unqualified"
+    version="000101">
+
+    <element name="leesUitBrpVerzoek" type="sync:LeesUitBrpVerzoekType" />
+    <element name="leesUitBrpAntwoord" type="sync:LeesUitBrpAntwoordType" />
+    <element name="conversietabelQuery" type="sync:ConversietabelQueryType" />
+    <element name="conversietabelQueryResponse" type="sync:ConversietabelQueryResponseType">
+        <unique name="UniekeConversietabelType">
+            <selector xpath="sync:conversietabelMapping" />
+            <field xpath="@type" />
+        </unique>
+    </element>
+    <element name="synchronisatieStrategieVerzoek" type="sync:SynchronisatieStrategieVerzoekType" />
+    <element name="synchronisatieStrategieAntwoord" type="sync:SynchronisatieStrategieAntwoordType" />
+    <element name="converteer" type="sync:ConverteerType" />
+    <element name="converteerResponse" type="sync:ConverteerResponseType" />
+    <element name="synchroniseerNaarBrpVerzoek" type="sync:SynchroniseerNaarBrpVerzoekType" />
+    <element name="synchroniseerNaarBrpAntwoord" type="sync:SynchroniseerNaarBrpAntwoordType" />
+    <element name="converteerNaarBrpVerzoek" type="sync:ConverteerNaarBrpVerzoekType" />
+    <element name="converteerNaarBrpAntwoord" type="sync:ConverteerNaarBrpAntwoordType" />
+    <element name="converteerNaarLo3Verzoek" type="sync:ConverteerNaarLo3VerzoekType" />
+    <element name="converteerNaarLo3Antwoord" type="sync:ConverteerNaarLo3AntwoordType" />
+
+    <complexType name="ConversietabelQueryType">
+    </complexType>
+
+    <complexType name="ConversietabelQueryResponseType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <choice>
+                <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1" nillable="false" />
+                <element name="conversietabelMapping" type="sync:ConversietabelMappingType" minOccurs="1"
+                    maxOccurs="unbounded" nillable="false">
+                    <unique name="UniekeLo3Code">
+                        <selector xpath="sync:mapping" />
+                        <field xpath="@lo3Code" />
+                    </unique>
+                </element>
+            </choice>
+        </sequence>
+    </complexType>
+
+    <complexType name="ConversietabelMappingType">
+        <sequence>
+            <element name="mapping" minOccurs="1" maxOccurs="unbounded" nillable="false">
+                <complexType>
+                    <sequence>
+                        <element name="brpCode" type="string" minOccurs="1" maxOccurs="unbounded"></element>
+                    </sequence>
+                    <attribute name="lo3Code" type="string" use="required"></attribute>
+                </complexType>
+            </element>
+        </sequence>
+        <attribute name="type" type="sync:ConversietabelType" use="required"></attribute>
+    </complexType>
+
+    <complexType name="LeesUitBrpVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="antwoordFormaat" type="sync:AntwoordFormaatType" minOccurs="1" maxOccurs="1" nillable="false"/>
+         </sequence>
+    </complexType>
+
+    <complexType name="LeesUitBrpAntwoordType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <choice>
+                <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1" nillable="false" />
+                <choice>
+                    <element name="lo3Pl" type="sync:Lo3PlType" minOccurs="0" maxOccurs="1" nillable="false" />
+                    <element name="brpPl" type="sync:BrpPlType" minOccurs="0" maxOccurs="1" nillable="false" />
+                </choice>
+            </choice>
+        </sequence>
+    </complexType>
+
+    <complexType name="SynchronisatieStrategieVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="vorigANummer" type="sync:ANummerType" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="bsn" type="sync:BsnType" minOccurs="0" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+    <complexType name="SynchronisatieStrategieAntwoordType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="resultaat" type="sync:SearchResultaatType" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="toelichting" type="sync:ToelichtingType" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="lo3Pl" type="sync:Lo3PlType" minOccurs="0" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+    <complexType name="ErrorType">
+        <sequence>
+            <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="1" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+    <complexType name="ConverteerType">
+        <sequence>
+            <any maxOccurs="unbounded" processContents="lax" />
+        </sequence>
+        <anyAttribute processContents="lax" />
+    </complexType>
+    
+    <complexType name="ConverteerResponseType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <choice>
+                <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1" nillable="false" />
+                <element name="lo3Pl" type="sync:Lo3PlType" minOccurs="1" maxOccurs="1" nillable="false" />
+            </choice>
+        </sequence>
+    </complexType>
+
+    <complexType name="ConverteerNaarBrpVerzoekType">
+        <sequence>
+            <element name="lo3BerichtAsTeletexString" type="sync:Lo3PlType" minOccurs="1" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+     
+    <complexType name="ConverteerNaarBrpAntwoordType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <choice>
+                <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="1" maxOccurs="1" nillable="false" />
+                <element name="brpPl" type="sync:BrpPlType" minOccurs="1" maxOccurs="1" nillable="false" />
+            </choice>
+        </sequence>
+        <anyAttribute processContents="lax" />
+    </complexType>
+    
+    <complexType name="BrpPlType">
+        <sequence>
+            <any maxOccurs="unbounded" processContents="lax" />
+        </sequence>
+    </complexType>
+    
+    <complexType name="ConverteerNaarLo3VerzoekType">
+        <sequence>
+            <any maxOccurs="unbounded" processContents="lax" />
+        </sequence>
+        <anyAttribute processContents="lax" />
+    </complexType>
+    
+    <complexType name="ConverteerNaarLo3AntwoordType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <choice>
+                <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1" nillable="false" />
+                <element name="lo3Pl" type="sync:Lo3PlType" minOccurs="1" maxOccurs="1" nillable="false" />
+            </choice>
+        </sequence>
+    </complexType>
+    
+    
+    <complexType name="SynchroniseerNaarBrpVerzoekType">
+        <sequence>
+            <element name="lo3BerichtAsTeletexString" type="sync:Lo3PlType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="aNummerTeVervangenPl" type="sync:ANummerType" minOccurs="0" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+    
+    <complexType name="SynchroniseerNaarBrpAntwoordType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="foutmelding" type="sync:FoutmeldingType" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="logging" type="sync:LogRegelType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+    
+        <!-- Blokkering (ISC -> SYNC) -->
+    
+    <element name="blokkeringVerzoek" type="sync:BlokkeringVerzoekType" />
+    <complexType name="BlokkeringVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"  />
+            <element name="persoonsaanduiding" type="sync:PersoonsaanduidingType" minOccurs="1" maxOccurs="1"  />
+            <element name="processId" type="sync:ProcessIdType" minOccurs="1" maxOccurs="1" />
+            <element name="gemeenteNaar" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+            <element name="gemeenteRegistratie" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+    
+    <element name="blokkeringAntwoord" type="sync:BlokkeringAntwoordType" />
+    <complexType name="BlokkeringAntwoordType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1"/>
+            <element name="toelichting" type="sync:ToelichtingType"  minOccurs="0" maxOccurs="1" />
+            <element name="persoonsaanduiding" type="sync:PersoonsaanduidingType" minOccurs="0" maxOccurs="1"  />
+            <element name="processId" type="sync:ProcessIdType" minOccurs="0" maxOccurs="1" />
+            <element name="gemeenteNaar" type="sync:GemeentecodeType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+    
+    <!--  Blokkering info (ISC -> SYNC) -->
+
+    <element name="blokkeringInfoVerzoek" type="sync:BlokkeringInfoVerzoekType" />
+    <complexType name="BlokkeringInfoVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"  />
+        </sequence>
+    </complexType>
+    
+    <element name="blokkeringInfoAntwoord" type="sync:BlokkeringInfoAntwoordType" />
+    <complexType name="BlokkeringInfoAntwoordType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1"/>
+            <element name="toelichting" type="sync:ToelichtingType"  minOccurs="0" maxOccurs="1" />
+            <element name="persoonsaanduiding" type="sync:PersoonsaanduidingType" minOccurs="0" maxOccurs="1"  />
+            <element name="processId" type="sync:ProcessIdType" minOccurs="0" maxOccurs="1" />
+            <element name="gemeenteNaar" type="sync:GemeentecodeType" minOccurs="0" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+
+    <!-- Deblokkering (ISC -> SYNC) -->
+
+    <element name="deblokkeringVerzoek" type="sync:DeblokkeringVerzoekType"/>
+    <complexType name="DeblokkeringVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"  />
+            <element name="processId" type="sync:ProcessIdType" minOccurs="1" maxOccurs="1" />
+            <element name="gemeenteRegistratie" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+    <element name="deblokkeringAntwoord" type="sync:DeblokkeringAntwoordType"/>
+    <complexType name="DeblokkeringAntwoordType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1"/>
+            <element name="toelichting" type="sync:ToelichtingType"  minOccurs="0" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <!-- StartSynchronisatieCorrelatie  (ISC -> SYNC) -->
+
+    <element name="startSynchronisatieCorrelatie" type="sync:StartSynchronisatieCorrelatieType"/>
+    <complexType name="StartSynchronisatieCorrelatieType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"  />
+            <element name="processId" type="sync:ProcessIdType" minOccurs="1" maxOccurs="1" />
+            <element name="aktenummer" type="sync:AktenummerType" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+    
+    <!-- StopSynchronisatieCorrelatie  (ISC -> SYNC) -->
+
+    <element name="stopSynchronisatieCorrelatie" type="sync:StopSynchronisatieCorrelatieType"/>
+    <complexType name="StopSynchronisatieCorrelatieType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"  />
+            <element name="processId" type="sync:ProcessIdType" minOccurs="1" maxOccurs="1" />
+            <element name="aktenummer" type="sync:AktenummerType" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+    
+    <!-- SynchronisatieCorrelatieSignaal  (SYNC -> ISC) -->
+
+    <element name="synchronisatieCorrelatieSignaal" type="sync:SynchronisatieCorrelatieSignaalType"/>
+    <complexType name="SynchronisatieCorrelatieSignaalType">
+        <sequence>
+            <element name="status" type="sync:StatusType" minOccurs="1" maxOccurs="1"  />
+            <element name="toelichting" type="sync:ToelichtingType" minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+    
+    <complexType name="LogRegelType">
+        <sequence>
+            <element name="logRegel" minOccurs="0" maxOccurs="unbounded">
+                <complexType>
+                    <sequence>
+                        <element name="lo3Categorie" type="sync:LogLo3CategorieType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="lo3Stapel" type="sync:LogLo3StapelType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="lo3Voorkomen" type="sync:LogLo3VoorkomenType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="severity" type="sync:LogSeverityType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="type" type="sync:LogTypeType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="code" type="sync:LogCodeType" minOccurs="0" maxOccurs="1" nillable="false" />
+                        <element name="omschrijving" type="sync:LogOmschrijvingType" minOccurs="1" maxOccurs="1" nillable="false" />
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+     </complexType>
+
+    <simpleType name="ANummerType">
+        <restriction base="string">
+            <maxLength value="10" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="BsnType">
+        <restriction base="string">
+            <maxLength value="9" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="FoutmeldingType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="SearchResultaatType">
+        <restriction base="string">
+            <enumeration value="Toevoegen" />
+            <enumeration value="Vervangen" />
+            <enumeration value="Negeren" />
+            <enumeration value="Onduidelijk" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="Lo3PlType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="StatusType">
+        <restriction base="string">
+            <enumeration value="Ok" />
+            <enumeration value="Geblokkeerd" />
+            <enumeration value="Waarschuwing" />
+            <enumeration value="Fout" />
+            <enumeration value="BerichtParseFout" />
+            <enumeration value="BerichtInhoudFout" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="ToelichtingType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="ConversietabelType">
+        <restriction base="string">
+            <enumeration value="adellijkeTitelPredikaatConversietabel" />
+            <enumeration value="redenEindeRelatieConversietabel" />
+            <enumeration value="verblijfsrechtConversietabel" />
+            <enumeration value="redenVerkrijgingVerliesNlNationaliteitConversietabel" />
+            <enumeration value="aangeverAdreshoudingRedenWijzigingAdresConversietabel" />
+            <enumeration value="soortReisdocumentConversietabel" />
+            <enumeration value="reisdocumentRedenOntbrekenConversietabel" />
+            <enumeration value="reisdocumentAutoriteitVanAfgifteConversietabel" />
+            <enumeration value="redenOpschortingBijhoudingConversietabel" />
+            <enumeration value="voorvoegselScheidingstekenConversietabel" />
+        </restriction>
+    </simpleType>
+    
+   <simpleType name="LogLo3CategorieType">    
+        <restriction base="positiveInteger">
+             <maxInclusive value="99"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogLo3StapelType">    
+        <restriction base="integer">
+            <minInclusive value="0"/>
+            <maxInclusive value="99"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogLo3VoorkomenType">    
+        <restriction base="integer">
+            <minInclusive value="0"/>
+            <maxInclusive value="99"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogSeverityType">    
+        <restriction base="positiveInteger">
+             <maxInclusive value="999"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogTypeType">    
+        <restriction base="string">
+             <maxLength value="20" />
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogCodeType">    
+        <restriction base="string">
+             <maxLength value="20" />
+        </restriction>
+   </simpleType>
+   
+  <simpleType name="LogOmschrijvingType">    
+        <restriction base="string">
+             <maxLength value="400" />
+        </restriction>
+   </simpleType>   
+   
+   <simpleType name="GemeentecodeType">
+       <restriction base="string">
+           <minLength value="4"/>
+           <maxLength value="4"/>
+       </restriction>
+   </simpleType>
+   
+   <simpleType name="ProcessIdType">
+       <restriction base="string">
+           <maxLength value="100"/>
+       </restriction>
+   </simpleType>
+   
+   <simpleType name="PersoonsaanduidingType">
+       <restriction base="string">
+           <maxLength value="31"/>
+           <enumeration value="Verhuizend van LO3 naar BRP">
+               <annotation>
+                   <documentation/>
+               </annotation>
+           </enumeration>
+           <enumeration value="Verhuizend van BRP naar LO3 GBA">
+               <annotation>
+                   <documentation/>
+               </annotation>
+           </enumeration>
+           <enumeration value="Verhuizend van BRP naar LO3 RNI">
+               <annotation>
+                   <documentation/>
+               </annotation>
+           </enumeration>
+       </restriction>
+   </simpleType>
+   
+   <simpleType name="AktenummerType">
+       <restriction base="string">
+           <maxLength value="7"/>
+       </restriction>
+   </simpleType>
+   
+    <simpleType name="AntwoordFormaatType">
+        <restriction base="string">
+            <enumeration value="Lo3" />
+            <enumeration value="Brp" />
+        </restriction>
+    </simpleType>
+   
+</schema>

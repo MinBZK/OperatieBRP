@@ -1,0 +1,14 @@
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voajob.cron.expression', '0/5 * * * * ?');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('toqueue.cron.expression', '0/5 * * * * ?');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voisc.queue.host', 'localhost:1099');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voisc.queue.receivetimeout', '30000');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voisc.queue.verzenden', 'queue/vospg.verzenden');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voisc.queue.ontvangst', 'queue/vospg.ontvangst');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voisc.database.reconnects', '1');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voisc.mailbox.hostname', 'localhost');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voisc.mailbox.portnumber', '1212');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('jdbc.driverClassName', 'org.postgresql.Driver');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('jdbc.url', 'jdbc:postgresql://localhost/ISC');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('jdbc.username', 'postgres');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('jdbc.password', 'postgres');
+INSERT INTO voisc.properties (propertykey, propertyvalue) VALUES ('voisc.database.sleepTime', '30');

@@ -1,0 +1,30 @@
+<project name="transformation-pojo-quickstart" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+			
+	<!-- Additional files to be deployed in the sar. -->
+	<property name="additional.deploys" value="smooks-res.xml" />
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="runtest" depends="compile" description="runs test JMS Sender">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.transformxml2pojo.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+	
+	<target name="receive" depends="compile" description="runs Test JMS Receiver">
+		<echo>Runs Test JMS Receiver</echo>
+		<java fork="no" classname="org.jboss.soa.esb.samples.quickstart.transformxml2pojo.test.ReceiveJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+
+</project>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd
+	">
+
+	<bean id="jndiTemplate" class="org.springframework.jndi.JndiTemplate">
+        <property name="environment">
+                <props>
+                <prop key="java.naming.provider.url">localhost:1099</prop>
+                <prop key="java.naming.factory.url.pkgs">org.jnp.interfaces:org.jboss.naming</prop>
+                <prop key="java.naming.factory.initial">org.jnp.interfaces.NamingContextFactory</prop>
+                </props>
+        </property>
+    </bean>
+
+    <bean id="connectionFactory" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiTemplate">
+            <ref bean="jndiTemplate"/>
+        </property>
+        <property name="jndiName">
+            <value>ConnectionFactory</value>
+        </property>
+    </bean>
+
+	<bean name="brpVerzendenQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	    <property name="jndiTemplate" ref="jndiTemplate"/>  
+	    <property name="jndiName" value="queue/brp.verzenden" />  
+	</bean>
+	
+	<bean name="brpOntvangstQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	    <property name="jndiTemplate" ref="jndiTemplate"/>  
+	    <property name="jndiName" value="queue/brp.ontvangst" />  
+	</bean>
+	
+	<bean name="mviOntvangstQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	    <property name="jndiTemplate" ref="jndiTemplate"/>  
+	    <property name="jndiName" value="queue/mvi.ontvangst" />  
+	</bean>
+
+	<bean name="mviVerzendenQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	    <property name="jndiTemplate" ref="jndiTemplate"/>  
+	    <property name="jndiName" value="queue/mvi.verzenden" />  
+	</bean>
+
+	<bean name="vospgOntvangstQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	    <property name="jndiTemplate" ref="jndiTemplate"/>  
+	    <property name="jndiName" value="queue/vospg.ontvangst" />  
+	</bean>
+
+	<bean name="vospgVerzendenQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	    <property name="jndiTemplate" ref="jndiTemplate"/>  
+	    <property name="jndiName" value="queue/vospg.verzenden" />  
+	</bean>
+	
+	<bean name="syncRequestQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	    <property name="jndiTemplate" ref="jndiTemplate"/>  
+	    <property name="jndiName" value="queue/sync.request" />  
+	</bean>
+
+	<bean name="syncResponseQueue" class="org.springframework.jndi.JndiObjectFactoryBean">  
+	    <property name="jndiTemplate" ref="jndiTemplate"/>  
+	    <property name="jndiName" value="queue/sync.response" />  
+	</bean>
+	
+
+	<bean name="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+		<property name="connectionFactory" ref="connectionFactory" />
+		<property name="receiveTimeout" value="30000" />
+	</bean>	
+</beans>

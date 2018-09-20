@@ -1,0 +1,343 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE beans PUBLIC "-//SPRING//DTD BEAN//EN"
+                       "http://www.springframework.org/dtd/spring-beans.dtd">
+<beans>
+
+	<bean
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="locations" value="file:config/config.properties" />
+		<property name="ignoreResourceNotFound" value="true" />
+		<property name="ignoreUnresolvablePlaceholders" value="true" />
+		<property name="searchSystemEnvironment" value="true" />
+		<property name="systemPropertiesModeName" value="SYSTEM_PROPERTIES_MODE_OVERRIDE" />
+	</bean>
+
+	<!-- ==== Datasource ==== -->
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName">
+			<value>${jdbc.driverClassName}</value>
+		</property>
+		<property name="url">
+			<value>${jdbc.gbav.url}</value>
+		</property>
+		<property name="username">
+			<value>${jdbc.gbav.username}</value>
+		</property>
+		<property name="password">
+			<value>${jdbc.gbav.password}</value>
+		</property>
+	</bean>
+
+
+	<bean class="nl.gba.gbav.impl.lo3.PLDataBuilderImpl" id="PLDataBuilder" />
+	<bean class="nl.gba.gbav.impl.util.UtilsImpl" id="gbavUtils" />
+	<bean class="nl.gba.gbav.impl.lo3.bas.BerichtFactoryImpl" id="LO3BerichtFactory" />
+	<bean class="nl.ictu.spg.domain.lo3.gbanetwork.LO3BerichtMetaUtilImpl"
+		id="lo3BerichtMetaUtil" />
+	<bean id="mvVerstrekkingService"
+		class="nl.ictu.spg.integration.idvmessageprocessing.MVVerstrekkingServiceImpl"
+		init-method="init">
+		<property name="lo3Bas" ref="BAS" />
+		<property name="eventHandlerRegistry" ref="eventHandlerRegistry" />
+		<property name="enabled" value="false" />
+	</bean>
+	<bean class="nl.gba.gbav.impl.lo3.bas.BASImpl" id="BAS">
+		<property name="LO3BerichtDAO" ref="LO3BerichtDAO" />
+	</bean>
+	<bean
+		class="nl.ictu.spg.domain.dao.hibernate.lo3.gbanetwork.LO3BerichtDAOHibernateImpl"
+		id="LO3BerichtDAOTarget">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="LO3BerichtDAO" parent="abstractTxDefinition">
+		<property name="target">
+			<ref bean="LO3BerichtDAOTarget" />
+		</property>
+	</bean>
+
+
+	<!-- ==== Hibernate SessionFactory ==== -->
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+		<property name="dataSource">
+			<ref bean="dataSource" />
+		</property>
+		<property name="mappingJarLocations">
+			<list>
+				<value>classpath:libs/core-1.0.jar</value>
+			</list>
+		</property>
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.dialect">org.hibernate.dialect.PostgreSQLDialect</prop>
+				<prop key="hibernate.show_sql">false</prop>
+				<prop key="hibernate.sql">false</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean abstract="true"
+		class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean"
+		id="abstractTxDefinition" lazy-init="true">
+		<property name="transactionManager">
+			<ref bean="transactionManager" />
+		</property>
+		<property name="transactionAttributes">
+			<ref bean="transactionAttributes" />
+		</property>
+	</bean>
+	<bean class="org.springframework.orm.hibernate3.HibernateTransactionManager"
+		id="transactionManager">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+
+	<bean id="transactionAttributes" class="java.util.HashMap">
+		<constructor-arg>
+			<props>
+				<!-- Add signatures of methods of the service for which you want to define 
+					a transaction policy. -->
+				<!-- Note: we are not using the 'readOnly' attribute because of https://jira.springsource.org/browse/SPR-960. -->
+				<prop key="get*">PROPAGATION_SUPPORTS</prop>
+				<prop key="find*">PROPAGATION_REQUIRED,+nl.ictu.spg.domain.pl.GegevensmodelException</prop>
+				<prop key="add*">PROPAGATION_REQUIRED</prop>
+				<prop key="remove*">PROPAGATION_REQUIRED</prop>
+				<!-- some additional definitions for explicit transactions -->
+				<prop key="invokeWithinTx*">PROPAGATION_REQUIRED,+junit.framework.AssertionFailedError</prop>
+				<prop key="invokeWithinNewTx*">PROPAGATION_REQUIRES_NEW,+AssertionFailedError</prop>
+				<prop key="deactivatePl*">PROPAGATION_REQUIRES_NEW,-NoDeactivatePLActivityFoundException,-MoreDeactivatePLActivitiesFoundException,+AssertionFailedError</prop>
+
+				<!-- TMV Controller methods that are invoked within a new TX -->
+				<prop key="verwerkRegistratieTerugmelding*">PROPAGATION_REQUIRES_NEW,-RuntimeException,+AssertionFailedError</prop>
+				<prop key="verwerkInzageVerzoek*">PROPAGATION_REQUIRES_NEW,-RuntimeException,+AssertionFailedError</prop>
+				<!-- explicitly add checked exception when a rollback should occur, Spring 
+					by default rollsback on RuntimeException default behaviour -->
+				<prop key="*">PROPAGATION_REQUIRED</prop>
+			</props>
+		</constructor-arg>
+	</bean>
+	<bean id="eventHandlerRegistry" class="nl.gba.gbav.impl.activities.EventHandlerRegistryImpl" />
+
+	<bean class="nl.ictu.spg.domain.lo3.pl.LO3PLDAOHibernateImpl" id="LO3PLDAOTarget">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="LO3PLDAO" parent="abstractTxDefinition">
+		<property name="target">
+			<ref bean="LO3PLDAOTarget" />
+		</property>
+	</bean>
+
+	<bean id="transactionAssistantTarget"
+		class="nl.ictu.spg.common.util.transaction.TransactionAssistantImpl">
+	</bean>
+
+	<bean id="TXAssistant" parent="abstractTxDefinition">
+		<property name="target" ref="transactionAssistantTarget" />
+	</bean>
+
+	<bean
+		class="nl.ictu.spg.domain.dao.hibernate.activityflow.ActivityflowDAOHibernateImpl"
+		id="ActivityflowDAOTarget">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory" />
+		</property>
+	</bean>
+	<bean id="ActivityflowDAO" parent="abstractTxDefinition">
+		<property name="target">
+			<ref bean="ActivityflowDAOTarget" />
+		</property>
+	</bean>
+
+	<bean
+		class="nl.gba.gbav.impl.util.configuration.ConfigurationBeanPostProcessor"
+		id="configurationBeanPostProcessor" />
+
+	<bean class="nl.ictu.spg.common.util.SystemProperties" id="SystemProperties">
+		<property name="properties">
+			<props>
+				<!-- Indicates the date for enforcing the LO 3.7 functionality. The date 
+					value must have format YYYYMMDD -->
+				<prop key="datum_invoering_lo37">20091101</prop>
+				<!-- RFC-69: Specify afnemer mailbox instantie code -->
+				<prop key="afnemer_mailbox_instantie">10</prop>
+				<!-- Allow or disallow missing gegevensgroep 80 in category 07 (synchroniciteit); 
+					true or false. -->
+				<prop key="allow_missing_synchroniciteit">true</prop>
+				<!-- This property is used to set on and off the ability to be to edit 
+					and delete from the landelijke tabellen -->
+				<prop key="landelijke_tabellen_allow_update">false</prop>
+				<!-- This key is used to specify a limit to the max number of rows returned 
+					from Zoeken PL -->
+				<prop key="max_pl_zoek_rows">31</prop>
+				<!-- The EREF prefix is a two-character string which is prefixed to the 
+					numeric part of an EREF when sending a LO3 message. The convention is that 
+					the first character is one of 'O', 'T', 'A' or 'P' This depends on the environment 
+					in which the system is installed (i.e. 'ontwikkel', 'test', 'acceptatie' 
+					or 'productie'). The second character indicates the serie. Current default 
+					is 'A'. -->
+				<prop key="eref_prefix">${core.eref_prefix}</prop>
+				<!-- The property 'search_individual_lo3bericht_activities' contains 
+					the HQL select-statement for searching individual LO3 messages that need 
+					to be processed by the LO3RequestProcessor daemon process. The contents of 
+					this property can be changed whenever the need arises to process only a specific 
+					kind of message. -->
+				<prop key="search_individual_lo3bericht_activities">
+					(select activiteit_id
+					from activiteit
+					where
+					activiteit_type=100
+					and toestand = 10000
+					limit ?)
+					union all
+					(select
+					activiteit_id
+					from activiteit
+					where activiteit_type=100
+					and toestand =
+					10002
+					limit ?)
+					order by activiteit_id limit ?
+				</prop>
+				<!-- The property 'search_idv_lo3bericht_activities_queueing' contains 
+					the HQL select-statement for searching individual LO3 messages that need 
+					to be processed by the LO3RequestProcessor daemon process. The contents of 
+					this property can be changed whenever the need arises to process only a specific 
+					kind of message. -->
+				<prop key="search_idv_lo3bericht_activities_queueing">
+					(select activiteit_id
+					, laatste_actie_dt
+					from
+					activiteit
+					where activiteit_type=100
+					and toestand = 10000
+					limit ?)
+					union all
+					(select activiteit_id
+					, laatste_actie_dt
+					from activiteit
+					where activiteit_type=100
+					and toestand = 10002
+					limit ?)
+					order by
+					activiteit_id limit ?
+				</prop>
+				<!-- The property 'search_outgoing_bericht_activities_for_am_activity' 
+					contains the HQL select-statement for searching bericht activities for an 
+					AM activity. This property is used by ActivityflowDAOHibernateImpl .findOutgoingBerichtActiviteitenForAMActiviteit(). -->
+				<prop key="search_outgoing_bericht_activities_for_am_activity">
+					SELECT b.id FROM ActiviteitCMP c, ActiviteitCMP b
+					WHERE
+					c.moederId=? AND b.moederId=c.id AND b.type=? AND
+					b.communicatiePartner=?
+					ORDER BY b.id
+				</prop>
+				<!-- The property 'max_result_set' indicates the maximum records to be 
+					retrieved from the database in relation to messages to be processed during 
+					a single run The contents of this property can be changed whenever the need 
+					arises to process only a specific kind of message. -->
+				<prop key="max_result_set">10000</prop>
+
+				<!-- max resultset allowed when performing activiteiten query, exceeding 
+					the limit will prevent search and inform user -->
+				<prop key="ba_max_result_set">10000</prop>
+
+				<!-- maximum number of displayed activities related to a PL instance -->
+				<prop key="max_display_pl_activities">1000</prop>
+
+				<!-- maximum number of input a-nummers for creating messages Ag31/Lq01 -->
+				<prop key="ba_anummer_batch_size">1000</prop>
+
+				<!-- Enable/disable sending of Pf0x messages through VOSPG; values: true/false -->
+				<prop key="enable_send_pf0x">${core.enable_send_pf0x}</prop>
+				<!-- This is the delay between processing runs of the PL update background 
+					service (see also nl.ictu.spg.service.plupdate.PlUpdateBackgroundService). 
+					Every time the background process has performed a sweep of the database for 
+					work it will wait a while before performing a new sweep. The purpose of this 
+					delay is to prevent the background process from continually querying the 
+					database for work. The unit of waittime is in millisecs. -->
+				<prop key="update_idv_wait_time">${core.idv.wait_time}</prop>
+				<!-- This is the minimum delay for resubmitting a previously submitted 
+					message for processing. The purpose of this delay is to prevent resubmitting 
+					too soon. Messages to be resubmitted are recognized by their changed timestamp. 
+					However it is possible that the previous submission is still being processed. 
+					This delay should make this case very unlikely. The unit of waittime is in 
+					millisecs. -->
+				<prop key="resubmit_idv_wait_time">900000</prop>
+				<!-- The batch size is used by StoreAm.process() method. It indicates 
+					after how many DataRecords the transaction should be committed and a new 
+					one started -->
+				<prop key="batch_size">100</prop>
+				<!-- The 'delay_actie_' properties are used to configure the maximum 
+					amount of time that an activity will wait for a reaction to be received. 
+					The unit of delay is one hour. -->
+				<prop key="delay_actie_send_qv01bericht">12</prop>
+				<prop key="delay_actie_send_lo3bericht">4</prop>
+				<prop key="delay_actie_lq01_cyclus">192</prop>
+				<prop key="delay_actie_qv01_cyclus">72</prop>
+				<prop key="delay_actie_amactiviteit">192</prop>
+				<prop key="delay_actie_importeren_verwerken">120</prop>
+				<prop key="delay_actie_idv_verwerken">8</prop>
+				<!-- The time between SpgCache reloads. See also nl.ictu.spg.domain.util.SpgCache. 
+					The unit of refresh is milliseconds. -->
+				<prop key="timeBetweenToReload">900000</prop>
+				<prop key="uploadDirectory">/usr/local/spg/encrypted</prop>
+				<prop key="encryptionSuffix">.gpg</prop>
+				<prop key="AMDecryptionCommand">gpg --passphrase-fd 0 --batch --output %TO% --decrypt
+					%FROM%</prop>
+				<prop key="AMProcessorCommand">/usr/local/spg/scripts/SPGprocessAM.sh %GEMEENTECODE%
+					%AANTALBESTANDEN%</prop>
+				<!-- The time after which a PL is considered old. See finding GBA653 -->
+				<prop key="nrofdays_pl_old">5</prop>
+				<!-- The mailboxNumber of BPR -->
+				<prop key="mailbox_number_BPR">${core.mailbox_number_BPR}</prop>
+				<prop key="reportTemplatesDirectory">/usr/local/spg/report_templates</prop>
+				<prop key="sqlReportResultsDirectory">${ba.sql.rapportage.output.dir}</prop>
+				<prop key="sqlReportCommand">/usr/local/spg/scripts/sql_reports.sh</prop>
+				<prop key="bcmDescriptionsPath">${ba.bcm.descriptions.path}</prop>
+				<prop key="afnemerCodeGBAV">999903</prop>
+				<prop key="issue_uiterlijke_actie_periode_in_days">28</prop>
+				<prop key="useLiteralLikeCriteria">true</prop>
+				<prop key="root.data.dir">data</prop>
+				<!-- AMVerwerker-related properties - amverwerker.outputfile.prefix: 
+					prefix of the outputfiles that will be generated by the AMVerwerker; the 
+					name of the outputfiles will be this prefix, followed by the gemeentecode 
+					or afnemercode and finally the ".DAT" suffix - amverwerker.outputfile.mediatype: 
+					on which medium the outputfiles are going to be transported; e.g. DVD - amverwerker.outputfile.max-records-per-file: 
+					maximum number of records to write to each outputfile (before creating a 
+					new outputfile) -->
+				<prop key="amverwerker.outputfile.prefix">am-output-afnemer-</prop>
+				<prop key="amverwerker.outputfile.mediatype">DVD</prop>
+				<prop key="amverwerker.outputfile.max-records-per-file">1000000</prop>
+				<!-- Enable or disable workaround for operational Postgres problem regarding 
+					bad execution plan when collecting protocollering data. -->
+				<prop key="protocollering.execplan.workaround">true</prop>
+			</props>
+		</property>
+	</bean>
+	<bean
+		class="nl.ictu.spg.domain.dao.hibernate.referentie.BaseTableDAOHibernateImpl"
+		id="BaseTableDAOTarget">
+		<property name="sessionFactory" ref="sessionFactory" />
+		<!-- <property name="longQueryTimeInMillis" value="3000"/> <property name="veryLongQueryTimeInMillis" 
+			value="30000"/> -->
+	</bean>
+
+	<bean id="BaseTableDAO" parent="abstractTxDefinition">
+		<property name="target">
+			<ref bean="BaseTableDAOTarget" />
+		</property>
+	</bean>
+
+	<bean class="nl.ictu.spg.domain.lo3.pl.LO3PLBuilderImpl" id="LO3PLBuilder">
+		<property name="afnemerDAM" ref="afnemerDAM" />
+	</bean>
+	<bean class="nl.ictu.spg.domain.lo3.AfnemerDAMImpl" id="afnemerDAM">
+		<property name="baseTableDao" ref="BaseTableDAO" />
+	</bean>
+</beans>

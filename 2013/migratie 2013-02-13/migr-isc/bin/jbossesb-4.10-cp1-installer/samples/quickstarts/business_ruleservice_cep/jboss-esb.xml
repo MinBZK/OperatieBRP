@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.3.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.3.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.3.0.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+		<jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+			<jms-bus busid="bus_GW">
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_business_ruleservice_cep_GW"/>
+			</jms-bus>
+			<jms-bus busid="bus_ESB">
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_business_ruleservice_cep_ESB"/>
+			</jms-bus>
+		</jms-provider>
+	</providers>
+
+	<services>
+		<service category="business_ruleservice_cep" name="StatusHandlerService" description="The status handler service.">
+			<listeners>
+				<jms-listener name="listener_GW" busidref="bus_GW" is-gateway="true" />
+				<jms-listener name="listener_ESB" busidref="bus_ESB"/>
+			</listeners>
+			<actions mep="OneWay">
+				<action name="status-filter" class="org.jboss.soa.esb.samples.quickstart.business_ruleservice_cep.status.StatusFilter">
+					<property name="status-body-location" value="Status"/>
+				</action>
+				<action class="org.jboss.soa.esb.actions.BusinessRulesProcessor" name="process-rules">
+					<property name="ruleAgentProperties" value="META-INF/business_ruleservice_cep.properties" />
+					<!--
+					<property name="ruleAuditType" value="THREADED_FILE"/>
+					<property name="ruleAuditFile" value="/tmp/audit"/>
+					<property name="ruleAuditInterval" value="10000"/>
+					-->
+					<property name="ruleFireMethod" value="FIRE_UNTIL_HALT"/>
+					<property name="ruleEventProcessingType" value="STREAM"/>
+					<property name="ruleClockType" value="REALTIME"/>
+					<property name="stateful" value="true"/>
+					<property name="object-paths">
+						<object-path esb="body.Status"/>
+					</property>
+					<property name="channels">
+						<send-to channel-name="warehouse" channel-class="org.jboss.soa.esb.samples.quickstart.business_ruleservice_cep.hub.WarehouseChannel">
+							<property name="warehouse-name" value="Denver"/>
+						</send-to>
+						<send-to channel-name="distribution" service-category="business_ruleservice_cep" service-name="DistributionService"/>
+					</property>
+				</action>
+			</actions>
+		</service>
+
+		<service category="business_ruleservice_cep" name="DistributionService" description="The mock districution service." invmScope="GLOBAL">
+			<actions mep="OneWay">
+				<action name="print-before" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="DistributionService received Message"/>
+				</action>
+			</actions>
+		</service>
+	</services>
+
+</jbossesb>

@@ -1,0 +1,350 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="foutafhandeling">
+
+	<!--  -->
+	<!--  -->
+	<!-- START -->
+	<!--  -->
+	<!--  -->
+	
+	<start-state name="start">
+		<transition to="Registreer fout"></transition>
+	</start-state>
+
+	<node name="Registreer fout">
+		<action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				foutafhandelingRegistreerFoutAction
+			</bean>
+		</action><transition to="controleer input"></transition>
+	</node>
+
+	<node name="controleer input">
+		<action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				foutafhandelingControleerInputAction
+			</bean>
+		</action>
+		<transition to="bepaal beheerder actie"></transition>
+	</node>
+
+	<decision name="bepaal beheerder actie">
+		<transition to="Registreer resolutie" name="nee"></transition>
+		<transition to="Beheerder actie" name="ja">
+			<condition expression="#{indicatieBeheerder}"></condition>
+		</transition>
+	</decision>
+
+	<!--  -->
+	<!--  -->
+	<!-- BEHEERDER -->
+	<!--  -->
+	<!--  -->
+	
+	<task-node name="Beheerder actie">
+		<task name="foutafhandeling">
+			<assignment pooled-actors="beheer"></assignment>
+		</task>
+		<transition to="verwerk beheerder input" name="ok"></transition>
+	</task-node>
+
+
+	<node name="verwerk beheerder input">
+		<action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				foutafhandelingVerwerkBeheerderKeuzeAction
+			</bean>
+		</action>	
+		<transition to="Registreer resolutie"></transition>
+	</node>
+
+	<node name="Registreer resolutie">
+		<action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				foutafhandelingRegistreerResolutieAction
+			</bean>
+		</action>	
+		<transition to="fork5"></transition>
+	</node>
+
+	<!--  -->
+	<!--  -->
+	<!-- BERICHTEN -->
+	<!--  -->
+	<!--  -->
+
+
+	<fork name="fork5">
+		<transition to="bepaal versturen pf" name="pf"></transition>
+		<transition to="bepaal versturen blokkering" name="deblokkering"></transition>
+		<transition to="bepaal versturen antwoord" name="antwoord"></transition>
+	</fork>
+
+	<!--  -->
+	<!-- PF01 -->
+	<!--  -->
+
+	<decision name="bepaal versturen pf">
+		<transition to="join5" name="nee"></transition>
+		<transition to="maak pf" name="ja">
+			<condition expression="#{indicatiePf}"></condition>
+		</transition>
+	</decision>
+
+    <node name="maak pf">
+        <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+            <bean>
+                foutafhandelingMaakPfAction
+            </bean>
+        </action>
+        <transition to="bepaal versturen vb01" name="VOSPG: pf (notify)">
+            <action class="nl.moderniseringgba.isc.jbpm.actionhandler.EsbNotifier">
+                <esbServiceName>
+                    VOSPG-Outbound
+                </esbServiceName>
+                <esbCategoryName>
+                    ISC
+                </esbCategoryName>
+                <bpmToEsbVars>
+                    <mapping bpm="pfBericht" esb="BODY_CONTENT"></mapping>
+                </bpmToEsbVars>
+            </action>
+        </transition>
+    </node>
+
+	<decision name="bepaal versturen vb01">
+		<transition to="join5" name="nee"></transition>
+		<transition to="maak vb01" name="ja">
+			<condition expression="#{indicatieVb01}"></condition>
+		</transition>
+	</decision>
+	
+    <node name="maak vb01">
+        <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+            <bean>
+                foutafhandelingMaakVb01Action
+            </bean>
+        </action>
+        <transition to="join5" name="VOSPG: vb01 (notify)">
+            <action class="nl.moderniseringgba.isc.jbpm.actionhandler.EsbNotifier">
+                <esbServiceName>
+                    VOSPG-Outbound
+                </esbServiceName>
+                <esbCategoryName>
+                    ISC
+                </esbCategoryName>
+                <bpmToEsbVars>
+                    <mapping bpm="vb01Bericht" esb="BODY_CONTENT"></mapping>
+                </bpmToEsbVars>
+            </action>
+        </transition>
+    </node>
+
+	<!--  -->
+	<!-- DEBLOKKEREN -->
+	<!--  -->
+
+	<decision name="bepaal versturen blokkering">
+		<transition to="join5" name="nee"></transition>
+		<transition to="maak deblokkering" name="ja">
+			<condition expression="#{indicatieDeblokkering}"></condition>
+			<script>
+				<expression>
+					deblokkerenFunctioneleStap="foutafhandeling.deblokkeren.stap";
+					deblokkerenHerhalingTimeout=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("brp.timeout");
+					deblokkerenHerhalingMaxHerhalingen=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsInteger("brp.herhalingen");
+				</expression>
+				<variable name='deblokkerenFunctioneleStap' access='write' />
+				<variable name='deblokkerenHerhalingTimeout' access='write' />
+				<variable name='deblokkerenHerhalingMaxHerhalingen' access='write' />
+			</script>			
+		</transition>
+	</decision>
+	
+	<node name="maak deblokkering">
+		<action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				foutafhandelingMaakDeblokkeringAction
+			</bean>
+		</action>
+		<transition to="BRP: deblokkeren">
+			<script>
+				<expression>
+					deblokkerenDueDate = nl.moderniseringgba.isc.jbpm.TimerUtil.getDueDate(deblokkerenHerhalingTimeout);
+				</expression>
+				<variable name='deblokkerenDueDate' access='write' />
+				<variable name='deblokkerenHerhalingTimeout' access='read' />
+			</script>
+		</transition>
+	</node>
+
+	<node name="BRP: deblokkeren">
+		<action class="org.jboss.soa.esb.services.jbpm.actionhandlers.EsbActionHandler">
+			<esbServiceName>
+				Sync-Outbound
+			</esbServiceName>
+			<esbCategoryName>
+				ISC
+			</esbCategoryName>
+			<bpmToEsbVars>
+				<mapping bpm="deblokkeringVerzoekBericht" esb="BODY_CONTENT"></mapping>
+			</bpmToEsbVars>
+			<esbToBpmVars>
+				<mapping bpm="deblokkeringAntwoordBericht" esb="BODY_CONTENT"></mapping>
+			</esbToBpmVars>			
+		</action>
+		<timer name="herhaalbericht" transition="timeout" duedate="#{deblokkerenDueDate}"></timer>
+		<transition to="bepaal deblokkeren antwoord"></transition>
+		<transition to="Controleer herhalingen deblokkeren" name="timeout">
+			<script>
+				<expression>
+				    if(deblokkerenHerhaling == null) {
+				    	deblokkerenHerhaling = 1;
+				    } else {
+				        deblokkerenHerhaling = deblokkerenHerhaling + 1;
+				    }
+				</expression>
+				<variable name='deblokkerenHerhaling' access='read,write' />
+			</script>
+		</transition>
+	</node>
+
+	<decision name="Controleer herhalingen deblokkeren">
+		<transition to="maak deblokkering"></transition>
+		<transition to="foutafhandeling deblokkeren" name="maximum">
+			<condition expression="#{deblokkerenHerhaling &gt; deblokkerenHerhalingMaxHerhalingen}"></condition>
+			<script>
+				<expression>
+				    deblokkerenFoutafhandelingFout="foutafhandeling.deblokkeren.maximumherhalingen";
+				    deblokkerenFoutafhandelingFoutmelding=null;
+				    
+					deblokkerenFoutafhandelingIndicatieBeheerder=true;
+					deblokkerenFoutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					deblokkerenFoutafhandelingPaden.put("end", "Deblokkeren negeren", false, false, false);
+					deblokkerenFoutafhandelingPaden.put("restart", "Opnieuw proberen te deblokkeren", false, false, false);
+				</expression>
+				<variable name='deblokkerenFoutafhandelingFout' access='write' />
+				<variable name='deblokkerenFoutafhandelingFoutmelding' access='write' />
+				<variable name='deblokkerenFoutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='deblokkerenFoutafhandelingPaden' access='write' />
+			</script>		
+		</transition>
+	</decision>
+
+	<decision name="bepaal deblokkeren antwoord">
+		<transition to="Controleer deblokkeren antwoord">
+			<condition expression="#{deblokkeringAntwoordBericht.berichtType == 'DeblokkeringAntwoord'}"></condition>
+		</transition>
+		<transition to="foutafhandeling deblokkeren" name="onverwacht bericht">
+			<script>
+				<expression>
+				    deblokkerenFoutafhandelingFout="foutafhandeling.deblokkeren.onverwachtbericht";
+				    deblokkerenFoutafhandelingFoutmelding=deblokkeringAntwoordBericht.toString();
+				    
+					deblokkerenFoutafhandelingIndicatieBeheerder=true;
+					deblokkerenFoutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					deblokkerenFoutafhandelingPaden.put("end", "Deblokkeren negeren", false, false, false);
+					deblokkerenFoutafhandelingPaden.put("restart", "Opnieuw proberen te deblokkeren", false, false, false);
+				</expression>
+				<variable name='deblokkerenFoutafhandelingFout' access='write' />
+				<variable name='deblokkerenFoutafhandelingFoutmelding' access='write' />
+				<variable name='deblokkeringAntwoordBericht' access='read' />
+				<variable name='deblokkerenFoutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='deblokkerenFoutafhandelingPaden' access='write' />
+			</script>		
+		</transition>
+	</decision>
+
+	<decision name="Controleer deblokkeren antwoord">
+		<handler class="nl.moderniseringgba.isc.jbpm.spring.SpringDecisionHandler" config-type="bean">
+		   <bean>
+		      foutafhandelingControleerDeblokkeringAntwoordDecision
+		   </bean>
+		</handler>	
+		<transition to="join5"></transition>
+		<transition to="foutafhandeling deblokkeren" name="fout">
+			<script>
+				<expression>
+				    deblokkerenFoutafhandelingFout="foutafhandeling.deblokkeren.fout";
+				    deblokkerenFoutafhandelingFoutmelding=deblokkeringAntwoordBericht.getToelichting();
+				    
+					deblokkerenFoutafhandelingIndicatieBeheerder=true;
+					deblokkerenFoutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+					deblokkerenFoutafhandelingPaden.put("end", "Deblokkeren negeren", false, false, false);
+					deblokkerenFoutafhandelingPaden.put("restart", "Opnieuw proberen te deblokkeren", false, false, false);
+				</expression>
+				<variable name='deblokkerenFoutafhandelingFout' access='write' />
+				<variable name='deblokkerenFoutafhandelingFoutmelding' access='write' />
+				<variable name='deblokkeringAntwoordBericht' access='read' />
+				<variable name='deblokkerenFoutafhandelingIndicatieBeheerder' access='write' />
+				<variable name='deblokkerenFoutafhandelingPaden' access='write' />
+			</script>
+		</transition>
+	</decision>
+
+	<process-state name="foutafhandeling deblokkeren">
+		<sub-process name="foutafhandeling" binding="late"></sub-process>
+		<variable access="read" mapped-name="functioneleStap" name="deblokkerenFunctioneleStap"></variable>
+		<variable access="read" mapped-name="fout" name="deblokkerenFoutafhandelingFout" ></variable>
+		<variable access="read" mapped-name="foutmelding" name="deblokkerenFoutafhandelingFoutmelding"></variable>
+		<variable access="read" mapped-name="indicatieBeheerder" name="deblokkerenFoutafhandelingIndicatieBeheerder"></variable>
+		<variable access="write" mapped-name="restart" name="deblokkerenRestart"></variable>
+		<variable access="read" mapped-name="foutafhandelingPaden" name="deblokkerenFoutafhandelingPaden"></variable>
+		<transition to="restart deblokkeren"></transition>
+	</process-state>	
+	
+	<decision name="restart deblokkeren">
+		<transition to="join5">
+			<condition expression="#{deblokkerenRestart == 'end'}"></condition>
+		</transition>
+		<transition to="maak deblokkering" name="opnieuw">
+			<condition expression="#{deblokkerenRestart == 'restart'}"></condition>
+		</transition>
+	</decision>
+	
+	<!--  -->
+	<!-- ANTWOORD -->
+	<!--  -->
+
+	<decision name="bepaal versturen antwoord">
+		<transition to="join5" name="nee"></transition>
+		<transition to="maak antwoord" name="ja">
+			<condition expression="#{indicatieAntwoord}"></condition>
+		</transition>
+	</decision>
+	
+	<node name="maak antwoord">
+		<action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+			<bean>
+				foutafhandelingMaakAntwoordAction
+			</bean>
+		</action>
+		<transition to="join5">
+ 			<action class="nl.moderniseringgba.isc.jbpm.actionhandler.EsbNotifier">
+                <esbServiceName>
+                    BRP-Outbound
+                </esbServiceName>
+                <esbCategoryName>
+                    ISC
+                </esbCategoryName>
+                <bpmToEsbVars>
+                    <mapping bpm="brpAntwoordBericht" esb="BODY_CONTENT"></mapping>
+                </bpmToEsbVars>
+            </action>
+		</transition>
+	</node>
+
+	<!--  -->
+	<!--  -->
+	<!-- END -->
+	<!--  -->
+	<!--  -->
+
+	<join name="join5">
+		<transition to="end"></transition>
+	</join>
+
+	<end-state name="end"></end-state>
+
+</process-definition>

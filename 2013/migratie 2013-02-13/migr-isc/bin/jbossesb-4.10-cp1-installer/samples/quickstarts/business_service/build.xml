@@ -1,0 +1,76 @@
+<project name="Quickstart_business_service" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	
+	<!-- must be included before import to take effect -->
+	<property name="quickstart.classes.excludes" value="**/HelloWorldBean.class"/>
+			
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<property name="ejb.jar.name" value="${basedir}/build/business_service-ejb.jar"/>
+	<property name="additional.deploys" value="${ejb.jar.name}"/>
+
+   <property name="classes" value="build/classes"/>
+	
+	<target name="config">
+		<path id="quickstart-dependencies-classpath">
+			<fileset dir="${org.jboss.esb.server.home}/client" >
+				<include name="jbossmq-client.jar"/>
+				<include name="jboss-ejb3-client.jar"/>
+				<include name="jboss-aop-jdk50-client.jar"/>
+				<include name="jboss-annotations-ejb3.jar"/>
+				<include name="jboss-ejb3x.jar"/>
+				<include name="jboss-aspect-jdk50-client.jar"/>
+				<include name="jbossmq-client.jar"/>
+				<include name="jboss-messaging-client.jar"/>
+			</fileset>
+		</path>
+	</target>
+	
+	<target name="quickstart-specific-dependencies" depends="assert-ejb3-available"/>
+
+	<target name="run" depends="compile,config">
+			<echo>Launching Quickstart in standalone mode...</echo>
+			<java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">
+				<arg value="${basedir}/jboss-esb.xml" />
+				<classpath refid="exec-classpath" />
+			</java>
+	</target>
+
+	<target name="quickstart-specific-assemblies">
+		<jar destfile="${ejb.jar.name}">
+			<fileset dir="build/classes" includes="org/jboss/tutorial/stateless/bean/*.class"/>
+		</jar>
+	</target>
+	
+   <target name="testaspojo" depends="compile" 
+	description="tests a pojo">
+      <java classname="org.jboss.tutorial.stateless.client.Client" fork="yes" dir=".">
+         <arg value="-pojo"/>
+			<classpath refid="exec-classpath" />
+      </java>
+   </target>
+
+   <target name="testasejb" depends="compile"
+	description="tests an EJB">
+      <java classname="org.jboss.tutorial.stateless.client.Client" fork="yes" dir=".">
+         <arg value="-ejb"/>
+			<classpath refid="exec-classpath" />
+      </java>
+   </target>
+
+   <target name="runtest" depends="compile"
+		description="runs Test JMS Sender">
+      <echo>Runs Test JMS Sender</echo>
+      <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.businessservice.test.SendJMSMessage" failonerror="true">
+         <arg value="Your Name"/>
+			<classpath refid="exec-classpath" />
+      </java>
+   </target>
+	
+</project>

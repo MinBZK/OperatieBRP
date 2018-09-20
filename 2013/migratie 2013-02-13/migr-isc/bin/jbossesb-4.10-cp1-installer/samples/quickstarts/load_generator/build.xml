@@ -1,0 +1,79 @@
+<project name="Quickstart_load_generator" default="runtest" basedir=".">
+
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml" />
+
+	<target name="quickstart-specific-clean">
+		<delete dir="load_generator_classes"/>
+	</target>
+
+	<target name="compile-churn" depends="compile,jbm-load-xml,jbmq-load-xml,hornetq-load-xml" description="compile groovy to bytecode">
+		<taskdef name="groovyc" classname="org.codehaus.groovy.ant.Groovyc" classpathref="exec-classpath" />
+		<mkdir dir="load_generator_classes" />
+		<copy todir="load_generator_classes" overwrite="true">
+			<fileset dir="${basedir}/scripts/">
+				<include name="*.xml" />
+				<include name="*.properties" />
+			</fileset>
+			<fileset dir="${basedir}"> 
+				<include name="log4j.xml" /> 
+			</fileset>
+		</copy>
+		<copy file="${basedir}/scripts/${load-xml}" tofile="load_generator_classes/load.xml" overwrite="true" />
+			
+		<groovyc destdir="load_generator_classes" srcdir="${basedir}/scripts" includes="*.groovy" classpathref="exec-classpath" />
+	</target>
+
+	<target name="jbm-load-xml" if="messaging.present">
+		<property name="load-xml" value="load.xml.default" />
+	</target>
+	<target name="jbmq-load-xml" if="jbossmq.present">
+		<property name="load-xml" value="load.xml.default" />
+	</target>
+	<target name="hornetq-load-xml" if="hornetq.present">
+		<property name="load-xml" value="load.xml.hornetq" />
+	</target>
+	
+	<target name="load-agent" depends="compile-churn" description="Test the load agent script/settings">
+		<java classname="JmsLoadAgent" >
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<classpath refid="exec-classpath" />
+			<classpath location="load_generator_classes" />
+			<arg value="load_generator_classes/load.xml" />
+		</java>
+	</target>
+
+	<target name="load-report" depends="compile-churn" description="Test the report agent script/settings">
+		<java classname="LoadReport" fork="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<classpath location="build/classes"/>
+			<classpath refid="exec-classpath"/>
+			<classpath location="load_generator_classes"/>
+			<arg value="load_generator_classes/load.xml"/>
+		</java>
+	</target>
+
+        <target name="load-report-secure" depends="compile-churn" description="Test the report agent script/settings">
+                <java classname="LoadReport" fork="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+                        <classpath location="."/>
+                        <classpath location="build/classes"/>
+                        <classpath refid="exec-classpath"/>
+                        <classpath location="load_generator_classes"/>
+                        <arg line="load_generator_classes/load.xml admin admin"/>
+                </java>
+        </target>
+
+	<target name="runtest" depends="compile-churn,load-agent,load-report" description="Run the agent in background thread and report script in console">
+		
+	</target>
+
+	<target name="runtest-secure" depends="compile-churn,load-agent,load-report-secure" description="Run the agent in background thread and report script in console">
+	</target>
+
+</project>

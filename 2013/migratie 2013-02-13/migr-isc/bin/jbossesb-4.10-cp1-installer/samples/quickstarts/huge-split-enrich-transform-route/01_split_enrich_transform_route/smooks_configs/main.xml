@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:edi="http://www.milyn.org/xsd/smooks/edi-1.1.xsd">
+
+    <!--
+    Filter the message using the SAX Filter (i.e. not DOM, so no
+    intermediate DOM, so we can process huge messages...
+    -->
+    <params>
+        <param name="stream.filter.type">SAX</param>
+    </params>
+
+    <!-- Configure the reader for the EDI message... -->
+    <edi:reader mappingModel="/smooks_configs/parse/edi-to-xml-order-mapping.xml" />
+
+    <!-- Import datasource configs... -->
+    <import file="database/datasources.xml" />
+
+    <!-- Import reference/enrichment data configs - products, accounts etc... -->
+    <import file="database/ref-data.xml" />
+
+    <!-- Import config for binding order and order-item data into memory... -->
+    <import file="bindings.xml" />
+
+    <!-- Import config for routing order item XML to the "02_Low_Price" Service... -->
+    <import file="routing/route-to-02_Low_Price_Service.xml" />
+
+    <!-- Import config for routing order item Java Objects to the "03_High_Price" Service... -->
+    <import file="routing/route-to-03_High_Price_Service.xml" />
+
+    <!-- Import config for routing order item Java Objects to the "04_Reptiles_notify_webservice_proxy" Service... -->
+    <import file="routing/route-to-04_Reptiles_notify_webservice_proxy.xml" />
+
+    <!-- Import config for routing order items to the database... -->
+    <import file="routing/route-to-05_Database.xml" />
+
+</smooks-resource-list>

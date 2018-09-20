@@ -1,0 +1,82 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="quickstartEsbChannelProcess">
+                  <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_security_jbpm_Request_esb_Process" selector="serviceName='HelloWorldPubService'" />
+              </jms-bus>
+
+             <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_security_jbpm_Request_esb" selector="serviceName='HelloWorldPubService'" />
+              </jms-bus>
+
+             <jms-bus busid="quickstartEsbChannel2">
+                  <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_security_jbpm_Request_esb2"/>
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+      
+      <services>
+
+  		<service category="ESBServiceSample" name="HelloWorldStartServiceProcess" description="Hello world ESB Service Process">
+			<security moduleName="jbossesb" runAs="adminRole"/>
+
+	           <listeners>
+					<jms-listener name="helloWorldProcess" busidref="quickstartEsbChannelProcess" maxThreads="1" />
+				</listeners>
+
+            <actions mep="OneWay">
+
+				<action name="action" class="org.jboss.soa.esb.samples.quickstart.securityjbpm.MyListenerAction" process="displayMessage"/> 
+
+				<action name="create_new_process_instance" class="org.jboss.soa.esb.services.jbpm.actions.BpmProcessor">
+					<property name="command" value="StartProcessInstanceCommand" />
+					<property name="process-definition-name" value="helloWorld"/>   
+					<property name="esbToBpmVars">
+						<mapping esb="BODY_CONTENT" bpm="request" />
+                    </property> 
+				</action>            
+            </actions>
+
+        </service>
+
+        <service category="ESBServiceSample" name="HelloWorldService1" description="Hello world ESB Service">
+			<security moduleName="jbossesb" />
+
+            <listeners>
+                <jms-listener name="helloWorld" busidref="quickstartEsbChannel" maxThreads="1" />
+            </listeners>
+
+            <actions mep="OneWay">
+
+				<action name="action" class="org.jboss.soa.esb.samples.quickstart.securityjbpm.MyListenerAction" process="displayMessage"/> 
+
+				<action name="routeAction" class="org.jboss.soa.esb.actions.StaticWiretap">
+					<property name="destinations">
+						<route-to service-category="ESBServiceSample" service-name="HelloWorldService2"/>
+					</property>
+				</action>
+
+            </actions>
+        </service>
+
+       <service category="ESBServiceSample" name="HelloWorldService2" description="Hello world ESB Service"> 
+		<security moduleName="jbossesb" />
+
+            <listeners>
+                <jms-listener name="helloWorld2" busidref="quickstartEsbChannel2" maxThreads="1" />
+            </listeners>
+
+			<actions mep="OneWay">
+				<action name="action" class="org.jboss.soa.esb.samples.quickstart.securityjbpm.MyListenerAction" process="displayMessage"/> 
+			</actions>
+
+		</service>
+	</services>
+     
+</jbossesb>

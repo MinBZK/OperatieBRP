@@ -1,0 +1,28 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:ftl="http://www.milyn.org/xsd/smooks/freemarker-1.1.xsd"
+                      xmlns:esbr="http://www.jboss.org/xsd/jbossesb/smooks/routing-1.0.xsd">
+
+    <!-- Use the SAX filter so we can process huge messages... -->
+    <params>
+        <param name="stream.filter.type">SAX</param>
+    </params>
+
+    <!-- Capture data from the incoming message into DOM models.  These are then avaiable to templating etc... -->
+    <resource-config selector="Order,OrderLines">
+        <resource>org.milyn.delivery.DomModelCreator</resource>
+    </resource-config>
+
+    <!-- For each "OrderLines" fragment, apply a template to the captured DOM models. Bind the templating result
+         into the bean context under a beanId of "orderLinesFrag" ... -->
+    <ftl:freemarker applyOnElement="OrderLines">
+        <ftl:template>/orderLinesFrag.ftl</ftl:template>
+        <ftl:use>
+            <ftl:bindTo id="orderLinesFrag" />
+        </ftl:use>
+    </ftl:freemarker>
+
+    <!-- Route the "orderLinesFrag" bean to the ReceiverService... -->
+    <esbr:routeBean beanIdRef="orderLinesFrag" toServiceCategory="FirstServiceESB" toServiceName="ReceiverService" routeOnElement="OrderLines" />
+
+</smooks-resource-list>

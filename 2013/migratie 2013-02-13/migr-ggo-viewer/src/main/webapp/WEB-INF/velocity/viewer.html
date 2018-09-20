@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+<html lang="nl">
+<head>
+	<title>GGO Viewer</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+	<link rel="stylesheet" href="css/viewer.css">
+	<link rel="stylesheet" href="css/uitlijnen.css">
+	<link rel="stylesheet" href="css/fineuploader.css">
+	<script language="javascript" type="text/javascript" src="js/IE-hacks.js"></script>
+	<script language="javascript" type="text/javascript" src="js/lib/jquery-1.8.3.min.js" ></script>
+	<script language="javascript" type="text/javascript" src="js/lib/jquery-ui.min.js"></script>
+	<script language="javascript" type="text/javascript" src="js/lib/jquery.fineuploader-3.0.min.js"></script>
+	<script language="javascript" type="text/javascript" src="js/lib/underscore-min.js"></script>
+	<script language="javascript" type="text/javascript" src="js/Overzicht.js"></script>
+	<script language="javascript" type="text/javascript" src="js/Lo3Persoonslijst.js"></script>
+	<script language="javascript" type="text/javascript" src="js/Precondities.js"></script>
+	<script language="javascript" type="text/javascript" src="js/Vergelijking.js"></script>
+	<script language="javascript" type="text/javascript" src="js/BcmSignaleringen.js"></script>
+	<script language="javascript" type="text/javascript" src="js/BrpPersoonslijst.js"></script>
+	<script language="javascript" type="text/javascript" src="js/BrpRelatie.js"></script>
+	<script language="javascript" type="text/javascript" src="js/BrpActie.js"></script>
+	<script language="javascript" type="text/javascript" src="js/viewer.js"></script>
+	<script language="javascript" type="text/javascript" src="js/ViewerUtils.js"></script>
+	<script language="javascript" type="text/javascript" src="js/Lo3ElementMap.js"></script>
+</head>
+<body>
+<div id="switch">
+<a href="#" id="vertical" class="vertical">Kantel weergave</a>
+<a href="#" id="historisch" class="historisch">#if ( ! $demoMode )Toon / verberg historisch#end</a>
+<a href="#" id="ongeldig" class="ongeldig">#if ( ! $demoMode )Toon / verberg onjuist#end</a>
+<a href="logout" id="logout">#if ( ! $demoMode )Log uit#end</a>
+</div>
+
+<div class="selectie">
+#if ( ! $demoMode )
+	<form id="zoekForm" action="zoek">
+		<label for="aNummer">Voer a-nummer in: </label>
+		<input type="text" id="aNummer" name="aNummer" />
+		<input type="submit" value="Zoek" />
+		<div id="loadingSubmitDiv" class="loading-spinner"></div>
+	</form>
+	Of selecteer bestand (*.txt, *.xls, *.GBA): 
+	<div id="lg01File"></div>
+#else
+    <div id="defaultPLen">
+#foreach ($pl in $defaultPlen)
+		<a href="#" onclick="laadBestand('$FilenameUtils.separatorsToUnix($pl.getAbsolutePath())');return false;" class="laadBestand">$pl.getName()</a><br/>
+#end
+	</div>
+    <div id="loadingPLDiv" class="loading-spinner"></div>
+#end
+</div>
+#if (! $demoMode )
+<div id="foutmelding"><table id="foutmeldingen"></table></div>
+#end
+<div id="content">
+</div>
+</body>
+</html>

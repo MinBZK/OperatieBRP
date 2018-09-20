@@ -1,0 +1,312 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>nl.moderniseringgba.migratie</groupId>
+		<artifactId>migr-voisc</artifactId>
+		<version>0.0.33</version>
+		<relativePath>../migr-voisc</relativePath>
+	</parent>
+	<groupId>nl.moderniseringgba.migratie.voisc</groupId>
+	<artifactId>migr-voisc-runtime</artifactId>
+	<name>Migr - VOISC - Runtime</name>
+	<packaging>jar</packaging>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>copy-dependencies</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>copy-dependencies</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                            <overWriteIfNewer>true</overWriteIfNewer>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>2.6</version>
+            </plugin>
+            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptors>
+                        <descriptor>src/main/assembly/zip.xml</descriptor>
+                        <descriptor>src/main/assembly/zipMailbox.xml</descriptor>
+                    </descriptors>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>make-assembly</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+<!--             <plugin> -->
+<!--                 <artifactId>maven-assembly-plugin</artifactId> -->
+<!--                 <configuration> -->
+<!--                     <descriptors> -->
+<!--                         <descriptor>src/main/assembly/zipMailbox.xml</descriptor> -->
+<!--                     </descriptors> -->
+<!--                 </configuration> -->
+<!--                 <executions> -->
+<!--                     <execution> -->
+<!--                         <id>make-assembly</id> -->
+<!--                         <phase>package</phase> -->
+<!--                         <goals> -->
+<!--                             <goal>single</goal> -->
+<!--                         </goals> -->
+<!--                     </execution> -->
+<!--                 </executions> -->
+<!--             </plugin> -->
+        </plugins>
+        <pluginManagement>
+            <plugins>
+                <!--This plugin's configuration is used to store Eclipse m2e settings 
+                    only. It has no influence on the Maven build itself. -->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-dependency-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.4,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>
+                                                copy-dependencies
+                                            </goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore />
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+		       <plugin>
+		           <groupId>org.apache.maven.plugins</groupId>
+		           <artifactId>maven-resource-plugin</artifactId>
+		           <version>2.4.3</version>
+		       </plugin>
+		   </plugins>
+        </pluginManagement>
+        <resources>
+	        <resource>
+	            <directory>src/main/resources</directory>
+	            <excludes>
+	                <exclude>**/*.jks</exclude>
+	                <exclude>**/*.sql</exclude>
+	                <exclude>*.sh</exclude>
+	                <exclude>config.properties</exclude>
+	                <exclude>example-config.properties</exclude>
+	            </excludes>
+	        </resource>
+	    </resources>
+    </build>
+	<dependencies>
+		<!-- Project -->
+		<dependency>
+			<groupId>nl.moderniseringgba.migratie.isc</groupId>
+			<artifactId>migr-isc-bericht</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>nl.moderniseringgba.migratie.voisc</groupId>
+			<artifactId>migr-voisc-db</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>nl.moderniseringgba.migratie.isc</groupId>
+			<artifactId>migr-isc-db</artifactId>
+		</dependency>
+		<!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jms</artifactId>
+			<version>3.1.0.RELEASE</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-orm</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+		</dependency>
+		
+		<!-- JPA/Hibernate -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+		</dependency>
+		
+		<!-- PostgreSQL JDBC -->
+		<dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>            
+        </dependency>
+  		
+		<!-- Javax JMS --> 
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>jms-api</artifactId>
+		</dependency>
+
+		<!-- JBoss Queueing -->
+		<dependency>
+			<groupId>org.jboss.naming</groupId>
+			<artifactId>jnp-client</artifactId>
+			<version>5.0.5.Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.aop</groupId>
+			<artifactId>jboss-aop</artifactId>
+			<version>2.1.6.GA</version>
+		</dependency>
+		<dependency>
+			<groupId>jboss.messaging</groupId>
+			<artifactId>jboss-messaging</artifactId>
+			<version>1.4.3.GA</version>
+		</dependency>
+		<dependency>
+			<groupId>org.jboss.remoting</groupId>
+			<artifactId>jboss-remoting</artifactId>
+			<version>2.5.1</version>
+		</dependency>		
+		<dependency>
+			<groupId>oswego-concurrent</groupId>
+			<artifactId>concurrent</artifactId>
+			<version>1.3.4</version>
+		</dependency>
+		<dependency>
+			<groupId>jboss</groupId>
+			<artifactId>jboss-serialization</artifactId>
+			<version>4.2.2.GA</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.quartz-scheduler</groupId>
+		    <artifactId>quartz</artifactId>
+		    <version>1.8.5</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context-support</artifactId>
+			<version>3.1.0.RELEASE</version>
+		</dependency>
+
+		<dependency>
+		    <groupId>commons-dbcp</groupId>
+		    <artifactId>commons-dbcp</artifactId>
+		    <version>1.4</version>
+		</dependency>
+		<!-- TEST -->
+		<!-- TEST -->
+		<!-- TEST -->
+
+		<!-- junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>		
+		<!-- HyperSQL als in memory alternatief voor PostgreSQL t.b.v. unit-testen -->
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- mock queue -->
+		<dependency>
+			<groupId>com.mockrunner</groupId>
+			<artifactId>mockrunner</artifactId>
+			<version>0.3.1</version>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Voor de test mailboxserver -->
+		<dependency>
+			<groupId>gbav</groupId>
+			<artifactId>core</artifactId>
+			<version>1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>gbav</groupId>
+			<artifactId>spg-test</artifactId>
+			<version>1.0</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<dependency>
+			<groupId>com.h2database</groupId>
+			<artifactId>h2</artifactId>
+			<version>1.3.168</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- JMS --> 
+		<dependency>
+			<groupId>javax.jms</groupId>
+			<artifactId>jms-api</artifactId>
+			<version>1.1-rev-1</version>
+		</dependency>
+	</dependencies>
+	<!-- This version works for jboss jms client jars and hibernate.. -->
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>3.6.0.GA</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
+</project>
+

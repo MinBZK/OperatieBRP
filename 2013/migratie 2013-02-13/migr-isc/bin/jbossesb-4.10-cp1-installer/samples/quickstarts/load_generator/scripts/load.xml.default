@@ -1,0 +1,34 @@
+<load-script log-directory="/tmp/esb-load-logs">
+	<load-generators batch-count="20">
+		<load-generator 
+		    payload="load_generator_classes/payload.xml"
+			queue="queue/quickstart_load_generator_Request_gw" 
+			msg-count="200"
+			batch-interval-seconds="1"
+			 />
+		<load-generator 
+		    payload="load_generator_classes/payload.xml"
+			queue="queue/quickstart_load_generator_Request_gw" 
+			msg-count="200"
+			batch-interval-seconds="1"
+			 />
+	</load-generators>
+	<reporters>
+	<jms-reporters tps-interval-seconds="1" fastest-queue-mbean-name="jboss.esb.quickstart.destination:service=Queue,name=quickstart_load_generator_Request_esb" >
+		<jms-reporter
+			queue-mbean-name="jboss.esb.quickstart.destination:service=Queue,name=quickstart_load_generator_Request_esb" />
+		<jms-reporter
+			queue-mbean-name="jboss.esb.quickstart.destination:service=Queue,name=quickstart_load_generator_Request_esb2" />
+	</jms-reporters>
+	<service-reporters>
+		<service-reporter 
+			service-category="LoadServiceCategory"
+			service-name="DummyJMSLoad"
+			esb-archive-name="Quickstart_load_generator.esb" />
+		<service-reporter 
+			service-category="LoadServiceCategory"
+			service-name="DummyJMSLoad2"
+			esb-archive-name="Quickstart_load_generator.esb" />
+	</service-reporters>
+	</reporters>
+</load-script>

@@ -1,0 +1,154 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+        <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+      
+           <jms-bus busid="recipientlistCBRChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsrecipientlist_cbr_Request" />
+            </jms-bus>
+                
+            <jms-bus busid="recipientlistChannel1">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsrecipientlist_B" />
+            </jms-bus>   
+
+            <jms-bus busid="recipientlistChannel2">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsrecipientlist_C" />
+            </jms-bus>
+
+           <jms-bus busid="recipientlistChannel3">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsrecipientlist_D" />
+            </jms-bus>
+
+           <jms-bus busid="recipientlistChannel4">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsrecipientlist_A" />
+            </jms-bus>
+
+            <jms-bus busid="recipientlistStaticRouterChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsrecipientlist_static_router_Request" />
+            </jms-bus>
+
+            <jms-bus busid="recipientlistEsbChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsrecipientlist_Esb_Request" />
+            </jms-bus>
+            
+            <!-- Note that only queues that are listened to (input) require jms-provider 
+                 definitions. jms-provider definitions are not required for these queues as 
+                 the quickstart only notifies the queues (output): queue/qsrecipientlist_regular_Request, 
+                 queue/qsrecipientlist_1_Request, queue/qsrecipientlist_2_Request -->
+           
+          </jms-provider>
+      </providers>
+      
+      <services>
+
+        <!-- CBR Service -->
+        <service category="recipientlistCBRServices" name="FirstRecipientlistCBRServiceESB" description="ESB Listener" >
+                <listeners>
+                    <jms-listener name="the-CBR-gateway" busidref="recipientlistCBRChannel" is-gateway="true" />
+                    <jms-listener name="XPathContentBasedRouter" busidref="recipientlistEsbChannel"/>  
+                </listeners>
+                <actions mep="OneWay">
+                    <action class="org.jboss.soa.esb.actions.ContentBasedRouter" name="ContentBasedRouter">
+                       <property name="ruleSet" value="MyESBRules-XPath.drl"/>
+                        <property name="ruleLanguage" value="XPathLanguage.dsl"/>
+                        <property name="ruleReload" value="true"/>
+                        <property name="destinations">
+                            <route-to destination-name="regular" service-category="recipientlistCategory1" service-name="regularService"/>
+                            <route-to destination-name="extra"  service-category="recipientlistCategory2"  service-name="ExtraStaticListener"/>
+                       </property>
+                    </action>
+                </actions>
+        </service>
+
+        <service category="recipientlistCategory1" name="regularService" description="regular service">
+            <listeners>
+                 <jms-listener name="native1" busidref="recipientlistChannel1"/> 
+            </listeners>
+            <actions mep="OneWay">
+            
+            <action name="notificationAction" class="org.jboss.soa.esb.actions.Notifier">
+                    <property name="okMethod" value="notifyOK" />
+                    <property name="notification-details">
+                        <NotificationList type="OK">
+                            <target class="NotifyConsole" />
+                            <target class="NotifyQueues">
+								<messageProp name="quickstart" value="regular_output" />
+                                <queue jndiName="queue/qsrecipientlist_regular_Request">
+                               </queue>
+                           </target>
+                       </NotificationList>
+                    </property>
+                </action>               
+                <action name="outaction1" class="org.jboss.soa.esb.actions.SystemPrintln" /> 
+            </actions>   
+        </service>
+
+        <service category="recipientlistCategory2" name="ExtraStaticListener" description="Static Router">
+            <listeners>
+                <jms-listener name="test-Gateway" busidref="recipientlistStaticRouterChannel" is-gateway="true"/>  
+                 <jms-listener name="native3" busidref="recipientlistChannel3"/>
+            </listeners>
+            <actions mep="OneWay">
+               <action name="routeAction"  class="org.jboss.soa.esb.actions.StaticRouter">
+                    <property name="destinations">
+                        <route-to service-category="recipientlistCategory1" service-name="regularService" />  
+                        <route-to service-category="recipientlistCategory4" service-name="extraService1" />  
+                        <route-to service-category="recipientlistCategory5" service-name="extraService2" />                    
+                    </property>
+               </action>  
+            </actions>
+        </service>
+     
+        <service category="recipientlistCategory4" name="extraService1" description="extra service1">
+            <listeners>
+                 <jms-listener name="native4" busidref="recipientlistChannel4"/> 
+            </listeners>
+            <actions mep="OneWay">
+            
+            <action name="notificationAction4" class="org.jboss.soa.esb.actions.Notifier">
+                    <property name="okMethod" value="notifyOK" />
+                    <property name="notification-details">
+                        <NotificationList type="OK">
+                            <target class="NotifyConsole" />
+                            <target class="NotifyQueues">
+								<messageProp name="quickstart" value="extra_output1" />
+                                <queue jndiName="queue/qsrecipientlist_1_Request">
+                               </queue>
+                           </target>
+                       </NotificationList>
+                    </property>
+                </action>               
+                <action name="outaction4" class="org.jboss.soa.esb.actions.SystemPrintln" /> 
+            </actions>   
+        </service>
+     
+        <service category="recipientlistCategory5" name="extraService2" description="extra service2">
+            <listeners>
+                 <jms-listener name="native2" busidref="recipientlistChannel2"/> 
+            </listeners>
+            <actions mep="OneWay">
+            
+            <action name="notificationAction42" class="org.jboss.soa.esb.actions.Notifier">
+                    <property name="okMethod" value="notifyOK" />
+                    <property name="notification-details">
+                        <NotificationList type="OK">
+                            <target class="NotifyConsole" />
+                            <target class="NotifyQueues">
+								<messageProp name="quickstart" value="extra_output2" />
+                                <queue jndiName="queue/qsrecipientlist_2_Request">
+                               </queue>
+                           </target>
+                       </NotificationList>
+                    </property>
+                </action>                                       
+                <action name="outaction2" class="org.jboss.soa.esb.actions.SystemPrintln" />
+            </actions>   
+        </service>
+     
+      </services>     
+     
+</jbossesb>

@@ -1,0 +1,34 @@
+package com.jboss.soa.esb.routing.cbr
+
+#list any import classes here.
+import org.jboss.soa.esb.message.Message;
+import org.jboss.soa.esb.message.format.MessageType;
+
+expander XPathLanguage.dsl
+
+#declare any global variables here
+global java.util.List destinations;
+
+rule "Blue Routing Rule using XPATH"	
+	when
+		xpathEquals expr "/order:Order/@statusCode", "0" use namespaces "order=http://org.jboss.soa.esb/Order"
+	then 
+	    Log : "Blue Team";
+		Destination : "blue";		
+end
+
+rule "Red Routing Rule using XPATH"	
+	when
+		xpathEquals expr "/order:Order/@statusCode", "1" use namespaces "order=http://org.jboss.soa.esb/Order"
+	then 
+	    Log : "Red Team";
+		Destination : "red";		
+end
+
+rule "Green Routing Rule using XPATH"	
+	when
+		xpathEquals expr "/order:Order/@statusCode", "2" use namespaces "order=http://org.jboss.soa.esb/Order"
+	then 
+	    Log : "Green Team";
+		Destination : "green";		
+end

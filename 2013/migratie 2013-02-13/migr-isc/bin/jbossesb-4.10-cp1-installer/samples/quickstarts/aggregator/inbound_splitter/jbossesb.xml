@@ -1,0 +1,45 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd">
+
+      <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+             <jms-bus busid="quickstartGwChannel">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Aggregator_Request_GW"/>
+             </jms-bus>
+             <jms-bus busid="quickstartEsbChannel">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Aggregator_Request_ESB"/>
+             </jms-bus>             
+          </jms-provider>
+      </providers>
+      
+      <services>
+          <service 
+        	category="MessageRouting" 
+        	name="SplitterService" 
+        	description="Sends messages to N destinations">
+        	<listeners>        
+        		  <jms-listener name="quickstartGwChannel"
+        			   busidref="quickstartGwChannel"
+        			   is-gateway="true"                            
+        		  />
+              <jms-listener name="quickstartEsbChannel"
+                 busidref="quickstartEsbChannel">                
+	            </jms-listener>
+          </listeners>
+          <actions mep="OneWay">
+             <action name="print-before" class="org.jboss.soa.esb.actions.SystemPrintln">
+                 <property name="message" value="Hello Splitting Router" />
+             </action>
+             <action class="org.jboss.soa.esb.actions.StaticRouter" name="StaticRouter">
+                 <property name="destinations"> <!-- process="split" is the trick -->        		      
+        	        <route-to destination-name="red"   service-category="RedTeam"   service-name="GoRed" /> 
+        	        <route-to destination-name="blue"   service-category="BlueTeam"   service-name="GoBlue" /> 
+        	        <route-to destination-name="green"   service-category="GreenTeam"   service-name="GoGreen" /> 
+                 </property> 
+             </action>
+          </actions> 
+          </service>              
+    	</services>
+</jbossesb>

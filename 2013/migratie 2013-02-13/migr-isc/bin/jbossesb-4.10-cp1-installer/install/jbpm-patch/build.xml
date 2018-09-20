@@ -1,0 +1,24 @@
+<project name="JBESB_Installer" default="replace" basedir=".">
+
+	<!-- Set deployment properties filename -->
+	<property name="org.jboss.esb.deployment.properties" location="deployment.properties"/>
+	<property name="org.jboss.esb.deployment.deploy" location="deploy"/>
+
+	<!-- Load Build Properties File -->
+	<property file="${org.jboss.esb.deployment.properties}"/>
+	
+        <property name="deploy.dir" value="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/deploy"/>
+        <property name="hadeploy.dir" value="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/deploy-hasingleton"/>
+
+        <property name="product.dir" location=".."/>
+
+	<target name="replace">
+		<loadfile property="jbpm.application.policy.text"	
+			srcFile="jbpm-app-policy.text"/> 	
+		<replaceregexp file="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/conf/login-config.xml" 
+			replace="${jbpm.application.policy.text}"
+			match="^&lt;policy&gt;\s*$\n" flags="m"/>
+	</target>
+
+
+</project>

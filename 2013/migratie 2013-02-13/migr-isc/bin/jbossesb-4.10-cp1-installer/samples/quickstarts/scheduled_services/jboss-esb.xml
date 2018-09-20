@@ -1,0 +1,39 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+		<schedule-provider name="scheduler">
+			<simple-schedule scheduleid="3-sec-trigger" frequency="3" execCount="2" />
+		</schedule-provider>
+	</providers>
+
+	<services>
+		<service category="ScheduledServices"
+			name="MyFirstScheduledService"
+			description="Demonstrates a basic scheduled service">
+			<listeners>
+				<scheduled-listener name="my_scheduled_listener"
+					scheduleidref="3-sec-trigger"
+					event-processor="org.jboss.soa.esb.samples.quickstart.scheduler.MyScheduledActionMsgComposer" />
+			</listeners>
+			<actions mep="OneWay">
+				<action name="first"
+					class="org.jboss.soa.esb.samples.quickstart.scheduler.MyBasicAction"
+					process="displayMessage2">
+					<property name="exceptionMethod"
+						value="exceptionHandler" />
+				</action>
+			    <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+				    <property name="script" value="/scripts/iTunesTop5.groovy" />
+			   </action>	
+	                   <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+
+			</actions>
+		</service>
+
+	</services>
+
+</jbossesb>

@@ -1,0 +1,49 @@
+<project name="Quickstart_helloworld_file_action" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<import file="../conf/base-build.xml"/>
+  
+	<property name="jbossesb.name" value="jboss-esb.xml"/>
+	<property name="jbossesb.rootdir" location="${build.dir}/dirs"/>
+	<property name="jbossesb.inputdir" location="${jbossesb.rootdir}/input"/>
+	<property name="jbossesb.outputdir" location="${jbossesb.rootdir}/output"/>
+	<property name="jbossesb.errordir" location="${jbossesb.rootdir}/error"/>
+	
+	<target name="runtest" depends="compile"
+		description="will create a testfile which in turn will trigger the ESB">
+		<echo>Runs Test File Creator</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.helloworldfileaction.test.CreateTestFile" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="${jbossesb.inputdir}"/>
+			<arg value="MyInput.dat"/> <!-- the directory the file should be created in -->
+			<arg value="Hello World In A File"/> <!-- the file contents -->
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+	
+	<target name="config">
+			<delete dir="${jbossesb.rootdir}" quiet="true"/>
+			<mkdir dir="${jbossesb.rootdir}"/>
+			<mkdir dir="${jbossesb.inputdir}"/>
+			<mkdir dir="${jbossesb.outputdir}"/>
+			<mkdir dir="${jbossesb.errordir}"/>
+		
+			<antcall target="filter_jboss-esb.xml"/>
+			<copy file="log4j.xml" tofile="build/log4j.xml"/>
+		</target>
+	
+	<target name="filter_jboss-esb.xml">
+		<copy file="jboss-esb-unfiltered.xml" tofile="${basedir}/${jbossesb.name}" overwrite="true" filtering="true">
+				<filterset>
+					<filter token="INPUTDIR" value="${jbossesb.inputdir}"/>
+					<filter token="OUTPUTDIR" value="${jbossesb.outputdir}"/>
+					<filter token="ERRORDIR" value="${jbossesb.errordir}"/>
+			</filterset>
+		</copy>
+	</target>
+	
+</project>

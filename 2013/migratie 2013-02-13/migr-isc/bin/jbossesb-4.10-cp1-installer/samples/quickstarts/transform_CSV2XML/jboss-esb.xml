@@ -1,0 +1,70 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+		<jms-provider name="JBossMQ"
+			connection-factory="ConnectionFactory">
+
+			<jms-bus busid="quickstartCSVGwChannel">
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_transform_CSV2XML_gw" />
+			</jms-bus>
+			<jms-bus busid="quickstartCSVEsbChannel">
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_transform_CSV2XML_esb" />
+			</jms-bus>
+
+		</jms-provider>
+	</providers>
+
+	<services>
+
+		<service category="QuickstartTransformCSV" name="SimpleListener"  description="Hello World">
+			<listeners>
+				<jms-listener name="CSVJMS-Gateway" busidref="quickstartCSVGwChannel" is-gateway="true"/>
+				<jms-listener name="CSVquickstart" busidref="quickstartCSVEsbChannel"/>
+			</listeners>
+			
+				<actions mep="OneWay">
+                    <!--
+                    Note that with this quickstart, the transformation is broken into 2 transforms; CSV to XML
+                    and XML to XML.  These 2 transformations could easly be merged into a single transform, saving
+                    on XML processing.
+                    -->
+
+                    <action name="print-before" class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="[transform_CSV2Smooks_Intermediate_format] Message before CVS to XML transformation" />
+		            </action>	 
+					
+                    <!--
+                    Transform 1: Source CSV to Canonical XML...
+                    -->
+					<action name="transform-from-csv" class="org.jboss.soa.esb.smooks.SmooksAction">
+                        <property name="smooksConfig" value="/smooks-res.xml" />
+			            <property name="messageProfile" value="source-csv" />
+	                </action>
+					
+					<action name="print-after-csv-tranform" class="org.jboss.soa.esb.actions.SystemPrintln">
+						<property name="message" value="[transform_CSV2Smooks_Intermediate_format] Message after CVS to XML transformation" />
+		            </action>	 
+					
+                    <!--
+                    Transform 2: Canonical XML to target XML...
+                    -->
+                    <action name="transform-to-xml" class="org.jboss.soa.esb.smooks.SmooksAction">
+                        <property name="smooksConfig" value="/smooks-res.xml" />
+                        <property name="messageProfile" value="canonical-xml" />
+                    </action>
+
+					<action name="print-after-xml-transform" class="org.jboss.soa.esb.actions.SystemPrintln">
+			            <property name="message" value=">>>> Message after Smooks intermediate xml -> target xml : " />
+				 </action>	
+                            <!-- The next action is for Continuous Integration testing -->
+	                    <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+			</actions>
+				
+		</service>
+	</services>
+
+</jbossesb>

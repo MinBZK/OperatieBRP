@@ -1,0 +1,130 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+        <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+           <jms-bus busid="wiretapCBRChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qswiretap_cbr_Request" />
+            </jms-bus>
+                
+            <jms-bus busid="wiretapChannel1">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qswiretap_B" />
+            </jms-bus>   
+
+            <jms-bus busid="wiretapChannel2">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qswiretap_C" />
+            </jms-bus>
+
+           <jms-bus busid="wiretapChannel3">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qswiretap_D" />
+            </jms-bus>
+
+            <jms-bus busid="wiretapGwChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qswiretap_wire_GW_Request" />
+            </jms-bus>          
+
+            <jms-bus busid="wiretapStaticRouterChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qswiretap_static_router_Request" />
+            </jms-bus>
+
+            <jms-bus busid="wiretapEsbChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qswiretap_Esb_Request" />
+            </jms-bus>
+            
+            <!-- Note that only queues that are listened to (input) require jms-provider 
+                 definitions. jms-provider definitions are not required for these queues as 
+                 the wiretap quickstart only notifies the queues (output):                 
+                 queue/qswiretap_wire_out_Request, queue/qswiretap_regular_Request -->
+           
+          </jms-provider>
+      </providers>
+      
+      <services>
+
+        <!-- CBR Service -->
+        <service category="wiretapCBRServices" name="FirstWiretapCBRServiceESB" description="ESB Listener" >
+                <listeners>
+                    <jms-listener name="the-CBR-gateway" busidref="wiretapCBRChannel" is-gateway="true" />
+                    <jms-listener name="XPathContentBasedRouter" busidref="wiretapEsbChannel"/>  
+                </listeners>
+                <actions mep="OneWay">
+                    <action class="org.jboss.soa.esb.actions.ContentBasedRouter" name="ContentBasedRouter">
+                       <property name="ruleSet" value="MyESBRules-XPath.drl"/>
+                        <property name="ruleLanguage" value="XPathLanguage.dsl"/>
+                        <property name="ruleReload" value="true"/>
+                        <property name="destinations">
+                            <route-to destination-name="regular" service-category="wiretapCategory1" service-name="regularService"/>
+                            <route-to destination-name="wiretap"  service-category="wiretapCategory2"  service-name="wiretapService"/>
+                       </property>
+                    </action>
+                </actions>
+        </service>
+
+        <service category="wiretapCategory1" name="regularService" description="Static wiretap - regular service">
+            <listeners>
+                 <jms-listener name="native1" busidref="wiretapChannel1"/> 
+            </listeners>
+            <actions mep="OneWay">
+            <action name="outaction1" class="org.jboss.soa.esb.actions.SystemPrintln" /> 
+            <action name="notificationAction" class="org.jboss.soa.esb.actions.Notifier">
+                    <property name="okMethod" value="notifyOK" />
+                    <property name="notification-details">
+                        <NotificationList type="OK">
+                            <target class="NotifyConsole" />
+                            <target class="NotifyQueues">
+								<messageProp name="quickstart" value="regular_output"/>
+                                <queue jndiName="queue/qswiretap_regular_Request"/>
+                           </target>
+                       </NotificationList>
+                    </property>
+                </action>                                       
+            <!-- The next action is for Continuous Integration testing -->
+            <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore" /> 
+            </actions>   
+        </service>
+
+        <service category="wiretapCategory2" name="wiretapService" description="Static wiretap - wiretap service">
+            <listeners>
+                 <jms-listener name="wiretapJMS-Gateway" busidref="wiretapGwChannel" is-gateway="true" />  
+                 <jms-listener name="native2" busidref="wiretapChannel2"/>       
+           </listeners>  
+            <actions mep="OneWay">
+            <action name="outaction2" class="org.jboss.soa.esb.actions.SystemPrintln" /> 
+            <action name="wiretap_notificationAction" class="org.jboss.soa.esb.actions.Notifier">
+                <property name="okMethod" value="notifyOK" />
+                <property name="notification-details">
+                    <NotificationList type="OK">
+                        <target class="NotifyConsole" />   
+                        <target class="NotifyQueues">
+							<messageProp name="quickstart" value="wiretap_output" />
+                           <queue jndiName="queue/qswiretap_wire_out_Request"/>
+                       </target>
+                   </NotificationList>
+                </property>
+            </action>
+            <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore" /> 
+                          
+            </actions>
+        </service>
+
+       <service category="wiretapCategory3" name="WiretapStaticListener" description="Static Router">
+            <listeners>
+                <jms-listener name="test-Gateway" busidref="wiretapStaticRouterChannel" is-gateway="true" />  
+                 <jms-listener name="native3" busidref="wiretapChannel3"/>
+            </listeners>
+            <actions mep="OneWay">
+               <action name="routeAction"  class="org.jboss.soa.esb.actions.StaticRouter">
+                    <property name="destinations">
+                        <route-to service-category="wiretapCategory2" service-name="wiretapService" /> 
+                        <route-to service-category="wiretapCategory1" service-name="regularService" />  
+                    </property>
+               </action>  
+            </actions>
+        </service>
+
+      </services>
+     
+</jbossesb>

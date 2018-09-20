@@ -1,0 +1,54 @@
+<project name="Quickstart_webservice_mtom" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+			
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+    <target name="quickstart-specific-checks" depends="assert-ws-available,assert-jbossremoting-version, check-src-dir" />
+
+	<target name="check-src-dir">
+		<condition property="quickstart.src.dir" value="src_as5" else="src">
+			<and>
+				<available classname="org.jboss.wsf.common.handler.GenericSOAPHandler" classpathref="compile-classpath"/>
+			</and>
+		</condition>
+		<echo message="Set src dir to : ${quickstart.src.dir}"/>
+	</target>
+
+    <target name="quickstart-specific-dependencies">
+        <path id="quickstart-dependencies-classpath">
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jbossws-client.jar,jboss-remoting.jar" />
+        </path>
+    </target>
+	
+    <target name="quickstart-specific-assemblies">
+        <!-- Overriden from the target of the same name in base-build.xml. -->
+        <!-- Called by the "deploy" target.  Don't call directly!! -->
+
+        <!-- Build the webservice... -->
+        <war warfile="build/${ant.project.name}.war"
+             webxml="${basedir}/war/resources/WEB-INF/web.xml">
+			<webinf dir="${basedir}/war/resources/WEB-INF">
+                <include name="jboss-web.xml"/>
+            </webinf>
+            <fileset dir="${basedir}/war/view">
+                <include name="**/*"/>
+            </fileset>
+        </war>
+    </target>
+
+    <target name="runtest" depends="compile" description="runs test JMS Sender">
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.webservicemtom.webservice.client.MTOMClient"
+              failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <classpath refid="exec-classpath"/>
+            <sysproperty key="java.endorsed.dirs" path="${org.jboss.esb.server.endorsed.dir}"/>
+        </java>
+    </target>
+
+
+</project>

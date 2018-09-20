@@ -1,0 +1,557 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="uc308">
+
+    <!--  -->
+    <!--  -->
+    <!-- START -->
+    <!--  -->
+    <!--  -->
+
+ <start-state name="START">
+  <transition to="2. Controleer bijhoudende gemeente">
+   <script>
+    <expression>
+     functioneleStap="uc308.start.stap";
+     bronGemeente = input.getBrpGemeente().getCode();
+     doelGemeente = input.getLo3Gemeente().getCode();
+    </expression>
+    <variable name='functioneleStap' access='write' />
+    <variable name='bronGemeente' access='write' />
+    <variable name='doelGemeente' access='write' />
+   </script>
+  </transition>
+ </start-state>
+
+ <decision name="2. Controleer bijhoudende gemeente">
+  <handler class="nl.moderniseringgba.isc.jbpm.spring.SpringDecisionHandler"
+   config-type="bean">
+   <bean>
+    uc308ControleerBijhoudingsGemeenteDecision
+   </bean>
+  </handler>
+  <transition to="VALIDEREN" />
+  <transition to="Foutafhandeling" name="2b. BRP-gemeente">
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.start.brpGemeente";
+     foutafhandelingFoutmelding="uc308.start.brpGemeente.fout";
+
+     foutafhandelingIndicatieBeheerder=false;
+     restart="end";
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+    </expression>
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+    <variable name='restart' access='write' />
+   </script>
+  </transition>
+ </decision>
+
+ <!-- -->
+ <!-- -->
+ <!-- Valideren -->
+ <!-- -->
+ <!-- -->
+
+ <node name="VALIDEREN">
+  <transition
+   to="3-1. Valideer BRP-bijhoudingsbericht Toevallige gebeurtenis">
+   <script>
+    <expression>
+     functioneleStap="uc308.validerenBrpBijhoudingVerzoekbericht.stap";
+     valideerHerhalingTimeout=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("sync.timeout");
+     valideerHerhalingMaxHerhalingen=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsInteger("sync.herhalingen");
+    </expression>
+    <variable name='functioneleStap' access='write' />
+    <variable name='valideerHerhalingTimeout' access='write' />
+    <variable name='valideerHerhalingMaxHerhalingen' access='write' />
+   </script>
+  </transition>
+ </node>
+
+ <decision name="3-1. Valideer BRP-bijhoudingsbericht Toevallige gebeurtenis">
+  <handler class="nl.moderniseringgba.isc.jbpm.spring.SpringDecisionHandler"
+   config-type="bean">
+   <bean>
+    uc308ControleerValidatieBrpBijhoudingVerzoekBerichtDecision
+   </bean>
+  </handler>
+  <transition to="CONVERTEREN"></transition>
+  <transition to="Foutafhandeling" name="3b. Validatie mislukt">
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.opvragen.fout";
+     foutafhandelingFoutmelding=converteerNaarLo3Antwoord.getFoutmelding();
+
+     foutafhandelingIndicatieBeheerder=true;
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+     foutafhandelingPaden.put("restartAtConverteren", "Opnieuw proberen
+     te converteren", false, false, false);
+    </expression>
+    <variable name='converteerNaarLo3Antwoord' access='read' />
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+   </script>
+  </transition>
+ </decision>
+
+ <!-- -->
+ <!-- -->
+ <!-- Converteren -->
+ <!-- -->
+ <!-- -->
+
+ <node name="CONVERTEREN">
+  <transition
+   to="4-1. Converteer BRP-Bijhouding">
+   <script>
+    <expression>
+     functioneleStap="uc308.converterenBrpBijhoudingVerzoekBericht.stap";
+     converteerHerhalingTimeout=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("sync.timeout");
+     converteerHerhalingMaxHerhalingen=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsInteger("sync.herhalingen");
+    </expression>
+    <variable name='functioneleStap' access='write' />
+    <variable name='converteerHerhalingTimeout' access='write' />
+    <variable name='converteerHerhalingMaxHerhalingen' access='write' />
+   </script>
+  </transition>
+ </node>
+
+ <node
+  name="4-1. Converteer BRP-Bijhouding">
+  <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler"
+   config-type="bean">
+   <bean>
+    uc308MaakConverteerNaarLo3VerzoekBerichtAction
+   </bean>
+  </action>
+  <transition to="4-2. Verzenden converteerbericht">
+   <script>
+    <expression>
+     converteerDueDate =
+     nl.moderniseringgba.isc.jbpm.TimerUtil.getDueDate(converteerHerhalingTimeout);
+    </expression>
+    <variable name='converteerDueDate' access='write' />
+    <variable name='converteerHerhalingTimeout' access='read' />
+   </script>
+  </transition>
+ </node>
+
+ <node name="4-2. Verzenden converteerbericht">
+  <action
+   class="org.jboss.soa.esb.services.jbpm.actionhandlers.EsbActionHandler">
+   <esbServiceName>
+    Sync-Outbound
+   </esbServiceName>
+   <esbCategoryName>
+    ISC
+   </esbCategoryName>
+   <bpmToEsbVars>
+    <mapping bpm="converteerBericht" esb="BODY_CONTENT"></mapping>
+   </bpmToEsbVars>
+   <esbToBpmVars>
+    <mapping bpm="syncBericht" esb="BODY_CONTENT"></mapping>
+   </esbToBpmVars>
+  </action>
+  <timer name="herhaalbericht" transition="timeout" duedate="#{converteerDueDate}" />
+  <transition to="4-3. Bepaal antwoord op converteerbericht"></transition>
+  <transition to="4-4. Controleer herhalingen converteerbericht"
+   name="timeout">
+   <script>
+    <expression>
+     if(converteerHerhaling == null) {
+     converteerHerhaling = 1;
+     } else {
+     converteerHerhaling = converteerHerhaling + 1;
+     }
+    </expression>
+    <variable name='converteerHerhaling' access='read,write' />
+   </script>
+  </transition>
+ </node>
+
+ <decision name="4-4. Controleer herhalingen converteerbericht">
+  <transition
+   to="4-1. Converteer BRP-Bijhouding"></transition>
+  <transition to="Foutafhandeling" name="4a. Fout (maximum herhalingen)">
+   <condition
+    expression="#{converteerHerhaling &gt; converteerHerhalingMaxHerhalingen}"></condition>
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.opvragen.maximumherhalingen";
+     foutafhandelingFoutmelding=null;
+
+     foutafhandelingIndicatieBeheerder=true;
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+     foutafhandelingPaden.put("restartAtConverteren", "Opnieuw proberen
+     te converteren", false, false, false);
+    </expression>
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+   </script>
+  </transition>
+ </decision>
+
+ <decision name="4-3. Bepaal antwoord op converteerbericht">
+  <transition to="4-5. Controleer antwoord converteerbericht">
+   <condition
+    expression="#{syncBericht.berichtType == 'ConverteerNaarLo3Antwoord'}"></condition>
+   <script>
+    <expression>
+     converteerNaarLo3Antwoord=syncBericht;
+    </expression>
+    <variable name='converteerNaarLo3Antwoord' access='write' />
+    <variable name='syncBericht' access='read' />
+   </script>
+  </transition>
+  <transition to="Foutafhandeling" name="4b-1. Technische fout">
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.opvragen.technischefout";
+     foutafhandelingFoutmelding=syncBericht.toString();
+
+     foutafhandelingIndicatieBeheerder=true;
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+     foutafhandelingPaden.put("restartAtConverteren", "Opnieuw proberen
+     te converteren", false, false, false);
+    </expression>
+    <variable name='syncBericht' access='read' />
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+   </script>
+  </transition>
+ </decision>
+
+ <decision name="4-5. Controleer antwoord converteerbericht">
+  <handler class="nl.moderniseringgba.isc.jbpm.spring.SpringDecisionHandler"
+   config-type="bean">
+   <bean>
+    uc308ControleerConverteerNaarLo3AntwoordBerichtDecision
+   </bean>
+  </handler>
+  <transition to="TB02"></transition>
+  <transition to="Foutafhandeling" name="4b. Conversie mislukt">
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.opvragen.fout";
+     foutafhandelingFoutmelding=converteerNaarLo3Antwoord.getFoutmelding();
+
+     foutafhandelingIndicatieBeheerder=true;
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+     foutafhandelingPaden.put("restartAtConverteren", "Opnieuw proberen
+     te converteren", false, false, false);
+    </expression>
+    <variable name='converteerNaarLo3Antwoord' access='read' />
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+   </script>
+  </transition>
+ </decision>
+
+ <!-- -->
+ <!-- -->
+ <!-- Verzenden Tb02 bericht -->
+ <!-- -->
+ <!-- -->
+
+ <node name="TB02">
+  <transition to="5-1. Maak Tb02 bericht">
+   <script>
+    <expression>
+     functioneleStap="uc308.verzendenTb01.stap";
+     verzendenTb02HerhalingTimeout=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("vospg.timeout");
+     verzendenTb02HerhalingMaxHerhalingen=nl.moderniseringgba.isc.jbpm.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsInteger("vospg.herhalingen");
+    </expression>
+    <variable name='functioneleStap' access='write' />
+    <variable name='verzendenTb02HerhalingTimeout' access='write' />
+    <variable name='verzendenTb02HerhalingMaxHerhalingen' access='write' />
+   </script>
+  </transition>
+ </node>
+
+ <node name="5-1. Maak Tb02 bericht">
+  <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler"
+   config-type="bean">
+   <bean>
+    uc308MaakTb02Action
+   </bean>
+  </action>
+  <transition to="5-2. Verzend Tb02 bericht">
+   <script>
+    <expression>
+     verzendenTb02DueDate =
+     nl.moderniseringgba.isc.jbpm.TimerUtil.getDueDate(verzendenTb02HerhalingTimeout);
+    </expression>
+    <variable name='verzendenTb02DueDate' access='write' />
+    <variable name='verzendenTb02HerhalingTimeout' access='read' />
+   </script>
+  </transition>
+ </node>
+
+ <node name="5-2. Verzend Tb02 bericht">
+  <action
+   class="org.jboss.soa.esb.services.jbpm.actionhandlers.EsbActionHandler">
+   <esbServiceName>
+    VOSPG-Outbound
+   </esbServiceName>
+   <esbCategoryName>
+    ISC
+   </esbCategoryName>
+   <bpmToEsbVars>
+    <mapping bpm="tb02Bericht" esb="BODY_CONTENT"></mapping>
+   </bpmToEsbVars>
+   <esbToBpmVars>
+    <mapping bpm="vospgBericht" esb="BODY_CONTENT"></mapping>
+   </esbToBpmVars>
+  </action>
+  <timer name="herhaalbericht" transition="timeout"
+   duedate="#{verzendenTb02DueDate}" />
+  <transition to="6-2. Bepaal antwoord op Tb02"></transition>
+  <transition to="6-1. Controleer herhalingen Tb02" name="timeout">
+   <script>
+    <expression>
+     if(verzendenTb02Herhaling == null) {
+     verzendenTb02Herhaling = 1;
+     } else {
+     verzendenTb02Herhaling = verzendenTb02Herhaling + 1;
+     }
+    </expression>
+    <variable name='verzendenTb02Herhaling' access='read,write' />
+   </script>
+  </transition>
+ </node>
+
+ <decision name="6-1. Controleer herhalingen Tb02">
+  <transition to="Foutafhandeling" name="10b. Afbreken">
+   <condition
+    expression="#{verzendenTb02Herhaling &gt; verzendenTb02HerhalingMaxHerhalingen}"></condition>
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.verzendenTb02.maximumherhalingen";
+     foutafhandelingFoutmelding=null;
+
+     foutafhandelingIndicatieBeheerder=true;
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+     foutafhandelingPaden.put("restartAtTb02", "Opnieuw Tb02 verzenden", false, false, false);
+    </expression>
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+   </script>
+  </transition>
+  <transition to="5-1. Maak Tb02 bericht" name="10a. Herzenden Tb02" />
+ </decision>
+
+ <decision name="6-2. Bepaal antwoord op Tb02">
+  <transition to="Foutafhandeling" name="6c. Technische fout">
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.verzendenTb02.technischefout";
+     vospgBericht=nl.moderniseringgba.isc.jbpm.FoutUtil.technischeFout(vospgBericht);
+     foutafhandelingFoutmelding=vospgBericht.getMelding();
+
+     foutafhandelingIndicatieBeheerder=true;
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+     foutafhandelingPaden.put("restartAtTb02", "Opnieuw Tb02 verzenden", false, false, false);
+    </expression>
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='vospgBericht' access='read,write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+   </script>
+  </transition>
+  <transition to="Foutafhandeling" name="6c. Protocol fout">
+   <condition
+    expression="#{vospgBericht.berichtType == 'Pf01' || vospgBericht.berichtType == 'Pf02' || vospgBericht.berichtType == 'Pf03'}"></condition>
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.verzendenTb02.protocolfout";
+     foutafhandelingFoutmelding=null;
+
+     foutafhandelingIndicatieBeheerder=false;
+     restart="end";
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+    </expression>
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='restart' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+   </script>
+  </transition>
+  <transition to="6b. Tf21 foutreden U,V,G,B,O" name="7d. Tf21 bericht foutreden U,V,G,B,O">
+   <condition expression="#{vospgBericht.berichtType == 'Tf21'}"></condition>
+   <script>
+    <expression>
+     tf21Bericht=vospgBericht;
+    </expression>
+    <variable name='tf21Bericht' access='write' />
+    <variable name='vospgBericht' access='read' />
+   </script>
+
+  </transition>
+  <transition to="7. Stuur BRP Verwerkingsbevestiging">
+   <condition expression="#{vospgBericht.berichtType == 'Null'}"></condition>
+   <script>
+    <expression>
+     nullBericht=vospgBericht;
+    </expression>
+    <variable name='nullBericht' access='write' />
+    <variable name='vospgBericht' access='read' />
+   </script>
+  </transition>
+ </decision>
+
+ <node name="6b. Tf21 foutreden U,V,G,B,O">
+  <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+   <bean>
+    uc308MaakTf21FoutredenAction
+   </bean>
+  </action>
+  <transition to="Foutafhandeling">
+   <script>
+    <expression>
+     foutafhandelingFout="uc308.verzendenTb02.Tf01Foutreden";
+     foutafhandelingFoutmelding=Tf21Foutreden;
+
+     foutafhandelingIndicatieBeheerder=false;
+     restart="end";
+     foutafhandelingPaden=new nl.moderniseringgba.isc.jbpm.jsf.FoutafhandelingPaden();
+     foutafhandelingPaden.put("end", "Proces (foutief) beeindigen",
+     false, false, true);
+    </expression>
+    <variable name='foutafhandelingFout' access='write' />
+    <variable name='foutafhandelingFoutmelding' access='write' />
+    <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+    <variable name='foutafhandelingPaden' access='write' />
+    <variable name='Tf21Foutreden' acces='read' />
+    <variable name='restart' access='write' />
+   </script>
+  </transition>
+ </node>
+
+ <!-- -->
+ <!-- -->
+ <!-- Verwerkingsbevestiging: gelukt -->
+ <!-- -->
+ <!-- -->
+
+ <node name="7. Stuur BRP Verwerkingsbevestiging">
+  <transition to="7-1. Stuur BRP Verwerkingsbevestiging: Gelukt">
+   <script>
+    <expression>
+     functioneleStap="uc308.brpGeboorteAntwoord.stap";
+    </expression>
+    <variable name='functioneleStap' access='write' />
+   </script>
+  </transition>
+ </node>
+
+ <node name="7-1. Stuur BRP Verwerkingsbevestiging: Gelukt">
+  <action class="nl.moderniseringgba.isc.jbpm.spring.SpringActionHandler">
+   <bean>
+    uc308MaakBrpBijhoudingAntwoordAction
+   </bean>
+  </action>
+  <transition to="Correct afgerond">
+   <action class="nl.moderniseringgba.isc.jbpm.actionhandler.EsbNotifier">
+    <esbServiceName>
+     BRP-Outbound
+    </esbServiceName>
+    <esbCategoryName>
+     ISC
+    </esbCategoryName>
+    <bpmToEsbVars>
+     <mapping bpm="brpBijhoudingAntwoordBericht" esb="BODY_CONTENT"></mapping>
+    </bpmToEsbVars>
+   </action>
+  </transition>
+ </node>
+
+ <!-- -->
+ <!-- -->
+ <!-- Foutafhandeling -->
+ <!-- -->
+ <!-- -->
+
+ <process-state name="Foutafhandeling">
+  <sub-process name="foutafhandeling" binding="late"></sub-process>
+  <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+  <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+  <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+  <variable access="read" mapped-name="fout" name="foutafhandelingFout"></variable>
+  <variable access="read" mapped-name="foutmelding"
+   name="foutafhandelingFoutmelding"></variable>
+  <variable access="read" mapped-name="indicatieBeheerder"
+   name="foutafhandelingIndicatieBeheerder"></variable>
+  <variable access="read" mapped-name="lo3Bericht" name="vospgBericht"></variable>
+  <variable access="read" mapped-name="blokkeringBericht" name="blokkeringBericht"></variable>
+  <variable access="read" mapped-name="brpBericht" name="input"></variable>
+  <variable access="read,write" mapped-name="restart" name="restart"></variable>
+  <variable access="read" mapped-name="foutafhandelingPaden"
+   name="foutafhandelingPaden"></variable>
+  <transition to="RESTART"></transition>
+ </process-state>
+
+ <decision name="RESTART">
+  <transition to="Incorrect afgerond">
+   <condition expression="#{restart == 'end'}"></condition>
+  </transition>
+  <transition to="TB02" name="Opnieuw Tb02 verzenden">
+   <condition expression="#{restart == 'restartAtTb02'}"></condition>
+  </transition>
+ </decision>
+
+
+ <!-- -->
+ <!-- -->
+ <!-- Incorrect afgerond -->
+ <!-- -->
+ <!-- -->
+
+ <end-state name="Incorrect afgerond"></end-state>
+
+ <!-- -->
+ <!-- -->
+ <!-- Einde gelukt -->
+ <!-- -->
+ <!-- -->
+
+ <end-state name="Correct afgerond"></end-state>
+
+ <!-- -->
+ <!-- -->
+ <!-- Einde gelukt met notificatie -->
+ <!-- -->
+ <!-- -->
+
+</process-definition>

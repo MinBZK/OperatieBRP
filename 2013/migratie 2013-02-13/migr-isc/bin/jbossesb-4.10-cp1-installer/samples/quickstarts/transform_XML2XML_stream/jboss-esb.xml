@@ -1,0 +1,43 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.1.0.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.1.0.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.1.0.xsd"
+    parameterReloadSecs="5">
+
+	<providers>
+		<jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+
+			<jms-bus busid="quickstartGwChannel">
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_transform_stream_gw" />
+			</jms-bus>
+
+		</jms-provider>
+	</providers>
+
+	<services>
+
+		<service category="FirstServiceESB" name="SplitterService" description="Splitter Service" invmScope="GLOBAL">
+			<listeners>
+				<jms-listener name="JMS-Gateway" busidref="quickstartGwChannel" is-gateway="true"/>
+			</listeners>
+			<actions mep="OneWay">
+				<action name="print-before" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="[SplitterService] Message to be Split" />
+				</action>
+				<action name="simple-transform" class="org.jboss.soa.esb.smooks.SmooksAction">
+                    <property name="smooksConfig" value="/smooks-res.xml" />
+				</action>
+			</actions>
+		</service>
+
+		 <service category="FirstServiceESB" name="ReceiverService" description="Receiver Service"  invmScope="GLOBAL">
+            <actions mep="OneWay">
+                <action name="print-after" class="org.jboss.soa.esb.actions.SystemPrintln">
+                    <property name="message" value="[ReceiverService] Split fragment received from SplitterService" />
+                </action>
+            </actions>
+        </service>
+
+	</services>
+
+</jbossesb>

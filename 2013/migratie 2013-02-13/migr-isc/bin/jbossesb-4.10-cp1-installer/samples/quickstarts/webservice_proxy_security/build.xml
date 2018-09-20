@@ -1,0 +1,130 @@
+<project name="Quickstart_webservice_proxy_security" default="deploy" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+    <property name="additional.deploys" value="wsbarrier-service.xml"/>
+
+	<!-- Import the base Ant build script... -->
+    <import file="../conf/base-build.xml"/>
+
+    <property name="war.build.dir" location="${build.dir}/war/classes"/>
+
+    <target name="quickstart-specific-checks" depends="assert-ws-available"/>
+
+    <target name="quickstart-specific-assemblies" depends="makewar"/>
+
+    <target name="quickstart-specific-predeploys">
+		<copy todir="${org.jboss.esb.server.deploy.dir}"
+			file="build/predeploy/webservice_proxy_security.war"/>
+		<!-- sleep seconds="3"/ -->
+	</target>
+
+    <target name="quickstart-specific-undeploys">
+		<delete file="${org.jboss.esb.server.deploy.dir}/webservice_proxy_security.war"/>
+	</target>
+
+    <target name="genkey">
+		<mkdir dir="${build.dir}/META-INF/"/>
+
+        <property name="keystore" location="${build.dir}/webservice_proxy_security.keystore" />
+        <property name="password.file" location="${basedir}/wsproxysecurity.password" />
+
+        <delete file="${keystore}" failonerror="false"/>
+        <genkey
+			alias="webservice_proxy_security"
+			keystore="${keystore}"
+			keypass="webservice_proxy_security_pass"
+			storepass="webservice_proxy_security_pass"
+			verbose="true">
+            <dname>
+                <param name="CN" value="localhost"/>
+                <param name="OU" value="jbossesb"/>
+                <param name="O" value="jbossesb"/>
+                <param name="C" value="US"/>
+            </dname>
+        </genkey>
+    	
+        <pathconvert targetos="unix" property="keystoredir">
+            <path><pathelement location="${keystore}"/></path>
+        </pathconvert>
+        <pathconvert targetos="unix" property="password.file.unix">
+            <path><pathelement location="${password.file}"/></path>
+        </pathconvert>
+
+        <copy file="jboss-esb-template.xml" tofile="${build.dir}/META-INF/jboss-esb.xml">
+            <filterset>
+                <filter token="keystore" value="${keystoredir}" />
+            </filterset>
+        </copy>
+
+        <copy file="httpclient-8443.properties" todir="${build.dir}/META-INF">
+            <filterset>
+                <filter token="keystore" value="${keystoredir}" />
+				<filter token="keystore.password" value="${password.file.unix}" />
+            </filterset>
+        </copy>
+
+        <copy file="server-template.xml" tofile="${build.dir}/server.xml">
+            <filterset>
+                <filter token="keystore" value="${keystoredir}" />
+            </filterset>
+        </copy>
+
+		<echo message=""/>
+		<echo message="IMPORTANT for 4.x: Copy ${build.dir}/server.xml into jbossesb-server-4.x/server/default/deploy/jboss-web.deployer/server.xml *before* starting server!!!"/>
+		<echo message="IMPORTANT for 5.x: Copy ${build.dir}/server.xml into jboss-5.x/server/default/deploy/jbossweb.sar/server.xml *before* starting server!!!"/>
+		<echo message=""/>
+	</target>
+
+    <target name="makewar" description="make war">
+        <!-- Compile... -->
+        <mkdir dir="${war.build.dir}" />
+        <javac srcdir="war/src" destdir="${war.build.dir}" debug="true">
+            <classpath refid="compile-classpath" />
+        </javac>
+
+        <!-- War... -->
+		<mkdir dir="build/predeploy"/>
+        <war warfile="build/predeploy/webservice_proxy_security.war"
+             webxml="${basedir}/war/resources/WEB-INF/web.xml">
+            <webinf dir="${basedir}/war/resources/WEB-INF">
+                <include name="jboss-web.xml"/>
+            </webinf>
+            <classes dir="${war.build.dir}" includes="**/*.class"/>
+            <fileset dir="${basedir}/war/view">
+                <include name="**/*"/>
+            </fileset>
+        </war>
+    </target>
+
+	<target name="run">
+		<echo>standalone mode is not available for this quickstart.</echo>
+    </target>
+
+	<target name="runinternal" depends="compile">
+	    <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.webservice_proxy_security.test.SendWSMessage" failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="${runtest.arg.url}"/>
+	    	<arg value="${user.name}"/>
+			<arg value="${build.dir}/META-INF/httpclient-8443.properties"/>
+			<classpath refid="exec-classpath"/>
+	    </java>
+	 </target>  
+
+	<target name="runws" depends="compile">
+		<echo>Calling JBossWS webservice directly.</echo>
+		<property name="runtest.arg.url" value="https://localhost:8443/webservice_proxy_security/HelloWorldWS"/>
+		<antcall target="runinternal"/>
+	 </target>  
+
+	<target name="runhttps" depends="compile">
+		<echo>Calling JBossWS webservice via HttpGatewayListener and SOAPProxy.</echo>
+		<property name="runtest.arg.url" value="https://localhost:8443/Quickstart_webservice_proxy_security/http/ProxyWS"/>
+		<antcall target="runinternal"/>
+	 </target>  
+	<target name="runtest" depends="runhttps"/>
+
+</project>

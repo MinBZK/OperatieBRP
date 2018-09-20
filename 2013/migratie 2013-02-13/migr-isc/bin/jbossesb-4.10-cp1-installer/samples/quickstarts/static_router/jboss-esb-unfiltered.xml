@@ -1,0 +1,123 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd">
+
+    <providers>
+          <ftp-provider name="FTPprovider" hostname="@FTP_HOSTNAME@" >
+          	<ftp-bus busid="StaticRouterFtpGW" >
+          		<ftp-message-filter
+          			username="@FTP_USERNAME@"
+          			password="@FTP_PASSWORD@"
+          			passive="false"
+          			directory="@FTP_DIRECTORY@"
+          			input-suffix=".dat"
+          		/>
+          	</ftp-bus>
+          </ftp-provider>
+
+          <fs-provider name="LocalFsProvider">
+          	<fs-bus busid="staticRouter" >
+          		<fs-message-filter
+          			directory="@STATICROUTER@"
+          			input-suffix=".esbMessage"
+          		/>
+          	</fs-bus>
+          	<fs-bus busid="fileMessageDestination_01" >
+          		<fs-message-filter
+          			directory="@SERVICE01@"
+          			input-suffix=".toRoute01"
+          			post-delete="false"
+          			post-directory="@SERVICE01_POST@"
+          		/>
+          	</fs-bus>
+          	<fs-bus busid="fileMessageDestination_02" >
+          		<fs-message-filter
+          			directory="@SERVICE02@"
+          			input-suffix=".toRoute02"
+          			post-delete="false"
+          			post-directory="@SERVICE02_POST@"
+          		/>
+          	</fs-bus>
+          	<fs-bus busid="fileMessageDestination_03" >
+          		<fs-message-filter
+          			directory="@SERVICE03@"
+          			input-suffix=".toRoute03"
+          			post-delete="false"
+          			post-directory="@SERVICE03_POST@"
+          		/>
+          	</fs-bus>
+          </fs-provider>
+          
+      </providers>
+      
+      <services>
+          
+        <service 
+          		 category="StaticRouterCategoryEsb1"
+          		 name="fileListener"
+          		 description="Static router(listener)">
+            <listeners>
+                <ftp-listener name="Ftp-Gateway"
+                    busidref="StaticRouterFtpGW"
+                    is-gateway="true"
+                />
+                <fs-listener name="StaticRouter"
+                              busidref="staticRouter"
+                />                
+            </listeners>
+            <actions mep="OneWay">
+               <action name="routeAction"  class="org.jboss.soa.esb.actions.StaticRouter">
+               		<property name="destinations">
+   	 				   <route-to service-category="category01" service-name="service01" /> 
+   	 				   <route-to service-category="category02" service-name="service02" /> 
+   	 				   <route-to service-category="category03" service-name="service03" /> 
+	    		   </property>
+   	   			</action>    
+            </actions>
+        </service>
+
+        <service 
+          		 category="category01"
+          		 name="service01"
+          		 description="Static route destination 1">
+            <listeners>
+                <fs-listener name="fileDest01" busidref="fileMessageDestination_01"/>                
+            </listeners>
+            <actions mep="OneWay">
+               <action name="doThis"  class="org.jboss.soa.esb.samples.quickstart.staticrouter.SimpleFileAction">
+               		<property name="msgSuffix" value=".01FromRouter" />
+               </action>
+            </actions>
+        </service>
+
+        <service 
+          		 category="category02"
+          		 name="service02"
+          		 description="Static route destination 2">
+            <listeners>
+                <fs-listener name="fileDest02" busidref="fileMessageDestination_02"/>
+            </listeners>
+            <actions mep="OneWay">
+               <action name="doThis"  class="org.jboss.soa.esb.samples.quickstart.staticrouter.SimpleFileAction">
+               		<property name="msgSuffix" value=".02FromRouter" />
+               </action>
+            </actions>
+        </service>
+
+        <service 
+          		 category="category03"
+          		 name="service03"
+          		 description="Static route destination 3">
+            <listeners>
+                <fs-listener name="fileDest03" busidref="fileMessageDestination_03"/>
+            </listeners>
+            <actions mep="OneWay">
+               <action name="doThis"  class="org.jboss.soa.esb.samples.quickstart.staticrouter.SimpleFileAction">
+               		<property name="msgSuffix" value=".03FromRouter" />
+               </action>
+            </actions>
+        </service>
+      </services>
+     
+</jbossesb>

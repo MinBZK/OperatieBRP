@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- $Id: hsqldb-jdbc-state-service.xml 61572 2007-03-22 14:32:18Z adrian@jboss.org $ -->
+
+<server>
+
+  <!-- ==================================================================== -->
+  <!-- JBossMQ State Management using HSQLDB                                -->
+  <!-- See docs/examples/jms for other configurations                       -->
+  <!-- ==================================================================== -->
+   
+  <!-- A Statemanager that stores state in the database -->
+  <mbean code="org.jboss.mq.sm.jdbc.JDBCStateManager"
+	      name="jboss.mq:service=StateManager">
+    <depends optional-attribute-name="ConnectionManager">jboss.jca:service=DataSourceBinding,name=DefaultDS</depends>
+    <attribute name="SqlProperties">
+      CREATE_TABLES_ON_STARTUP = TRUE
+      CREATE_USER_TABLE = CREATE TABLE JMS_USERS (USERID VARCHAR(32) NOT NULL, PASSWD VARCHAR(32) NOT NULL, \
+                                                 CLIENTID VARCHAR(128) NULL, PRIMARY KEY(USERID))
+      CREATE_ROLE_TABLE = CREATE TABLE JMS_ROLES (ROLEID VARCHAR(32) NOT NULL, USERID VARCHAR(32) NOT NULL, \
+                                                 PRIMARY KEY(USERID, ROLEID))
+      CREATE_SUBSCRIPTION_TABLE = CREATE TABLE JMS_SUBSCRIPTIONS (CLIENTID VARCHAR(128) NOT NULL, \
+                                                 SUBNAME VARCHAR(128) NOT NULL, TOPIC VARCHAR(255) NOT NULL, \
+                                                 SELECTOR VARCHAR(255) NULL, PRIMARY KEY(CLIENTID, SUBNAME))
+      GET_SUBSCRIPTION = SELECT TOPIC, SELECTOR FROM JMS_SUBSCRIPTIONS WHERE CLIENTID=? AND SUBNAME=?
+      LOCK_SUBSCRIPTION = SELECT TOPIC, SELECTOR FROM JMS_SUBSCRIPTIONS WHERE CLIENTID=? AND SUBNAME=?
+      GET_SUBSCRIPTIONS_FOR_TOPIC = SELECT CLIENTID, SUBNAME, SELECTOR FROM JMS_SUBSCRIPTIONS WHERE TOPIC=?
+      INSERT_SUBSCRIPTION = INSERT INTO JMS_SUBSCRIPTIONS (CLIENTID, SUBNAME, TOPIC, SELECTOR) VALUES(?,?,?,?)
+      UPDATE_SUBSCRIPTION = UPDATE JMS_SUBSCRIPTIONS SET TOPIC=?, SELECTOR=? WHERE CLIENTID=? AND SUBNAME=?
+      REMOVE_SUBSCRIPTION = DELETE FROM JMS_SUBSCRIPTIONS WHERE CLIENTID=? AND SUBNAME=?
+      GET_USER_BY_CLIENTID = SELECT USERID, PASSWD, CLIENTID FROM JMS_USERS WHERE CLIENTID=?
+      GET_USER = SELECT PASSWD, CLIENTID FROM JMS_USERS WHERE USERID=?
+      POPULATE.TABLES.01 = INSERT INTO JMS_USERS (USERID, PASSWD) VALUES ('guest', 'guest')
+      POPULATE.TABLES.02 = INSERT INTO JMS_USERS (USERID, PASSWD) VALUES ('j2ee', 'j2ee')
+      POPULATE.TABLES.03 = INSERT INTO JMS_USERS (USERID, PASSWD, CLIENTID) VALUES ('john', 'needle', 'DurableSubscriberExample')
+      POPULATE.TABLES.04 = INSERT INTO JMS_USERS (USERID, PASSWD) VALUES ('nobody', 'nobody')
+      POPULATE.TABLES.05 = INSERT INTO JMS_USERS (USERID, PASSWD) VALUES ('dynsub', 'dynsub')
+      POPULATE.TABLES.06 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('guest','guest')
+      POPULATE.TABLES.07 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('j2ee','guest')
+      POPULATE.TABLES.08 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('john','guest')
+      POPULATE.TABLES.09 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('subscriber','john')
+      POPULATE.TABLES.10 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('publisher','john')
+      POPULATE.TABLES.11 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('publisher','dynsub')
+      POPULATE.TABLES.12 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('durpublisher','john')
+      POPULATE.TABLES.13 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('durpublisher','dynsub')
+      POPULATE.TABLES.14 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('noacc','nobody')
+      POPULATE.TABLES.15 = INSERT INTO JMS_USERS (USERID, PASSWD) VALUES ('gatewayuser', 'gwpassword')
+      POPULATE.TABLES.16 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('gatewayrole','gatewayuser')
+      POPULATE.TABLES.17 = INSERT INTO JMS_USERS (USERID, PASSWD) VALUES ('esbuser', 'esbpassword')
+      POPULATE.TABLES.18 = INSERT INTO JMS_ROLES (ROLEID, USERID) VALUES ('esbrole','esbuser')
+      POPULATE.TABLES.19 = INSERT INTO JMS_USERS (USERID, PASSWD) VALUES ('esbuser2', 'esbpassword')
+    </attribute>
+  </mbean>
+
+</server>

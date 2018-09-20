@@ -1,0 +1,32 @@
+<project name="Quickstart_http_gateway" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+    <property name="additional.deploys" value="http-exception-mappings.properties,readme.txt" />
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/> 	
+
+    <target name="runtest" depends="compile" description="sends a SOAP HTTP request to the http gateway">
+        <echo>Http Client</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.actions.routing.http.HttpRouter" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="endpointUrl=http://localhost:8080/Quickstart_http_gateway/http/soap/"/>
+
+			<!-- The EBWS is secured with container level security -->
+            <arg value="configurators=HttpProtocol,AuthBASIC"/>
+            <arg value="method=POST"/>
+            <arg value="auth-username=kermit"/>
+            <arg value="auth-password=thefrog"/>
+            <arg value="authscope-host=localhost"/>
+            <arg value="authscope-port=8080"/>
+			<!-- The actual payload to POST -->
+            <arg value="payload=soap-login.xml"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+</project>

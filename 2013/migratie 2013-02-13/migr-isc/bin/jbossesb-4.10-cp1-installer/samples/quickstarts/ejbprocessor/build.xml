@@ -1,0 +1,65 @@
+<project name="Quickstart_EjbProcessor" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+	<property name="quickstart.classes.includes" value="**/Simple.class, **/SimpleRemote.class"/>
+
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<property name="ejb.jar" value="SimpleSLSB.jar"/>
+	<property name="ejb.build.dir" value="${build.dir}/ejb"/>
+	<property name="ejb.classes.dir" value="${build.dir}/classes"/>
+	<property name="ejb.output.dir" value="${ejb.build.dir}/output"/>
+
+	<target name="runtest" depends="compile" description="sends a JMS message to queue/quickstart_ejbprocessor_Request_gw">
+        <echo>Runs Test JMS Sender</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.ejbprocessor.test.SendJMSMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="Hello EJBProcessor Service"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+	 <target name="sendesb" depends="compile"
+        description="Will send an esb Message">
+        <echo>Runs Test ESB Message Sender</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.ejbprocessor.test.SendEsbMessage" failonerror="true">
+            <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="EJBProcessor"/> <!--  service category -->
+            <arg value="SimpleService"/>  <!--  service name -->
+            <arg value="EJBProcessor quickstart - no Gateway"/> <!--  Message text -->
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+	<target name="quickstart-specific-checks">
+		<antcall target="assert-ejb3-available"/>
+	</target>
+	
+	<target name="quickstart-specific-assemblies">
+		<mkdir dir="${ejb.output.dir}"/>
+		<delete dir="${ejb.classes.dir}" quiet="true"/>
+		<mkdir dir="${ejb.classes.dir}"/>
+		<javac srcdir="${basedir}/ejb/src" destdir="${ejb.classes.dir}" debug="true" deprecation="true">
+			<classpath refid="compile-classpath" />
+		</javac>
+
+		<jar destfile="${ejb.output.dir}/${ejb.jar}">
+			<fileset dir="${ejb.classes.dir}"/>
+		</jar>
+	</target>
+
+	<target name="quickstart-specific-deploys">
+        <echo message="Copying ${ejb.jar} to ${org.jboss.esb.server.deploy.dir}/${ejb.jar}"/>
+		<copy file="${ejb.output.dir}/${ejb.jar}" overwrite="true" todir="${org.jboss.esb.server.deploy.dir}" />
+    </target>
+
+    <target name="quickstart-specific-undeploys">
+		<delete file="${org.jboss.esb.server.deploy.dir}/${ejb.jar}" quiet="true"/>
+    </target>
+
+</project>

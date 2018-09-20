@@ -1,0 +1,67 @@
+<project name="Quickstart_recipient_list" default="runtest" basedir=".">
+	
+    <description> 
+            ${ant.project.name}
+            ${line.separator}
+    </description>
+
+    <property name="additional.deploys" value="MyESBRules-XPath.drl"/>
+
+    <!-- Import the base Ant build script... -->
+    <import file="../conf/base-build.xml"/>
+
+    <target name="runtest-cbr" depends="compile">
+        <echo>Runs Content Based Router Test</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.recipientList.test.SendCBRJMSMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="ESB recipient list pattern quickstart - content based router test"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+    <target name="runtest" depends="compile">
+        <echo>Runs JMS Sender - to destination channel</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.recipientList.test.SendJMSMessage" failonerror="true">
+            <sysproperty key="log4j.configuration" value="${log4j.xml}"/> 
+            <arg value="ESB recipient list pattern quickstart - message to destination channel"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>  
+
+    <target name="static-router" depends="compile">
+        <echo>Runs Static-Router Test</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.recipientList.test.SendStaticRouterJMSMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="ESB recipient list pattern quickstart - static router test"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+    <target name="receive-destination" depends="compile">
+	        <echo>Runs Test Recipient List destination regular message receiver</echo>
+	        <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.recipientList.test.ReceiveJMSMessage" failonerror="true">
+		    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	            <arg value="queue/qsrecipientlist_regular_Request"/>  
+	            <classpath refid="exec-classpath"/>
+	        </java>
+	    </target>	
+	
+    <target name="receive-destination1" depends="compile">
+	        <echo>Runs Test Recipient List destination 1 message receiver</echo>
+	        <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.recipientList.test.ReceiveJMSMessage" failonerror="true">
+	            <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+	            <arg value="queue/qsrecipientlist_1_Request"/>  
+	            <classpath refid="exec-classpath"/>
+	        </java>
+	    </target>		
+	
+	   <target name="receive-destination2" depends="compile">
+		        <echo>Runs Test Recipient List destination 2 message receiver</echo>
+		        <java fork="no" classname="org.jboss.soa.esb.samples.quickstart.recipientList.test.ReceiveJMSMessage" failonerror="true">
+			    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		            <arg value="queue/qsrecipientlist_2_Request"/>  
+		            <classpath refid="exec-classpath"/>
+		        </java>
+		    </target>		
+	
+</project>

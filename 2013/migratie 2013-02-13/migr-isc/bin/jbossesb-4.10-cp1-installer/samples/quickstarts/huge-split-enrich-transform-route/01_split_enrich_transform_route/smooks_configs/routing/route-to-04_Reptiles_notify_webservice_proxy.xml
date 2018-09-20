@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                     xmlns:ftl="http://www.milyn.org/xsd/smooks/freemarker-1.1.xsd"
+                     xmlns:esbr="http://www.jboss.org/xsd/jbossesb/smooks/routing-1.0.xsd">
+
+    <!--
+        At the end of every order-item, generate an <ord> split message for the "02_XML" Service
+        and bind it back into the bean context under a bean ID of "02_XML_OrderItem"...
+     -->
+    <ftl:freemarker applyOnElement="order-item">
+        <ftl:template><!--<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:ord="http://ordermanagement/ReptilesNotifyWS">
+   <soapenv:Header/>
+   <soapenv:Body>
+      <ord:notify>
+         <notification>
+            <date>${orderDetail.date?string("yyyy-MM-dd'T'HH:mm:ss")}</date>
+            <email>${accounts[0].EMAIL}</email>
+            <firstName>${accounts[0].FIRSTNAME}</firstName>
+            <lastName>${accounts[0].LASTNAME}</lastName>
+            <product>${product.NAME} (${product.ATTR1})</product>
+            <quantity>${orderItem.quantity}</quantity>
+            <totalPrice>${product.LISTPRICE?c}</totalPrice>
+         </notification>
+      </ord:notify>
+   </soapenv:Body>
+</soapenv:Envelope>--></ftl:template>
+        <ftl:use>
+            <ftl:bindTo id="04_SOAP_OrderItem" />
+        </ftl:use>
+    </ftl:freemarker>
+
+    <!--
+        At the end of every order-item, route the "Reptiles Notification" SOAP message ("04_SOAP_OrderItem") to the
+        "04_Reptiles_notify_webservice_proxy" Service, if the order item product.CATEGORY is "REPTILES"...
+    -->
+    <esbr:routeBean beanIdRef="04_SOAP_OrderItem" toServiceCategory="HugeQS" toServiceName="04_Reptiles_notify_webservice_proxy" routeOnElement="order-item">
+        <condition><!-- product.CATEGORY == "REPTILES" --></condition>
+    </esbr:routeBean>
+
+</smooks-resource-list>

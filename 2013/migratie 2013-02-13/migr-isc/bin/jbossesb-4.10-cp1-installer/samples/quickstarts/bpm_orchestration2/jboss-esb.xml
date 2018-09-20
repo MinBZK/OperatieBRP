@@ -1,0 +1,233 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+              <jms-bus busid="deployGwChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_deploy_Request_gw" />
+              </jms-bus>
+              <jms-bus busid="deployEsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_deploy_Request_esb" />
+              </jms-bus>              
+              <jms-bus busid="startGwChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_start_Request_gw" />
+                     <!-- quickstart_bpm_orchestration2_start_Request_gw -->
+                     <!-- DVDStore_Orders -->
+                     <!-- Petstore_Orders -->
+              </jms-bus>
+              <jms-bus busid="startEsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_start_Request_esb" />
+              </jms-bus>
+              <jms-bus busid="service1EsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_service1_Request_esb" />
+              </jms-bus>
+              <jms-bus busid="service2EsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_service2_Request_esb" />
+              </jms-bus>
+              <jms-bus busid="service3EsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_service3_Request_esb" />
+              </jms-bus>
+              <jms-bus busid="service4EsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_service4_Request_esb" />
+              </jms-bus>     
+              <jms-bus busid="service5EsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_service5_Request_esb" />
+              </jms-bus>
+              <jms-bus busid="service6EsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_service6_Request_esb" />
+              </jms-bus>
+              <jms-bus busid="service7EsbChannel">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_service7_Request_esb" />
+              </jms-bus>              
+              <jms-bus busid="resultsService">
+                  <jms-message-filter dest-type="QUEUE"
+                      dest-name="queue/quickstart_bpm_orchestration2_results_service_esb" />
+              </jms-bus>                       
+          </jms-provider>
+      </providers>
+
+      <services>
+        <service category="BPM_Orchestration2_Starter_Service" name="Starter_Service"
+                 description="BPM Orchestration Sample 2: Use this service to start a process instance">
+            <listeners>
+                <jms-listener name="JMS-Gateway" busidref="startGwChannel"
+                    is-gateway="true"/>
+                <jms-listener name="ESB-Listener" busidref="startEsbChannel"/>
+            </listeners>
+            <actions mep="OneWay">
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+				<action name="dump1" class="org.jboss.soa.esb.actions.SystemPrintln">
+                   		<property name="printfull" value="true"/>
+				</action>                    
+				<action  name="start_a_new_process_instance" 
+                   class="org.jboss.soa.esb.services.jbpm.actions.BpmProcessor">
+                    <property name="command" value="StartProcessInstanceCommand" />
+                    <property name="process-definition-name" value="bpm_orchestration2Process"/>   
+                     <property name="esbToBpmVars">
+                        <mapping esb="eVar1" bpm="counter"  value="45" />
+                        <mapping esb="BODY_CONTENT" bpm="theBody" />
+                    </property>
+				</action>
+
+				<action name="dump3" class="org.jboss.soa.esb.actions.SystemPrintln">
+                   		<property name="printfull" value="true"/>
+				</action>
+            </actions>
+        </service>
+        
+        <service category="BPM_Orchestration2_Service1" name="Service1"
+                 description="BPM Orchestration Sample 2: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service1EsbChannel"/>
+            </listeners>
+            <actions>
+
+                 <action name="dump" class="org.jboss.soa.esb.actions.SystemPrintln">
+                   	<property name="printfull" value="true"/>
+                 </action>
+
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service1.groovy" />
+                </action>
+                <action name="alert" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration2.esb_actions.SimpleJMSNotifier">
+					<property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration2_service1_Alert" />     
+                </action>
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+        <service category="BPM_Orchestration2_Service2" name="Service2"
+                 description="BPM Orchestration Sample 2: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service2EsbChannel"/>
+            </listeners>
+            <actions>
+            
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service2.groovy" />
+                </action>
+                <action name="alert" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration2.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration2_service2_Alert" />     
+                </action>
+                
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+        <service category="BPM_Orchestration2_Service3" name="Service3"
+                 description="BPM Orchestration Sample 2: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service3EsbChannel"/>
+            </listeners>
+            <actions>
+            
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service3.groovy" />
+                </action>
+                <action name="alert" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration2.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration2_service3_Alert" />     
+                </action>
+                
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+        
+        <service category="BPM_Orchestration2_Service4" name="Service4"
+                 description="BPM Orchestration Sample 2: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service4EsbChannel"/>
+            </listeners>
+            <actions>            
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service4.groovy" />
+                </action>                
+                <action name="alert" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration2.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration2_service4_Alert" />     
+                </action>                
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+        <service category="BPM_Orchestration2_Service5" name="Service5"
+                 description="BPM Orchestration Sample 2: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service5EsbChannel"/>
+            </listeners>
+            <actions>            
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service5.groovy" />
+                </action>                
+                <action name="alert" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration2.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration2_service5_Alert" />     
+                </action>
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+        <service category="BPM_Orchestration2_Service6" name="Service6"
+                 description="BPM Orchestration Sample 2: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service6EsbChannel"/>
+            </listeners>
+            <actions>            
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service6.groovy" />
+                </action>  
+                 
+                <action name="alert" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration2.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration2_service6_Alert" />     
+                </action>
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+        <service category="BPM_Orchestration2_Service7" name="Service7"
+                 description="BPM Orchestration Sample 2: this is a service invoked within the process">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="service7EsbChannel"/>
+            </listeners>
+            <actions>            
+                <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/service7.groovy" />
+                </action>  
+                 
+                <action name="alert" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration2.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration2_service7_Alert" />     
+                </action>
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+            </actions>
+        </service>
+
+        
+        
+        <service category="BPM_Orchestration2_ResultsService" name="ResultsService"
+                 description="BPM Orchestration Sample 2: Sends outbound results of the process flow">
+            <listeners>
+                <jms-listener name="ESB-Listener" busidref="resultsService"/>
+            </listeners>
+            <actions>
+                 <action name="groovy" class="org.jboss.soa.esb.actions.scripting.GroovyActionProcessor">
+                  <property name="script" value="/scripts/results_service.groovy" />
+                </action>
+                <action name="alert" class="org.jboss.soa.esb.samples.quickstarts.bpm_orchestration2.esb_actions.SimpleJMSNotifier">
+								  <property name="ALERT_QUEUE_NAME" value="quickstart_bpm_orchestration2_results_Alert" />     
+                </action>     
+                <action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+                <action name="results-message" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="message" value="SUCCESS!" />
+				</action>                
+                                             
+            </actions>
+        </service>
+      </services>
+
+</jbossesb>

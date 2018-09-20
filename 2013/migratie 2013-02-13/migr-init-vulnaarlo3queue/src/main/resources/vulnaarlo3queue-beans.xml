@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+
+    <!-- Deze wordt niet altijd automatisch geladen dus even expliciet toevoegen -->
+    <context:property-placeholder location="classpath*:config.properties"/>
+
+    <!-- Hornet queue -->
+    <bean name="queueConnectionFactory" class="org.hornetq.jms.client.HornetQXAConnectionFactory">
+        <constructor-arg value="false"/>
+        <constructor-arg>
+            <bean name="transportConfiguration" class="org.hornetq.api.core.TransportConfiguration">
+                <constructor-arg value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory"/>
+                <constructor-arg>
+                    <map key-type="java.lang.String" value-type="java.lang.Object">
+                        <entry key="host" value="${initQueue.host}"/>
+                        <entry key="port" value="${initQueue.port}"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <!-- Cache for JMS connection -->
+    <bean id="cachedConnectionFactory"
+          class="org.springframework.jms.connection.CachingConnectionFactory"
+          p:targetConnectionFactory-ref="queueConnectionFactory"
+          p:sessionCacheSize="10"/>
+
+    <!-- Hornet Queue -->
+    <bean name="initVullingQueueHornet" class="org.hornetq.jms.client.HornetQQueue">
+        <constructor-arg value="${initQueue.name}"/>
+    </bean>
+
+    <!-- jmsTemplate -->
+    <bean name="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cachedConnectionFactory"/>
+        <property name="receiveTimeout" value="30000"/>
+        <property name="sessionTransacted" value="true"/>
+    </bean>
+
+    <!-- Services en Repositories -->
+    <tx:annotation-driven/>
+    <context:component-scan base-package="nl.moderniseringgba.migratie.init.vulnaarlo3queue"/>
+
+    <!-- Datasource -->
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName:org.postgresql.Driver}"/>
+        <property name="url" value="${jdbc.url:jdbc:postgresql://localhost/kern}"/>
+        <property name="username" value="${jdbc.username:postgres}"/>
+        <property name="password" value="${jdbc.password:postgres}"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive" value="200"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxIdle" value="5"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="true"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+        <property name="timeBetweenEvictionRunsMillis" value="5000"/>
+        <property name="poolPreparedStatements" value="true"/>
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+</beans>

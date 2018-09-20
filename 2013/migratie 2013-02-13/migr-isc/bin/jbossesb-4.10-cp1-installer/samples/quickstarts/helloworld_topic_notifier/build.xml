@@ -1,0 +1,64 @@
+<project name="Quickstart_helloworld_topic_notifier" default="run" basedir=".">
+
+	<property environment="env" />
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+	<target name="config">
+		<property name="results.dir" location="."/>	
+		<!--
+		<echoproperties/>
+		-->
+		<copy file="jboss-esb-unfiltered.xml"
+			tofile="jboss-esb.xml" overwrite="true">
+			<filterset>
+				<filter token="results.dir" value="file:///${results.dir}"/>
+				<filter token="tmp.dir" value="${java.io.tmpdir}"/>
+			</filterset>	
+		</copy>
+	</target>
+
+	<target name="quickstart-specific-clean">
+		<delete file="${basedir}/results.log"/>
+		<delete file="${basedir}/jboss-esb.xml"/>
+	</target>
+	
+	<target name="runtest" depends="compile" 
+		description="sends a JMS message to queue/quickstart_helloworld_topic_notifier_Request_gw">
+		<echo>Runs Test JMS Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.helloworldtopicnotifier.test.SendJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<arg value="Hello World"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>  
+
+	<target name="receive" depends="compile"
+		description="Receives ESB message from topic">
+                <echo>Runs Test ESB Message Receiver</echo>
+                <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.helloworldtopicnotifier.ReceiveJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+                        <arg value="/topic/helloworldtopic"/> <!--  topicName -->
+                        <arg value="non-durable"/> <!--  create a non-durable topic -->
+                        <classpath refid="exec-classpath"/>
+                </java>
+	</target>
+	
+	<target name="receive-durable" depends="compile"
+		description="Receives ESB message from topic">
+                <echo>Runs Test ESB Message Receiver</echo>
+                <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.helloworldtopicnotifier.ReceiveJMSMessage" failonerror="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+                        <arg value="/topic/helloworldtopic"/> <!--  topicName -->
+			<arg value="durable"/> <!--  create a durable topic -->
+                        <classpath refid="exec-classpath"/>
+                </java>
+
+	</target>
+</project>

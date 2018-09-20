@@ -1,0 +1,163 @@
+<project name="Quickstart_Huge_Enrich_Split_Transform_Route" default="run" basedir=".">
+
+    <description>
+        ${ant.project.name}
+        ${line.separator}
+    </description>
+
+    <!-- Import the base Ant build script... -->
+    <import file="../conf/base-build.xml"/>
+
+    <target name="run" >
+        <echo message="This target is not used by this Quickstart.  Please read the 'README.html' file." />
+    </target>
+
+    <target name="runtest" >
+        <echo message="This target is not used by this Quickstart.  Please read the 'README.html' file." />
+    </target>
+
+	<target name="start-hsqldb-server" depends="classpath-dependencies-as4, classpath-dependencies-as5">
+		<java classname="org.hsqldb.Server" dir="05_Database" fork="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>	
+			<arg value="-database" />
+			<arg value="db" />
+			<classpath refid="exec-classpath" />
+		</java>
+	</target>
+
+	<target name="start-hsqldb-manager" depends="classpath-dependencies-as4, classpath-dependencies-as5">
+		<java classname="org.hsqldb.util.DatabaseManager" dir="05_Database" fork="true">
+			<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+			<classpath refid="exec-classpath" />
+		</java>
+	</target>
+
+    <target name="01_split_enrich_transform_route" depends="compile,compile_high_price_model" description="run split_transform_route Service">
+        <echo>Split Enrich Transform Route Service:</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <!-- jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y"/ -->
+            <arg value="${basedir}/01_split_enrich_transform_route/jbossesb.xml"/>
+            <classpath>
+                <fileset dir="05_Database" includes="hsqldb.jar"/>
+                <pathelement location="01_split_enrich_transform_route" />
+                <pathelement location="03_High_Price/classes" />
+                <path refid="exec-classpath" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="02_Low_Price" depends="compile" description="run 02_XML Service">
+        <echo>02_Low_Price Service:</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">
+            <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="${basedir}/02_Low_Price/jbossesb.xml"/>
+            <classpath>
+                <path refid="exec-classpath" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="03_High_Price" depends="compile_high_price_model" description="run 03_JavaObjects Service">
+        <echo>03_High_Price Service:</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="${basedir}/03_High_Price/jbossesb.xml"/>
+            <classpath>
+                <path refid="exec-classpath" />
+                <pathelement location="03_High_Price/classes" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="04_Reptiles_notify_webservice" depends="compile">
+        <antcall target="quickstart-specific-assemblies" />
+        <copy todir="${org.jboss.esb.server.deploy.dir}" file="build/${ant.project.name}.war"/>
+
+        <echo message="*" />
+        <echo message="****************************************************************************************************" />
+        <echo message="The Reptile Notification Webservice has been deployed to '${org.jboss.esb.server.deploy.dir}'." />
+        <echo message="****************************************************************************************************" />
+        <echo message="*" />
+    </target>
+
+    <target name="createMessage" depends="compile" description="Create the input message.">
+        <echo>Creating input message...</echo>
+        <input message="How many Order Items should the message contain? (Simply press return for 20 Order Items)" defaultvalue="20" addproperty="numOrderItems" />
+        <java fork="yes" classname="org.jboss.soa.esb.example.MessageGenerator" failonerror="true">
+            <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="${numOrderItems}"/>
+            <classpath refid="exec-classpath"/>
+        </java>
+    </target>
+
+    <target name="compile_high_price_model" depends="compile" >
+        <!-- Compile the 03_High_Price object model... -->
+        <delete dir="03_High_Price/classes" />
+        <mkdir dir="03_High_Price/classes" />
+        <javac srcdir="03_High_Price/src" destdir="03_High_Price/classes" debug="true" deprecation="true">
+            <classpath refid="compile-classpath" />
+        </javac>
+    </target>
+
+    <target name="generate_order_binding_template" depends="compile_high_price_model" description="Generate 03_High_Price Order Binding Template">
+        <java fork="yes" classname="org.milyn.javabean.gen.ConfigGenerator" failonerror="true">
+            <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <arg value="-c"/>
+            <arg value="org.jboss.soa.esb.example.highprice.Order"/>
+            <arg value="-o"/>
+            <arg value="01_split_enrich_transform_route/smooks_configs/routing/order-binding-template.xml"/>                      
+            <classpath>
+                <path refid="exec-classpath" />
+                <pathelement location="03_High_Price/classes" />
+            </classpath>
+        </java>
+    </target>
+
+    <target name="select" description="Select the orders from the database">
+        <sql print="true" driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:9002" userid="sa" autocommit="true" password="" classpath="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/lib/hsqldb.jar">
+            <transaction>select * from orders</transaction>
+        </sql>
+    </target>
+
+    <target name="delete" description="Delete the orders in the database">
+        <sql print="true" driver="org.hsqldb.jdbcDriver" url="jdbc:hsqldb:hsql://localhost:9002" userid="sa" autocommit="true" password="" classpath="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}/lib/hsqldb.jar">
+            <transaction>delete from orders</transaction>
+        </sql>
+    </target>
+
+    <target name="quickstart-specific-checks" depends="assert-ws-available"/>
+
+    <target name="quickstart-specific-dependencies">
+        <path id="quickstart-dependencies-classpath">
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jbossws-client.jar,jboss-remoting.jar" />
+        </path>
+    </target>
+
+    <target name="quickstart-specific-assemblies" depends="dependencies">
+
+        <!-- Compile the 03_High_Price object model... -->
+        <delete dir="03_High_Price/classes" />
+        <mkdir dir="03_High_Price/classes" />
+        <javac srcdir="03_High_Price/src" destdir="03_High_Price/classes" debug="true" deprecation="true">
+            <classpath refid="compile-classpath" />
+        </javac>
+
+        <!-- Compile the webservice... -->
+        <delete dir="04_Reptiles_notify_webservice/WEB-INF/classes" />
+        <mkdir dir="04_Reptiles_notify_webservice/WEB-INF/classes" />
+        <javac srcdir="04_Reptiles_notify_webservice/WEB-INF/src" destdir="04_Reptiles_notify_webservice/WEB-INF/classes" debug="true" deprecation="true">
+            <classpath refid="compile-classpath" />
+        </javac>
+
+        <!-- Assemble the webservice... -->
+        <war warfile="build/${ant.project.name}.war" webxml="04_Reptiles_notify_webservice/WEB-INF/web.xml" basedir="04_Reptiles_notify_webservice" />
+    </target>    
+
+    <target name="quickstart-specific-clean">
+        <delete dir="03_High_Price/classes" />
+        <delete dir="04_Reptiles_notify_webservice/WEB-INF/classes" />
+    </target>
+
+</project>

@@ -1,0 +1,15 @@
+CREATE TABLE gateway_table
+(
+unique_id INTEGER AUTO_INCREMENT NOT NULL PRIMARY KEY,
+data_column VARCHAR(255) NOT NULL,
+status_col VARCHAR(255) NOT NULL,
+timestamp_col VARCHAR(255)
+);
+
+CREATE TABLE TX_ESB_MESSAGES
+(
+message_id VARCHAR(255) NOT NULL,
+data_column CLOB NOT NULL,
+status_col VARCHAR(255) NOT NULL,
+timestamp_col VARCHAR(255)
+);

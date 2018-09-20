@@ -1,0 +1,10 @@
+TRUNCATE conversietabel.aangifteadreshouding RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.adellijketitelpredikaat RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.autoriteitvanafgifte RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.redeninhoudingvermissingreisdocument RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.redenontbindinghuwelijkpartnerschap RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.redenopschorting RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.redenverkrijgingverliesnlschap RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.soortnlreisdocument RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.verblijfstitel RESTART IDENTITY CASCADE;
+TRUNCATE conversietabel.voorvoegsel RESTART IDENTITY CASCADE;

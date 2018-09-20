@@ -1,0 +1,79 @@
+<project name="Quickstart_exceptions_faults" default="run" basedir=".">
+	
+	<description> 
+		${ant.project.name}
+		${line.separator}
+	</description>
+	
+	<!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+	
+  <target name="runtest" description="sends a JMS Message to the ESB" depends="compile">
+     <echo>Runs Test JMS Sender</echo>
+     <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.exceptions.test.SendJMSMessage" failonerror="true">
+       <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+       <arg value="queue/quickstart_exceptions_faults_GW"/>
+       <arg value="ExceptionCaughtService"/>
+     	 <arg value="Via Gateway"/>
+		<classpath refid="exec-classpath"/>
+     </java>
+  </target>  
+  	
+  <target name="callAsync" depends="compile"
+		description="Will send an esb Message">
+		<echo>Runs Test ESB Message Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.exceptions.test.SendEsbMessage" failonerror="true">
+	          <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		  <arg value="ExceptionalServices"/>
+		  <arg value="LostMessageService"/>  
+			<arg value="NO Gateway: Async/No Reply No Catch"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>	
+	
+  <target name="callSync" depends="compile"
+		description="Will send an esb Message">
+		<echo>Runs Test ESB Message Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.exceptions.test.SendEsbMessageSync" failonerror="true">
+		  <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+		  <arg value="ExceptionalServices"/>
+		  <arg value="LostMessageService"/>  
+			<arg value="NO Gateway: Sync w catch in client-side"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>		
+  
+  <target name="runtest2" description="sends a JMS Message to the ESB" depends="compile">
+     <echo>Runs Test JMS Sender</echo>
+     <java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.exceptions.test.SendJMSMessage" failonerror="true">
+       <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+       <arg value="queue/quickstart_exceptions_faults_GW"/>
+       <arg value="ExceptionCaughtService"/>
+     	 <arg value="Via Gateway"/>
+		<classpath refid="exec-classpath"/>
+     </java>
+  </target>  
+  
+  <target name="callSync2" depends="compile"
+		description="Will send an esb Message">
+		<echo>Runs Test ESB Message Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.exceptions.test.SendEsbMessageSync" failonerror="true">
+		  <arg value="ExceptionalServices"/>
+		  <arg value="ExceptionCaughtService"/>  
+			<arg value="NO Gateway: Sync w/catch in server-side"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>			
+
+  <target name="callAsync2" depends="compile"
+		description="Will send an esb Message">
+		<echo>Runs Test ESB Message Sender</echo>
+		<java fork="yes" classname="org.jboss.soa.esb.samples.quickstart.exceptions.test.SendEsbMessage" failonerror="true">
+		  <arg value="ExceptionalServices"/>
+		  <arg value="ExceptionCaughtService"/>  
+			<arg value="NO Gateway: Async/No Reply w/Catch"/>
+			<classpath refid="exec-classpath"/>
+		</java>
+	</target>	
+	
+</project>

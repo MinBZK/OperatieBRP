@@ -1,0 +1,57 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+        <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+     
+            <jms-bus busid="dynamicrouterChannel1">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsdynamicrouter_A" />
+            </jms-bus>   
+
+            <jms-bus busid="dynamicrouterChannel2">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsdynamicrouter_B" />
+            </jms-bus>   
+
+            <jms-bus busid="dynamicrouterInputChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsdynamicrouter_Input_Request" />
+            </jms-bus>
+
+            <jms-bus busid="dynamicrouterControlChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/qsdynamicrouter_Control_Request" />
+            </jms-bus>
+  
+          </jms-provider>
+      </providers>
+      
+      <services>     
+     
+        <service category="incomingCategory1" name="incomingService" description="incoming service">
+            <listeners>
+                 <jms-listener name="incoming-Gateway" busidref="dynamicrouterInputChannel" is-gateway="true" />
+                 <jms-listener name="native1" busidref="dynamicrouterChannel1"/> 
+            </listeners>
+            <actions mep="OneWay">
+                <action name="action1" 
+                class="org.jboss.soa.esb.samples.quickstart.dynamicRouter.MyDynamicRouterAction" 
+                process="processMessage"  />    
+            </actions>   
+        </service>
+        
+        <service category="incomingCategory2" name="controlService" description="control service">
+            <listeners>
+                 <jms-listener name="control-Gateway" busidref="dynamicrouterControlChannel" is-gateway="true" />
+                 <jms-listener name="native2" busidref="dynamicrouterChannel2"/> 
+            </listeners>
+            <actions mep="OneWay">
+                <action name="action2" 
+                class="org.jboss.soa.esb.samples.quickstart.dynamicRouter.MyControlAction" 
+                process="processControlMessage"  />  
+            </actions>   
+        </service>
+     
+      </services>     
+     
+</jbossesb>

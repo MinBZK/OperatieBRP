@@ -1,0 +1,62 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <jms-provider name="JBM" connection-factory="ConnectionFactory">
+              <jms-bus busid="quickstartGwChannel">
+                  <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_ejbprocessor_Request_gw" />
+              </jms-bus>
+              <jms-bus busid="quickstartEsbChannel">
+                  <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_ejbprocessor_Request_esb" />
+              </jms-bus>
+
+          </jms-provider>
+      </providers>
+
+      <services>
+        <service category="EJBProcessor" name="SimpleService" description="Service that demonstrates calling EJBs">
+
+            <listeners>
+                <jms-listener name="JMS-Gateway" busidref="quickstartGwChannel" maxThreads="1" is-gateway="true" />
+                <jms-listener name="helloWorld" busidref="quickstartEsbChannel" maxThreads="1" />
+            </listeners>
+
+            <actions mep="OneWay">
+
+				<action name="EJBTestVoid" class="org.jboss.soa.esb.actions.EJBProcessor">
+					<property name="ejb3" value="true" />
+					<property name="method" value="printMessage" />
+					<property name="jndi-name" value="SimpleSLSB/remote" />
+					<property name="initial-context-factory" value="org.jnp.interfaces.NamingContextFactory" />
+					<property name="provider-url" value="localhost:1099" />
+					<property name="ejb-params">
+						<arg0 type="java.lang.String">org.jboss.soa.esb.message.defaultEntry</arg0>
+					</property>
+				</action>
+
+				<action name="EJBTestWithReturnValue" class="org.jboss.soa.esb.actions.EJBProcessor">
+					<property name="ejb3" value="true" />
+					<property name="method" value="getMessage" />
+					<property name="jndi-name" value="SimpleSLSB/remote" />
+					<property name="initial-context-factory" value="org.jnp.interfaces.NamingContextFactory" />
+					<property name="provider-url" value="localhost:1099" />
+					<property name="esb-out-var" value="org.jboss.soa.esb.message.defaultEntry"/>
+				</action>
+
+				<action name="debug" class="org.jboss.soa.esb.actions.SystemPrintln">
+					<property name="printfull" value="false"/>
+					<property name="message" value="Value from getMessage"/>
+				</action>
+
+				<!-- The next action is for Continuous Integration testing -->
+				<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+
+			</actions>
+		</service>
+
+	  </services>
+
+</jbossesb>

@@ -1,0 +1,47 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd">
+
+    <providers>
+        <fs-provider name="FSprovider1">
+            <fs-bus busid="ediFileMessageBus">
+                <fs-message-filter
+                        directory="build"
+                        input-suffix=".edi"
+                        work-suffix=".esbWorking"
+                        post-delete="false"  post-directory="build"  post-suffix=".sentToEsb"
+                        error-delete="false" error-directory="build" error-suffix=".IN_ERROR" />
+            </fs-bus>
+        </fs-provider>
+    </providers>
+
+    <services>
+
+    <service category="HugeQS" name="SplitterService" description="Splits out the order items and routes them.">
+        <listeners>
+            <fs-listener name="FileGateway" busidref="ediFileMessageBus" is-gateway="true" poll-frequency-seconds="2">
+                <property name="composer-class" value="org.jboss.soa.esb.smooks.splitting.FileStreamSplitter"/>
+                <property name="splitterConfig" value="/smooks_configs/main.xml"/>
+                <!-- property name="reportPath" value="/zap/report.html"/ -->
+             </fs-listener>
+        </listeners>
+        <actions mep="OneWay">
+            <action name="print" class="org.jboss.soa.esb.example.PrintMessage">
+                <property name="delay" value="500" />
+            </action>
+        </actions>
+    </service>
+
+    <service category="HugeQS" name="04_Reptiles_notify_webservice_proxy" description="Routes the SOAP requests to the 'Reptiles Notification' Webservice">
+        <actions mep="OneWay">
+            <action name="httprouter" class="org.jboss.soa.esb.actions.routing.http.HttpRouter">
+                <property name="endpointUrl" value="http://127.0.0.1:8080/Quickstart_Huge_Enrich_Split_Transform_Route/ReptilesNotifyWS" />
+                <property name="method" value="POST" />
+                <property name="responseType" value="STRING" />
+            </action>
+        </actions>
+    </service>
+
+    </services>
+</jbossesb>

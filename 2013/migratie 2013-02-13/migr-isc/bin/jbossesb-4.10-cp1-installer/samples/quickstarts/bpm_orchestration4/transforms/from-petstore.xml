@@ -1,0 +1,40 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+                      xmlns:jb="http://www.milyn.org/xsd/smooks/javabean-1.2.xsd"
+                      default-target-profile="from:petstore">
+
+    <!-- Populate the OrderHeader -->
+    <jb:bean beanId="orderHeader" class="org.jboss.soa.esb.store.OrderHeader" createOnElement="order">
+        <jb:value property="orderId"     data="Order/@orderId" />
+        <jb:value property="orderDate"   data="Order/@orderDate" decoder="Calendar">
+            <jb:decodeParam name="format">EEE MMM dd HH:mm:ss z yyyy</jb:decodeParam>
+			<jb:decodeParam name="locale-language">en</jb:decodeParam>
+            <jb:decodeParam name="locale-country">US</jb:decodeParam> 
+        </jb:value>
+        <jb:value property="statusCode"  data="Order/@status" />
+        <jb:value property="totalAmount" data="Order/@totalPrice"/>
+    </jb:bean>
+
+    <!-- Populate the Customer -->
+    <jb:bean beanId="customer" class="org.jboss.soa.esb.store.Customer" createOnElement="order">
+        <jb:value property="userName"  data="order/@userName" />
+        <jb:value property="firstName" data="order/@shipToFirstName" />
+        <jb:value property="lastName"  data="order/@shipToLastName" />
+        <jb:value property="state"     data="order/@shipState" />
+    </jb:bean>
+
+    <!-- Populate the OrderItem list -->
+    <jb:bean beanId="orderItemList" class="java.util.ArrayList" createOnElement="LineItems">
+        <jb:wiring beanIdRef="orderItem" />
+    </jb:bean>
+
+    <!-- Populate the OrderItem instance -->
+    <jb:bean beanId="orderItem" class="org.jboss.soa.esb.store.OrderItem" createOnElement="LineItems/LineItem">
+        <jb:value property="position"  data="LineItem/@lineNumber" />
+        <jb:value property="quantity"  data="LineItem/@quantity" />
+        <jb:value property="productId" data="LineItem/Item/@itemId" />
+        <jb:value property="price"     data="LineItem/Item/@listPrice" />
+        <jb:value property="title"     data="LineItem/Item/@name" />
+    </jb:bean>
+    
+</smooks-resource-list>

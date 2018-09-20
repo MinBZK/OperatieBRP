@@ -1,0 +1,120 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>nl.moderniseringgba.migratie</groupId>
+		<artifactId>migr-isc</artifactId>
+		<version>0.0.33</version>
+		<relativePath>../migr-isc</relativePath>
+	</parent>
+	<groupId>nl.moderniseringgba.migratie.isc</groupId>
+	<artifactId>migr-isc-bericht</artifactId>
+	<name>Migr - ISC - Berichten</name>
+	<packaging>jar</packaging>
+	
+	<dependencies>
+		<!-- Project -->
+		<dependency>
+			<groupId>nl.moderniseringgba.migratie.conversie</groupId>
+			<artifactId>migr-conversie-model</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>nl.moderniseringgba.migratie</groupId>
+			<artifactId>migr-utils</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-codec</groupId>
+			<artifactId>commons-codec</artifactId>
+			<!-- Let op: JBOSS ESB levert commons codec 1.3 -->
+			<version>1.3</version>
+		</dependency>	
+		
+    <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>2.1</version>
+    </dependency>
+    <dependency>
+        <groupId>com.sun.xml.bind</groupId>
+        <artifactId>jaxb-impl</artifactId>
+        <version>2.2.6</version>
+    </dependency>
+
+		<!-- TEST -->
+		<!-- TEST -->
+		<!-- TEST -->
+	
+		<!-- junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>	
+
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>nl.moderniseringgba.migratie.conversie</groupId>
+			<artifactId>migr-conversie-model</artifactId>
+			<type>test-jar</type>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>	
+	
+	<build>
+		<plugins>
+        <!-- JAXB xjc plugin that invokes the xjc compiler to compile XML schema into Java classes.-->
+	        <plugin>
+	            <groupId>org.codehaus.mojo</groupId>
+	            <artifactId>jaxb2-maven-plugin</artifactId>
+                <version>1.5</version>
+	            <executions>
+                    <!--
+                        Voor het gebruik van meedere jaxb configuraties moet rekening gehouden worden met het volgende:
+                        Each execution needs its own stale file, otherwise the plugin will think there is nothing to generate 
+                        in the executions after the fist one. Need to set clearOutputDir to false for all but the first execution, 
+                        otherwise the Java sources generated in prior steps will be cleared (deleted). 
+                     -->
+	                <execution>
+                        <id>brp-xjc</id>
+	                    <goals>
+	                        <goal>xjc</goal>
+	                    </goals>
+                        <configuration>
+                            <schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
+                            <schemaFiles>BRP_Berichten.xsd</schemaFiles>
+                            <packageName>nl.moderniseringgba.isc.esb.message.brp.generated</packageName>
+                            <outputDirectory>${project.build.directory}/generated-sources/jaxb</outputDirectory>
+                            <bindingDirectory>${basedir}/src/main/resources</bindingDirectory>
+                            <bindingFiles>jaxb-bindings.xml</bindingFiles>
+                            <staleFile>${project.build.directory}/jaxb2/.brpXjcStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+	                </execution>
+                    <execution>
+                        <id>sync-xjc</id>
+                        <goals>
+                            <goal>xjc</goal>
+                        </goals>
+                        <configuration>
+                            <schemaDirectory>${basedir}/src/main/resources/xsd</schemaDirectory>
+                            <schemaFiles>SYNC_Berichten.xsd</schemaFiles>
+                            <packageName>nl.moderniseringgba.isc.esb.message.sync.generated</packageName>
+                            <outputDirectory>${project.build.directory}/generated-sources/jaxb</outputDirectory>
+                            <bindingDirectory>${basedir}/src/main/resources</bindingDirectory>
+                            <bindingFiles>jaxb-bindings.xml</bindingFiles>
+                            <staleFile>${project.build.directory}/jaxb2/.syncXjcStaleFlag</staleFile>
+                            <clearOutputDir>false</clearOutputDir>
+                        </configuration>
+                    </execution>
+	            </executions>
+	        </plugin>
+		</plugins>
+	</build>
+</project>
+

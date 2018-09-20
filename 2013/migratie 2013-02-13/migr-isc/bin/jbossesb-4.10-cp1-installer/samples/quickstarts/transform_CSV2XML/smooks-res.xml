@@ -1,0 +1,52 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<smooks-resource-list xmlns="http://www.milyn.org/xsd/smooks-1.1.xsd"
+        xmlns:csv="http://www.milyn.org/xsd/smooks/csv-1.1.xsd">
+
+    <profiles>
+        <profile base-profile="source-csv" />
+        <profile base-profile="canonical-xml" />
+    </profiles>
+
+    <csv:reader targetProfile="source-csv" fields="orderId,orderDate,statusCode,netAmount,totalAmount,tax,userName,firstName,lastName,state,orderLine1Position,orderLine1Quantity,orderLine1ProductId,orderLine1ProductTitle,orderLine1ProductPrice,orderLine2Position,orderLine2Quantity,orderLine2ProductId,orderLine2ProductTitle,orderLine2ProductPrice" />    
+
+	<resource-config target-profile="canonical-xml" selector="csv-set">
+		<resource type="xsl">
+            <![CDATA[
+			<xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:smooks-bean="xalan://org.milyn.templating.xslt.XalanJavabeanExtension"
+                extension-element-prefixes="smooks-bean"
+                version="1.0">
+
+                <xsl:output method="xml" encoding="UTF-8" />
+
+                <xsl:template match="*" name="templatelet">
+					<orders>
+						<xsl:for-each select="csv-record">
+							<Order orderId="{orderId}"
+                                orderDate="{orderDate}"
+                                statusCode="{statusCode}"
+                                netAmount="{netAmount}"
+                                totalAmount="{totalAmount}"
+                                tax="{tax}" >
+								<Customer userName="{userName}" firstName="{firstName}" lastName="{lastName}" state="{state}" />
+								<OrderLines>
+									<OrderLine posistion="{orderLine1Position}" quantity="{orderLine1Quantity}">
+										<Product  productId="{orderLine1ProductId}" title="{orderLine1ProductTitle}" price="{orderLine1ProductPrice}"/>
+									</OrderLine>
+									<OrderLine posistion="{orderLine2Position}" quantity="{orderLine2Quantity}">
+										<Product  productId="{orderLine2ProductId}" title="{orderLine2ProductTitle}" price="{orderLine2ProductPrice}"/>
+									</OrderLine>
+								</OrderLines>
+							</Order>
+						</xsl:for-each>
+					</orders>
+                </xsl:template>
+
+			</xsl:stylesheet>
+            ]]>
+        </resource>
+        <param name="is-xslt-templatelet">false</param>
+    </resource-config>
+
+	
+</smooks-resource-list>

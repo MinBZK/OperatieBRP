@@ -1,0 +1,53 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <hibernate-provider name="Hibernateprovider"
+		hibernate-cfg-file="hibernate.cfg.xml">
+          	<hibernate-bus busid="helloHibernateChannel" >
+			<hibernate-message-filter
+				classname="org.jboss.soa.esb.samples.quickstart.hibernateaction.Order"
+				event="onSave,onDelete"/>
+          	</hibernate-bus>
+          </hibernate-provider>
+          
+          <jms-provider name="JBossMQ" 
+          		connection-factory="ConnectionFactory">
+			    <jms-bus busid="quickstartEsbChannel">
+			        <jms-message-filter
+			            dest-type="QUEUE"
+			            dest-name="queue/quickstart_hibernate_action_Request_esb"
+			            selector="source='fromHelloworldHibernateAction'"
+			        />
+			    </jms-bus>
+			
+		   </jms-provider>
+
+      </providers>
+      
+      <services>
+        <service 
+			category="myCategory"
+			name="myHibernateListener"
+        	description="Hello World Hibernate Action (esb hibernate listener)">
+            <listeners>
+            	<hibernate-listener name="HibernateGateway"
+            		busidref="helloHibernateChannel"
+            		is-gateway="true"/>
+                <jms-listener name="helloWorldJmsAction"
+                              busidref="quickstartEsbChannel"
+                />
+            </listeners>
+            <actions mep="OneWay">
+                   <action name="action1" 
+                   	class="org.jboss.soa.esb.samples.quickstart.hibernateaction.MyAction" 
+                   	process="displayMessage" 
+                   	/>      
+            </actions>
+        </service>
+      </services>
+     
+</jbossesb>

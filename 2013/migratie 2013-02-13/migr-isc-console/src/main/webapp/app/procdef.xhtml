@@ -1,0 +1,220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+    >
+<ui:composition template="t_loggedin.xhtml">
+<ui:define name="menu">
+<ga:responseActions>
+    <ga:parameter name="id" target="#{id}" required="true">
+        <f:validateLongRange minimum="0"/>
+        <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+    </ga:parameter>
+    <ga:parameter name="view" target="#{viewMode}" default="ins"/>
+    <!-- process intsances parameters -->
+    <ga:parameter name="pi_key" target="#{pi_key}" default="">
+        <f:converter converterId="gravel.StringWildcardFilter"/>
+    </ga:parameter>
+    <ga:parameter name="fr" target="#{filter_running}" default="${true}">
+         <f:converter converterId="javax.faces.Boolean"/>
+     </ga:parameter>
+     <ga:parameter name="fs" target="#{filter_suspended}" default="${true}">
+         <f:converter converterId="javax.faces.Boolean"/>
+     </ga:parameter>
+     <ga:parameter name="fe" target="#{filter_ended}" default="${false}">
+         <f:converter converterId="javax.faces.Boolean"/>
+     </ga:parameter>
+
+    <!-- tasks parameters -->
+    <ga:parameter name="name" target="#{task_filter_name}" default="">
+        <f:converter converterId="gravel.StringWildcardFilter"/>
+    </ga:parameter>
+    <ga:parameter name="actor" target="#{task_filter_actor}" default="">
+        <f:converter converterId="gravel.StringWildcardFilter"/>
+    </ga:parameter>
+   <ga:parameter name="fn" target="#{task_filter_notstarted}" default="${true}">
+        <f:converter converterId="javax.faces.Boolean"/>
+    </ga:parameter>
+    <ga:parameter name="fr" target="#{task_filter_running}" default="${true}">
+        <f:converter converterId="javax.faces.Boolean"/>
+    </ga:parameter>
+    <ga:parameter name="fs" target="#{task_filter_suspended}" default="${true}">
+        <f:converter converterId="javax.faces.Boolean"/>
+    </ga:parameter>
+    <ga:parameter name="fe" target="#{task_filter_ended}" default="${false}">
+        <f:converter converterId="javax.faces.Boolean"/>
+    </ga:parameter>
+    <j4j:loadProcess id="#{id}" target="#{pd}"/>
+    <j4j:listTasksForProcess unless="#{viewMode != 'task'}" process="#{pd}" target="#{tasks}"/>
+    <j4j:listProcessInstances unless="#{viewMode != 'ins'}" target="#{piList}" processId="#{id}"/>
+    <gd:filter source="#{piList}" target="#{piList}" entryVar="entry" 
+    test="#{filter_ended and entry.end != null or entry.end == null and (filter_suspended and entry.suspended or filter_running and ! entry.suspended)}"/>
+    <gd:filter if="#{! empty pi_key}" source="#{piList}" target="#{piList}" entryVar="entry" filter="#{pi_key}" 
+    filterArgument="#{entry.key == null ? '' : entry.key}"/>
+
+    <gd:filter source="#{tasks}" target="#{tasks}" entryVar="entry" 
+    test="#{task_filter_notstarted and entry.start == null and entry.end == null or task_filter_ended and entry.end != null or (entry.start != null and entry.end == null) and (task_filter_suspended and entry.suspended or task_filter_running and ! entry.suspended)}"/>
+    <gd:filter if="#{! empty task_filter_name}" entryVar="entry" source="#{tasks}" target="#{tasks}" 
+    filter="#{task_filter_name}" filterArgument="#{entry.name == null ? '' : entry.name}"/>
+    <gd:filter if="#{! empty task_filter_actor}" entryVar="entry" source="#{tasks}" target="#{tasks}" 
+    filter="#{task_filter_actor}" filterArgument="#{entry.actorId == null ? '' : entry.actorId}"/>
+</ga:responseActions>
+<gs:div style="padding:0;margin:0">
+    <ga:attribute name="rendered" value="#{pd != null}"/>
+    <table class="leftmenu">
+        <tbody>
+            <tr class="leftmenuheader">
+                <th colspan="2"> #{msgs['processdefinition.summary']}</th>
+            </tr>
+            <tr class="leftmenu">
+                <th>#{msgs['processdefinition.summary']}</th>
+                <td>
+                	<h:outputText value="ID #{id}"/>
+					<ui:remove><!--
+	                    <h:outputLink value="procdef.jsf" style="font-weight:bold">
+	                        <f:param name="id" value="#{id}"/>
+	                        <h:outputText value="ID #{id}"/>
+	                    </h:outputLink>
+					--></ui:remove>
+                </td>
+            </tr>
+            <tr class="leftmenu">
+                <th> #{msgs['processdefinition.heading.name']}</th>
+                <td>
+                    <h:outputText value="#{pd.name}"/>
+                </td>
+            </tr>
+            <tr class="leftmenu">
+                <th>#{msgs['processdefinition.heading.version']}</th>
+                <td>
+                    <h:outputText value="#{pd.version}"/>
+                </td>
+            </tr>
+            <tr class="leftmenuheader">
+                <th colspan="2" class="nf">#{msgs['menu.views']}</th>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <gs:ul>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'ins' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="ins"/>
+                                #{msgs['processinstance.heading']}
+                            </h:outputLink>
+                        </gs:li>
+             			<ga:checkRole roles="#{access.role.process.details}">
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'task' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="task"/>
+                                #{msgs['task.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                        </ga:checkRole>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'img' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="img"/>
+                                  #{msgs['processimage.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                    </gs:ul>
+                </td>
+            </tr>
+            <tr class="leftmenuheader">
+                <th colspan="2" class="nf">#{msgs['menu.actions']}</th>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <h:form>
+                        <h:inputHidden value="#{id}"/>
+                        <gs:ul>
+						<ga:checkRole roles="#{access.role.process.start}">
+                            <gs:li>
+								<h:outputText value="#{msgs['processdefinition.action.start.beforelink']} "/>
+                                <h:commandLink value="#{msgs['processdefinition.action.start.link']}"   onclick="return confirm('#{msgs['confirm.processinstance.start']}')">
+                                    <ga:parameter name="id" target="#{id}">
+                                        <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+                                    </ga:parameter>
+                                    <j4j:loadProcess id="#{id}" target="#{pd}"/>
+                                    <j4j:startProcess process="#{pd}" target="#{pi}"/>
+                                    <n:nav outcome="started" url="procins.jsf?id=#{pi.id}" storeMessages="true"/>
+                                </h:commandLink>
+                                <h:outputText value=" #{msgs['processdefinition.action.start.afterlink']}"/>
+                            </gs:li>
+						</ga:checkRole>
+						<ga:checkRole roles="#{access.role.process.delete}">
+                            <gs:li>
+								<h:outputText value="#{msgs['processdefinition.action.delete.beforelink']} "/>
+                                <h:commandLink value="#{msgs['processdefinition.action.delete.link']}" 
+                                onclick="return confirm('#{msgs['confirm.processdefinition.delete']}')">
+                                    <ga:parameter name="id" target="#{id}">
+                                        <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+                                    </ga:parameter>
+                                    <j4j:loadProcess id="#{id}" target="#{pd}"/>
+                                    <j4j:delete value="#{pd}"/>
+                                    <n:nav outcome="success" url="processes.jsf" storeMessages="true"/>
+                                </h:commandLink>
+                                <h:outputText value=" #{msgs['processdefinition.action.delete.afterlink']} "/>
+                            </gs:li>
+						</ga:checkRole>
+                        </gs:ul>
+                    </h:form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</gs:div>
+</ui:define>
+
+<ui:define name="body">
+    <gs:div>
+        <ga:attribute name="rendered" value="#{pd != null}"/>
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'ins'}"/>
+            <ui:decorate template="t_processinstances.xhtml">
+                <ui:define name="processinstances_title">
+					<h:outputFormat value="#{msgs['processdefinition.list.processinstances']}">
+                        <f:param value="#{pd.name}"/>
+                        <f:param value="#{pd.version}"/>
+                    </h:outputFormat>
+                </ui:define>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'task'}"/>
+            <ui:decorate template="t_tasks.xhtml">
+                <ui:define name="tasks_title">
+					<h:outputFormat value="#{msgs['processdefinition.list.tasks']}">
+                        <f:param value="#{pd.name}"/>
+                        <f:param value="#{pd.version}"/>
+                    </h:outputFormat>				
+                </ui:define>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="#{viewMode}"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'img'}"/>
+            <img alt="#{msgs['processimage.notavailable']}" src="pi/#{id}.jpg" style="margin-left:auto;margin-right:auto"/>
+        </h:outputText>
+    </gs:div>
+</ui:define>
+</ui:composition>
+
+</html>

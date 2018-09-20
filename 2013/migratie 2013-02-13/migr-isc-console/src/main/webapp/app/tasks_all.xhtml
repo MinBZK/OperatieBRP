@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+    <ui:composition template="../app/t_loggedin.xhtml">
+        <ui:define name="actions">
+        
+            <ga:responseActions>
+                <ga:checkRole roles="#{access.role.tasks.listAll}">
+
+			        <j4j:listTasks includeEnded="true" target="#{tasks}"/>
+	                
+	                <!-- tasks parameters -->
+	                <ga:parameter name="name" target="#{task_filter_name}" default="">
+	                    <f:converter converterId="gravel.StringWildcardFilter"/>
+	                </ga:parameter>
+	                <ga:parameter name="actor" target="#{task_filter_actor}" default="">
+	                    <f:converter converterId="gravel.StringWildcardFilter"/>
+	                </ga:parameter>
+	              <ga:parameter name="fn" target="#{task_filter_notstarted}" default="${true}">
+                <f:converter converterId="javax.faces.Boolean"/>
+            </ga:parameter>
+            <ga:parameter name="fr" target="#{task_filter_running}" default="${true}">
+                <f:converter converterId="javax.faces.Boolean"/>
+            </ga:parameter>
+            <ga:parameter name="fs" target="#{task_filter_suspended}" default="${true}">
+                <f:converter converterId="javax.faces.Boolean"/>
+            </ga:parameter>
+            <ga:parameter name="fe" target="#{task_filter_ended}" default="${false}">
+                <f:converter converterId="javax.faces.Boolean"/>
+            </ga:parameter>
+	                <gd:filter source="#{tasks}" target="#{tasks}" entryVar="entry" test="#{task_filter_notstarted and entry.start == null and entry.end == null or task_filter_ended and entry.end != null or (entry.start != null and entry.end == null) and (task_filter_suspended and entry.suspended or task_filter_running and ! entry.suspended)}"/>
+	                <gd:filter if="#{! empty task_filter_name}" entryVar="entry" source="#{tasks}" target="#{tasks}" filter="#{task_filter_name}" filterArgument="#{entry.name == null ? '' : entry.name}"/>
+	                <gd:filter if="#{! empty task_filter_actor}" entryVar="entry" source="#{tasks}" target="#{tasks}" filter="#{task_filter_actor}" filterArgument="#{entry.actorId == null ? '' : entry.actorId}"/>
+
+				</ga:checkRole>
+
+			</ga:responseActions>
+            
+            
+        </ui:define>
+
+        <ui:define name="menu">
+        </ui:define>
+
+        <ui:define name="body">
+            <gs:div>
+                <ui:decorate template="t_tasks.xhtml"/>
+            </gs:div>
+        </ui:define>
+    </ui:composition>
+
+
+</html>
+

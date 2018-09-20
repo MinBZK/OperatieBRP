@@ -1,0 +1,83 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+<ui:component>
+    <ga:checkRole roles="#{access.role.vars}">
+    <ga:responseActions>
+        <ga:parameter name="page" target="#{page}">
+            <f:convertNumber integerOnly="true"/>
+        </ga:parameter>
+        <gd:pager value="#{vars}" target="#{vars_pager}" page="#{page}"/>
+    </ga:responseActions>
+    <table class="results">
+    <thead>
+        <tr>
+            <th colspan="3">
+                <ui:decorate template="t_pager.xhtml">
+                    <ui:param name="pager" value="#{vars_pager}"/>
+                    <ui:define name="pager_params">
+                        <ui:insert name="params"/>
+                    </ui:define>
+                </ui:decorate>
+                <ui:insert name="vars_title">
+                    <h:outputText value="#{msgs['variable.heading']}"/>
+                </ui:insert>
+            </th>
+        </tr>
+        <tr>
+            <td style="width:150px">
+				#{msgs['variable.heading.name']}
+            </td>
+            <td style="width:180px">
+				#{msgs['variable.heading.value']}
+            </td>
+			<ga:checkRole roles="#{access.role.execution.modify}">
+            <td colspan="1" style="width:90px">
+                #{msgs['menu.actions']}"
+            </td>
+			</ga:checkRole>
+        </tr>
+    </thead>
+    <h:outputText>
+    <ga:attribute name="rendered" value="#{! empty vars}"/>
+        <tbody class="results">
+	       <gd:repeat value="#{vars}" var="var" idVar="rid" first="#{vars_pager.first}" limit="#{vars_pager.limit}">
+                <gs:tr styleClass="#{rid % 2 == 0 ? 'odd' : 'even'}">
+                    <td>
+                        <h:outputText value="#{var.key}"/>
+                    </td>
+                    <td>
+                        <h:outputText value="#{var.value}"/>
+                    </td>
+					<ga:checkRole roles="#{access.role.execution.modify}">
+                    <td>
+                        <h:form>
+                            <h:commandLink onclick="return confirm('#{msgs['confirm.variable.delete']}')" >
+                                <h:outputText value="#{msgs['action.delete']}"/>
+                                <ui:insert name="loadEntity"/>
+                                <j4j:removeVariable name="#{var.key}" entity="#{entity}"/>
+                                <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                            </h:commandLink>
+                        </h:form>
+                    </td>
+					</ga:checkRole>
+                </gs:tr>
+            </gd:repeat>
+        </tbody>
+    </h:outputText>
+    </table>
+    </ga:checkRole>
+</ui:component>
+
+</html>

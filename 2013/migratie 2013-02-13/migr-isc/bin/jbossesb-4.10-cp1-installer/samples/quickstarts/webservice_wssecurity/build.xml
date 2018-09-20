@@ -1,0 +1,68 @@
+<project name="Quickstart_webservice_wss" default="deploy" basedir=".">
+
+    <description>
+        ${ant.project.name}
+        ${line.separator}
+    </description>
+
+    <!-- Import the base Ant build script... -->
+    <import file="../conf/base-build.xml"/>
+
+    <target name="quickstart-specific-checks" depends="assert-ws-available,assert-jbossremoting-version, check-src-dir, check-rsrc-dir"/>
+
+	<target name="check-src-dir">
+        <condition property="quickstart.src.dir" value="src_cxf" else="src">
+            <and>
+                <available classname="org.apache.cxf.endpoint.Endpoint" classpathref="compile-classpath"/>
+            </and>
+        </condition>
+        <echo message="Set src dir to : ${quickstart.src.dir}"/>
+    </target>
+
+	<target name="check-rsrc-dir">
+        <condition property="wss.rsrc.dir" value="${basedir}/war/resources_cxf" else="${basedir}/war/resources">
+            <and>
+                <available classname="org.apache.cxf.endpoint.Endpoint" classpathref="compile-classpath"/>
+            </and>
+        </condition>
+        <echo message="Set resource dir to : ${wss.rsrc.dir}"/>
+    </target>
+
+    <target name="quickstart-specific-dependencies">
+        <path id="quickstart-dependencies-classpath">
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jbossws-client.jar,jboss-remoting.jar"/>
+        </path>
+    </target>
+
+    <target name="quickstart-specific-assemblies">
+        <!-- Overriden from the target of the same name in base-build.xml. -->
+        <!-- Called by the "deploy" target.  Don't call directly!! -->
+
+        <!-- Build the webservice... -->
+        <war warfile="build/${ant.project.name}.war"
+             webxml="${wss.rsrc.dir}/WEB-INF/web.xml">
+            <fileset dir="${basedir}/war/view">
+                <include name="**/*"/>
+            </fileset>
+            <fileset dir="${wss.rsrc.dir}">
+                <include name="**/*"/>
+            </fileset>
+        </war>
+    </target>
+
+    <target name="runtest" depends="compile" description="runs test JMS Sender">
+        <java fork="yes" classname="org.jboss.test.ws.jaxws.samples.wssecurity.client.WSSClient"
+              failonerror="true">
+		<sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <classpath refid="exec-classpath"/>
+            <sysproperty key="java.endorsed.dirs" path="${org.jboss.esb.server.endorsed.dir}"/>
+            <sysproperty key="org.jboss.ws.wsse.keyStore" value="src/META-INF/wsse.keystore"/>
+            <sysproperty key="org.jboss.ws.wsse.trustStore" value="src/META-INF/wsse.truststore"/>
+            <sysproperty key="org.jboss.ws.wsse.keyStorePassword" value="jbossws"/>
+            <sysproperty key="org.jboss.ws.wsse.trustStorePassword" value="jbossws"/>
+            <sysproperty key="org.jboss.ws.wsse.keyStoreType" value="jks"/>
+            <sysproperty key="org.jboss.ws.wsse.trustStoreType" value="jks"/>
+        </java>
+    </target>
+
+</project>

@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+        >
+<ui:component>
+
+<ga:responseActions>
+    <ga:parameter name="page" target="#{page}">
+        <f:convertNumber integerOnly="true"/>
+    </ga:parameter>
+    <gd:pager value="#{tokens}" target="#{tokens_pager}" page="#{page}"/>
+</ga:responseActions>
+
+<table class="results">
+<thead>
+
+    <tr>
+        <th colspan="10">
+            <ui:decorate template="t_pager.xhtml">
+                <ui:param name="pager" value="#{tokens_pager}"/>
+                <ui:define name="pager_params">
+                    <ui:insert name="params"/>
+                </ui:define>
+            </ui:decorate>
+            <ui:insert name="tokens_title">
+                <h:outputText value="#{msgs['token.heading']}"/>
+            </ui:insert>
+        </th>
+    </tr>
+    <tr>
+        <td>
+            #{msgs['token.heading.id']}
+        </td>
+        <td>
+            #{msgs['token.heading.parent']}
+        </td>
+        <td>
+            #{msgs['token.heading.node']}
+        </td>
+        <td style="width:110px;">
+            #{msgs['token.heading.status']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['token.heading.start']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['token.heading.end']}
+        </td>
+        <td colspan="4">
+            #{msgs['menu.actions']}
+        </td>
+    </tr>
+</thead>
+<h:outputText>
+    <ga:attribute name="rendered" value="#{! empty tokens}"/>
+    <tbody class="results">
+        <gd:repeat value="#{tokens}" var="token" idVar="rid" first="#{tokens_pager.first}" limit="#{tokens_pager.limit}">
+            <gs:tr>
+                <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                <td>
+                    <h:outputText value="#{token.id}"/>
+                </td>
+                <td>
+                    <h:outputText value="(no parent)" style="font-style:italic" rendered="#{token.parent == null}"/>
+                    <h:outputText value="#{token.parent.name} (ID #{token.parent.id})" 
+                        rendered="#{token.parent != null and ! empty token.parent.name}"/>
+                    <h:outputText value="ID #{token.parent.id}" rendered="#{token.parent != null and empty token.parent.name}"/>
+                </td>
+                <td>
+                    <h:outputText value="#{token.node.name}"/>
+                </td>
+                <td>
+                    <h:outputText value="#{msgs['status.ended']}" styleClass="statusEnded">
+                        <ga:attribute name="rendered" value="#{token.end != null}"/>
+                    </h:outputText>
+                    <h:outputText value=" #{msgs['status.ended.suspended']}" style="font-style:italic">
+                        <ga:attribute name="rendered" value="#{token.end != null and token.suspended}"/>
+                    </h:outputText>
+                    <h:outputText>
+                        <ga:attribute name="rendered" value="#{token.end == null}"/>
+                        <ga:attribute name="value" value="#{token.suspended ? msgs['status.suspended'] : msgs['status.running']}"/>
+                        <ga:attribute name="styleClass" value="#{token.suspended ? 'statusSuspended' : 'statusRunning'}"/>
+                    </h:outputText>
+                </td>
+                <td>
+                    <h:outputText value="#{token.start}">
+                        <f:convertDateTime type="both" timeZone="#{j4j:getServerTimeZone()}"/>
+                    </h:outputText>
+                </td>
+                <td>
+                    <h:outputText value="#{token.end}">
+                        <f:convertDateTime type="both" timeZone="#{j4j:getServerTimeZone()}"/>
+                    </h:outputText>
+                </td>
+                <td width="60">
+                    <h:outputLink value="token.jsf?id=#{token.id}">
+                        #{msgs['action.examine']}
+                    </h:outputLink>
+                </td>
+                <td width="40">
+					<ga:checkRole roles="#{access.role.execution.signal}">
+                    <h:form>
+                        <ga:attribute name="rendered" value="#{token.end == null}"/>
+                        <h:commandLink onclick="return confirm('#{msgs['confirm.token.end']}')">#{msgs['action.end']}
+                            <f:param name="xtoken_id" value="#{token.id}"/>
+                            <ga:parameter name="xtoken_id" target="#{xtoken_id}">
+                                <f:convertNumber integerOnly="true"/>
+                            </ga:parameter>
+                            <j4j:loadToken id="#{xtoken_id}" target="#{xtoken}"/>
+                            <j4j:cancel value="#{xtoken}"/>
+                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                        </h:commandLink>
+                    </h:form>
+					</ga:checkRole>
+                </td>
+                <td width="60">
+					<ga:checkRole roles="#{access.role.execution.suspend}">
+                    <h:form>
+                        <ga:attribute name="rendered" value="#{token.end == null}"/>
+                        <h:commandLink>#{msgs['action.suspend']}
+                            <ga:attribute name="rendered" value="#{! token.suspended}"/>
+                            <f:param name="xtoken_id" value="#{token.id}"/>
+                            <ga:parameter name="xtoken_id" target="#{xtoken_id}">
+                                <f:convertNumber integerOnly="true"/>
+                            </ga:parameter>
+                            <j4j:loadToken id="#{xtoken_id}" target="#{xtoken}"/>
+                            <j4j:suspend value="#{xtoken}"/>
+                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                        </h:commandLink>
+                        <h:commandLink>#{msgs['action.resume']}
+                            <ga:attribute name="rendered" value="#{token.suspended}"/>
+                            <f:param name="xtoken_id" value="#{token.id}"/>
+                            <ga:parameter name="xtoken_id" target="#{xtoken_id}">
+                                <f:convertNumber integerOnly="true"/>
+                            </ga:parameter>
+                            <j4j:loadToken id="#{xtoken_id}" target="#{xtoken}"/>
+                            <j4j:resume value="#{xtoken}"/>
+                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                        </h:commandLink>
+                    </h:form>
+					</ga:checkRole>
+                </td>
+                <td width="130">
+					<ga:checkRole roles="#{access.role.execution.signal}">
+                    <h:form>
+                        <ga:attribute name="rendered" value="#{token.end == null and ! token.suspended}"/>
+                        <ga:responseActions>
+                            <gd:sort if="#{! empty token.availableTransitions}"
+                                source="#{token.availableTransitions}" target="#{transitions}"
+                                entryVar="t" argument="#{t.name != null ? t.name : ''}"/>
+                        </ga:responseActions>
+                        <gd:repeat value="#{transitions}" var="transition">
+                            <h:commandLink onclick="return confirm('#{msgs['confirm.signal']}')" >
+                                <h:outputText value="#{msgs['action.signal']}" rendered="#{empty transition.name}"/>
+                                <h:outputText value="#{msgs['action.signal']}: " rendered="#{! empty transition.name}"/>
+                                <gs:b rendered="#{! empty transition.name}">
+                                    <h:outputText value="#{transition.name}"/>
+                                </gs:b>
+                                <j4j:loadToken id="#{token.id}" target="#{xtoken}"/>
+                                <j4j:signal value="#{xtoken}" transition="#{transition.name}"/>
+                                <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                            </h:commandLink><br/>
+                        </gd:repeat>
+                    </h:form>
+					</ga:checkRole>
+                </td>
+            </gs:tr>
+        </gd:repeat>
+    </tbody>
+</h:outputText>
+</table>
+</ui:component>
+
+</html>

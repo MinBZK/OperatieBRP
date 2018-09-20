@@ -1,0 +1,50 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+        <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+
+            <jms-bus busid="quickstartGwChannel">
+                <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_invm_action_Request"/>
+            </jms-bus>
+
+        </jms-provider>
+    </providers>
+
+    <services>
+
+        <!-- Set the invmScope attribute to "GLOBAL".  Make "GLOBAL" the default in the ESB properties file! -->
+        <service category="HelloWorld" name="Service1" description="Service 1" invmScope="GLOBAL">
+            <listeners>
+                <!-- So we just need to define a Gateway to the service... -->
+                <jms-listener name="JMS-Gateway" busidref="quickstartGwChannel" is-gateway="true"/>
+            </listeners>
+            <actions mep="OneWay">
+                <action name="println" class="org.jboss.soa.esb.actions.SystemPrintln">
+                    <property name="message" value=" - > Service 1"/>
+                </action>
+
+                <!-- Route to the "Service 2" -->
+                <action name="routeAction" class="org.jboss.soa.esb.actions.StaticRouter">
+                    <property name="destinations">
+                        <route-to service-category="HelloWorld" service-name="Service2"/>
+                    </property>
+                </action>
+            </actions>
+        </service>
+
+        <service category="HelloWorld" name="Service2" description="Service 2" invmScope="GLOBAL">
+            <!-- Don't need to define any listeners for local InVM services... -->
+            <actions mep="OneWay">
+                <action name="println" class="org.jboss.soa.esb.actions.SystemPrintln">
+                    <property name="message" value=" - - > Service 2"/>
+                </action>
+            </actions>
+        </service>
+
+    </services>
+
+</jbossesb>

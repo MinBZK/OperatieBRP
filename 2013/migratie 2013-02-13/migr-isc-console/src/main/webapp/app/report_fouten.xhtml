@@ -1,0 +1,82 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://moderniseringgba.nl/migratie">
+    <head>
+		<link rel="stylesheet" href="../jquery/ui/css/jquery.ui.all.css"></link>
+		<script src="../jquery/jquery-1.9.0.js"></script>
+		<script src="../jquery/plugins/jquery.validate.js"></script>
+		<script src="../jquery/plugins/jquery.validate.messages_nl.js"></script>
+		<script src="../jquery/ui/jquery.ui.core.js"></script>
+		<script src="../jquery/ui/jquery.ui.datepicker.js"></script>    
+		<script src="../jquery/ui/jquery.ui.datepicker-nl.js"></script>    
+		<script>
+            $(document).ready(function(){
+            	$.datepicker.setDefaults( $.datepicker.regional[ "nl" ] );
+
+            	defaultVanDate = new Date();
+            	defaultVanDate.setDate(defaultVanDate.getDate()-1);
+            	
+            	defaultTotDate = new Date();
+            	defaultTotDate.setMonth(defaultTotDate.getMonth()-1);
+            	defaultTotDate.setDate(defaultTotDate.getDate()-1);
+            	
+			    $( "#datumVan" ).datepicker({ dateFormat: "dd-mm-yy" }).val($.datepicker.formatDate( "dd-mm-yy", defaultVanDate));
+			    $( "#datumTot" ).datepicker({ dateFormat: "dd-mm-yy" }).val($.datepicker.formatDate( "dd-mm-yy", defaultTotDate));
+		        $( "#parameters" ).validate();
+		    });
+		</script>
+		<style type="text/css">
+			* {   
+				font-weight:normal;
+				font-family:verdana,sans-serif;
+				font-size:10pt;
+			}
+			legend {
+				font-weight: bold;
+			}
+			label { 
+				width: 10em; float: left; 
+			}
+			label.error { 
+				float: none; color: red; padding-left: .5em; vertical-align: top; 
+			}
+			p { 
+				clear: both; 
+			}
+			.submit { 
+				margin-left: 12em; 
+			}
+			em { 
+				font-weight: bold; padding-right: 1em; vertical-align: top; color: red
+			}
+		</style>		
+	</head>    
+	<body>
+		<form id="parameters" action="../rs/report/view/mig-fouten-overzicht">
+			<fieldset>
+   				<legend>Rapportage parameters</legend>
+				<p>
+					<label for="datumVan">Datum van:</label>
+					<em>*</em><input id="datumVan" name="datumVan" type="text" class="datepicker required" />
+				</p>
+				<p>
+					<label for="datumTot">Datum tot:</label>
+					<em>*</em><input id="datumTot" name="datumTot" type="text" class="datepicker required" />
+				</p>			
+			    <p>
+			    	<input class="submit" type="submit" value="Rapport uitvoeren"/>
+			   	</p>
+			</fieldset>			
+		</form>
+	</body>
+</html>

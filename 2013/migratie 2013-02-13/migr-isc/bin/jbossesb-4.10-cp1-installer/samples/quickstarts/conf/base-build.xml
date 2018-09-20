@@ -1,0 +1,867 @@
+<project name="base-build" basedir=".">
+	<!-- get the name of the directory where this file exists -->
+	<dirname property="pwd" file="${ant.file.base-build}"/>
+	
+	<property name="quickstarts.dir" location="${pwd}/.."/>
+	<property name="product.dir" location="${quickstarts.dir}/../.."/>
+	<property name="registry.dir" location="${pwd}/registry"/>
+
+    <!-- load quickstart specific properties -->
+	<property file="${pwd}/quickstarts.properties" prefix="quickstart" />
+
+    <property name="build.dir" value="${basedir}/build" />
+    <property name="classes" value="${build.dir}/classes" />
+	
+<!-- ==================================================================== -->
+<!-- This section handles the discovery of the distribution hierarchy.    -->
+<!-- There should be no need to change this section unless the hierarchy  -->
+<!-- structure changes.                                                   -->
+<!-- ==================================================================== -->
+
+	<condition
+		property="hierarchy.test.server.config"
+		value="${quickstart.org.jboss.esb.server.config}"
+		else="default">
+		<isset property="quickstart.org.jboss.esb.server.config"/>
+	</condition>
+
+	<!-- Are we embedded in a source hierarchy? -->
+	<condition property="hierarchy.source">
+		<available file="${product.dir}/build-distr.xml"/>
+	</condition>
+
+	<echo>product.dir=${product.dir}</echo>
+	<echo>${hierarchy.test.server.config}</echo>
+
+	<condition property="hierarchy.quickstart.tests">
+       		<and>
+			<available file="${product.dir}/install"/>
+			<available file="${product.dir}/javadocs"/>
+			<available file="${product.dir}/lib"/>
+			<available file="${product.dir}/samples"/>
+			<available file="${product.dir}/xml"/>
+		</and> 
+        </condition>
+
+	<!-- Are we embedded in a jbossesb distribution hierarchy? -->
+	<condition property="hierarchy.jbossesb">
+		<and>
+			<or>
+				<available file="${product.dir}/Contributors.txt"/>
+				<available file="${product.dir}/Copyright.txt"/>
+				<available file="${product.dir}/copyright.txt"/>
+			</or>
+			<not>
+				<available file="${product.dir}/server/${hierarchy.test.server.config}"/>
+			</not>
+		</and>
+	</condition>
+	<!-- Are we embedded in a jbossesb-server distribution hierarchy? -->
+	<condition property="hierarchy.jbossesb-server">
+		<and>
+			<available file="${product.dir}/copyright.txt"/>
+			<available file="${product.dir}/server/${hierarchy.test.server.config}"/>
+		</and>
+	</condition>
+	<!-- Do we build against a jbossesb distribution? -->
+	<condition property="build.jbossesb">
+		<or>
+			<isset property="hierarchy.source"/>
+			<isset property="hierarchy.jbossesb"/>
+		</or>
+	</condition>
+
+	<!-- Do we have a recognised hierarchy? -->
+	<condition property="build.recognised">
+		<or>
+			<isset property="build.jbossesb"/>
+			<isset property="hierarchy.jbossesb-server"/>
+			<isset property="hierarchy.quickstart.tests"/>
+		</or>
+	</condition>
+
+	<fail unless="build.recognised" message="Cannot determine build hierarchy"/>
+
+	<!-- Check for jbossesb if we are running in source hierarchy -->
+	<target name="check-jbossesb-dist" if="hierarchy.source">
+		<available file="${product.dir}/build/jbossesb" property="dist.exists"/>
+		<fail unless="dist.exists"
+			message="JBossESB must be built. Please run 'ant dist' in ${product.dir}"/>
+	</target>
+
+
+<!-- ==================================================================== -->
+<!-- This section handles the discovery of the messaging platform.        -->
+<!-- ==================================================================== -->
+
+    <target name="messaging-config" depends="jbossesb-dependencies-as4, jbossesb-dependencies-as5">
+        <condition property="messaging.present">
+            <or>
+                <available file="${org.jboss.esb.server.deploy.dir}/jboss-messaging"/>
+                <available file="${org.jboss.esb.server.deploy.dir}/messaging"/>
+            </or>
+        </condition>
+        <condition property="messaging.present">
+            <available file="${org.jboss.esb.server.deploy.dir}/jboss-messaging.sar"/>
+        </condition>
+        <condition property="hornetq.present">
+            <available file="${org.jboss.esb.server.deploy.dir}/hornetq"/>
+        </condition>
+
+        <condition property="jbossmq.present">
+            <not>
+            	<or>
+                <isset property="messaging.present"/>
+                <isset property="hornetq.present"/>
+            	</or>
+            </not>
+        </condition>
+    </target>
+
+    <!-- dependencies specific to JBoss Messaging -->
+    <target name="messaging-dependencies" if="messaging.present" depends="messaging-config">
+        <property name="jms.service.file" value="jbm-queue-service.xml"/>
+        <property name="no.service.file" value=""/>
+    	<property name="jms.service.file.targetname"  value="${ant.project.name}-queue-service.xml" />
+        <property name="jms.description" value="JBoss Messaging"/>
+        <property name="jms.provider" value="jbm"/>
+    </target>
+
+    <!-- dependencies specific to JBoss MQ -->
+    <target name="jbossmq-dependencies" if="jbossmq.present" depends="messaging-config">
+        <property name="jms.service.file" value="jbmq-queue-service.xml"/>
+        <property name="no.service.file" value=""/>
+    	<property name="jms.service.file.targetname"  value="${ant.project.name}-queue-service.xml" />
+        <property name="jms.description" value="JBoss MQ"/>
+        <property name="jms.provider" value="jbmq"/>
+    </target>
+
+    <!-- dependencies specific to JBoss HornetQ -->
+    <target name="hornetq-dependencies" if="hornetq.present" depends="messaging-config">
+        <property name="jms.service.file" value="hornetq-jms.xml"/>
+        <property name="no.service.file" value="no-service.xml"/>
+    	<property name="jms.service.file.targetname"  value="hornetq-jms.xml" />
+        <property name="jms.description" value="JBoss HornetQ"/>
+        <property name="jms.provider" value="hornetq"/>
+    </target>
+	
+<!-- ==================================================================== -->
+<!-- This section discovers quickstart specific libraries.                -->
+<!-- ==================================================================== -->
+
+    <available property="quickstart.lib.exists" file="${basedir}/lib"/>
+
+    <target name="qslib-dependencies" if="quickstart.lib.exists">
+        <path id="quickstart-lib-classpath">
+            <fileset dir="${basedir}/lib" includes="*.jar" /> <!-- Quickstart Specific Jars. -->
+        </path>
+    </target>
+
+    <target name="non-qslib-dependencies" unless="quickstart.lib.exists">
+        <path id="quickstart-lib-classpath"/>
+    </target>
+
+<!-- ==================================================================== -->
+<!-- This section handles dependencies specific to each distribution.     -->
+<!-- It configures the following properties                               -->
+<!-- org.jboss.esb.server.config, org.jboss.esb.server.home,              -->
+<!-- org.jboss.esb.server.server and deployment-classpath                 -->
+<!-- ==================================================================== -->
+
+	<target name="check-as-version">
+		<property name="org.jboss.esb.server.server" location="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}"/>
+		<echo message="product.dir=${product.dir}"/>
+		<echo message="server.server=${org.jboss.esb.server.server}"/>
+		<!-- Check for JBossAS5 -->
+		<condition property="jbossas5">
+			<available file="${org.jboss.esb.server.server}/deployers"/>
+		</condition>
+	    
+		<!-- Check for JBossAS4.x -->
+		<condition property="jbossas4">
+			<not>
+				<available file="${org.jboss.esb.server.server}/deployers"/>
+			</not>
+		</condition>
+
+		<condition property="jbossas6">
+                      <available file="${org.jboss.esb.server.server}/deployers/weld.deployer"/>
+		</condition>
+
+                <condition property="log4j.xml" value="${basedir}/../conf/as6/log4j.xml" else="./log4j.xml">
+                    <isset property="jbossas6"/>
+                </condition>
+
+	</target>
+
+	<!-- Configure dependencies for jbossesb and source distributions -->
+	<target name="jbossesb-dependencies-as4" if="jbossas4" depends="check-jbossesb-dist, qslib-dependencies, non-qslib-dependencies, jbossesb-source-dependencies, jbossesb-server-dependencies, check-as-version">
+		<property name="org.jboss.esb.server.server" location="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}"/>
+		<property name="org.jboss.esb.server.deploy.dir" location="${org.jboss.esb.server.server}/deploy"/>
+		<property name="org.jboss.esb.server.endorsed.dir" location="${org.jboss.esb.server.home}/lib/endorsed"/>
+
+		<path id="deployment-classpath">
+			<!-- jbossws jars -->
+			<fileset dir="${org.jboss.esb.server.home}/client" includes="jboss-jaxws.jar jboss-saaj.jar jbossws-common.jar jbossws-spi.jar"/>
+
+			<fileset dir="${org.jboss.esb.server.deploy.dir}/jbossesb.sar/lib" includes="*.jar"/>
+			<!-- jbossesb config -->
+			<fileset dir="${org.jboss.esb.server.deploy.dir}/jbossesb.esb" includes="*.jar"/>
+			<pathelement location="${org.jboss.esb.server.deploy.dir}/jbossesb.esb"/>
+			<!-- jbpm config -->
+			<fileset dir="${org.jboss.esb.server.deploy.dir}/jbpm.esb" includes="*.jar"/>
+			<pathelement location="${org.jboss.esb.server.deploy.dir}/jbpm.esb"/>
+			<pathelement location="${org.jboss.esb.server.server}/lib/cglib.jar"/>
+			<pathelement location="${org.jboss.esb.server.server}/lib/dom4j.jar"/>
+			<pathelement location="${org.jboss.esb.server.server}/lib/antlr.jar"/>
+			<pathelement location="${org.jboss.esb.server.server}/lib/jbosssx.jar"/>
+			<!-- smooks config -->
+			<fileset dir="${org.jboss.esb.server.deploy.dir}/smooks.esb" includes="*.jar"/>
+			<pathelement location="${org.jboss.esb.server.deploy.dir}/smooks.esb"/>
+			<!-- jbrules config -->
+			<fileset dir="${org.jboss.esb.server.deploy.dir}/jbrules.esb" includes="*.jar"/>
+			<pathelement location="${org.jboss.esb.server.deploy.dir}/jbrules.esb"/>
+			<!-- spring config -->
+			<fileset dir="${org.jboss.esb.server.deploy.dir}/spring.esb" includes="*.jar"/>
+			<pathelement location="${org.jboss.esb.server.deploy.dir}/spring.esb"/>
+			<!-- soap config -->
+			<fileset dir="${org.jboss.esb.server.deploy.dir}/soap.esb" includes="*.jar"/>
+			<pathelement location="${org.jboss.esb.server.deploy.dir}/soap.esb"/>
+			<fileset dir="${org.jboss.esb.server.server}/lib" includes="activation.jar, mail.jar, jboss-ejb3x.jar"/>
+			<!-- general libs -->
+			<pathelement location="${org.jboss.esb.server.home}/lib/commons-logging.jar"/>
+			<pathelement location="${org.jboss.esb.server.home}/lib/commons-codec.jar"/>
+			<pathelement location="${org.jboss.esb.server.home}/lib/jboss-system.jar"/>
+			<pathelement location="${org.jboss.esb.server.home}/lib/jboss-xml-binding.jar"/>
+			<pathelement location="${org.jboss.esb.server.server}/lib/jbossts-common.jar"/>
+			<pathelement location="${org.jboss.esb.server.server}/lib/quartz.jar"/>
+                        <!-- includes for read only cache -->
+			<fileset dir="${org.jboss.esb.server.server}/lib" includes="jboss-cache*.jar"/>
+			<pathelement location="${org.jboss.esb.server.server}/lib/jgroups.jar"/>
+                        <!-- includes for h2 -->
+			<fileset dir="${org.jboss.esb.server.server}/lib" includes="h2*.jar"/>
+			<!-- common client jars -->
+			<fileset dir="${org.jboss.esb.server.home}/client" includes="jaxb-api.jar jaxb-impl.jar jaxb-xjc.jar"/>
+			<fileset dir="${org.jboss.esb.server.home}/client" includes="jbossall-client.jar"/>
+			<!-- common lib jars -->
+			<fileset dir="${org.jboss.esb.server.home}/lib" includes="commons-httpclient.jar"/>
+			<fileset dir="${org.jboss.esb.server.home}/lib/endorsed" includes="xalan.jar"/>
+		</path>
+	</target>
+
+	<!-- Configure dependencies for jbossesb and source distributions -->
+    <target name="jbossesb-dependencies-as5" if="jbossas5" depends="check-jbossesb-dist, qslib-dependencies, non-qslib-dependencies, jbossesb-source-dependencies, jbossesb-server-dependencies, check-as-version">
+
+        <property name="org.jboss.esb.server.server" location="${org.jboss.esb.server.home}/server/${org.jboss.esb.server.config}"/>
+		<property name="org.jboss.esb.server.deploy.dir" location="${org.jboss.esb.server.server}/deploy"/>
+		<property name="org.jboss.esb.server.common.lib" location="${org.jboss.esb.server.home}/common/lib"/>
+		<property name="org.jboss.esb.server.endorsed.dir" location="${org.jboss.esb.server.home}/lib/endorsed"/>
+
+        <path id="deployment-classpath">
+            <!-- jbossws jars -->
+            <fileset dir="${org.jboss.esb.server.common.lib}" includes="jbossws-native-jaxws.jar jbossws-native-jaxws-ext.jar jboss-saaj.jar"/>
+            <fileset dir="${org.jboss.esb.server.common.lib}" includes="jbossws-common.jar jbossws-framework.jar jbossws-native-jaxrpc.jar jbossws-native-saaj.jar jbossws-spi.jar"/>
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="*cxf*" /> 
+            <fileset dir="${org.jboss.esb.server.server}/deployers/jbossws.deployer" includes="wss4j.jar"/>
+
+            <!-- jbossts jars -->
+            <fileset dir="${org.jboss.esb.server.common.lib}" includes="jbossts-common.jar"/>
+
+            <fileset dir="${org.jboss.esb.server.server}/deployers/esb.deployer/lib" includes="*.jar"/>
+            <!-- jbossesb.esb jars -->
+            <fileset dir="${org.jboss.esb.server.deploy.dir}/jbossesb.esb" includes="*.jar"/>
+            <pathelement location="${org.jboss.esb.server.deploy.dir}/jbossesb.esb"/>
+            
+            <!-- jbpm.esb jars -->
+            <fileset dir="${org.jboss.esb.server.deploy.dir}/jbpm.esb" includes="*.jar"/>
+            <pathelement location="${org.jboss.esb.server.deploy.dir}/jbpm.esb"/>
+
+            <pathelement location="${org.jboss.esb.server.home}/lib/dom4j.jar"/>
+            <pathelement location="${org.jboss.esb.server.common.lib}/antlr.jar"/>
+            <pathelement location="${org.jboss.esb.server.common.lib}/jbosssx.jar"/>
+            <!-- AS6 has it in lib -->
+            <pathelement location="${org.jboss.esb.server.home}/lib/jbosssx.jar"/>
+            
+            <!-- smooks.esb jars -->
+            <fileset dir="${org.jboss.esb.server.deploy.dir}/smooks.esb" includes="*.jar"/>
+            <pathelement location="${org.jboss.esb.server.deploy.dir}/smooks.esb"/>
+            
+            <!-- jbrules.esb jars -->
+            <fileset dir="${org.jboss.esb.server.deploy.dir}/jbrules.esb" includes="*.jar"/>
+            <pathelement location="${org.jboss.esb.server.deploy.dir}/jbrules.esb"/>
+            
+            <!-- spring.esb jars -->
+            <fileset dir="${org.jboss.esb.server.deploy.dir}/spring.esb" includes="*.jar"/>
+            <pathelement location="${org.jboss.esb.server.deploy.dir}/spring.esb"/>
+            
+            <!-- soap.esb config -->
+            <fileset dir="${org.jboss.esb.server.deploy.dir}/soap.esb" includes="*.jar"/>
+            <pathelement location="${org.jboss.esb.server.deploy.dir}/soap.esb"/>
+
+            <fileset dir="${org.jboss.esb.server.home}/lib/endorsed" includes="activation.jar"/>
+            <fileset dir="${org.jboss.esb.server.common.lib}" includes="mail.jar, jboss-ejb3x.jar"/>
+
+            <!-- general libs -->
+            <pathelement location="${org.jboss.esb.server.common.lib}/commons-logging.jar"/>
+            <pathelement location="${org.jboss.esb.server.common.lib}/quartz.jar"/>
+
+            <pathelement location="${org.jboss.esb.server.home}/lib/jboss-system.jar"/>
+            <pathelement location="${org.jboss.esb.server.home}/lib/jboss-xml-binding.jar"/>
+
+			<!-- includes for read only cache -->
+            <fileset dir="${org.jboss.esb.server.server}/lib" includes="jbosscache-*.jar"/>
+            
+			<!-- includes for h2 -->
+            <fileset dir="${org.jboss.esb.server.server}/lib" includes="h2*.jar"/>
+
+            <fileset dir="${org.jboss.esb.server.home}/lib/endorsed" includes="xalan.jar"/>
+
+            <!-- common client jars -->
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jaxb-api.jar jaxb-impl.jar jaxb-xjc.jar"/>
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jbossall-client.jar"/>
+
+            <!-- common lib jars -->
+            <fileset dir="${org.jboss.esb.server.server}/lib" includes="commons-httpclient*.jar"/>
+        </path>
+    </target>
+
+
+	<target name="jbossesb-quickstart-override">
+		<condition 
+			property="org.jboss.esb.server.config" 
+			value="${quickstart.org.jboss.esb.server.config}">
+			<isset property="quickstart.org.jboss.esb.server.config"/>
+		</condition>
+
+		<condition
+			property="org.jboss.esb.server.home"  
+			value="${quickstart.org.jboss.esb.server.home}">
+			<isset property="quickstart.org.jboss.esb.server.home"/>
+		</condition>
+	</target>
+
+	<target name="jbossesb-source-dependencies"
+		depends="jbossesb-quickstart-override" if="build.jbossesb">
+		<!-- check for installation deployment.properties -->
+		<property name="install.dir" value="${product.dir}/install"/>
+		<property file="${install.dir}/deployment.properties" prefix="install" />
+		<condition
+			property="org.jboss.esb.server.home"  
+			value="${install.org.jboss.esb.server.home}">
+			<isset property="install.org.jboss.esb.server.home"/>
+		</condition>
+
+		<condition 
+			property="org.jboss.esb.server.config" 
+			value="${install.org.jboss.esb.server.config}">
+			<isset property="install.org.jboss.esb.server.config"/>
+		</condition>
+
+		<property name="org.jboss.esb.server.config" value="default"/>
+
+		<fail unless="org.jboss.esb.server.home" message="Cannot determine target deployment, please check quickstarts.properties or deployment.properties"/>
+
+		<property name="org.jboss.esb.server" location="${product.dir}/server/${org.jboss.esb.server.config}"/>
+	</target>
+
+	<!-- Configure dependencies for jbossesb-server distribution -->
+	<target name="jbossesb-server-dependencies"
+		depends="jbossesb-quickstart-override"
+		if="hierarchy.jbossesb-server">
+		<property name="org.jboss.esb.server.home" value="${product.dir}"/> 
+
+		<property name="org.jboss.esb.server.config" value="default"/>
+
+		<condition property="jbossesb-server-recognised">
+			<available file="${product.dir}/server/${org.jboss.esb.server.config}/deploy/jbossesb.sar"/>
+		</condition>
+
+		<fail unless="jbossesb-server-recognised" message="Could not detect embedded ESB configuration"/>
+
+		<echo message="Using profile: ${org.jboss.esb.server.config}"/>
+	</target>
+	
+<!-- ==================================================================== -->
+<!-- This section handles common dependencies.                            -->
+<!-- It configures the following properties                               -->
+<!-- compile-classpath, exec-classpath                                    -->
+<!-- ==================================================================== -->
+
+	<target name="dependencies" depends="classpath-dependencies-as4, classpath-dependencies-as5, quickstart-specific-checks"/>
+
+	<target name="classpath-dependencies-as4" if="jbossas4" depends="messaging-dependencies, jbossmq-dependencies, hornetq-dependencies, quickstart-specific-dependencies">
+    	
+		<path id="compile-classpath">
+			<path refid="quickstart-dependencies-classpath" />
+			<path refid="quickstart-lib-classpath" />
+			<fileset dir="${org.jboss.esb.server.home}/client" includes="hibernate-client.jar" /> <!-- Required for jbpm Client Code. -->
+			<fileset dir="${org.jboss.esb.server.server}/lib" includes="hibernate3.jar quartz-all.jar"/> <!-- Required for the helloworld_hibernate_action quickstart -->
+			<path refid="deployment-classpath" />
+			<fileset dir="${org.jboss.esb.server.home}/client" includes="*.jar" /> <!-- Required for JMS Client Code. -->
+		</path>
+		<property name="compile-classpath" refid="compile-classpath"/>
+
+		<path id="exec-classpath">
+			<pathelement location="." />
+			<pathelement location="${classes}" />
+			<pathelement location="${basedir}/src"/>
+			<pathelement location="${registry.dir}"/>
+			<fileset dir="${org.jboss.esb.server.server}/lib" includes="jboss-remoting.jar jboss-j2ee.jar jboss-messaging-client.jar" /> <!-- Required for JMS Client Code. -->
+			<fileset dir="${org.jboss.esb.server.server}/lib" includes="hibernate3.jar commons-collections.jar hsqldb.jar" /> <!-- Required for jbpm Client Code. -->
+			<fileset dir="${org.jboss.esb.server.server}/lib" includes="bsh.jar" /> <!-- Required for scripting Client Code. -->
+			<fileset dir="${org.jboss.esb.server.home}/lib/endorsed" includes="*.jar" /> <!-- Required for JMS Client Code. -->
+			<fileset dir="${org.jboss.esb.server.deploy.dir}/jboss-aop-jdk50.deployer" includes="jboss-aop-jdk50.jar" /> <!-- Required for JMS Client Code. -->
+			<fileset dir="${org.jboss.esb.server.server}/lib" includes="jaxen.jar" /> <!-- Required for smooks Client Code. -->
+			<path refid="compile-classpath" />
+            <pathelement location="${pwd}/anttasks/classes" />
+		</path>
+		<property name="exec-classpath" refid="exec-classpath"/>
+	</target>
+	
+	<target name="classpath-dependencies-as5" if="jbossas5" depends="messaging-dependencies, jbossmq-dependencies, hornetq-dependencies, quickstart-specific-dependencies">
+        
+        <path id="compile-classpath">
+            <path refid="quickstart-dependencies-classpath" />
+            <path refid="quickstart-lib-classpath" />
+            <fileset dir="${org.jboss.esb.server.home}/common/lib" includes="hibernate-*.jar" /> <!-- Required for jbpm Client Code. -->
+            <fileset dir="${org.jboss.esb.server.home}/common/lib" includes="quartz.jar"/> <!-- Required for the helloworld_hibernate_action quickstart -->
+            <pathelement location="${org.jboss.esb.server.common.lib}/commons-httpclient.jar"/>
+            <path refid="deployment-classpath" />
+            <fileset dir="${org.jboss.esb.server.home}/client" excludes="*cxf* jbossws-native-jaxws.jar jbossws-native-jaxws-ext.jar jaxws-rt.jar jaxws-tools.jar" /> 
+        </path>
+        <property name="compile-classpath" refid="compile-classpath"/>
+
+        <path id="exec-classpath">
+            <pathelement location="." />
+            <pathelement location="${classes}" />
+            <pathelement location="${basedir}/src" />
+            <pathelement location="${registry.dir}"/>
+            <fileset dir="${org.jboss.esb.server.home}/common/lib" includes="jboss-remoting.jar jboss-javaee.jar jboss-messaging-client.jar netty.jar" /> <!-- Required for JMS Client Code. -->
+            <fileset dir="${org.jboss.esb.server.home}/client" includes="jboss-messaging-client.jar" /> <!-- Required for JMS Client Code. -->
+            <fileset dir="${org.jboss.esb.server.home}/common/lib" includes="hibernate-*.jar commons-collections.jar hsqldb.jar" /> <!-- Required for jbpm Client Code. -->
+            <fileset dir="${org.jboss.esb.server.home}/common/lib" includes="bsh.jar" /> <!-- Required for scripting Client Code. -->
+            <fileset dir="${org.jboss.esb.server.home}/lib/endorsed" includes="*.jar" /> <!-- Required for JMS Client Code. -->
+            <fileset dir="${org.jboss.esb.server.home}/lib" includes="jboss-aop*.jar" /> <!-- Required for JMS Client Code. -->
+            <fileset dir="${org.jboss.esb.server.home}/common/lib" includes="jaxen.jar" /> <!-- Required for smooks Client Code. -->
+            <path refid="compile-classpath" />
+            <pathelement location="${pwd}/anttasks/classes" />
+        </path>
+        <property name="exec-classpath" refid="exec-classpath"/>
+    </target>
+    
+<!-- ==================================================================== -->
+<!-- This section defines the following public targets.                   -->
+<!-- compile, run, deploy jar, prepare-deployment, package-deployment,    -->
+<!-- undeploy, deploy-jms-dests, undeploy-jms-dests, echoCP, echoPaths,   -->
+<!-- clean, help-quickstarts, help                                        -->
+<!-- ==================================================================== -->
+
+    <target name="compile" depends="dependencies">
+		<mkdir dir="${classes}" />
+		<condition property="src.dir" value="${quickstart.src.dir}" else="${basedir}/src">
+            <isset property="quickstart.src.dir"/>
+		</condition>
+		
+		<javac srcdir="${src.dir}" destdir="${classes}" debug="true" deprecation="true">
+			<classpath refid="compile-classpath" />			
+		</javac>
+
+        <mkdir dir="${pwd}/anttasks/classes" />
+        <javac srcdir="${pwd}/anttasks/src" destdir="${pwd}/anttasks/classes" debug="true">
+			<classpath refid="compile-classpath" />			
+		</javac>
+	</target>
+	
+	<target name="run" depends="compile,config">
+		<description>	run				will run the quickstart in standalone mode
+		</description>
+		
+		<condition property="esb.config.file" 
+			value="${esb.config.file}" else="${basedir}/jboss-esb.xml">
+			<isset property="esb.config.file"/>
+		</condition>
+		<echo>Launching Quickstart in standalone mode...</echo>
+        <taskdef name="qsjava" classname="org.jboss.ant.QuickstartJava" classpathref="exec-classpath" />
+        <qsjava fork="yes" classname="org.jboss.soa.esb.listeners.StandAloneBootStrapper" failonerror="true">
+			<arg value="${esb.config.file}" />
+            <!--jvmarg value="-Xdebug"/>
+            <jvmarg value="-Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=y"/ -->
+            <classpath refid="exec-classpath" />
+		</qsjava>
+	</target>
+
+    <target name="deploy" depends="prepare-deployment, quickstart-specific-predeploys, check-exploded, deploy-esb, deploy-exploded-esb, quickstart-specific-deploys, display-instructions">
+		<description>deploy				will deploy the Quickstart .esb archive to JBoss ESB Server
+    	</description>
+    </target>
+
+    <target name="prepare-deployment" depends="compile, config, copy-metainf, quickstart-specific-assemblies, package-deployment"/>
+
+    <target name="copy-metainf">
+        <mkdir dir="${build.dir}/META-INF" />
+        <copy todir="${build.dir}/META-INF">
+            <fileset dir="${basedir}" includes="jboss-esb.xml" />
+            <fileset dir="${basedir}" includes="deployment.xml" />
+            <fileset dir="${basedir}" includes="jboss-classloading.xml" />
+            <fileset dir="${basedir}" includes="jboss-structure.xml" />
+        </copy>
+
+    	<condition property="deploymentXmlExists">
+    		<available file="${build.dir}/META-INF/deployment.xml" />
+    	</condition>
+    	<antcall target="transformDeploymentXml" />
+    	
+    </target>
+
+	<target name="transformDeploymentXml" if="deploymentXmlExists">
+		<xslt style="${pwd}/deployment-xml.xsl" in="${build.dir}/META-INF/deployment.xml" out="${build.dir}/META-INF/deployment.xml.transformed">
+			<param name="jmsProvider" expression="${jms.provider}"/>
+		</xslt>    	
+		<delete file="${build.dir}/META-INF/deployment.xml" failonerror="false" />
+		<move file="${build.dir}/META-INF/deployment.xml.transformed" tofile="${build.dir}/META-INF/deployment.xml" />
+	</target>
+	
+    <target name="check-exploded">
+        <condition property="deploy.exploded.requested">
+            <equals arg1="${deploy.exploded}" arg2="true" casesensitive="false"/>
+        </condition>
+    </target>
+
+    <target name="deploy-esb" unless="deploy.exploded.requested">
+    	<copy todir="${org.jboss.esb.server.deploy.dir}"
+            file="${build.dir}/${ant.project.name}.esb"/>	
+    </target>
+
+    <target name="deploy-exploded-esb" if="deploy.exploded.requested">
+        <property name="dest" location="${org.jboss.esb.server.deploy.dir}/${ant.project.name}.esb"/>
+        <delete quiet="true" file="${dest}"/>
+        <delete quiet="true" dir="${dest}"/>
+        <mkdir dir="${dest}"/>
+        <unjar src="${build.dir}/${ant.project.name}.esb" dest="${dest}"/>
+    </target>
+
+    <target name="package-deployment">
+	<mkdir dir="lib"/>
+        <jar destfile="${build.dir}/${ant.project.name}.esb">
+                   <fileset dir="${build.dir}/classes" excludes="${quickstart.classes.excludes}" includes="${quickstart.classes.includes}"/>
+                   <fileset dir="${build.dir}" includes="*.jar,*.war" excludes="${quickstart.deployment.excludes}"/>
+                   <fileset dir="${build.dir}" includes="deployment.xml"/>
+                   <fileset dir="${build.dir}" includes="META-INF/**" />
+                   <fileset dir="${basedir}/src" excludes="**/*.java" /> <!-- Please leave the src dir in here! -->
+                   <fileset dir="${basedir}" includes="${jms.service.file} ${no.service.file} ${additional.deploys}" excludes="build/**" />
+                   <fileset dir="${basedir}/lib" includes="*.jar"/>
+        </jar>
+    </target>
+	
+    <target name="undeploy" depends="dependencies, undeploy-messaging, quickstart-specific-undeploys">
+		<description>	undeploy			will undeploy the Quickstart .esb archive from JBoss ESB Server
+		</description>
+        <!--delete file="${org.jboss.esb.server.deploy.dir}/${ant.project.name}.esb"  quiet="false"/-->        
+    	
+    	<delete verbose="true" includeemptydirs="true" quiet="true"
+    	  dir="${org.jboss.esb.server.deploy.dir}/${ant.project.name}.esb"/>
+    	<delete verbose="true" includeemptydirs="true" quiet="true"
+    	  file="${org.jboss.esb.server.deploy.dir}/${ant.project.name}.esb"/>
+
+	</target>
+
+	<target name="check-jms-dests" depends="messaging-dependencies">
+
+		<condition property="jms.dests.notrequired">
+			<not>	
+				<available file="${basedir}/${jms.service.file}"/>
+			</not>
+		</condition>
+	</target>
+
+	<target name="deploy-jms-dests" depends="dependencies, deploy-messaging">
+		<description>deploy-jms-dests		will deploy the jms destinations for application server
+		</description>
+	</target>
+
+	<target name="undeploy-jms-dests" depends="dependencies, undeploy-messaging">
+		<description>undeploy-jms-dests		will undeploy the jms destination for application server
+		</description>
+	</target>
+	
+    <target name="echoCP" depends="dependencies">
+		<property name="cp" refid="exec-classpath" />
+		<echo message="Classpath is ${cp}" />
+	</target>
+	
+	<target name="echoPaths" depends="dependencies">
+		<echo>
+			pwd : ${pwd}
+			quickstarts.dir : ${quickstarts.dir}
+			product.dir : ${product.dir}
+			org.jboss.esb.server.home : ${org.jboss.esb.server.home}
+			org.jboss.esb.server.config : ${org.jboss.esb.server.config}
+			org.jboss.esb.jboss.server.deploy.dir : ${org.jboss.esb.server.deploy.dir}
+			jms.service.file : ${jms.service.file}
+			jms.description : ${jms.description}
+		</echo>
+	</target>
+
+	<target name="clean" depends="quickstart-specific-clean">
+		<description>clean				cleans the project
+		</description>
+
+
+        <delete dir="${build.dir}" />
+		<delete>
+			<fileset dir="${basedir}">
+				<include name="listener.log"/>	
+			</fileset>
+		</delete>
+	</target>
+
+    <target name="help-quickstarts">
+			<description>help-quickstarts		display information about configuration for all quickstarts </description>
+			<loadfile
+			      property="readme"
+			      srcFile="${pwd}/readme.txt">
+		    </loadfile>
+			<echo>${readme}</echo>
+		</target>
+	
+	<target name="help">
+		<description>
+		help				will print the project description
+			
+		</description>
+		<loadfile
+		      property="readme"
+		      srcFile="readme.txt">
+	    </loadfile>
+		<echo>${readme}</echo>
+	</target>
+	
+<!-- ==================================================================== -->
+<!-- This section defines standalone message deployment                   -->
+<!-- ==================================================================== -->
+
+    <target name="deploy-messaging"  depends="check-jms-dests" unless="jms.dests.notrequired">
+        <copy file="${jms.service.file}" overwrite="true" tofile="${org.jboss.esb.server.deploy.dir}/${jms.service.file.targetname}" failonerror="false"/>
+    </target>
+
+    <target name="undeploy-messaging" depends="check-jms-dests" unless="jms.dests.notrequired">
+        <delete file="${org.jboss.esb.server.deploy.dir}/${jms.service.file.targetname}" quiet="true"/>
+    </target>
+
+<!-- ==================================================================== -->
+<!-- This section defines assertions for determining if the target        -->
+<!-- supports JBossWS or EJB.                                             -->
+<!-- ==================================================================== -->
+
+    <target name="assert-ws-available" depends="jbossesb-dependencies-as4, jbossesb-dependencies-as5">
+        <available property="ws-spi" file="${org.jboss.esb.server.server}/lib/jbossws-spi.jar"/>
+    	<available property="ws-intros" file="${org.jboss.esb.server.deploy.dir}/jbossws.sar/jboss-jaxb-intros.jar"/>
+    	<condition property="ws-available-as4">
+    		<and>
+    			<isset property="ws-spi"/>
+    			<isset property="ws-intros"/>
+    		</and>
+    	</condition>
+    	
+        <available property="ws-spi-as5" file="${org.jboss.esb.server.home}/common/lib/jbossws-spi.jar"/>
+    	<available property="ws-intros-as5" file="${org.jboss.esb.server.server}/deployers/jbossws.deployer/jboss-jaxb-intros.jar"/>
+    	
+    	<condition property="ws-available-as5">
+    		<and>
+    			<isset property="ws-spi-as5"/>
+    			<isset property="ws-intros-as5"/>
+    		</and>
+    	</condition>
+
+    	<available property="ws-cxf-server-as5" file="${org.jboss.esb.server.server}/deployers/jbossws.deployer/jbossws-cxf-server.jar"/>
+
+    	<condition property="ws-available-as5-cxf">
+    		<and>
+    			<isset property="ws-spi-as5"/>
+    			<isset property="ws-cxf-server-as5"/>
+    		</and>
+    	</condition>
+    	
+    	<condition property="ws-available">
+    		<or>
+    			<isset property="ws-available-as4"/>
+    			<isset property="ws-available-as5"/>
+    			<isset property="ws-available-as5-cxf"/>
+    		</or>
+    	</condition>
+    	
+    	
+        <fail unless="ws-available">**** DEPLOYMENT FAILED... Sorry, this Quickstart requires a modified JBoss Webservice container, please refer to the 'Configuring Webservice Integration' section of the Administration Guide.</fail>
+
+        <echo message="JBoss Webservice container found on target '${org.jboss.esb.server.deploy.dir}'." />
+    </target>
+
+    <target name="assert-ejb3-available" if="jbossas4">
+        <available property="ejb3-available" file="${org.jboss.esb.server.deploy.dir}/ejb3.deployer" type="dir" />
+        <fail unless="ejb3-available">**** DEPLOYMENT FAILED... Sorry, this Quickstart requires a JBoss EJB3 container.  '${org.jboss.esb.server.home}' does not have an EJB3 container.  Check the 'org.jboss.esb.server.home' property in ../quickstarts.properties"</fail>
+        <echo message="JBoss EJB3 container found on target '${org.jboss.esb.server.deploy.dir}'." />
+    </target>
+
+    <target name="assert-ftp-config">
+        <condition property="quickstart.ftp.config">
+            <and>
+                <isset property="quickstart.jbossesb.ftp.hostname"/>
+                <isset property="quickstart.jbossesb.ftp.username"/>
+                <isset property="quickstart.jbossesb.ftp.password"/>
+                <isset property="quickstart.jbossesb.ftp.directory"/>
+            </and>
+        </condition>
+        <fail unless="quickstart.ftp.config" message="Please configure ftp properties in quickstart.properties"/>
+    </target>
+
+    <target name="assert-jbossremoting-version" depends="classpath-dependencies-as4, classpath-dependencies-as5">
+        <java fork="yes" classname="org.jboss.remoting.Version" failonerror="true" outputproperty="jbr-version-string">
+            <classpath refid="exec-classpath"/>
+        </java>
+
+        <echo message="JBR Version String: '${jbr-version-string}'."/>
+        <condition property="is-valid-jbr-version">
+            <and>
+                <contains string="${jbr-version-string}" substring="2.2.2.SP" />
+                <not>
+                    <contains string="${jbr-version-string}" substring="2.2.2.SP1 " />
+                </not>
+            </and>
+        </condition>
+        
+        <condition property="is-valid-jbr-version">
+            <and>
+                <contains string="${jbr-version-string}" substring="2.5" />
+            </and>
+        </condition>
+        <fail unless="is-valid-jbr-version" message="Invalid version of JBossRemoting installed on target server.  Please install version 2.2.2.SP2 or higher: http://repository.jboss.org/jboss/remoting/" />
+    </target>
+
+    <target name="assert-jgroups" depends="jbossesb-dependencies-as4, jbossesb-dependencies-as5">
+        <available property="jgroups-available" file="${org.jboss.esb.server.server}/lib/jgroups.jar"/>
+        <fail unless="jgroups-available" message="Unfortunately this aspect requires jgroups in order to function correctly.  Please target a server instance which contains jgroups.jar"/>
+    </target>
+
+    <target name="assert-as5" unless="jbossas5">
+        <fail message="This quickstart can only be run on JBoss AS 5.1.0.GA or higher" />
+    </target>
+
+    <target name="assert-jbossws-identity-version" if="jbossas4">
+		<property name="prefix" value="jbossws."/>
+        <loadproperties>
+           <zipentry zipfile="${org.jboss.esb.server.deploy.dir}/jbossws.sar/jbossws-core.jar" name="META-INF/MANIFEST.MF"/>
+            <filterchain>
+                <prefixlines prefix="${prefix}"/>
+            </filterchain>
+        </loadproperties>
+        <property name="jbossws-version-string" value="${jbossws.Specification-Version}"/>
+
+        <echo message="JBossWS Version String: '${jbossws-version-string}'."/>
+        <condition property="invalid-jbossws-version">
+            <not>
+                <contains string="${jbossws-version-string}" substring="jbossws-3.0" />
+            </not>
+        </condition>
+
+        <fail unless="invalid-jbossws-version" message="Invalid version of JBossWS installed on target server. Please install version 3.0.5.GA or higher: http://repository.jboss.org/maven2/org/jboss/ws/native/jbossws-native-core" />
+	</target>
+
+    <target name="assert-jbpm-secured" depends="jbossesb-dependencies-as4, jbossesb-dependencies-as5">
+        <condition property="jbossesb-server-production">
+        	<available file="${org.jboss.esb.server.home}/server/production"/>
+        </condition>
+        <condition property="jbossesb-server-gpd-deployer">
+            <available file="${org.jboss.esb.server.server}/deploy/jbpm.esb/gpd-deployer.war"/>
+        </condition>
+
+        <!-- jBPM Console properties -->
+        <condition property="jbossesb-server-secured">
+            <or>
+                <isset property="jbossesb-server-production"/>
+                <isset property="jbossesb-server-gpd-deployer"/>
+            </or>
+        </condition>
+        <condition property="jbpm.secure.properties.required">
+            <and>
+                <isset property="jbossesb-server-secured"/>
+                <not>
+                    <and>
+                        <isset property="quickstart.jbpm.console.username"/>
+                        <isset property="quickstart.jbpm.console.password"/>
+                    </and>
+                </not>
+            </and>
+         </condition>
+         <fail if="jbpm.secure.properties.required"
+             message="Quickstart configuration error: ${line.separator}${line.separator} jBPM username and password must be set in ${pwd}/quickstarts.properties. ${line.separator} The jBPM web console is secured."/>
+
+        <condition property="org.jboss.esb.jbpm.console.upload.url" value="/gpd-deployer/upload/">
+            <isset property="jbossesb-server-gpd-deployer"/>
+        </condition>
+        <condition property="org.jboss.esb.jbpm.console.upload.url" value="/jbpm-console/app/upload/">
+            <isset property="jbossesb-server-production"/>
+        </condition>
+        <condition property="org.jboss.esb.jbpm.console.upload.url" value="/jbpm-console/upload/">
+            <not>
+                <isset property="jbossesb-server-secured"/>
+            </not>
+        </condition>
+
+        <condition property="jbpm.console.username" value="${quickstart.jbpm.console.username}" else="">
+            <isset property="jbossesb-server-secured"/>
+        </condition>
+
+        <condition property="jbpm.console.password" value="${quickstart.jbpm.console.password}" else="">
+            <isset property="jbossesb-server-secured"/>
+        </condition>
+    </target>
+
+    <!-- ==================================================================== -->
+    <!-- This section defines properties/targets to be overridden by the      -->
+    <!-- quickstart specific build.xml file.                                  -->
+    <!-- ==================================================================== -->
+
+    <property name="additional.deploys" value="" />
+    <property name="deploy.exploded" value="false" />
+    <property name="quickstart.classes.includes" value="**"/>
+    <property name="quickstart.classes.excludes" value=""/>
+    <property name="quickstart.deployment.excludes" value=""/>
+	
+    <target name="quickstart-specific-dependencies">
+    	<path id="quickstart-dependencies-classpath"/>
+    </target>
+
+    <target name="quickstart-specific-checks"/>
+
+    <target name="quickstart-specific-assemblies">
+        <echo message="No Quickstart specific assembly tasks." />
+    </target>
+
+    <target name="quickstart-specific-predeploys">
+        <echo message="No Quickstart specific predeployments being made." />
+    </target>
+
+    <target name="quickstart-specific-deploys">
+        <echo message="No Quickstart specific deployments being made." />
+    </target>
+
+    <target name="quickstart-specific-undeploys">
+        <echo message="No Quickstart specific undeployments being made." />
+    </target>
+
+    <target name="config"/>
+
+    <target name="quickstart-specific-clean">
+        <echo message="No Quickstart specific 'clean' being made." />
+    </target>
+
+    <target name="display-instructions">
+        <echo message='${line.separator}******************' />
+        <echo>Quickstart deployed to target JBoss ESB/App Server at '${org.jboss.esb.server.deploy.dir}'.</echo>
+        <echo>1.  Check your ESB Server console to make sure the deployment was executed without errors.</echo>
+        <echo>2.  Run 'ant runtest' to run the Quickstart.</echo>
+        <echo>3.  Check your ESB Server console again.  The Quickstart should have produced some output.</echo>
+        <echo message='******************' />
+    </target>
+
+</project>

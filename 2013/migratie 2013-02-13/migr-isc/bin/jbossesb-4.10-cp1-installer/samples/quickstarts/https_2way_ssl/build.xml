@@ -1,0 +1,50 @@
+<project name="quickstart_https_2way_ssl" default="deploy" basedir=".">
+
+    <property environment="env" />
+
+    <description>
+		${ant.project.name}
+		${line.separator}
+	</description>
+
+    <!-- Import the base Ant build script... -->
+	<import file="../conf/base-build.xml"/>
+
+    <target name="quickstart-specific-assemblies">
+        <property name="keystore" location="${build.dir}/https_2way_ssl.keystore" />
+
+        <delete file="${keystore}" failonerror="false"/>
+        <genkey keystore="${keystore}" storepass="https_2way_ssl_pass" keypass="https_2way_ssl_pass" keyalg="DSA" alias="https_2way_ssl">
+            <dname>
+                <param name="CN" value="localhost"/>
+                <param name="OU" value="jbossesb"/>
+                <param name="O" value="jbossesb"/>
+                <param name="C" value="IE"/>
+            </dname>
+        </genkey>
+    	
+        <pathconvert targetos="unix" property="keystoredir">
+            <path><pathelement location="${keystore}"/></path>
+        </pathconvert>
+
+        <copy file="jboss-esb-template.xml" tofile="${build.dir}/META-INF/jboss-esb.xml">
+            <filterset>
+                <filter token="keystore" value="${keystoredir}" />
+            </filterset>
+        </copy>
+        <copy file="HttpRouter-localhost-https-9433.properties" todir="${build.dir}/META-INF">
+            <filterset>
+                <filter token="keystore" value="${keystoredir}" />
+            </filterset>
+        </copy>
+    </target>
+
+    <target name="runtest" depends="compile" description="runs Test JMS Sender">
+        <echo>Runs Test JMS Sender</echo>
+        <java fork="yes" classname="org.jboss.soa.esb.samples.https.test.SendJMSMessage" failonerror="true">
+	    <sysproperty key="log4j.configuration" value="${log4j.xml}"/>
+            <classpath refid="exec-classpath" />
+        </java>
+    </target>
+
+</project>

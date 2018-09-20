@@ -1,0 +1,189 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd">
+
+    <providers>
+          <jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+             <jms-bus busid="xpathQuickstartGwChannel">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Fun_XPathCBR_Request_GW"/>
+             </jms-bus>
+             <jms-bus busid="regexQuickstartGwChannel">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Fun_RegexCBR_Request_GW"/>
+             </jms-bus>
+             <jms-bus busid="droolsQuickstartGwChannel">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Fun_DroolsCBR_Request_GW"/>
+             </jms-bus>
+             <jms-bus busid="Fun_CBR_ToBlue">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Fun_CBR_ToBlue"/>
+             </jms-bus>
+             <jms-bus busid="Fun_CBR_ToRed">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Fun_CBR_ToRed"/>
+             </jms-bus>
+             <jms-bus busid="Fun_CBR_ToGreenTransformer">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Fun_CBR_ToGreenTransformer"/>
+             </jms-bus>		                          
+             <jms-bus busid="Fun_CBR_ToGreen">
+                 <jms-message-filter dest-type="QUEUE" dest-name="queue/quickstart_Fun_CBR_ToGreen"/>
+             </jms-bus>		             
+          </jms-provider>
+      </providers>
+      
+      <services>
+          <!-- ESB XPath CBR Service -->
+          <service category="Fun_CBRServices_ESB" name="XPath_FunCBRService_ESB" description="ESB Listener - for the native clients" invmScope="GLOBAL">
+              <listeners>
+                  <!-- Gateway -->
+                  <jms-listener name="TheGateway" busidref="xpathQuickstartGwChannel" is-gateway="true" />
+               </listeners>
+              <actions mep="OneWay">
+                  <action class="org.jboss.soa.esb.actions.ContentBasedRouter" name="ContentBasedRouter">
+                      <property name="cbrAlias" value="XPath"/>
+                      <property name="destinations">
+                          <namespace prefix="ord" uri="http://org.jboss.soa.esb/Order" />
+
+                          <route-to service-category="BlueTeam"  service-name="GoBlue"  expression="/ord:Order[@statusCode='0']" />
+                          <route-to service-category="RedTeam"   service-name="GoRed"   expression="/ord:Order[@statusCode='1']" />
+                          <route-to service-category="GreenTeam" service-name="GoGreen" expression="/ord:Order[@statusCode='2']" />
+                      </property>
+                  </action>
+              </actions>
+          </service>
+
+          <!-- ESB Regex CBR Service -->
+          <service category="Fun_CBRServices_ESB" name="Regex_FunCBRService_ESB" description="ESB Listener - for the native clients" invmScope="GLOBAL">
+              <listeners>
+                  <!-- Gateway -->
+                  <jms-listener name="TheGateway" busidref="regexQuickstartGwChannel" is-gateway="true" />
+               </listeners>
+              <actions mep="OneWay">
+                  <action class="org.jboss.soa.esb.actions.ContentBasedRouter" name="ContentBasedRouter">
+                      <property name="cbrAlias" value="Regex"/>
+                      <property name="ruleSet" value="/regex-rules.properties"/>                      
+                      <property name="ruleReload" value="true"/>
+                      <property name="destinations">
+                          <route-to destination-name="blue"  service-category="BlueTeam"  service-name="GoBlue" />
+                          <route-to destination-name="red"   service-category="RedTeam"   service-name="GoRed" />
+                          <route-to destination-name="green" service-category="GreenTeam" service-name="GoGreen" />
+                      </property>
+                  </action>
+              </actions>
+          </service>
+
+        <!-- ESB Drools CBR Service -->
+          <service category="Fun_CBRServices_ESB" name="Drools_FunCBRService_ESB" description="ESB Listener - for the native clients" invmScope="GLOBAL">
+              <listeners>
+                    <!-- Gateway -->
+                    <jms-listener name="TheGateway" busidref="droolsQuickstartGwChannel" is-gateway="true" />
+               </listeners>
+              <actions mep="OneWay">
+                  <action class="org.jboss.soa.esb.actions.ContentBasedRouter" name="ContentBasedRouter">
+                      <property name="ruleSet" value="FunCBRRules-XPath.drl"/>
+                      <property name="ruleLanguage" value="XPathLanguage.dsl"/>
+                      <property name="ruleReload" value="true"/>
+                      <property name="destinations">
+                          <route-to destination-name="blue"  service-category="BlueTeam"  service-name="GoBlue" />
+                          <route-to destination-name="red"   service-category="RedTeam"   service-name="GoRed" />
+                          <route-to destination-name="green" service-category="GreenTeam" service-name="GoGreen" />
+                      </property>
+                  </action>
+              </actions>
+          </service>
+
+        <!-- Blue -->
+        <service
+  	      category="BlueTeam"
+  	      name="GoBlue"
+  	      description="Move to the Blue Team">
+  	      <listeners>
+  	        <jms-listener
+  	       	  name="Fun_CBR_ToBlue"
+  	       	  busidref="Fun_CBR_ToBlue"
+  	         />
+  	      </listeners>
+  	      <actions mep="OneWay">
+		<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+  	      	  <action name="notificationAction" 
+               		class="org.jboss.soa.esb.actions.Notifier">
+               		<property name="okMethod" value="notifyOK" />
+               		<property name="notification-details">
+   	 				   <NotificationList type="OK"> 
+      				     <target class="NotifyConsole" /> <!--  System.out.println -->
+				    	 <target class="NotifyQueues">
+							<messageProp name="quickstart" value="Fun_CBR_Blue_Alert"/>
+				   	       <queue jndiName="queue/quickstart_Fun_CBR_Blue_Alert">
+					       </queue> 
+			 	     	 </target>
+	    		   	   </NotificationList> 
+	    		   </property>
+   	   			</action>      
+           </actions>
+  	    </service>
+
+        <!-- Red -->
+        <service
+  	      category="RedTeam"
+  	      name="GoRed"
+  	      description="Move to the Red Team">
+  	      <listeners>
+  	        <jms-listener
+  	       	  name="Fun_CBR_ToRed"
+  	       	  busidref="Fun_CBR_ToRed"
+  	         />
+  	      </listeners>
+  	      <actions mep="OneWay">
+		<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+  	      	  <action name="notificationAction" 
+               		class="org.jboss.soa.esb.actions.Notifier">
+               		<property name="okMethod" value="notifyOK" />
+               		<property name="notification-details">
+   	 				   <NotificationList type="OK"> 
+      				     <target class="NotifyConsole" /> <!--  System.out.println -->
+				    	 <target class="NotifyQueues">
+							<messageProp name="quickstart" value="Fun_CBR_Red_Alert" />
+				   	       <queue jndiName="queue/quickstart_Fun_CBR_Red_Alert">
+					       </queue> 
+			 	     	 </target>
+	    		   	   </NotificationList> 
+	    		   </property>
+   	   			</action>      
+           </actions>
+  	    </service>
+
+        <!--  Green Entry Point - conducts a transformation -->
+        <service
+  	      category="GreenTeam"
+  	      name="GoGreen"
+  	      description="First transform then send to the Green Team">
+  	      <listeners>
+  	        <jms-listener
+  	       	  name="Fun_CBR_ToGreenTransformer"
+  	       	  busidref="Fun_CBR_ToGreenTransformer"
+  	         />
+  	      </listeners>  	      
+  	      <actions mep="OneWay">
+		<action name="testStore" class="org.jboss.soa.esb.actions.TestMessageStore"/>
+
+
+								 <!-- Inject the transformer actions here -->
+								           
+		 <action name="displayAfterTransformer" 
+		   class="org.jboss.soa.esb.samples.quickstart.funcbr.MyJMSListenerAction" process="displayMessage" />  
+
+   	   		    <action name="notificationAction" class="org.jboss.soa.esb.actions.Notifier">
+               		<property name="okMethod" value="notifyOK" />
+               		<property name="notification-details">
+   	 				   <NotificationList type="OK"> 
+   	 				   <target class="NotifyConsole" />
+				    	 <target class="NotifyQueues">
+							<messageProp name="quickstart" value="Fun_CBR_Green_Alert" />
+				   	       <queue jndiName="queue/quickstart_Fun_CBR_Green_Alert">
+					       </queue> 
+			 	     	 </target>
+	    		   	   </NotificationList> 
+	    		   </property>
+   	   			</action>  
+           </actions>
+  	    </service>  	         
+	</services>
+</jbossesb>

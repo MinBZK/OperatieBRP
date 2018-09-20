@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum:20-09-2012 Status:Concept -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+        xmlns:brp="http://www.bprbzk.nl/BRP/0001"
+        xmlns:mig="http://www.moderniseringgba.nl/Migratie/0001" 
+        targetNamespace="http://www.moderniseringgba.nl/Migratie/0001" 
+        elementFormDefault="qualified" 
+        attributeFormDefault="unqualified" 
+        version="000101">
+
+    <import schemaLocation="brp/BRP_Afstamming_Basis.xsd" namespace="http://www.bprbzk.nl/BRP/0001" />
+
+    <!-- Toegevoegd aan alle (inhoudelijke) berichten om aan te geven -->
+    <!-- tussen welke gemeenten wordt gecommuniceerd.                 -->
+    <complexType name="IscGemeenten">
+        <sequence>
+            <element name="lo3Gemeente" type="brp:Gemeentecode-s" />
+            <element name="brpGemeente" type="brp:Gemeentecode-s" />
+        </sequence>
+    </complexType>
+	
+	<!-- Toegevoegd ipv IscGemeenten als BRP niet het doel kan bepalen en dat door ISC wordt gedaan -->
+	<complexType name="IscGemeentenEnkelBron">
+		<sequence>
+			<element name="brpGemeente" type="brp:Gemeentecode-s" />
+		</sequence>
+	</complexType>    
+
+    <complexType name="BrpAntwoordType">
+        <sequence>
+            <element name="status" type="mig:StatusType"  minOccurs="1" maxOccurs="1"/>
+            <element name="toelichting" type="brp:Meldingtekst-s"  minOccurs="0" maxOccurs="1" />
+        </sequence>
+    </complexType>
+    
+    
+    <!-- Geboorte (BRP -> ISC) -->
+
+    <element name="geboorteVerzoek" type="mig:GeboorteVerzoekType" />
+    <!-- Net als brp:View_InschrijvingGeboorte_Afstamming, met toevoeging -->
+    <!-- van de bron- en bestemmingsgemeenten (en later misschien nog meer). -->
+    <complexType name="GeboorteVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeentenEnkelBron"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="familierechtelijkeBetrekking" type="brp:View_FamilierechtelijkeBetrekking_Afstamming"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="geboorteAntwoord" type="mig:GeboorteAntwoordType"/>
+    <complexType name="GeboorteAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <!-- MV Geboorte (ISC- > BRP)-->
+
+    <element name="mvGeboorteVerzoek" type="mig:MvGeboorteVerzoekType" />
+    <!-- Net als brp:View_InschrijvingGeboorte_Afstamming, met toevoeging -->
+    <!-- van de bron- en bestemmingsgemeenten (en later misschien nog meer). -->
+    <complexType name="MvGeboorteVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="0" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="0" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="familierechtelijkeBetrekking" type="brp:View_FamilierechtelijkeBetrekking_Afstamming"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="mvGeboorteAntwoord" type="mig:MvGeboorteAntwoordType"/>
+    <complexType name="MvGeboorteAntwoordType">
+        <sequence>
+            <element name="status" type="mig:StatusType"  minOccurs="1" maxOccurs="1"/>
+            <element name="toelichting" type="brp:Meldingtekst-s"  minOccurs="0" maxOccurs="1" />
+            <element name="foutCode" type="mig:FoutCode"  minOccurs="0" maxOccurs="1" />
+            <element name="aNummer" type="brp:ANummer-s"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+    
+	<!-- Verhuizing (BRP -> ISC) -->
+	
+	<element name="verhuizingVerzoek" type="mig:VerhuizingVerzoekType"/>
+	<complexType name="VerhuizingVerzoekType">
+		<sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+			<element name="afzender" type="mig:AfzenderType"  minOccurs="1" maxOccurs="1" />
+		    <element name="aNummer" type="brp:ANummer-s"  minOccurs="1" maxOccurs="1"/>
+			<element name="burgerservicenummer" type="brp:Burgerservicenummer-s"  minOccurs="1" maxOccurs="1"/>
+			<element name="huidigeGemeente" type="brp:Gemeentecode-s"  minOccurs="1" maxOccurs="1" />
+			<element name="nieuweGemeente" type="brp:Gemeentecode-s"  minOccurs="1" maxOccurs="1" />
+			<element name="datumInschrijving" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+			<element name="adresseerbaarObject" type="mig:AdresseerbaarObjectType"  minOccurs="0" maxOccurs="1" />
+			<element name="idNummeraanduiding" type="brp:IdentificatiecodeNummeraanduiding-s"  minOccurs="0" maxOccurs="1" />
+			<element name="naamOpenbareRuimte" type="brp:NaamOpenbareRuimte-s"  minOccurs="0" maxOccurs="1" />
+			<element name="afgekorteNaamOpenbareRuimte" type="brp:AfgekorteNaamOpenbareRuimte-s"  minOccurs="0" maxOccurs="1" />
+			<element name="huisnummer" type="brp:Huisnummer-s"  minOccurs="0" maxOccurs="1" />
+			<element name="huisletter" type="brp:Huisletter-s"  minOccurs="0" maxOccurs="1" />
+			<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging-s"  minOccurs="0" maxOccurs="1" />
+			<element name="postcode" type="brp:Postcode-s"  minOccurs="0" maxOccurs="1" />
+			<element name="woonplaats" type="mig:WoonplaatsType"  minOccurs="0" maxOccurs="1" />
+			<element name="locatieTovAdres" type="mig:LocatieTovAdresType"  minOccurs="0" maxOccurs="1" />
+			<element name="locatieOmschrijving" type="brp:LocatieOmschrijving-s"  minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>	
+	
+	<element name="verhuizingAntwoord" type="mig:VerhuizingAntwoordType"/>
+	<complexType name="VerhuizingAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+	</complexType>
+
+	<!-- MV Verhuizing (ISC -> BRP) -->
+	
+	<element name="mvVerhuizingVerzoek" type="mig:MvVerhuizingVerzoekType"/>
+	<complexType name="MvVerhuizingVerzoekType">
+		<sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+			<element name="afzender" type="mig:AfzenderType"  minOccurs="1" maxOccurs="1" />
+		    <element name="aNummer" type="brp:ANummer-s"  minOccurs="1" maxOccurs="1"/>
+			<element name="burgerservicenummer" type="brp:Burgerservicenummer-s"  minOccurs="1" maxOccurs="1"/>
+			<element name="huidigeGemeente" type="brp:Gemeentecode-s"  minOccurs="1" maxOccurs="1" />
+			<element name="nieuweGemeente" type="brp:Gemeentecode-s"  minOccurs="1" maxOccurs="1" />
+			<element name="datumInschrijving" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+			<element name="adresseerbaarObject" type="mig:AdresseerbaarObjectType"  minOccurs="0" maxOccurs="1" />
+			<element name="idNummeraanduiding" type="brp:IdentificatiecodeNummeraanduiding-s"  minOccurs="0" maxOccurs="1" />
+			<element name="naamOpenbareRuimte" type="brp:NaamOpenbareRuimte-s"  minOccurs="0" maxOccurs="1" />
+			<element name="afgekorteNaamOpenbareRuimte" type="brp:AfgekorteNaamOpenbareRuimte-s"  minOccurs="0" maxOccurs="1" />
+			<element name="huisnummer" type="brp:Huisnummer-s"  minOccurs="0" maxOccurs="1" />
+			<element name="huisletter" type="brp:Huisletter-s"  minOccurs="0" maxOccurs="1" />
+			<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging-s"  minOccurs="0" maxOccurs="1" />
+			<element name="postcode" type="brp:Postcode-s"  minOccurs="0" maxOccurs="1" />
+			<element name="woonplaats" type="mig:WoonplaatsType"  minOccurs="0" maxOccurs="1" />
+			<element name="locatieTovAdres" type="mig:LocatieTovAdresType"  minOccurs="0" maxOccurs="1" />
+			<element name="locatieOmschrijving" type="brp:LocatieOmschrijving-s"  minOccurs="0" maxOccurs="1" />
+		</sequence>
+	</complexType>	
+	
+	<element name="mvVerhuizingAntwoord" type="mig:MvVerhuizingAntwoordType"/>
+	<complexType name="MvVerhuizingAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+	</complexType>
+
+	<!-- Zoek persoon (ISC -> BRP) -->
+	
+	<element name="zoekPersoonVerzoek" type="mig:ZoekPersoonVerzoekType"/>
+	<complexType name="ZoekPersoonVerzoekType">
+		<sequence>
+			<element name="aNummer" type="brp:ANummer-s"  minOccurs="0" maxOccurs="1"/>
+			<element name="burgerservicenummer" type="brp:Burgerservicenummer-s"  minOccurs="0" maxOccurs="1"/>
+			<element name="geslachtsnaam" type="brp:Geslachtsnaam-s"  minOccurs="0" maxOccurs="1"/>
+			<element name="geboortedatum" type="brp:Datum-s"  minOccurs="0" maxOccurs="1"/>
+			<element name="geslachtsaanduiding" type="brp:GeslachtsaanduidingCode-s"  minOccurs="0" maxOccurs="1"/>
+			<element name="voornamen" type="brp:Voornamen-s"  minOccurs="0" maxOccurs="1"/>
+			<element name="postcode" type="brp:Postcode-s"  minOccurs="0" maxOccurs="1"/>
+			<element name="bijhoudingsgemeente" type="brp:Gemeentecode-s"  minOccurs="0" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+	
+	<element name="zoekPersoonAntwoord" type="mig:ZoekPersoonAntwoordType"/>
+	<complexType name="ZoekPersoonAntwoordType">
+		<sequence>
+			<element name="status" type="mig:StatusType" minOccurs="1" maxOccurs="1"/>
+			<element name="toelichting" type="brp:Meldingtekst-s"  minOccurs="0" maxOccurs="1" />		
+			<element name="gevondenPersonen" type="mig:GevondenPersonenType"  minOccurs="0" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+	
+	<complexType name="GevondenPersonenType">
+		<sequence>
+			<element name="gevondenPersoon" type="mig:GevondenPersoonType"  minOccurs="0" maxOccurs="unbounded"/>
+		</sequence>
+	</complexType>
+	
+	<complexType name="GevondenPersoonType">
+		<sequence>
+			<element name="aNummer" type="brp:ANummer-s"  minOccurs="1" maxOccurs="1"/>
+			<element name="bijhoudingsgemeente" type="brp:Gemeentecode-s"  minOccurs="1" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+	
+	<!-- Notificatie (ISC -> BRP) -->
+	
+	<element name="notificatieVerzoek" type="mig:NotificatieVerzoekType"/>
+	<complexType name="NotificatieVerzoekType">
+		<sequence>
+			<element name="notificatie" type="brp:Meldingtekst-s"  minOccurs="1" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+	<element name="notificatieAntwoord" type="mig:NotificatieAntwoordType"/>
+	<complexType name="NotificatieAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+	</complexType>
+
+	<!-- Synchronisatie signaal (BRP -> ISC) -->
+	
+	<element name="synchronisatieSignaal" type="mig:SynchronisatieSignaalType"/>
+	<complexType name="SynchronisatieSignaalType">
+		<sequence>
+			<element name="aNummer" type="brp:ANummer-s"  minOccurs="1" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+ 
+    <!-- Erkenning na geboorte (BRP -> ISC) -->
+
+    <element name="erkenningVerzoek" type="mig:ErkenningVerzoekType" />
+    <complexType name="ErkenningVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="kind" type="brp:View_Kind_Afstamming"  minOccurs="1" maxOccurs="1" />
+            <element name="erkenner" type="brp:View_Ouder_Afstamming"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="erkenningAntwoord" type="mig:ErkenningAntwoordType"/>
+    <complexType name="ErkenningAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <!-- Erkenning na geboorte via notariële akte (BRP -> ISC) -->
+
+    <element name="erkenningNotarieelVerzoek" type="mig:ErkenningNotarieelVerzoekType" />
+    <complexType name="ErkenningNotarieelVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="kind" type="brp:View_Kind_Afstamming"  minOccurs="1" maxOccurs="1" />
+            <element name="erkenner" type="brp:View_Ouder_Afstamming"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="erkenningNotarieelAntwoord" type="mig:ErkenningNotarieelAntwoordType"/>
+    <complexType name="ErkenningNotarieelAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <!-- Vernietiging erkenning (BRP -> ISC) -->
+
+    <element name="erkenningVernietigingVerzoek" type="mig:ErkenningVernietigingVerzoekType" />
+    <complexType name="ErkenningVernietigingVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="kind" type="brp:View_Kind_Afstamming"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="erkenningVernietigingAntwoord" type="mig:ErkenningVernietigingAntwoordType"/>
+    <complexType name="ErkenningVernietigingAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <!-- ontkenning vaderschap (1*E) (BRP -> ISC) -->
+
+    <element name="ontkenningVaderschapVerzoek" type="mig:OntkenningVaderschapVerzoekType" />
+    <complexType name="OntkenningVaderschapVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="kind" type="brp:View_Kind_Afstamming"  minOccurs="1" maxOccurs="1" />
+            <element name="vader" type="brp:View_Ouder_Afstamming"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+    
+    <!--  Signal wijziging a-nummer (BRP -> ISC) -->
+    
+	<element name="wijzigingANummerSignaal" type="mig:WijzigingANummerSignaalType"/>
+	<complexType name="WijzigingANummerSignaalType">
+		<sequence>
+			<element name="iscGemeenten" type="mig:IscGemeentenEnkelBron" minOccurs="1" maxOccurs="1"/>
+			<element name="oudANummer" type="brp:ANummer-s" minOccurs="1" maxOccurs="1"/>
+			<element name="nieuwANummer" type="brp:ANummer-s"  minOccurs="1" maxOccurs="1"/>
+			<element name="datumGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+	
+    <element name="ontkenningVaderschapAntwoord" type="mig:OntkenningVaderschapAntwoordType"/>
+    <complexType name="OntkenningVaderschapAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <!-- ontkenning vaderschap door moeder (1*U) (BRP -> ISC) -->
+
+    <element name="ontkenningVaderschapDoorMoederVerzoek" type="mig:OntkenningVaderschapDoorMoederVerzoekType" />
+    <complexType name="OntkenningVaderschapDoorMoederVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="kind" type="brp:View_Kind_Afstamming"  minOccurs="1" maxOccurs="1" />
+            <element name="vader" type="brp:View_Ouder_Afstamming"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="ontkenningVaderschapDoorMoederAntwoord" type="mig:OntkenningVaderschapDoorMoederAntwoordType"/>
+    <complexType name="OntkenningVaderschapDoorMoederAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <element name="geslachtsnaamwijzigingVerzoek" type="mig:GeslachtsnaamwijzigingVerzoekType" />
+    <complexType name="GeslachtsnaamwijzigingVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="persoon" type="brp:Objecttype_Persoon"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="geslachtsnaamwijzigingAntwoord" type="mig:GeslachtsnaamwijzigingAntwoordType"/>
+    <complexType name="GeslachtsnaamwijzigingAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <element name="voornaamswijzigingVerzoek" type="mig:VoornaamswijzigingVerzoekType" />
+    <complexType name="VoornaamswijzigingVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="persoon" type="brp:Objecttype_Persoon"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="voornaamswijzigingAntwoord" type="mig:VoornaamswijzigingAntwoordType"/>
+    <complexType name="VoornaamswijzigingAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <element name="adoptieAntwoord" type="mig:AdoptieAntwoordType"/>
+    <complexType name="AdoptieAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <element name="transseksualiteitVerzoek" type="mig:TransseksualiteitVerzoekType" />
+    <complexType name="TransseksualiteitVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="persoon" type="brp:Objecttype_Persoon" minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="transseksualiteitAntwoord" type="mig:TransseksualiteitAntwoordType"/>
+    <complexType name="TransseksualiteitAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <element name="gerechtelijkeVaststellingVaderschapVerzoek" type="mig:GerechtelijkeVaststellingVaderschapVerzoekType"/>
+    <complexType name="GerechtelijkeVaststellingVaderschapVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="kind" type="brp:View_Kind_Afstamming"  minOccurs="1" maxOccurs="1" />
+            <element name="vader" type="brp:View_Ouder_Afstamming"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="gerechtelijkeVaststellingVaderschapAntwoord" type="mig:GerechtelijkeVaststellingVaderschapAntwoordType"/>
+    <complexType name="GerechtelijkeVaststellingVaderschapAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <element name="overlijdenVerzoek" type="mig:OverlijdenVerzoekType" />
+    <complexType name="OverlijdenVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="overledenPersoon" type="brp:Objecttype_Persoon"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="overlijdenAntwoord" type="mig:OverlijdenAntwoordType"/>
+    <complexType name="OverlijdenAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+    <element name="lijkvindingVerzoek" type="mig:LijkvindingVerzoekType" />
+    <complexType name="LijkvindingVerzoekType">
+        <sequence>
+            <element name="iscGemeenten" type="mig:IscGemeenten"  minOccurs="1" maxOccurs="1" />
+            <element name="datumAanvangGeldigheid" type="brp:Datum-s"  minOccurs="1" maxOccurs="1" />
+            <element name="tijdstipOntlening" type="brp:DatumTijd-s"  minOccurs="1" maxOccurs="1" />
+            <element name="toelichtingOntlening" type="brp:Ontleningstoelichting-s"  minOccurs="0" maxOccurs="1" />
+            <element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding"  minOccurs="0" maxOccurs="1" />
+            <element name="overledenPersoon" type="brp:Objecttype_Persoon"  minOccurs="1" maxOccurs="1" />
+        </sequence>
+    </complexType>
+
+    <element name="lijkvindingAntwoord" type="mig:LijkvindingAntwoordType"/>
+    <complexType name="LijkvindingAntwoordType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+	<!-- Generieke error bericht -->
+
+	<element name="error" type="mig:ErrorType"/>
+    <complexType name="ErrorType">
+        <complexContent>
+            <extension base="mig:BrpAntwoordType"/>
+        </complexContent>
+    </complexType>
+
+	
+	<!--  ========================================================================================================= -->
+	<!--  SIMPLE TYPES: Moeten verder aangescherpt worden (vervangen door BRP typen)                          -->
+	<!--  ========================================================================================================= -->
+	
+	<simpleType name="AdresseerbaarObjectType">
+		<restriction base="string">
+			<maxLength value="100"/>
+		</restriction>
+	</simpleType>
+		
+	<simpleType name="AfzenderType">
+		<restriction base="string">
+			<maxLength value="100"/>
+		</restriction>
+	</simpleType>	
+
+	<simpleType name="LocatieTovAdresType">
+		<restriction base="string">
+			<maxLength value="2"/>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="WoonplaatsType">
+		<restriction base="string">
+			<maxLength value="100"/>
+		</restriction>
+	</simpleType>
+	
+	<!--  ========================================================================================================= -->
+	<!--  SIMPLE TYPES: Migratie specifieke typen                                                                   -->
+	<!--  ========================================================================================================= -->
+	
+	<simpleType name="PersoonsaanduidingType">
+		<restriction base="string">
+			<maxLength value="31"/>
+			<enumeration value="Verhuizend van LO3 naar BRP">
+				<annotation>
+					<documentation/>
+				</annotation>
+			</enumeration>
+			<enumeration value="Verhuizend van BRP naar LO3 GBA">
+				<annotation>
+					<documentation/>
+				</annotation>
+			</enumeration>
+			<enumeration value="Verhuizend van BRP naar LO3 RNI">
+				<annotation>
+					<documentation/>
+				</annotation>
+			</enumeration>
+		</restriction>
+	</simpleType>
+
+	<simpleType name="ProcessIdType">
+		<restriction base="string">
+			<maxLength value="100"/>
+		</restriction>
+	</simpleType>	
+
+	<simpleType name="StatusType">
+		<restriction base="string">
+			<maxLength value="30"/>
+            <enumeration value="Ok" />
+            <enumeration value="Waarschuwing" />
+			<enumeration value="Fout" />
+		</restriction>
+	</simpleType>
+    
+    <simpleType name="FoutCode">
+        <restriction base="string">
+            <maxLength value="1"/>
+            <enumeration value="A">
+                <annotation><documentation>PL bestaat reeds</documentation></annotation>
+            </enumeration>
+            <enumeration value="G">
+                <annotation><documentation>Identificatie persoon niet gevonden</documentation></annotation>
+            </enumeration>
+            <enumeration value="U">
+                <annotation><documentation>Identificatie persoon niet uniek</documentation></annotation>
+            </enumeration>
+            <enumeration value="B">
+                <annotation><documentation>Identificatie persoon gemarkeerd 'geblokkeerd'</documentation></annotation>
+            </enumeration>
+            <enumeration value="O">
+                <annotation><documentation>Identificatie persoon gemarkeerd 'overleden'</documentation></annotation>
+            </enumeration>
+            <enumeration value="E">
+                <annotation><documentation>Identificatie persoon gemarkeerd 'geemigreerd'</documentation></annotation>
+            </enumeration>
+            <enumeration value="M">
+                <annotation><documentation>Identificatie persoon gemarkeerd 'ministerieel besluit'</documentation></annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>	
+</schema>

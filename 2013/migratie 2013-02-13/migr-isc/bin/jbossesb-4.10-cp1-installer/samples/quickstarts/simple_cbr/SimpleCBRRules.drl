@@ -1,0 +1,29 @@
+#created on: Oct 30, 2006
+package com.jboss.soa.esb.routing.cbr
+
+#list any import classes here.
+import org.jboss.soa.esb.message.Message;
+import org.jboss.soa.esb.message.format.MessageType;
+
+#declare any global variables here
+global java.util.List destinations;
+
+
+rule "Routing Rule - Serialized based message"
+	
+	when
+		Message( type == MessageType.JAVA_SERIALIZED)
+	then
+		System.out.println("Serialized");
+		destinations.add("serialized");
+		
+end
+
+rule "Routing Rule - XML based message"
+	
+	when
+		Message( type == MessageType.JBOSS_XML)
+	then 
+		System.out.println("JBoss_XML");
+		destinations.add("xml");
+end

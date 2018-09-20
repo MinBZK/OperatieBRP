@@ -1,0 +1,40 @@
+#created on: Oct 30, 2006
+package com.jboss.soa.esb.routing.cbr
+
+#list any import classes here.
+import org.jboss.soa.esb.message.Message;
+import org.jboss.soa.esb.message.format.MessageType;
+import org.jboss.soa.esb.samples.quickstart.businessrules.dvdstore.OrderHeader;
+
+#declare any global variables here
+global java.util.List destinations;
+
+
+rule "Highest Priority Orders"
+	
+	when
+		OrderHeader( orderPriority == 3 )
+	then
+		System.out.println("HIGHEST PRIORITY");
+		destinations.add("SuperSpecialCustomerService");
+		
+end
+
+rule "Medium Priority Orders"
+	
+	when
+		OrderHeader( orderPriority == 2 )
+	then 
+		System.out.println("Medium Priority");
+		destinations.add("SpecialCustomerService");
+end
+
+rule "Low Priority Orders"
+	
+	when
+		OrderHeader( orderPriority == 1 )
+	then 
+		System.out.println("Low Priority");
+		destinations.add("RegularCustomerService");
+end
+

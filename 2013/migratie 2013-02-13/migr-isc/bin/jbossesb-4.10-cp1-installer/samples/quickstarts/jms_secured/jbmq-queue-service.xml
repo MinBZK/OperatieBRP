@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<server>
+  <mbean code="org.jboss.mq.server.jmx.Queue"
+    name="jboss.esb.quickstart.destination:service=Queue,name=quickstart_jms_secured_Request_gw">
+    <attribute name="SecurityConf">
+		<security>
+			<!-- gatewayrole role can post messages but not read -->
+			<role name="gatewayrole" write="true"/>
+
+			<!-- esb role can consume and post messages (redeliver) -->
+			<role name="esbrole" read="true" write="true"/>
+		</security>
+	</attribute>
+    <depends optional-attribute-name="DestinationManager">jboss.mq:service=DestinationManager</depends>
+	<depends optional-attribute-name="SecurityManager">jboss.mq:service=SecurityManager</depends>
+  </mbean>
+
+  <mbean code="org.jboss.mq.server.jmx.Queue"
+    name="jboss.esb.quickstart.destination:service=Queue,name=quickstart_jms_secured_Request_esb">
+    <attribute name="SecurityConf">
+		<security>
+
+			<!-- esb role can consume and post messages (redeliver) -->
+			<role name="esbrole" read="true" write="true"/>
+		</security>
+	</attribute>
+    <depends optional-attribute-name="DestinationManager">jboss.mq:service=DestinationManager</depends>
+	<depends optional-attribute-name="SecurityManager">jboss.mq:service=SecurityManager</depends>
+  </mbean>
+</server>

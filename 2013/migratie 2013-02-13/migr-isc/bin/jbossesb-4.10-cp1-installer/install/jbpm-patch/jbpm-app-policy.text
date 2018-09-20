@@ -1,0 +1,22 @@
+<policy>
+  <application-policy name = "jbpm"> 
+       <authentication> 
+         <login-module code="org.jboss.security.auth.spi.DatabaseServerLoginModule" 
+                       flag="required"> 
+           <module-option name="dsJndiName">java:/JbpmDS</module-option> 
+           <module-option name="principalsQuery"> 
+             SELECT PASSWORD_ FROM JBPM_ID_USER WHERE NAME_=? 
+           </module-option> 
+           <module-option name="rolesQuery"> 
+             SELECT g.NAME_ ,'Roles' 
+             FROM JBPM_ID_USER u, 
+                  JBPM_ID_MEMBERSHIP m, 
+                  JBPM_ID_GROUP g 
+             WHERE g.TYPE_='security-role' 
+               AND m.GROUP_ = g.ID_ 
+               AND m.USER_ = u.ID_ 
+               AND u.NAME_=? 
+           </module-option> 
+         </login-module> 
+       </authentication> 
+    </application-policy> 

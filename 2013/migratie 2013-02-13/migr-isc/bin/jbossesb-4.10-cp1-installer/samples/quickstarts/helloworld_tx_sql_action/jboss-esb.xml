@@ -1,0 +1,57 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd http://anonsvn.jboss.org/repos/labs/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd"
+    parameterReloadSecs="5">
+
+    <providers>
+          <sql-provider name="GatewaySQLprovider" 
+          			url="jdbc:h2:tcp://localhost:9095/HelloworldTxSqlDB"
+          			datasource="java:/HelloworldTxSqlDB">
+          	<sql-bus busid="helloSQLChannel" >
+          		<sql-message-filter
+          			tablename="gateway_table"
+          			status-column="STATUS_COL"
+					order-by="DATA_COLUMN"	
+					where-condition="DATA_COLUMN like 'data%'"
+					message-column="DATA_COLUMN"
+          			message-id-column="UNIQUE_ID"
+          			insert-timestamp-column="TIMESTAMP_COL"
+          		/>
+          	</sql-bus>
+          </sql-provider>
+
+          <sql-provider name="SQLprovider" 
+          			url="jdbc:h2:tcp://localhost:9095/HelloworldTxSqlDB"
+          			datasource="java:/HelloworldTxSqlDB">
+          	<sql-bus busid="TxHelloSQLChannel" >
+          		<sql-message-filter
+          			tablename="TX_ESB_MESSAGES"
+					message-id-column="MESSAGE_ID"
+          			status-column="STATUS_COL"
+					insert-timestamp-column="TIMESTAMP_COL"
+					message-column="DATA_COLUMN"
+          		/>
+          	</sql-bus>
+          </sql-provider>
+
+      </providers>
+      
+      <services>
+        <service category="myCategory" name="myTxListener" description="Hello World TX SQL Action (esb jdbc listener)">
+            <listeners>
+            	<sql-listener name="SqlGateway" busidref="helloSQLChannel" is-gateway="true"/>
+            	<sql-listener name="TxSqlListener" busidref="TxHelloSQLChannel">
+					<property name="transacted" value="true"/>
+                </sql-listener>
+            </listeners>
+            <actions mep="OneWay">
+		       <action name="action1" class="org.jboss.soa.esb.samples.quickstart.helloworldtxsqlaction.MyAction" process="displayMessage" /> 
+			   <action name="action2" class="org.jboss.soa.esb.actions.SystemPrintln" />    
+            </actions>
+
+        </service>
+      </services>
+     
+</jbossesb>
+

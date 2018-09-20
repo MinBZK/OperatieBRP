@@ -1,0 +1,320 @@
+<?xml version = "1.0" encoding = "UTF-8"?>
+<jbossesb xmlns="http://anonsvn.labs.jboss.com/labs/jbossesb/trunk/product/etc/schemas/xml/jbossesb-1.0.1.xsd" >
+
+	<providers>
+		<jms-provider name="JBossMQ" connection-factory="ConnectionFactory">
+			<jms-bus busid="brpOntvangst">
+				<!-- 
+				 | Verwachte body:
+				 |    BRP XML bericht
+				 | Verwachte header(s): 
+				 |    geen 
+				 +-->
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/brp.ontvangst" />
+			</jms-bus>
+			<jms-bus busid="vospgOntvangst" >
+				<!-- 
+				 | Verwachte body: 
+				 |    LO3 Bericht
+				 | Verwachte header(s): 
+				 |    bericht-id 
+				 |    correlatie-id (als bericht een antwoord is op een eerder verzonden bericht)
+				 +-->
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/vospg.ontvangst" />
+			</jms-bus>
+			<jms-bus busid="mviOntvangst">
+				<!-- 
+				 | Verwachte body:
+				 |     LG01 bericht
+				 | Verwachte header(s): 
+				 |     bericht-id 
+				 +-->
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/mvi.ontvangst" />
+			</jms-bus>
+			<jms-bus busid="syncResponse">
+				<!-- 
+				 | Verwachte body:
+				 |     Null bericht (ok)
+				 | Verwachte header(s): 
+				 |     bericht-id 
+				 |     correlatie-id 
+				 +-->
+				<jms-message-filter dest-type="QUEUE" dest-name="queue/sync.response" />
+			</jms-bus>
+		</jms-provider>
+	</providers>
+
+	<services>
+		<service category="ISC" name="BRP-Inbound" description="Ontvang BRP berichten en routeer deze naar het juiste proces." invmScope="GLOBAL" invmTransacted="true">
+			<property name="webservice" value="false"/>
+			<listeners>
+				<jms-listener name="brp-gateway" busidref="brpOntvangst" is-gateway="true"  />
+			</listeners>	
+			<actions mep="OneWay">
+				<!-- Audit bericht -->
+				<action name="brp-inbound-audit" class="nl.moderniseringgba.isc.esb.BerichtAuditAction">
+					<property name="kanaal" value="BRP"/>
+     				<property name="richting" value="INKOMEND"/>
+				</action>
+				
+				<!--  Parse bericht -->
+				<action name="brp-inbound-parse" class="nl.moderniseringgba.isc.esb.BerichtParseAction">
+					<property name="kanaal" value="BRP"/>
+				</action>
+				
+				<!--  Correleren (en verwerken in jBPM) -->
+				<action name="brp-inbound-correlatie" class="nl.moderniseringgba.isc.esb.CorrelerenAction" />
+     		</actions>
+		</service>
+
+		<service category="ISC" name="MVI-Inbound" description="Ontvang MVI berichten en routeer deze naar het juiste proces" invmScope="GLOBAL" invmTransacted="true">
+			<property name="webservice" value="false"/>
+			<listeners>
+				<jms-listener name="mvi-gateway" busidref="mviOntvangst" is-gateway="true"  />
+			</listeners>
+			<actions mep="OneWay">
+				<!-- Audit bericht -->
+				<action name="mvi-inbound-audit" class="nl.moderniseringgba.isc.esb.BerichtAuditAction">
+					<property name="kanaal" value="MVI"/>
+     				<property name="richting" value="INKOMEND"/>
+				</action>
+				
+				<!--  Parse bericht -->
+				<action name="mvi-inbound-parse" class="nl.moderniseringgba.isc.esb.BerichtParseAction">
+					<property name="kanaal" value="MVI"/>
+				</action>
+				
+				<!--  Verwerken in jBPM -->
+				<action name="mvi-inbound-correlatie" class="nl.moderniseringgba.isc.esb.CorrelerenAction" />				
+            </actions>
+		</service>
+
+	
+		<service category="ISC" name="Sync-Inbound" description="Ontvang sync (antwoord) berichten en routeer deze naar het juiste proces" invmScope="GLOBAL" invmTransacted="true">
+			<property name="webservice" value="false"/>
+			<listeners>
+				<jms-listener name="sync-gateway" busidref="syncResponse" is-gateway="true"  />
+			</listeners>
+			<actions mep="OneWay">
+				<!-- Audit bericht -->
+				<action name="sync-inbound-audit" class="nl.moderniseringgba.isc.esb.BerichtAuditAction">
+					<property name="kanaal" value="SYNC"/>
+     				<property name="richting" value="INKOMEND"/>
+				</action>
+				
+				<!--  Parse bericht -->
+				<action name="sync-inbound-parse" class="nl.moderniseringgba.isc.esb.BerichtParseAction">
+					<property name="kanaal" value="SYNC"/>
+				</action>
+				
+				<!--  Correleren (en verwerken in jBPM) -->
+				<action name="sync-inbound-correlatie" class="nl.moderniseringgba.isc.esb.CorrelerenAction" />
+			</actions>
+		</service>
+		
+	
+		<service category="ISC" name="VOSPG-Inbound" description="Ontvang VOSPG berichten en routeer deze naar het juiste proces" invmScope="GLOBAL" invmTransacted="true">
+			<property name="webservice" value="false"/>
+			<listeners>
+				<jms-listener name="vospg-gateway" busidref="vospgOntvangst" is-gateway="true"  />
+			</listeners>
+			<actions mep="OneWay">
+				<!-- Audit bericht -->
+				<action name="vospg-inbound-audit" class="nl.moderniseringgba.isc.esb.BerichtAuditAction">
+					<property name="kanaal" value="VOSPG"/>
+     				<property name="richting" value="INKOMEND"/>
+				</action>
+				
+				<!--  Parse bericht -->
+				<action name="vospg-inbound-parse" class="nl.moderniseringgba.isc.esb.BerichtParseAction">
+					<property name="kanaal" value="VOSPG"/>
+				</action>
+				
+				<!--  Correleren (en verwerken in jBPM) -->
+				<action name="vospgc-inbound-correlatie" class="nl.moderniseringgba.isc.esb.CorrelerenAction" />
+			</actions>
+		</service>
+		
+		<!--
+		 | JBPM georienteerde services
+		 +-->
+		<service category="BPM" name="Installer" description="Installeert de JBPM processen" invmScope="GLOBAL">
+			<actions mep="OneWay">
+				<action name="jbpm-installer" class="nl.moderniseringgba.isc.esb.InstallProcessesAction" />
+			</actions>
+		</service>
+		
+		<service  category="BPM" name="Start" description="Start een nieuw jBPM proces" invmScope="GLOBAL" invmTransacted="true">
+			<property name="webservice" value="false"/>
+			<actions mep="OneWay">
+				<!-- JBPM start nieuw proces -->
+				<action name="jbpm-processor" class="org.jboss.soa.esb.services.jbpm.actions.BpmProcessor">
+					<property name="command" value="StartProcessInstanceCommand" />
+                    <property name="esbToBpmVars">                        
+                        <mapping esb="BODY_CONTENT" bpm="input" />
+                    </property>
+				</action>
+
+				<!-- Process instance opslaan voor nieuw proces -->
+				<action name="inbound-associate-processinstance" class="nl.moderniseringgba.isc.esb.AssociateProcessInstanceAction" />
+			</actions>
+		</service>		
+		
+		<service  category="BPM" name="Fout" description="Start een jBPM foutafhandeling proces" invmScope="GLOBAL" invmTransacted="true">
+			<property name="webservice" value="false"/>
+			<actions mep="OneWay">
+				<!-- JBPM start nieuw proces -->
+				<action name="jbpm-processor" class="org.jboss.soa.esb.services.jbpm.actions.BpmProcessor">
+					<property name="command" value="StartProcessInstanceCommand" />
+                    <property name="esbToBpmVars">                        
+                        <mapping esb="functioneleStap" bpm="functioneleStap" />
+                        <mapping esb="bronGemeente" bpm="bronGemeente" />
+                        <mapping esb="doelGemeente" bpm="doelGemeente" />
+                        <mapping esb="fout" bpm="fout" />
+                        <mapping esb="foutmelding" bpm="foutmelding" />
+                        <mapping esb="indicatieBeheerder" bpm="indicatieBeheerder" />
+                        <mapping esb="lo3Bericht" bpm="lo3Bericht" />
+                        <mapping esb="blokkeringBericht" bpm="blokkeringBericht" />
+                        <mapping esb="brpBericht" bpm="brpBericht" />
+                        <mapping esb="restart" bpm="restart" />
+                        <mapping esb="foutafhandelingPaden" bpm="foutafhandelingPaden" />
+                    </property>
+				</action>
+
+				<!-- Process instance opslaan voor nieuw proces -->
+				<action name="inbound-associate-processinstance" class="nl.moderniseringgba.isc.esb.AssociateProcessInstanceAction" />
+			</actions>
+		</service>		
+		
+		<service  category="BPM" name="Signal" description="Stuur een signaal naar een lopend jBPM proces" invmScope="GLOBAL" invmTransacted="true">
+			<property name="webservice" value="false"/>
+			<actions mep="OneWay">
+				<!-- JBPM signaleer proces -->
+				<action name="jbpm-callback" class="org.jboss.soa.esb.services.jbpm.actions.JBpmCallback">
+                    <property name="esbToBpmVars">                        
+                        <mapping esb="BODY_CONTENT" bpm="message" />
+                    </property>
+				</action>
+			</actions>
+		</service>		
+		
+		<!--
+		 | De sender services dienen vanuit de BPM processen aangeroepen te worden om een bericht via VOSPG of BRP te versturen.
+		 | Zodoende kan de correlatie van berichten en processen binnen het ESB proces worden gewaardborgd.
+		 +-->
+		<service category="ISC" name="BRP-Outbound" description="Verzend BRP notificatie" invmScope="GLOBAL" invmTransacted="true" >
+			<actions mep="OneWay">
+				<!--  Bericht format -->
+				<action name="brp-outbound-format" class="nl.moderniseringgba.isc.esb.BerichtFormatAction" />
+
+				<!--  Bericht audit -->
+				<action name="brp-outbound-audit" class="nl.moderniseringgba.isc.esb.BerichtAuditAction" >
+					<property name="kanaal" value="BRP"/>
+     				<property name="richting" value="UITGAAND"/>
+				</action>
+			
+				<!-- Correlatie opslaan -->
+				<action name="brp-outbound-correlatie" class="nl.moderniseringgba.isc.esb.CorrelatieBewarenAction" />
+
+				<!-- 
+				 | Body:
+				 |    BRP XML bericht
+				 | Header(s):
+				 |    geen 
+				 +-->
+				<action name="routeToReplyQueue" class="org.jboss.soa.esb.actions.routing.JMSRouter">
+					<property name="connection-factory" value="ConnectionFactory"/>
+					<property name="jndiName" value="queue/brp.verzenden"/>
+					<property name="unwrap" value="true"/>
+				</action>        
+			</actions>
+		</service>
+
+		<service  category="ISC" name="MVI-Outbound" description="Verzend MVI berichten" invmScope="GLOBAL" invmTransacted="true" >
+            <actions mep="OneWay">
+				<!--  Bericht format -->
+				<action name="mvi-outbound-format" class="nl.moderniseringgba.isc.esb.BerichtFormatAction" />
+
+				<!--  Bericht audit -->
+				<action name="mvi-outbound-audit" class="nl.moderniseringgba.isc.esb.BerichtAuditAction" >
+					<property name="kanaal" value="MVI"/>
+     				<property name="richting" value="UITGAAND"/>
+				</action>
+			
+				<!-- Correlatie opslaan -->
+				<action name="mvi-outbound-correlatie" class="nl.moderniseringgba.isc.esb.CorrelatieBewarenAction" />
+
+				<!-- 
+				 | Body:
+				 |    LG01 bericht
+				 | Header(s):
+				 |    geen 
+				 +-->
+				<action name="routeToReplyQueue" class="org.jboss.soa.esb.actions.routing.JMSRouter">
+					<property name="connection-factory" value="ConnectionFactory"/>
+					<property name="jndiName" value="queue/mvi.verzenden"/>
+					<property name="unwrap" value="true"/>
+				</action>        
+			</actions>
+		</service>
+
+		<service  category="ISC" name="VOSPG-Outbound" description="Verzend VOSPG berichten" invmScope="GLOBAL" invmTransacted="true" >
+            <actions mep="OneWay">
+            	<!--  Bericht format -->
+				<action name="vospg-outbound-format" class="nl.moderniseringgba.isc.esb.BerichtFormatAction" />
+
+				<!--  Bericht audit -->
+				<action name="vospg-outbound-audit" class="nl.moderniseringgba.isc.esb.BerichtAuditAction" >
+					<property name="kanaal" value="VOSPG"/>
+     				<property name="richting" value="UITGAAND"/>
+				</action>
+			
+				<!-- Correlatie opslaan -->
+				<action name="vospg-outbound-correlatie" class="nl.moderniseringgba.isc.esb.CorrelatieBewarenAction" />
+
+				<!-- 
+				 | Body: 
+				 |    LO3 Bericht
+				 | Header(s): 
+				 |    correlatie-id
+				 +-->
+				<action name="routeToReplyQueue" class="org.jboss.soa.esb.actions.routing.JMSRouter">
+					<property name="connection-factory" value="ConnectionFactory"/>
+					<property name="jndiName" value="queue/vospg.verzenden"/>
+					<property name="unwrap" value="true"/>
+				</action>        
+			</actions>
+		</service>
+		
+
+		<service  category="ISC" name="Sync-Outbound" description="Verzend sync berichten" invmScope="GLOBAL" invmTransacted="true" >
+            <actions mep="OneWay">
+            	<!--  Bericht format -->
+				<action name="sync-outbound-format" class="nl.moderniseringgba.isc.esb.BerichtFormatAction" />
+
+				<!--  Bericht audit -->
+				<action name="sync-outbound-audit" class="nl.moderniseringgba.isc.esb.BerichtAuditAction" >
+					<property name="kanaal" value="SYNC"/>
+     				<property name="richting" value="UITGAAND"/>
+				</action>
+			
+				<!-- Correlatie opslaan -->
+				<action name="sync-outbound-correlatie" class="nl.moderniseringgba.isc.esb.CorrelatieBewarenAction" />
+				
+				<!-- 
+				 | Body:
+				 |    LG01 bericht
+				 |    IB01 bericht
+				 | Header(s):
+				 |    bericht-id 
+				 +-->
+				<action name="routeToRequestQueue" class="org.jboss.soa.esb.actions.routing.JMSRouter">
+					<property name="connection-factory" value="ConnectionFactory"/>
+					<property name="jndiName" value="queue/sync.request"/>
+					<property name="unwrap" value="true"/>
+				</action>        
+			</actions>
+		</service>		
+		
+	</services>
+</jbossesb>
