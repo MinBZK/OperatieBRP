@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.brp.bzk.nl/bevraging/ws/basis" xmlns:srv="http://www.brp.bzk.nl/bevraging/ws/service/model"
+    targetNamespace="http://www.brp.bzk.nl/bevraging/ws/service/model" elementFormDefault="qualified"
+    attributeFormDefault="unqualified" version="000001">
+
+    <import namespace="http://www.brp.bzk.nl/bevraging/ws/basis" schemaLocation="brp_basis.xsd" />
+
+    <complexType name="Vraag">
+        <sequence>
+            <element name="id" type="brp:VraagId" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="afzenderId" type="brp:PartijId" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="abonnementId" type="brp:AbonnementId" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="tijdstipVerzonden" type="brp:DatTijd" minOccurs="1" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+    <element name="OpvragenPersoonVraag">
+        <complexType>
+            <complexContent>
+                <extension base="srv:Vraag">
+                    <sequence>
+                        <element name="bsn" type="brp:BSN" minOccurs="1" maxOccurs="1" nillable="false" />
+                    </sequence>
+                </extension>
+            </complexContent>
+        </complexType>
+    </element>
+
+    <complexType name="Antwoord">
+        <sequence>
+            <element name="id" type="brp:AntwoordId" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="tijdstipVerzonden" type="brp:DatTijd" minOccurs="1" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+    <element name="OpvragenPersoonAntwoord">
+        <complexType>
+            <complexContent>
+                <extension base="srv:Antwoord">
+                    <sequence>
+                        <element name="opvragenPersoonAntwoordFout" type="srv:OpvragenPersoonAntwoordFout"
+                            minOccurs="0" maxOccurs="unbounded" nillable="true" />
+                        <element name="persoon" type="brp:Persoon" minOccurs="0" maxOccurs="unbounded" nillable="false" />
+                    </sequence>
+                    <attribute name="aantalFouten" type="int" use="required" />
+                    <attribute name="aantalPersonen" type="int" use="required" />
+                </extension>
+            </complexContent>
+        </complexType>
+    </element>
+    
+    <complexType name="OpvragenPersoonAntwoordFout">
+        <sequence>
+            <element name="id" type="brp:FoutId" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="beschrijving" type="string" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="toelichting" type="string" minOccurs="0" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+</schema>

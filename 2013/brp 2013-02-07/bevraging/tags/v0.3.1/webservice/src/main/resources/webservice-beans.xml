@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+	    http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<import resource="classpath:business-beans.xml" />
+	<import resource="classpath:datasource-beans.xml" />
+	<import resource="classpath:dataaccess-beans.xml" />
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+	<bean id="propertyConfigurer"
+		class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="ignoreResourceNotFound">
+			<value>true</value>
+		</property>
+		<property name="locations">
+			<array>
+				<value>classpath:bevragingDefaults.properties</value>
+				<value>classpath:bevraging.properties</value>
+			</array>
+		</property>
+	</bean>
+
+	<bean id="opvragenPersoonService"
+		class="nl.bzk.brp.bevraging.ws.service.brp.OpvragenPersoonService" />
+
+	<bean id="loggingInInterceptor" class="org.apache.cxf.interceptor.LoggingInInterceptor" />
+
+	<bean id="uitgaandeArchiveringServiceLogger"
+		class="nl.bzk.brp.bevraging.ws.service.interceptor.helper.ArchiveringServiceLogger">
+		<constructor-arg index="0" value="UITGAAND" />
+	</bean>
+	<bean id="archiveringUitInterceptor"
+		class="nl.bzk.brp.bevraging.ws.service.interceptor.ArchiveringUitInterceptor">
+		<constructor-arg ref="uitgaandeArchiveringServiceLogger" />
+	</bean>
+
+	<bean id="ingaandeArchiveringServiceLogger"
+		class="nl.bzk.brp.bevraging.ws.service.interceptor.helper.ArchiveringServiceLogger">
+		<constructor-arg index="0" value="INGAAND" />
+	</bean>
+	<bean id="archiveringInInterceptor"
+		class="nl.bzk.brp.bevraging.ws.service.interceptor.ArchiveringInInterceptor">
+		<constructor-arg ref="ingaandeArchiveringServiceLogger" />
+	</bean>
+
+	<!-- JAX-WS Webservice Endpoint -->
+	<jaxws:endpoint id="opvragenPersoon" implementor="#opvragenPersoonService"
+		address="/opvragenpersoon">
+		<jaxws:properties>
+			<entry key="schema-validation-enabled" value="true" />
+			<entry key="faultStackTraceEnabled" value="false" />
+			<entry key="exceptionMessageCauseEnabled" value="false" />
+		</jaxws:properties>
+
+		<jaxws:inInterceptors>
+			<ref bean="archiveringInInterceptor" />
+			<ref bean="wss4jInInterceptor" />
+		</jaxws:inInterceptors>
+
+		<jaxws:outInterceptors>
+			<ref bean="wss4jOutInterceptor" />
+			<ref bean="archiveringUitInterceptor" />
+			<bean class="nl.bzk.brp.monitoring.ErrorAntwoordOutInterceptor" />
+		</jaxws:outInterceptors>
+
+		<jaxws:outFaultInterceptors>
+			<bean class="nl.bzk.brp.monitoring.FaultOutInterceptor" />
+		</jaxws:outFaultInterceptors>
+
+	</jaxws:endpoint>
+
+	<bean id="wss4jInInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor">
+		<constructor-arg>
+			<map>
+				<entry key="action" value="Timestamp Signature" />
+				<entry key="signaturePropFile" value="server_sigpropfile.properties" />
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="wss4jOutInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+		<constructor-arg>
+			<map>
+				<entry key="action" value="Timestamp Signature" />
+				<entry key="user" value="serverkey" />
+				<entry key="signaturePropFile" value="client_sigpropfile.properties" />
+				<entry key="passwordCallbackRef">
+					<bean
+						class="nl.bzk.brp.bevraging.ws.service.interceptor.helper.ServerPasswordCallback" />
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<!-- Monitoring -->
+	<!-- JMX configuratie -->
+	<bean id="org.apache.cxf.management.InstrumentationManager"
+		class="org.apache.cxf.management.jmx.InstrumentationManagerImpl">
+		<property name="bus" ref="cxf" />
+		<property name="enabled" value="true" />
+		<property name="usePlatformMBeanServer" value="true" />
+		<property name="JMXServiceURL"
+			value="service:jmx:rmi:///jndi/rmi://localhost:9914/jmxrmi" />
+	</bean>
+
+	<bean id="CounterRepository" class="org.apache.cxf.management.counters.CounterRepository">
+		<property name="bus" ref="cxf" />
+	</bean>
+
+	<bean id="berichtenMBean" class="nl.bzk.brp.monitoring.BerichtenMBean">
+		<property name="counterRepository" ref="CounterRepository"/>
+	</bean>
+
+	<bean id="telBerichtFilter" class="nl.bzk.brp.monitoring.TelBerichtFilter">
+		<property name="berichtenMBean" ref="berichtenMBean" />
+	</bean>
+
+
+	<bean id="exporter" class="org.springframework.jmx.export.MBeanExporter"
+		lazy-init="false">
+		<property name="beans">
+			<map>
+				<entry key="nl.bzp.brp:name=berichtenMBean" value-ref="berichtenMBean" />
+				<entry key="nl.bzp.brp:name=dataSourceMBean" value-ref="dataSource" />
+			</map>
+		</property>
+	</bean>
+</beans>

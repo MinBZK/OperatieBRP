@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="bijhouding"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:bijh="http://www.brp.nl/brp/0001"
+                  xmlns:tns="http://www.brp.bzk.nl/bijhouding/ws/service"
+                  targetNamespace="http://www.brp.bzk.nl/bijhouding/ws/service">
+
+    <wsdl:types>
+        <xsd:schema>
+            <xsd:import schemaLocation="verhuizing.xsd" namespace="http://www.brp.nl/brp/0001"/>
+            <xsd:import schemaLocation="afstamming.xsd" namespace="http://www.brp.nl/brp/0001"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <!-- Verhuizing -->
+    <wsdl:message name="Bijhouding">
+        <wsdl:part element="bijh:BRPBericht" name="bericht"/>
+    </wsdl:message>
+
+    <wsdl:message name="BijhoudingResultaat">
+        <wsdl:part type="bijh:berichtResultaat" name="berichtResultaat"/>
+    </wsdl:message>
+
+    <!-- Geboorte aangifte -->
+    <wsdl:message name="Afstamming">
+        <wsdl:part element="bijh:afstamming_InschrijvingAangifteGeboorte_Bijhouding_v0100"
+                   name="afstamming"/>
+    </wsdl:message>
+
+    <wsdl:message name="AfstammingResponse">
+        <wsdl:part element="bijh:afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse_v0100"
+                   name="afstammingResponse"/>
+    </wsdl:message>
+
+    <wsdl:portType name="BijhoudingPortType">
+        <!-- Verhuizing -->
+        <wsdl:operation name="verhuizing">
+            <wsdl:input message="tns:Bijhouding"/>
+            <wsdl:output message="tns:BijhoudingResultaat"/>
+        </wsdl:operation>
+        <!-- Geboorte aangifte -->
+        <wsdl:operation name="inschrijvingGeboorte">
+            <wsdl:input message="tns:Afstamming"/>
+            <wsdl:output message="tns:AfstammingResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="BijhoudingBinding" type="tns:BijhoudingPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="verhuizing">
+            <soap:operation soapAction="verhuizing"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="inschrijvingGeboorte">
+            <soap:operation soapAction="inschrijvingGeboorte"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="BijhoudingService">
+        <wsdl:port binding="tns:BijhoudingBinding" name="BijhoudingPort">
+            <soap:address location="http://localhost:8080/BRP/services/bijhouding"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

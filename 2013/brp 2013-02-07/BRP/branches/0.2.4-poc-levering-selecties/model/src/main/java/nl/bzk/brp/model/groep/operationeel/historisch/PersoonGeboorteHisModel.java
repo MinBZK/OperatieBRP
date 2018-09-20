@@ -1,0 +1,63 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.model.groep.operationeel.historisch;
+
+import java.io.Externalizable;
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import nl.bzk.brp.model.groep.operationeel.AbstractPersoonGeboorteGroep;
+import nl.bzk.brp.model.groep.operationeel.historisch.basis.AbstractPersoonGeboorteHisModel;
+import nl.bzk.brp.model.objecttype.operationeel.PersoonModel;
+
+
+/** User implementatie van PersoonGeboorteHis. */
+@Entity
+@Table(schema = "kern", name = "His_PersGeboorte")
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public class PersoonGeboorteHisModel extends AbstractPersoonGeboorteHisModel {
+
+    /** Default constructor tbv hibernate. */
+    @SuppressWarnings("unused")
+    public PersoonGeboorteHisModel() {
+        super();
+    }
+
+    /**
+     * .
+     *
+     * @param persoonGeboorteGroep .
+     * @param persoonModel .
+     */
+    public PersoonGeboorteHisModel(final AbstractPersoonGeboorteGroep persoonGeboorteGroep,
+        final PersoonModel persoonModel)
+    {
+        super(persoonGeboorteGroep, persoonModel);
+    }
+
+    public PersoonGeboorteHisModel kopieer() {
+        return new PersoonGeboorteHisModel(this, getPersoon());
+    }
+
+
+    @Override
+    public void writeExternal(final ObjectOutput out) throws IOException {
+        super.writeExternal(out);
+    }
+
+    @Override
+    public void readExternal(final ObjectInput in) throws IOException, ClassNotFoundException {
+        super.readExternal(in);
+    }
+}

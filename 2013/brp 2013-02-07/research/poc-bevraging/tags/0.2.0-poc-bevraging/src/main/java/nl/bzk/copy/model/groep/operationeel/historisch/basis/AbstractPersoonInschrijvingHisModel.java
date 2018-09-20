@@ -1,0 +1,121 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.copy.model.groep.operationeel.historisch.basis;
+
+import javax.persistence.*;
+
+import nl.bzk.copy.model.attribuuttype.DatumTijd;
+import nl.bzk.copy.model.basis.FormeleHistorie;
+import nl.bzk.copy.model.basis.FormeleHistorieImpl;
+import nl.bzk.copy.model.groep.operationeel.AbstractPersoonInschrijvingGroep;
+import nl.bzk.copy.model.objecttype.operationeel.ActieModel;
+import nl.bzk.copy.model.objecttype.operationeel.PersoonModel;
+
+
+/**
+ * .
+ */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public abstract class AbstractPersoonInschrijvingHisModel extends AbstractPersoonInschrijvingGroep implements
+        FormeleHistorie
+{
+
+    @Id
+    @SequenceGenerator(name = "hisPersInschr", sequenceName = "Kern.seq_His_PersInschr")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "hisPersInschr")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "Pers")
+    private PersoonModel persoon;
+
+    @Embedded
+    private final FormeleHistorieImpl historie;
+
+    /**
+     * Default constructor tbv hibernate.
+     */
+    protected AbstractPersoonInschrijvingHisModel() {
+        super();
+        historie = new FormeleHistorieImpl();
+    }
+
+    /**
+     * .
+     *
+     * @param persoonInschrijvingGroep .
+     * @param persoonModel             .
+     */
+    protected AbstractPersoonInschrijvingHisModel(final AbstractPersoonInschrijvingGroep persoonInschrijvingGroep,
+                                                  final PersoonModel persoonModel)
+    {
+        super(persoonInschrijvingGroep);
+        this.persoon = persoonModel;
+        if (persoonInschrijvingGroep instanceof AbstractPersoonInschrijvingHisModel) {
+            historie = new FormeleHistorieImpl(
+                    ((AbstractPersoonInschrijvingHisModel) persoonInschrijvingGroep).getHistorie()
+            );
+        } else {
+            historie = new FormeleHistorieImpl();
+        }
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+    public PersoonModel getPersoon() {
+        return persoon;
+    }
+
+    public FormeleHistorieImpl getHistorie() {
+        return historie;
+    }
+
+    @Override
+    public DatumTijd getDatumTijdRegistratie() {
+        return historie.getDatumTijdRegistratie();
+    }
+
+    @Override
+    public void setDatumTijdRegistratie(final DatumTijd datumTijdRegistratie) {
+        historie.setDatumTijdRegistratie(datumTijdRegistratie);
+    }
+
+    @Override
+    public DatumTijd getDatumTijdVerval() {
+        return historie.getDatumTijdVerval();
+    }
+
+    @Override
+    public void setDatumTijdVerval(final DatumTijd datumTijdVerval) {
+        historie.setDatumTijdVerval(datumTijdVerval);
+    }
+
+    @Override
+    public ActieModel getActieInhoud() {
+        return historie.getActieInhoud();
+    }
+
+    @Override
+    public void setActieInhoud(final ActieModel actieInhoud) {
+        historie.setActieInhoud(actieInhoud);
+    }
+
+    @Override
+    public ActieModel getActieVerval() {
+        return historie.getActieVerval();
+    }
+
+    @Override
+    public void setActieVerval(final ActieModel actieVerval) {
+        historie.setActieVerval(actieVerval);
+    }
+}

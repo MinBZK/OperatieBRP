@@ -1,0 +1,30 @@
+#!/bin/sh
+
+
+#rm -f *.crt *.key *.csr *.p12 *.jks
+
+##CA
+
+#openssl genrsa -out ca.key 4096
+#openssl req -new -x509 -days 3650 -key ca.key -out ca.crt -config ca_csr.cnf
+#keytool -v -importcert -file ca.crt               -keystore ca.jks -storepass hallo123 -alias staat_der_mgba_root_ca -noprompt
+
+
+##KERN SOAP SERVER (ssl/tls server side, Apache)
+
+#openssl genrsa -out kern_soap_server.key 2048
+#openssl req -out kern_soap_server.csr -key kern_soap_server.key -new -config kern_soap_server.cnf
+#openssl x509 -req -days 365 -in kern_soap_server.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out kern_soap_server.crt -extfile kern_soap_server.cnf -extensions x509_extensions
+
+##KERN SOAP CLIENT (ssl/tls client side, Java(?) client)
+
+openssl genrsa -out kern_soap_client.key 2048
+openssl req -out kern_soap_client.csr -key kern_soap_client.key -new -config kern_soap_client.cnf
+openssl x509 -req -days 365 -in kern_soap_client.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out kern_soap_client.crt -extfile kern_soap_client.cnf -extensions x509_extensions
+
+#PKCS12 maken van de client, handig voor keytool import en browser import
+
+#hele chain in pkcs gooien (is niet nodig)
+#openssl pkcs12 -export -chain -in kern_soap_client.crt -inkey kern_soap_client.key -out kern_soap_client.p12 -CAfile ca.crt -passout pass:hallo123
+openssl pkcs12 -export -in kern_soap_client.crt -inkey kern_soap_client.key -out kern_soap_client.p12 -passout pass:hallo123
+keytool -v -importkeystore -srckeystore kern_soap_client.p12 -srcstoretype PKCS12 -destkeystore kern_soap_client.jks -deststoretype JKS -srcstorepass hallo123 -deststorepass hallo123 -noprompt

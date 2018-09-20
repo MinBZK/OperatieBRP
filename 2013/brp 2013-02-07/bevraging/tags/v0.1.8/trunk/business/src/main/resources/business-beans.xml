@@ -1,0 +1,48 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
+    xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <bean id="berichtUitvoerderService" class="nl.bzk.brp.bevraging.business.service.impl.StandaardBerichtUitvoerderService">
+        <property name="stappen" ref="stappen"/>
+    </bean>
+
+    <bean id="bsnLocker" class="nl.bzk.brp.bevraging.business.service.impl.BsnLockerImpl"/>
+
+    <bean id="aanmakenLevering" class="nl.bzk.brp.bevraging.business.handlers.ProtocolleringStapExecutor"/>
+    
+    <bean id="stappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.bevraging.business.handlers.BerichtVerwerkingsStap">
+                <bean id="creeerTransactie" class="nl.bzk.brp.bevraging.business.handlers.CreeerTransactieStap"/>
+                <bean id="contextVerrijking" class="nl.bzk.brp.bevraging.business.handlers.ContextVerrijkingStap" />
+                <bean id="functioneleAutorisatie" class="nl.bzk.brp.bevraging.business.handlers.FunctioneleAutorisatieStap" />
+                <bean id="validatie" class="nl.bzk.brp.bevraging.business.handlers.ValidatieStap" />
+                <bean id="lock" class="nl.bzk.brp.bevraging.business.handlers.LockStap" />
+                <bean id="berichtUitvoering" class="nl.bzk.brp.bevraging.business.handlers.BerichtUitvoerStap" />
+                <bean id="populatieAutorisatieAchteraf" class="nl.bzk.brp.bevraging.business.handlers.PopulatieAutorisatieAchterafStap" />
+                <bean id="verstrekkingsBeperkingAchteraf" class="nl.bzk.brp.bevraging.business.handlers.VerstrekkingsBeperkingAchterafStap" />
+                <bean id="vertikaleAutorisatieAchteraf" class="nl.bzk.brp.bevraging.business.handlers.GegevensElementenAutorisatieAchterafStap" />
+                <bean id="protocollering" class="nl.bzk.brp.bevraging.business.handlers.ProtocolleringStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="brpConfiguratie" class="nl.bzk.brp.bevraging.business.configuratie.BrpConfiguratie">
+        <constructor-arg index="0" value="brp.properties"/>
+        <constructor-arg index="1" value="10"/>
+    </bean>
+
+    <context:component-scan base-package="nl.bzk.brp.bevraging.business" />
+
+    <context:annotation-config />
+
+    <tx:annotation-driven />
+
+    <aop:aspectj-autoproxy />
+
+</beans>

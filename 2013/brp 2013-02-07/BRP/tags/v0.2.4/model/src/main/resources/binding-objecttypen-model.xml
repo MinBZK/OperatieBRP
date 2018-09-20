@@ -1,0 +1,72 @@
+<binding package="nl.bzk.brp.model.objecttype.operationeel">
+
+    <include path="classpath:/binding-groepen-model.xml" precompiled="false"/>
+
+    <mapping class="nl.bzk.brp.model.objecttype.operationeel.PersoonIndicatieModel"
+             marshaller="nl.bzk.brp.model.binding.PersoonIndicatieMapper"
+             unmarshaller="nl.bzk.brp.model.binding.PersoonIndicatieMapper"/>
+
+    <!-- Objecttype_Overrule (bijhouding)-->
+    <mapping type-name="Objecttype_Overrule" abstract="true" class="nl.bzk.brp.model.validatie.OverruleMelding">
+        <value name="regelCode" field="code"/>
+        <value name="melding" field="omschrijving" usage="optional" nillable="true"/>
+        <value name="attribuutNaam" field="attribuutNaam" usage="optional" nillable="true"/>
+    </mapping>
+
+    <!-- Objecttype_Melding (bijhouding)-->
+    <mapping name="melding" class="nl.bzk.brp.model.validatie.Melding">
+        <value name="regelCode" field="code" enum-value-method="getNaam"/>
+        <value name="soortCode" field="soort" enum-value-method="getCode"/>
+        <value name="melding" field="omschrijving"/>
+        <value name="attribuutNaam" field="attribuutNaam" usage="optional"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+    </mapping>
+
+    <!-- Objecttype_PersoonGeslachtsnaamcomponent -->
+    <mapping abstract="true" type-name="AbstractPersoonGeslachtsnaamcomponent"
+             class="nl.bzk.brp.model.objecttype.operationeel.basis.AbstractPersoonGeslachtsnaamcomponentModel">
+        <structure name="volgnummer" field="volgnummer" map-as="Volgnummer"/>
+        <structure field="geslachtsnaamcomponent" map-as="PersoonGeslachtsnaamcomponentStandaardGroep"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonGeslachtsnaamcomponent"
+             class="nl.bzk.brp.model.objecttype.operationeel.PersoonGeslachtsnaamcomponentModel">
+        <structure map-as="AbstractPersoonGeslachtsnaamcomponent"/>
+    </mapping>
+
+    <!-- Objecttype_PersoonNationaliteit -->
+    <mapping abstract="true" type-name="AbstractPersoonNationaliteit"
+             class="nl.bzk.brp.model.objecttype.operationeel.basis.AbstractPersoonNationaliteitModel">
+        <structure name="nationaliteitNaam" field="nationaliteit" map-as="Nationaliteit" usage="optional"/>
+        <structure field="gegevens" map-as="PersoonNationaliteitStandaardGroep" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonNationaliteit"
+             class="nl.bzk.brp.model.objecttype.operationeel.PersoonNationaliteitModel">
+        <structure map-as="AbstractPersoonNationaliteit"/>
+    </mapping>
+
+    <!-- Objecttype_PersoonVoornaam -->
+    <mapping abstract="true" type-name="AbstractPersoonVoornaam"
+             class="nl.bzk.brp.model.objecttype.operationeel.basis.AbstractPersoonVoornaamModel">
+        <structure name="volgnummer" field="volgnummer" map-as="Volgnummer"/>
+        <structure field="gegevens" map-as="PersoonVoornaamStandaardGroep"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonVoornaam"
+             class="nl.bzk.brp.model.objecttype.operationeel.PersoonVoornaamModel">
+        <structure map-as="AbstractPersoonVoornaam"/>
+    </mapping>
+
+    <!-- Objecttype_PersoonAdres -->
+    <mapping abstract="true" type-name="AbstractPersoonAdres"
+             class="nl.bzk.brp.model.objecttype.operationeel.basis.AbstractPersoonAdresModel">
+        <structure field="gegevens" map-as="PersoonAdresStandaardGroep"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonAdres"
+             class="nl.bzk.brp.model.objecttype.operationeel.PersoonAdresModel">
+        <structure map-as="AbstractPersoonAdres"/>
+    </mapping>
+</binding>

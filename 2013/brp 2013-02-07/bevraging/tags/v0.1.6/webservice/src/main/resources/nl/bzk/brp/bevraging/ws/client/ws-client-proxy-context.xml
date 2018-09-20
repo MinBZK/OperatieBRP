@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:jaxws="http://cxf.apache.org/jaxws"
+  xsi:schemaLocation="
+          http://www.springframework.org/schema/context 
+          http://www.springframework.org/schema/context/spring-context-3.0.xsd
+          http://www.springframework.org/schema/beans 
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+          http://cxf.apache.org/jaxws 
+          http://cxf.apache.org/schemas/jaxws.xsd">
+    
+    <bean id="passwordCallback" class="nl.bzk.brp.bevraging.ws.service.interceptor.helper.ServerPasswordCallback"/>
+    
+    <bean id="signatureValidator" class="org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="action" value="Timestamp Signature"/>
+                <entry key="signaturePropFile" value="server_sigpropfile.properties"/>
+            </map>
+        </constructor-arg>
+    </bean>
+    
+    <bean id="messageSigner" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+        <constructor-arg>
+            <map>
+                <entry key="action" value="Timestamp Signature"/>
+                <entry key="user" value="serverkey"/>
+                <entry key="signaturePropFile" value="client_sigpropfile.properties"/>
+                <entry key="passwordCallbackRef" value-ref="passwordCallback"/>
+            </map>
+        </constructor-arg>
+    </bean>
+
+    <jaxws:client
+        id="opvragenPersoon"
+        serviceClass="nl.bzk.brp.bevraging.ws.service.OpvragenPersoonPortType"
+        address="http://localhost:8181/bevraging/services/opvragenpersoon">
+        <jaxws:inInterceptors>
+            <ref bean="signatureValidator"/>
+        </jaxws:inInterceptors>
+        <jaxws:outInterceptors>
+            <ref bean="messageSigner"/>
+        </jaxws:outInterceptors>
+    </jaxws:client>
+</beans>

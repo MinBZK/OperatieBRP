@@ -1,0 +1,70 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:brp="http://www.brp.nl/brp/0001"
+           xmlns:bas="http://www.brp.bzk.nl/basis"
+           attributeFormDefault="unqualified" elementFormDefault="qualified"
+           targetNamespace="http://www.brp.nl/brp/0001">
+
+    <xs:import schemaLocation="basis.xsd" namespace="http://www.brp.bzk.nl/basis"/>
+
+    <xs:element name="BRPBericht" type="brp:Bijhouding"/>
+
+    <xs:complexType name="Bijhouding">
+        <xs:sequence>
+            <xs:element name="Actie" type="brp:actie" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="actie">
+        <xs:sequence>
+            <xs:element name="Soort" type="xs:string"/>
+            <xs:element name="Partij" type="bas:PartijId"/>
+            <xs:element name="DatumAanvangGeldigheid" type="bas:Dat"/>
+            <xs:element name="Verhuizing" type="brp:verhuizing"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="verhuizing">
+        <xs:sequence>
+            <xs:element name="Persoon" type="brp:persoon"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="persoon">
+        <xs:sequence>
+            <xs:element name="IdentificatieNummers" type="brp:identificatieNummers"/>
+            <xs:element name="Adres" type="brp:adres"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="identificatieNummers">
+        <xs:sequence>
+            <xs:element name="Burgerservicenummer" type="bas:BSN"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="adres">
+        <xs:sequence>
+            <xs:element name="RedenWijziging" type="bas:redenWijzigingAdres" minOccurs="0"/>
+            <xs:element name="AangeverAdreshouding" type="xs:string" minOccurs="0"/>
+            <xs:element name="DatumAanvangAdreshouding" type="bas:Dat" minOccurs="0"/>
+            <xs:element name="AdresseerbaarObject" type="xs:string" minOccurs="0"/>
+            <xs:element name="IdentificatieNummeraanduiding" type="xs:string" minOccurs="0"/>
+            <xs:element name="Land" type="bas:LandCode"/>
+            <xs:element name="Gemeente" type="bas:GemCode"/>
+            <xs:element name="Woonplaats" type="bas:WPlaatsCode"/>
+            <xs:element name="NaamOpenbareruimte" type="xs:string" minOccurs="0"/>
+            <xs:element name="AfgekorteNaamOpenbareruimte" type="xs:string" minOccurs="0"/>
+            <xs:element name="Huisnummer" type="bas:Huisnr" minOccurs="0"/>
+            <xs:element name="Huisletter" type="bas:Huisletter" minOccurs="0"/>
+            <xs:element name="HuisnummerToevoeging" type="bas:Huisnrtoevoeging" minOccurs="0"/>
+            <xs:element name="Postcode" type="bas:Postcode"/>
+        </xs:sequence>
+        <xs:attribute name="SoortAdresCode" type="bas:soortAdres"/>
+    </xs:complexType>
+
+    <xs:complexType name="berichtResultaat">
+        <xs:sequence>
+            <xs:element name="resultaatCode" type="xs:string"/>
+            <xs:element name="meldingen" type="bas:meldingen" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>

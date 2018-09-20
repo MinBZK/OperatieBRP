@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+	xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+
+	<changeSet id="initial schema" author="bash">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="pers" schemaName="kern" />
+			</not>
+		</preConditions>
+		<sqlFile path="db/brp.sql" />
+		<sqlFile path="db/brp-cascade-delete.sql" />
+		<sqlFile path="db/afterburner.sql" />
+	</changeSet>
+
+	<changeSet id="createPlBlobTable" author="bash">
+		<preConditions onFail="MARK_RAN">
+			<not>
+				<tableExists tableName="plblob" schemaName="kern" />
+			</not>
+		</preConditions>
+		<createTable tableName="plblob" schemaName="kern">
+			<column name="id" type="integer" autoIncrement="true">
+				<constraints primaryKey="true" nullable="false" />
+			</column>
+			<!--<column name="pers_id" type="integer">-->
+				<!--<constraints nullable="true" />-->
+			<!--</column>-->
+			<column name="pl" type="blob">
+				<constraints nullable="false" />
+			</column>
+		</createTable>
+	</changeSet>
+
+	<changeSet id="PlBlobTablePersfkErbij" author="bash">
+		<addForeignKeyConstraint constraintName="persFk" referencedTableSchemaName="kern" referencedTableName="pers" baseColumnNames="id" baseTableSchemaName="kern" baseTableName="plblob" referencedColumnNames="id"/>
+	</changeSet>
+
+    <changeSet id="PlBlobTableKolomBetrokkenheidErbij" author="sasme">
+        <preConditions>
+            <not>
+                <columnExists tableName="plblob" columnName="betr" schemaName="kern"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="plblob" schemaName="kern">
+            <column name="betr" type="blob">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

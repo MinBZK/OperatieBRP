@@ -1,0 +1,808 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bprbzk.nl/BRP/0001" targetNamespace="http://www.bprbzk.nl/BRP/0001" elementFormDefault="qualified" attributeFormDefault="unqualified" version="000103">
+	<include schemaLocation="BRP_Objecttypen_Basis.xsd"/>
+	<!-- -->
+	<!-- Schema met de definitie van de complex types gebruikt in de berichten voor de BRP. -->
+	<!-- -->
+	<!-- Complex types voor de objecttypen (inclusief groepen) gesorteerd op alfabet -->
+	<complexType name="Objecttype_Actie">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="brp:DatumTijd" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="huwelijk" type="brp:View_Huwelijk" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="geregistreerdPartnerschap" type="brp:View_GeregistreerdPartnerschap" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="familierechtelijkeBetrekking" type="brp:View_FamilierechtelijkeBetrekking" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="persoon" type="brp:Objecttype_Persoon" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_ActieBronnen">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="bron" type="brp:Objecttype_Bron" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_ConversieGBA">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_InschrijvingGeboorte">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Verhuizing">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_RegistratieErkenning">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_RegistratieHuwelijk">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_WijzigingGeslachtsnaamcomponent">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_WijzigingNaamgebruik">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_CorrectieAdresBinnenNL">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_RegistratieNationaliteit">
+		<complexContent>
+			<extension base="brp:Objecttype_Actie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Bericht">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="stuurgegevens" type="brp:Groep_BerichtStuurgegevens" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="overruleMeldingen" type="brp:Container_BerichtOverruleMeldingen" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_BerichtActies" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bijgehoudenPersonen" type="brp:Container_BerichtBijgehoudenPersonen" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_BerichtStuurgegevens">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="organisatie" type="brp:Organisatienaam" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="applicatie" type="brp:Applicatienaam" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="referentienummer" type="brp:Sleutelwaardetekst" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="crossReferentienummer" type="brp:Sleutelwaardetekst" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="indicatiePrevalidatie" type="brp:Ja" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_BerichtResultaat">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="verwerkingCode" type="brp:VerwerkingsresultaatCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="bijhoudingCode" type="brp:BijhoudingsresultaatCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="hoogsteMeldingsniveauCode" type="brp:SoortMeldingCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="tijdstipRegistratie" type="brp:DatumTijd" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="peilmomentMaterieel" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="peilmomentFormeel" type="brp:DatumTijd" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="aanschouwer" type="brp:Burgerservicenummer" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_BerichtMeldingen">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="melding" type="brp:Objecttype_Melding" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_BerichtOverruleMeldingen">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="overrule" type="brp:Objecttype_Overrule" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_BerichtActies">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="conversieGBA" type="brp:View_ConversieGBA" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="inschrijvingGeboorte" type="brp:View_InschrijvingGeboorte" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieNationaliteit" type="brp:View_RegistratieNationaliteit" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="verhuizing" type="brp:View_Verhuizing" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieErkenning" type="brp:View_RegistratieErkenning" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="registratieHuwelijk" type="brp:View_RegistratieHuwelijk" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="wijzigingGeslachtsnaamcomponent" type="brp:View_WijzigingGeslachtsnaamcomponent" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="wijzigingNaamgebruik" type="brp:View_WijzigingNaamgebruik" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="correctieAdresBinnenNL" type="brp:View_CorrectieAdresBinnenNL" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_BerichtBijgehoudenPersonen">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="persoon" type="brp:Objecttype_Persoon" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_BerichtActie">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_BerichtMelding">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_BerichtOverrule">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="overrule" type="brp:Objecttype_Overrule" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Betrokkenheid">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="huwelijk" type="brp:View_Huwelijk" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="geregistreerdPartnerschap" type="brp:View_GeregistreerdPartnerschap" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="familierechtelijkeBetrekking" type="brp:View_FamilierechtelijkeBetrekking" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objecttype_Persoon" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="ouderschap" type="brp:Groep_BetrokkenheidOuderschap" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="ouderlijkGezag" type="brp:Groep_BetrokkenheidOuderlijkGezag" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_BetrokkenheidOuderlijkGezag">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="indicatieOuderHeeftGezag" type="brp:JaNee" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_BetrokkenheidOuderschap">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="datumAanvang" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="indicatieAdresgevend" type="brp:Ja" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Kind">
+		<complexContent>
+			<extension base="brp:Objecttype_Betrokkenheid">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Ouder">
+		<complexContent>
+			<extension base="brp:Objecttype_Betrokkenheid">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Partner">
+		<complexContent>
+			<extension base="brp:Objecttype_Betrokkenheid">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Bron">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="document" type="brp:Objecttype_Document" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Document">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="soortNaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="identificatie" type="brp:DocumentIdentificatie" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="aktenummer" type="brp:Aktenummer" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="omschrijving" type="brp:DocumentOmschrijving" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="partijCode" type="brp:Gemeentecode" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Melding">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="regelCode" type="brp:RegelCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="soortCode" type="brp:SoortMeldingCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="melding" type="brp:Meldingtekst" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="attribuutNaam" type="brp:LangeNaamEnumeratiewaarde" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Overrule">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="regelCode" type="brp:RegelCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="melding" type="brp:Meldingtekst" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="attribuutNaam" type="brp:LangeNaamEnumeratiewaarde" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Persoon">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="identificatienummers" type="brp:Groep_PersoonIdentificatienummers" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="geslachtsaanduiding" type="brp:Groep_PersoonGeslachtsaanduiding" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="samengesteldeNaam" type="brp:Groep_PersoonSamengesteldeNaam" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="aanschrijving" type="brp:Groep_PersoonAanschrijving" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="geboorte" type="brp:Groep_PersoonGeboorte" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="overlijden" type="brp:Groep_PersoonOverlijden" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="verblijfsrecht" type="brp:Groep_PersoonVerblijfsrecht" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="uitsluitingNLKiesrecht" type="brp:Groep_PersoonUitsluitingNLKiesrecht" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="eUVerkiezingen" type="brp:Groep_PersoonEUVerkiezingen" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="bijhoudingsverantwoordelijkheid" type="brp:Groep_PersoonBijhoudingsverantwoordelijkheid" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="opschorting" type="brp:Groep_PersoonOpschorting" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="bijhoudingsgemeente" type="brp:Groep_PersoonBijhoudingsgemeente" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="persoonskaart" type="brp:Groep_PersoonPersoonskaart" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="immigratie" type="brp:Groep_PersoonImmigratie" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="inschrijving" type="brp:Groep_PersoonInschrijving" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="afgeleidAdministratief" type="brp:Groep_PersoonAfgeleidAdministratief" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="betrokkenheden" type="brp:Container_PersoonBetrokkenheden" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Container_PersoonVoornamen" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="adressen" type="brp:Container_PersoonAdressen" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="nationaliteiten" type="brp:Container_PersoonNationaliteiten" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="reisdocumenten" type="brp:Container_PersoonReisdocumenten" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="indicaties" type="brp:Container_PersoonIndicaties" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonOpschorting">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="redenBijhoudingCode" type="brp:RedenOpschortingCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonIdentificatienummers">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="burgerservicenummer" type="brp:Burgerservicenummer" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="administratienummer" type="brp:ANummer" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonAanschrijving">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="wijzeVanGebruikGeslachtsnaamEchtgenootGeregistreerdPartnerCode" type="brp:WijzeGebruikGeslachtsnaamCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="indicatieAanschrijvenMetAdellijkeTitelsEnOfPredikaten" type="brp:JaNee" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="indicatieAlgoritmischAfgeleid" type="brp:JaNee" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="predikaatCode" type="brp:PredikaatCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Voornamen" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="voorvoegsel" type="brp:Voorvoegsel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="scheidingsteken" type="brp:Scheidingsteken" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="adellijkeTitelCode" type="brp:AdellijkeTitelCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaam" type="brp:Geslachtsnaam" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonGeboorte">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="datum" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="gemeenteCode" type="brp:Gemeentecode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsCode" type="brp:Woonplaatscode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandseplaats" type="brp:BuitenlandsePlaats" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandseRegio" type="brp:BuitenlandseRegio" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="landCode" type="brp:Landcode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="omschrijvinglocatie" type="brp:LocatieOmschrijving" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonOverlijden">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="datum" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="gemeenteCode" type="brp:Gemeentecode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsCode" type="brp:Woonplaatscode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsePlaats" type="brp:BuitenlandsePlaats" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandseRegio" type="brp:BuitenlandseRegio" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="landCode" type="brp:Landcode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="omschrijvingLocatie" type="brp:LocatieOmschrijving" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonVerblijfsrecht">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="iD" type="brp:VerblijfsrechtID" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumAanvang" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumVoorzienEinde" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="datumAanvangAaneensluitend" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonUitsluitingNLKiesrecht">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="indicatie" type="brp:JaNee" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumEinde" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonInschrijving">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="datum" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="versienummer" type="brp:Versienummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="vorigePersoon" type="brp:Objecttype_Persoon" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="volgendePersoon" type="brp:Objecttype_Persoon" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonGeslachtsaanduiding">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="code" type="brp:GeslachtsaanduidingCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonSamengesteldeNaam">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="predikaatCode" type="brp:PredikaatCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="voornamen" type="brp:Voornamen" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="voorvoegsel" type="brp:Voorvoegsel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="scheidingsteken" type="brp:Scheidingsteken" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="adellijkeTitelCode" type="brp:AdellijkeTitelCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaam" type="brp:Geslachtsnaam" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonPersoonskaart">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="gemeenteCode" type="brp:Gemeentecode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="indicatieVolledigGeconverteerd" type="brp:JaNee" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonBijhoudingsverantwoordelijkheid">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="verantwoordelijkeCode" type="brp:VerantwoordelijkeCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonBijhoudingsgemeente">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="code" type="brp:Gemeentecode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumInschrijvingInGemeente" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="indicatieOnverwerktDocumentAanwezig" type="brp:JaNee" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonImmigratie">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="landVanwaarGevestigdCode" type="brp:Landcode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="datumVestigingInNederland" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonEUVerkiezingen">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="indicatieDeelname" type="brp:JaNee" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumAanleidingAanpassingDeelnameEUVerkiezing" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="datumEindeUitsluitingEUKiesrecht" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonAfgeleidAdministratief">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="tijdstipLaatsteWijziging" type="brp:DatumTijd" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="indicatieGegevensInOnderzoek" type="brp:JaNee" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonBetrokkenheden">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="kind" type="brp:View_Kind" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="ouder" type="brp:View_Ouder" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="partner" type="brp:View_Partner" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonVoornamen">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="voornaam" type="brp:Objecttype_PersoonVoornaam" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonGeslachtsnaamcomponenten">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="geslachtsnaamcomponent" type="brp:Objecttype_PersoonGeslachtsnaamcomponent" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonAdressen">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="adres" type="brp:Objecttype_PersoonAdres" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonNationaliteiten">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="nationaliteit" type="brp:Objecttype_PersoonNationaliteit" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonReisdocumenten">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="reisdocument" type="brp:Objecttype_PersoonReisdocument" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonIndicaties">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="derdeHeeftGezag" type="brp:View_DerdeHeeftGezag" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="onderCuratele" type="brp:View_OnderCuratele" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="verstrekkingsbeperking" type="brp:View_Verstrekkingsbeperking" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="geprivilegieerde" type="brp:View_Geprivilegieerde" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="vastgesteldNietNederlander" type="brp:View_VastgesteldNietNederlander" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="behandeldAlsNederlander" type="brp:View_BehandeldAlsNederlander" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="belemmeringVerstrekkingReisdocument" type="brp:View_BelemmeringVerstrekkingReisdocument" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="bezitBuitenlandsReisdocument" type="brp:View_BezitBuitenlandsReisdocument" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="statenloos" type="brp:View_Statenloos" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonAdres">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="soortCode" type="brp:SoortAdresCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="redenWijzigingCode" type="brp:RedenWijzigingAdresCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="aangeverAdreshoudingCode" type="brp:AangeverAdreshoudingCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="datumAanvangAdreshouding" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="adresseerbaarObject" type="brp:AanduidingAdresseerbaarObject" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="identificatiecodeNummeraanduiding" type="brp:IdentificatiecodeNummeraanduiding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeenteCode" type="brp:Gemeentecode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="naamOpenbareRuimte" type="brp:NaamOpenbareRuimte" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="afgekorteNaamOpenbareRuimte" type="brp:AfgekorteNaamOpenbareRuimte" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeentedeel" type="brp:Gemeentedeel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummer" type="brp:Huisnummer" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="huisletter" type="brp:Huisletter" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="huisnummertoevoeging" type="brp:Huisnummertoevoeging" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="postcode" type="brp:Postcode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsCode" type="brp:Woonplaatscode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="locatietovAdres" type="brp:AanduidingBijHuisnummer" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="locatieOmschrijving" type="brp:LocatieOmschrijving" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsAdresRegel1" type="brp:Adresregel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsAdresRegel2" type="brp:Adresregel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsAdresRegel3" type="brp:Adresregel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsAdresRegel4" type="brp:Adresregel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsAdresRegel5" type="brp:Adresregel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsAdresRegel6" type="brp:Adresregel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="landCode" type="brp:Landcode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="datumVertrekUitNederland" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonGeslachtsnaamcomponent">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="volgnummer" type="brp:Volgnummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="voorvoegsel" type="brp:Voorvoegsel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="scheidingsteken" type="brp:Scheidingsteken" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="naam" type="brp:Geslachtsnaamcomponent" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="predikaatCode" type="brp:PredikaatCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="adellijkeTitelCode" type="brp:AdellijkeTitelCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonIndicatie">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="waarde" type="brp:Ja" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_DerdeHeeftGezag">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_OnderCuratele">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Verstrekkingsbeperking">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Geprivilegieerde">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_VastgesteldNietNederlander">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_BehandeldAlsNederlander">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_BelemmeringVerstrekkingReisdocument">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_BezitBuitenlandsReisdocument">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Statenloos">
+		<complexContent>
+			<extension base="brp:Objecttype_PersoonIndicatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonNationaliteit">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="nationaliteitNaam" type="brp:NaamEnumeratiewaarde" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="redenVerliesNaam" type="brp:NaamEnumeratiewaarde" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<!-- Handmatige change ... Code naar Naam -->
+					<element name="redenVerkrijgingNaam" type="brp:NaamEnumeratiewaarde" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<!-- ... -->
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonReisdocument">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="soortCode" type="brp:SoortNederlandsReisdocumentCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="nummer" type="brp:ReisdocumentNummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="autoriteitVanAfgifteCode" type="brp:AutoriteitVanAfgifteReisdocumentCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumIngangDocument" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumUitgifte" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumVoorzieneEindeGeldigheid" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="datumInhoudingVermissing" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="redenVervallenCode" type="brp:RedenOntbrekenReisdocumentCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="lengteHouder" type="brp:LengteInCm" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_PersoonVoornaam">
+		<complexContent>
+			<extension base="brp:StructuurMaterieleHistorie">
+				<sequence>
+					<element name="volgnummer" type="brp:Volgnummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="naam" type="brp:Voornaam" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Objecttype_Relatie">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="datumAanvang" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeenteAanvangCode" type="brp:Gemeentecode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsAanvangCode" type="brp:Woonplaatscode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsePlaatsAanvang" type="brp:BuitenlandsePlaats" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandseRegioAanvang" type="brp:BuitenlandseRegio" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="landAanvangCode" type="brp:Landcode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="omschrijvingLocatieAanvang" type="brp:LocatieOmschrijving" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="redenEindeCode" type="brp:RedenBeeindigingRelatieCode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="datumEinde" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gemeenteEindeCode" type="brp:Gemeentecode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="woonplaatsEindeCode" type="brp:Woonplaatscode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandsePlaatsEinde" type="brp:BuitenlandsePlaats" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="buitenlandseRegioEinde" type="brp:BuitenlandseRegio" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="landEindeCode" type="brp:Landcode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="omschrijvingLocatieEinde" type="brp:LocatieOmschrijving" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenheden" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenheden">
+		<complexContent>
+			<extension base="brp:Structuur">
+				<sequence>
+					<element name="kind" type="brp:View_Kind" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="ouder" type="brp:View_Ouder" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+					<element name="partner" type="brp:View_Partner" nillable="true" minOccurs="0" maxOccurs="unbounded"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Huwelijk">
+		<complexContent>
+			<extension base="brp:Objecttype_Relatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_GeregistreerdPartnerschap">
+		<complexContent>
+			<extension base="brp:Objecttype_Relatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="View_FamilierechtelijkeBetrekking">
+		<complexContent>
+			<extension base="brp:Objecttype_Relatie">
+				<sequence/>
+			</extension>
+		</complexContent>
+	</complexType>
+</schema>

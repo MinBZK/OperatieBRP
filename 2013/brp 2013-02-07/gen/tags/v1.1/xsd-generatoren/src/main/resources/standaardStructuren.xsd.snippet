@@ -1,0 +1,39 @@
+<!-- XML snippet dat altijd aan de object typen xsd toegevoegd moet worden. -->
+<!-- Een alternatieve oplossing is deze info als aparte XSD op te nemen. -->
+<!-- Het voordeel van deze snippet is dat de <schema> tag niet op 2 plekken gedefinieerd wordt. -->
+
+    <attribute name="communicatieID" type="brp:Sleutelwaardetekst-s" />
+    <attribute name="referentieID" type="brp:Sleutelwaardetekst-s" />
+    <attribute name="technischeSleutel" type="brp:Sleutelwaardetekst-s" />
+    <attributeGroup name="structuur">
+        <attribute ref="stuf:entiteittype" use="optional" />
+        <attribute ref="brp:technischeSleutel" use="optional" />
+        <attribute ref="brp:referentieID" use="optional" />
+        <attribute ref="brp:communicatieID" use="optional" />
+    </attributeGroup>
+
+    <!-- Structuur = Objecttype of Groep -->
+    <complexType name="Structuur" />
+    <complexType name="StructuurIdentificeerbaar">
+        <attributeGroup ref="brp:structuur" />
+    </complexType>
+    <complexType name="StructuurFormeleHistorie">
+        <complexContent>
+            <extension base="brp:StructuurIdentificeerbaar">
+                <sequence>
+                    <element ref="stuf:tijdstipRegistratie" minOccurs="0" maxOccurs="1" />
+                    <element ref="stuf:tijdstipVervallen" minOccurs="0" maxOccurs="1" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>
+    <complexType name="StructuurMaterieleHistorie">
+        <complexContent>
+            <extension base="brp:StructuurFormeleHistorie">
+                <sequence>
+                    <element ref="stuf:datumAanvangGeldigheid" minOccurs="0" maxOccurs="1" />
+                    <element ref="stuf:datumEindeGeldigheid" minOccurs="0" maxOccurs="1" />
+                </sequence>
+            </extension>
+        </complexContent>
+    </complexType>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>parent</artifactId>
+        <groupId>nl.bzk.brp.generatoren</groupId>
+        <version>1.1</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>algemeen</artifactId>
+    <name>Generatoren algemeen</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>nl.bzk.brp.metaregister</groupId>
+            <artifactId>dataaccess</artifactId>
+            <version>${metaregister.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>nl.bzk.brp.metaregister</groupId>
+            <artifactId>metamodel</artifactId>
+            <version>${metaregister.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-lang3</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-configuration</groupId>
+            <artifactId>commons-configuration</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jdom</groupId>
+            <artifactId>jdom2</artifactId>
+        </dependency>
+        <dependency>
+        	<groupId>commons-io</groupId>
+        	<artifactId>commons-io</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.jibx</groupId>
+            <artifactId>jibx-run</artifactId>
+            <version>${jibx.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jibx</groupId>
+            <artifactId>jibx-bind</artifactId>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <generatedSourcesDirectory>${generated.sources}</generatedSourcesDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.jibx</groupId>
+                <artifactId>maven-jibx-plugin</artifactId>
+                <version>1.2.4.5</version>
+                <executions>
+                    <execution>
+                        <id>schema-codegen-generatoren-info</id>
+                        <configuration>
+                            <multimodule>true</multimodule>
+                            <schemaLocation>src/main/resources</schemaLocation>
+                            <includeSchemas>
+                                <includeSchema>generatie-info.xsd</includeSchema>
+                            </includeSchemas>
+                            <schemaBindingDirectory>target/generated-sources</schemaBindingDirectory>
+                            <defaultPackage>nl.bzk.brp.generatoren.algemeen.generatieinfo</defaultPackage>
+                        </configuration>
+                        <goals>
+                            <goal>schema-codegen</goal>
+                            <goal>bind</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/v1.1/algemeen</connection>
+    </scm>
+
+</project>

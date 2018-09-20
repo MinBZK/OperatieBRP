@@ -1,0 +1,1 @@
+﻿select distinct p1.bsn, pa1.* from kern.persadres pa1, kern.pers p1, kern.persadres pa2, kern.pers p2 where pa2.pers = p2.id and pa1.pers = p1.id and pa1.huisnr = 10 and pa1.postcode = '4811AW' and pa1.huisletter = 'a' and pa1.huisnr = pa2.huisnr and pa1.postcode = pa2.postcode and pa1.huisletter = pa2.huisletter and pa1.huisnrtoevoeging is null order by pa1.id;

@@ -1,0 +1,62 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.copy.model.groep.bericht.basis;
+
+import nl.bzk.copy.model.attribuuttype.RedenVerkrijgingCode;
+import nl.bzk.copy.model.attribuuttype.RedenVerliesNaam;
+import nl.bzk.copy.model.basis.AbstractGroepBericht;
+import nl.bzk.copy.model.groep.logisch.basis.PersoonNationaliteitStandaardGroepBasis;
+import nl.bzk.copy.model.objecttype.operationeel.statisch.RedenVerkrijgingNLNationaliteit;
+import nl.bzk.copy.model.objecttype.operationeel.statisch.RedenVerliesNLNationaliteit;
+
+/**
+ * De standaard groep implementatie van object type persoonnationaliteit.
+ */
+@SuppressWarnings("serial")
+public abstract class AbstractPersoonNationaliteitStandaardGroepBericht extends AbstractGroepBericht
+        implements PersoonNationaliteitStandaardGroepBasis
+{
+
+    private RedenVerkrijgingNLNationaliteit redenVerkregenNlNationaliteit;
+    private RedenVerkrijgingCode redenVerkregenNlNationaliteitCode;
+    private RedenVerliesNLNationaliteit redenVerliesNlNationaliteit;
+    private RedenVerliesNaam redenVerliesNlNationaliteitNaam;
+
+    @Override
+    public RedenVerkrijgingNLNationaliteit getRedenVerkregenNlNationaliteit() {
+        return redenVerkregenNlNationaliteit;
+    }
+
+    @Override
+    public RedenVerliesNLNationaliteit getRedenVerliesNlNationaliteit() {
+        return redenVerliesNlNationaliteit;
+    }
+
+    public RedenVerkrijgingCode getRedenVerkregenNlNationaliteitCode() {
+        return redenVerkregenNlNationaliteitCode;
+    }
+
+    public RedenVerliesNaam getRedenVerliesNlNationaliteitNaam() {
+        return redenVerliesNlNationaliteitNaam;
+    }
+
+    public void setRedenVerkregenNlNationaliteit(final RedenVerkrijgingNLNationaliteit redenVerkregenNlNationaliteit) {
+        this.redenVerkregenNlNationaliteit = redenVerkregenNlNationaliteit;
+    }
+
+    public void setRedenVerliesNlNationaliteit(final RedenVerliesNLNationaliteit redenVerliesNlNationaliteit) {
+        this.redenVerliesNlNationaliteit = redenVerliesNlNationaliteit;
+    }
+
+    public void setRedenVerkregenNlNationaliteitCode(final RedenVerkrijgingCode redenVerkregenNlNationaliteitCode) {
+        this.redenVerkregenNlNationaliteitCode = redenVerkregenNlNationaliteitCode;
+    }
+
+    public void setRedenVerliesNlNationaliteitNaam(final RedenVerliesNaam redenVerliesNlNationaliteitNaam) {
+        this.redenVerliesNlNationaliteitNaam = redenVerliesNlNationaliteitNaam;
+    }
+}

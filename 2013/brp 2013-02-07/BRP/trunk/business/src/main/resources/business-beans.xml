@@ -1,0 +1,108 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <import resource="bedrijfsregelmanager-bean.xml" />
+
+    <context:component-scan base-package="nl.bzk.brp.configuratie" />
+
+    <context:component-scan base-package="nl.bzk.brp.business.stappen" />
+    <context:component-scan base-package="nl.bzk.brp.business.actie" />
+    <context:component-scan base-package="nl.bzk.brp.business.service" /><!-- <context:component-scan
+        base-package="nl.bzk.brp.business.service.impl" /> -->
+    <context:component-scan base-package="nl.bzk.brp.business.bedrijfsregels" />
+    <context:component-scan base-package="nl.bzk.brp.business.definities" />
+    <context:annotation-config />
+    <task:annotation-driven/>
+
+    <bean id="bijhoudingsBerichtVerwerker" class="nl.bzk.brp.business.service.BijhoudingsBerichtVerwerkerImpl">
+        <property name="stappen" ref="bijhoudingsStappen" />
+    </bean>
+
+    <bean id="bevragingsBerichtVerwerker" class="nl.bzk.brp.business.service.BerichtVerwerkerImpl">
+        <property name="stappen" ref="bevragingsStappen" />
+    </bean>
+
+    <bean id="bijhoudingBerichtValidatieStap" class="nl.bzk.brp.business.stappen.bijhouding.BijhoudingBerichtValidatieStap">
+        <property name="whitelistOverrulbareMeldingen" ref="whitelistOverrulbareMeldingen" />
+        <property name="naverwerkingOverrulbareMeldingen" ref="naverwerkingOverrulbareMeldingen" />
+    </bean>
+
+    <bean id="bijhoudingOverruleMeldingenValidatieStap" class="nl.bzk.brp.business.stappen.bijhouding.BijhoudingOverruleMeldingenValidatieStap">
+    </bean>
+
+
+    <bean id="bijhoudingsStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.business.stappen.AbstractBerichtVerwerkingsStap">
+                <bean id="berichtValidatieStap" class="nl.bzk.brp.business.stappen.BerichtValidatieStap"/>
+            	<bean id="berichtVerrijkingsStap" class="nl.bzk.brp.business.stappen.bijhouding.BerichtVerrijkingsStap" />
+            	<ref bean="bijhoudingBerichtValidatieStap" />
+                <bean id="berichtgegevensValidatieStap" class="nl.bzk.brp.business.stappen.bijhouding.BijhoudingGegevensValidatieStap" />
+                <!-- TODO: (Eric Jan Malotaux, 2012-04-23) Let op: de lock stap commit de transactie in de nabewerking! Zie
+                    https://www.modernodam.nl/jira/browse/BRP-1571 -->
+                <bean id="lock" class="nl.bzk.brp.business.stappen.LockStap" />
+                <bean id="transactieStapVoorBijhouding" class="nl.bzk.brp.business.stappen.bijhouding.BijhoudingTransactieStap" />
+                <bean id="bedrijfsregelValidatieStap" class="nl.bzk.brp.business.stappen.bijhouding.BedrijfsregelValidatieStap" />
+                <ref bean="bijhoudingOverruleMeldingenValidatieStap" />
+                <bean id="berichtUitvoerStap" class="nl.bzk.brp.business.stappen.bijhouding.BerichtUitvoerStap" />
+                <bean id="berichtContextValidatieStap" class="nl.bzk.brp.business.stappen.bijhouding.BerichtContextValidatieStap" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="bevragingsStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.business.stappen.AbstractBerichtVerwerkingsStap">
+                <bean id="berichtValidatieStap" class="nl.bzk.brp.business.stappen.BerichtValidatieStap"/>
+                <bean id="gegevensValidatieStap" class="nl.bzk.brp.business.stappen.bevraging.BevragingGegevensValidatieStap"/>
+                <!-- TODO: (Eric Jan Malotaux, 2012-04-23) Let op: de lock stap commit de transactie in de nabewerking! Zie
+                    https://www.modernodam.nl/jira/browse/BRP-1571 -->
+                <bean id="lock" class="nl.bzk.brp.business.stappen.LockStap" />
+                <bean id="transactieStapVoorBevraging" class="nl.bzk.brp.business.stappen.bevraging.BevragingTransactieStap" />
+                <bean id="opvragenBerichtUitvoerStap" class="nl.bzk.brp.business.stappen.bevraging.OpvragenPersoonBerichtUitvoerStap" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="whitelistOverrulbareMeldingen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="java.lang.String">
+                <value>BRBY0106</value>
+                <value>BRAL9003</value>
+                <value>BRBY0401</value>
+                <value>BRBY0403</value>
+                <value>BRBY0409</value>
+                <value>BRBY0417</value>
+                <value>BRBY0521</value>
+                <value>BRBY0525</value>
+                <value>BRBY0527</value>
+                <value>BRBY0531</value>
+                <value>BRBY0134</value>
+                <value>BRBY0033</value>
+                <value>BRBY0126</value>
+             </list>
+        </constructor-arg>
+    </bean>
+
+    <!--
+     | lijst van alle overrulebare meldingen die pas uitgevoerd worden NA de uitvoerstap.
+     | NET VOOR de uitvoerder wordt getest of er overrulemeldingen die niett geraakt zijn;
+     |  deze lijst vormt de uitzondering.
+     +-->
+    <bean id="naverwerkingOverrulbareMeldingen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="java.lang.String">
+                <value>BRBY0525</value>
+             </list>
+        </constructor-arg>
+    </bean>
+
+</beans>

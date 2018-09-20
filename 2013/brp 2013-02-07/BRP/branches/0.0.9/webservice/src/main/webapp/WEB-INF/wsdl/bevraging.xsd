@@ -1,0 +1,59 @@
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:bevr="http://www.bprbzk.nl/BRP/0001"
+           xmlns:bas="http://www.bprbzk.nl/BRP/basis"
+           attributeFormDefault="unqualified" elementFormDefault="qualified"
+           targetNamespace="http://www.bprbzk.nl/BRP/0001">
+
+    <xs:import schemaLocation="basis.xsd" namespace="http://www.bprbzk.nl/BRP/basis"/>
+
+    <xs:element name="OpvragenPersoon" type="bevr:OpvragenPersoonBericht"/>
+
+    <xs:element name="OpvragenPersoonResultaat" type="bevr:OpvragenPersoonAntwoord"/>
+
+    <xs:complexType name="OpvragenPersoonBericht">
+        <xs:sequence>
+            <xs:element name="afzenderId" type="bas:PartijId" minOccurs="1" maxOccurs="1" nillable="false" />
+            <xs:element name="tijdstipVerzonden" type="bas:DatTijd" minOccurs="1" maxOccurs="1" nillable="false" />
+            <xs:element name="opvragenPersoonCriteria" type="bevr:OpvragenPersoonCriteria"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="OpvragenPersoonCriteria">
+        <xs:sequence>
+            <xs:element name="bsn" type="bas:BSN"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="OpvragenPersoonResultaat">
+        <xs:sequence>
+            <xs:element name="aantal" type="xs:integer"/>
+            <xs:element name="antwoord" type="bevr:OpvragenPersoonAntwoord"/>
+            <xs:element name="meldingen" type="bas:meldingen" minOccurs="0" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="OpvragenPersoonAntwoord">
+        <xs:sequence>
+            <xs:element name="persoon" type="bevr:IdentificerendePersoonsGegevens" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="IdentificerendePersoonsGegevens">
+        <xs:sequence>
+            <xs:element name="A-nummer" type="xs:string"/>
+            <xs:element name="bsn" type="bas:BSN"/>
+            <xs:element name="geboortedatum" type="bas:Dat"/>
+            <xs:element name="geslachtsAanduiding" type="bas:GeslachtsAand"/>
+            <xs:element name="geslachtsNaam" type="xs:string"/>
+            <xs:element name="adres" type="bevr:IdentificerendePersoonAdresGegevens"/>
+            <xs:element name="voornaam" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="IdentificerendePersoonAdresGegevens">
+        <xs:sequence>
+            <xs:element name="huisnummer" type="bas:Huisnr"/>
+            <xs:element name="postcode" type="bas:Postcode"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

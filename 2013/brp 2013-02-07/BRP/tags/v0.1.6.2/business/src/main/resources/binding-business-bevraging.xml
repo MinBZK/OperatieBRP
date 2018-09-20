@@ -1,0 +1,113 @@
+<binding package="nl.bzk.brp" direction="input">
+
+    <include path="classpath:/binding-business.xml" precompiled="false"/>
+
+    <mapping name="bevragen_VraagDetailsPersoon" class="nl.bzk.brp.business.dto.bevraging.VraagDetailsPersoonBericht">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+		<structure name="stuurgegevens" get-method="getBerichtStuurgegevens" set-method="setBerichtStuurgegevens"
+		map-as="Groep_BerichtStuurgegevens" usage="optional"/>
+		<structure name="vraag" field="vraag" map-as="Groep_BerichtVraag_Basis_DetailsPersoon" />
+    </mapping>
+
+    <mapping name="bevragen_VraagPersonenOpAdresInclusiefBetrokkenheden" class="nl.bzk.brp.business.dto.bevraging.VraagPersonenOpAdresInclusiefBetrokkenhedenBericht">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+    	<structure name="stuurgegevens" get-method="getBerichtStuurgegevens" set-method="setBerichtStuurgegevens"
+    	map-as="Groep_BerichtStuurgegevens" />
+    	<structure name="vraag" field="vraag" map-as="Bevraging_PersonenOpAdresInclusiefBetrokkenheden" />
+    </mapping>
+
+    <mapping name="bevragen_VraagKandidaatVader" class="nl.bzk.brp.business.dto.bevraging.VraagKandidaatVaderBericht">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+        <structure name="stuurgegevens" get-method="getBerichtStuurgegevens" set-method="setBerichtStuurgegevens"
+        map-as="Groep_BerichtStuurgegevens" usage="optional"/>
+        <structure name="vraag" field="vraag" map-as="KandidaatVaderVraag" />
+    </mapping>
+
+      <!-- Groep_BerichtVraag_Basis_DetailsPersoon -->
+    <mapping abstract="true" type-name="Groep_BerichtVraag_Basis_DetailsPersoon" class="nl.bzk.brp.business.dto.bevraging.DetailsPersoonVraag">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+    	<!--  TODO Hosing: opties tijden niet in gebruik -->
+        <structure name="opties" usage="optional"/>
+        <structure name="zoekcriteria" get-method="getZoekCriteria" set-method="setZoekCriteria"
+                map-as="Groep_BerichtZoekcriteria_Burgerservicenummer"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Bevraging_PersonenOpAdresInclusiefBetrokkenheden"
+            class="nl.bzk.brp.business.dto.bevraging.PersonenOpAdresInclusiefBetrokkenhedenVraag">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+    	<!--  TODO Hosing: opties tijden niet in gebruik -->
+        <structure name="opties" usage="optional"/>
+		<structure name="zoekcriteria" usage="optional" get-method="getZoekCriteria" set-method="setZoekCriteria"
+	              map-as="Groep_BerichtZoekCriteriaPersonenOpAdresInclusiefBetrokkenheden"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="KandidaatVaderVraag" class="nl.bzk.brp.business.dto.bevraging.KandidaatVaderVraag">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+        <!--  TODO Hosing: opties tijden niet in gebruik -->
+        <structure name="opties" usage="optional"/>
+        <structure name="zoekcriteria" get-method="getZoekCriteria" set-method="setZoekCriteria"
+                   map-as="Groep_BerichtZoekargumenten_KandidaatVader"/>
+    </mapping>
+
+    <!--  Groep_BerichtZoekcriteria_Burgerservicenummer -->
+    <mapping abstract="true" type-name="Groep_BerichtZoekcriteria_Burgerservicenummer"
+            class="nl.bzk.brp.business.dto.bevraging.zoekcriteria.ZoekCriteriaDetailsPersoon">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+        <structure name="peilmomentMaterieel" usage="optional"/>
+        <structure name="peilmomentFormeel" usage="optional"/>
+        <value name="burgerservicenummer" get-method="getBurgerservicenummer" set-method="setBurgerservicenummer" usage="optional" nillable="true"/>
+    </mapping>
+
+     <!-- Groep_BerichtZoekcriteria_PersonenOpAdresInclusiefBetrokkenheden -->
+    <mapping abstract="true" type-name="Groep_BerichtZoekCriteriaPersonenOpAdresInclusiefBetrokkenheden"
+            class="nl.bzk.brp.business.dto.bevraging.zoekcriteria.ZoekCriteriaPersoonOpAdres">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+		<structure name="peilmomentMaterieel" usage="optional"/>
+		<structure name="peilmomentFormeel" usage="optional"/>
+        <value name="burgerservicenummer" get-method="getBurgerservicenummer" set-method="setBurgerservicenummer" usage="optional" nillable="true"/>
+        <value name="gemeenteCode" field="gemeenteCode" usage="optional" nillable="true"/>
+        <value name="naamOpenbareRuimte" field="naamOpenbareRuimte" usage="optional" nillable="true"/>
+        <value name="huisnummer" field="huisnummer" usage="optional" nillable="true"/>
+        <value name="huisletter" field="huisletter" usage="optional" nillable="true"/>
+        <value name="huisnummertoevoeging" field="huisnummertoevoeging" usage="optional" nillable="true"/>
+        <value name="postcode" field="postcode" usage="optional" nillable="true"/>
+    </mapping>
+
+    <!--  Groep_BerichtZoekargumenten_KandidaatVader -->
+    <mapping abstract="true" type-name="Groep_BerichtZoekargumenten_KandidaatVader"
+            class="nl.bzk.brp.business.dto.bevraging.zoekcriteria.ZoekCriteriaKandidaatVader">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+        <structure name="peilmomentMaterieel" usage="optional"/>
+        <structure name="peilmomentFormeel" usage="optional"/>
+        <value name="burgerservicenummer" get-method="getBurgerservicenummer" set-method="setBurgerservicenummer" usage="optional" nillable="true"/>
+        <value name="geboortedatumKind" field="geboortedatumKind" />
+    </mapping>
+
+</binding>

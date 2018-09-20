@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 10-01-2013 Status:Concept -->
+<schema xmlns:StUF="http://www.kinggemeenten.nl/StUF/StUF0302" xmlns="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.kinggemeenten.nl/StUF/StUF0302" elementFormDefault="qualified" attributeFormDefault="unqualified" version="010001">
+	<annotation>
+		<documentation>
+			Het schema met aanvullingen en restrictions op StUF-componenten, zoals te gebruiken binnen StUF BRP.
+		</documentation>
+	</annotation>
+	<include schemaLocation="stuf0302.xsd"/>
+	<!-- Toevoeging ihkv StUF-harmonisatie BRP -->
+	<!-- Definitie van complexTypes en simpleTypes voor Generieke datum en tijdstipVervallen -->
+	<element name="tijdstipVervallen" type="StUF:DatumTijd-e" nillable="true"/>
+	<element name="datumAanvangGeldigheid" type="StUF:OnvolledigeDatum-e" nillable="true"/>
+	<element name="datumEindeGeldigheid" type="StUF:OnvolledigeDatum-e" nillable="true"/>
+	<!-- -->
+	<!-- Einde toevoeging ihkv StUF-harmonisatie BRP -->
+	<!-- -->
+	<!-- Restricties StUF t.b.v. gebruik binnen StUF BRP -->
+	<attributeGroup name="elementBRP">
+		<attribute ref="StUF:noValue"/>
+	</attributeGroup>
+	<!-- -->
+	<complexType name="Stuurgegevens_Bijhouding">
+		<sequence>
+			<element name="berichtcode" type="StUF:Berichtcode"/>
+			<element name="zender" type="StUF:Systeem_BRP" minOccurs="0"/>
+			<element name="ontvanger" type="StUF:Systeem_BRP" minOccurs="0"/>
+			<element name="referentienummer" type="StUF:Refnummer" minOccurs="0"/>
+			<element name="crossRefnummer" type="StUF:Refnummer" minOccurs="0"/>
+			<element name="entiteittype" type="StUF:Entiteittype" minOccurs="0"/>
+			<element name="functie" type="StUF:Functie" minOccurs="0"/>
+		</sequence>
+	</complexType>
+	<complexType name="Systeem_BRP">
+		<complexContent>
+			<restriction base="StUF:Systeem">
+				<sequence>
+					<element name="organisatie" type="StUF:Organisatie" minOccurs="0"/>
+					<element name="applicatie" type="StUF:Applicatie"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="StuurgegevensDi02_Bijhouding">
+		<complexContent>
+			<restriction base="StUF:Stuurgegevens_Bijhouding">
+				<sequence>
+					<element name="berichtcode" type="StUF:Berichtcode" fixed="Di02"/>
+					<element name="zender" type="StUF:Systeem_BRP" minOccurs="1"/>
+					<element name="referentienummer" type="StUF:Refnummer" minOccurs="1"/>
+					<element name="functie" type="StUF:Functie" minOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="StuurgegevensDu02_Bijhouding">
+		<complexContent>
+			<restriction base="StUF:Stuurgegevens_Bijhouding">
+				<sequence>
+					<element name="berichtcode" type="StUF:Berichtcode" fixed="Du02"/>
+					<element name="zender" type="StUF:Systeem_BRP" minOccurs="1"/>
+					<element name="referentienummer" type="StUF:Refnummer" minOccurs="1"/>
+					<element name="crossRefnummer" type="StUF:Refnummer" minOccurs="1"/>
+					<element name="functie" type="StUF:Functie" minOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="StuurgegevensDi02_Vraag">
+		<complexContent>
+			<restriction base="StUF:Stuurgegevens_Bijhouding">
+				<sequence>
+					<element name="berichtcode" type="StUF:Berichtcode" fixed="Di02"/>
+					<element name="zender" type="StUF:Systeem_BRP" minOccurs="0"/>
+					<element name="referentienummer" type="StUF:Refnummer" minOccurs="0"/>
+					<element name="functie" type="StUF:Functie" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="StuurgegevensDu02_Vraag">
+		<complexContent>
+			<restriction base="StUF:Stuurgegevens_Bijhouding">
+				<sequence>
+					<element name="berichtcode" type="StUF:Berichtcode" fixed="Du02"/>
+					<element name="zender" type="StUF:Systeem_BRP" minOccurs="0"/>
+					<element name="referentienummer" type="StUF:Refnummer" minOccurs="0"/>
+					<element name="crossRefnummer" type="StUF:Refnummer" minOccurs="0"/>
+					<element name="functie" type="StUF:Functie" minOccurs="0"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

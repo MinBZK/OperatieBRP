@@ -1,0 +1,101 @@
+<binding package="nl.bzk.brp" direction="input">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0100" default="all" prefix="brp"/>
+
+    <include path="classpath:/binding-model-bevraging.xml" precompiled="true"/>
+
+    <!-- Stuurgegevens hieruit nodig -->
+    <include path="classpath:/binding-stuf.xml" precompiled="true"/>
+
+    <mapping name="ALG_GeefDetailsPersoon_V" class="nl.bzk.brp.business.dto.bevraging.VraagDetailsPersoonBericht">
+		<structure name="stuurgegevens" get-method="getStuurgegevens" set-method="setStuurgegevens" map-as="StuurgegevensDi02_Vraag"/>
+		<structure name="vraag" field="vraag" map-as="Groep_BerichtVraag_Basis_DetailsPersoon" />
+    </mapping>
+
+    <mapping name="ALG_GeefPersonenOpAdresInclusiefBetrokkenheden_Vi"
+             class="nl.bzk.brp.business.dto.bevraging.VraagPersonenOpAdresInclusiefBetrokkenhedenBericht">
+    	<structure name="stuurgegevens" get-method="getStuurgegevens" set-method="setStuurgegevens" map-as="StuurgegevensDi02_Vraag"/>
+    	<structure name="vraag" field="vraag" map-as="Groep_BerichtVraag_Basis_PersonenOpAdresInclusiefBetrokkenheden" />
+    </mapping>
+
+    <mapping name="ALG_BepaalKandidaatVader_Vi" class="nl.bzk.brp.business.dto.bevraging.VraagKandidaatVaderBericht">
+        <structure name="stuurgegevens" get-method="getStuurgegevens" set-method="setStuurgegevens" map-as="StuurgegevensDi02_Vraag"/>
+        <structure name="vraag" field="vraag" map-as="Groep_BerichtVraag_Basis_KandidaatVader" />
+    </mapping>
+
+      <!-- Groep_BerichtVraag_Basis_DetailsPersoon -->
+    <mapping abstract="true" type-name="Groep_BerichtVraag_Basis_DetailsPersoon" class="nl.bzk.brp.business.dto.bevraging.DetailsPersoonVraag">
+        <value style="attribute" name="communicatieID" get-method="getCommunicatieID" set-method="setCommunicatieID"
+               usage="optional" />
+       	<structure map-as="AbstractVraag"/>
+        <structure name="zoekcriteria" field="zoekCriteria" map-as="Groep_BerichtZoekcriteria_Burgerservicenummer"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Groep_BerichtVraag_Basis_PersonenOpAdresInclusiefBetrokkenheden"
+             class="nl.bzk.brp.business.dto.bevraging.PersonenOpAdresInclusiefBetrokkenhedenVraag">
+        <value style="attribute" name="communicatieID" get-method="getCommunicatieID" set-method="setCommunicatieID"
+               usage="optional"/>
+		<structure map-as="AbstractVraag"/>
+		<structure name="zoekcriteria" usage="optional" field="zoekCriteria"
+	               map-as="Groep_BerichtZoekCriteriaPersonenOpAdresInclusiefBetrokkenheden"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Groep_BerichtVraag_Basis_KandidaatVader" class="nl.bzk.brp.business.dto.bevraging.KandidaatVaderVraag">
+        <value style="attribute" name="communicatieID" get-method="getCommunicatieID" set-method="setCommunicatieID"
+               usage="optional"/>
+		<structure map-as="AbstractVraag"/>
+        <structure name="zoekcriteria" field="zoekCriteria" map-as="Groep_BerichtZoekargumenten_KandidaatVader"/>
+    </mapping>
+
+    <!--  Groep_BerichtZoekcriteria_Burgerservicenummer -->
+    <mapping abstract="true" type-name="Groep_BerichtZoekcriteria_Burgerservicenummer"
+             class="nl.bzk.brp.business.dto.bevraging.zoekcriteria.ZoekCriteriaDetailsPersoon">
+        <value style="attribute" name="communicatieID" get-method="getCommunicatieID" set-method="setCommunicatieID"
+               usage="optional"/>
+        <structure name="peilmomentMaterieel" usage="optional"/>
+        <structure name="peilmomentFormeel" usage="optional"/>
+        <structure map-as="ZoekCriteriaBsn"/>
+    </mapping>
+
+     <!-- Groep_BerichtZoekcriteria_PersonenOpAdresInclusiefBetrokkenheden -->
+    <mapping abstract="true" type-name="Groep_BerichtZoekCriteriaPersonenOpAdresInclusiefBetrokkenheden"
+             class="nl.bzk.brp.business.dto.bevraging.zoekcriteria.ZoekCriteriaPersoonOpAdres">
+        <value style="attribute" name="communicatieID" get-method="getCommunicatieID" set-method="setCommunicatieID"
+               usage="optional"/>
+		<structure name="peilmomentMaterieel" usage="optional"/>
+		<structure name="peilmomentFormeel" usage="optional"/>
+        <structure map-as="ZoekCriteriaBsn"/>
+        <value name="gemeenteCode" field="gemeentecode" usage="optional" nillable="true"/>
+        <value name="naamOpenbareRuimte" field="naamOpenbareRuimte" usage="optional" nillable="true"/>
+        <value name="huisnummer" field="huisnummer" usage="optional" nillable="true"/>
+        <value name="huisletter" field="huisletter" usage="optional" nillable="true"/>
+        <value name="huisnummertoevoeging" field="huisnummertoevoeging" usage="optional" nillable="true"/>
+        <value name="postcode" field="postcode" usage="optional" nillable="true"/>
+    </mapping>
+
+    <!--  Groep_BerichtZoekargumenten_KandidaatVader -->
+    <mapping abstract="true" type-name="Groep_BerichtZoekargumenten_KandidaatVader"
+             class="nl.bzk.brp.business.dto.bevraging.zoekcriteria.ZoekCriteriaKandidaatVader">
+        <value style="attribute" name="communicatieID" get-method="getCommunicatieID" set-method="setCommunicatieID"
+               usage="optional"/>
+        <structure name="peilmomentMaterieel" usage="optional"/>
+        <structure name="peilmomentFormeel" usage="optional"/>
+        <structure map-as="ZoekCriteriaBsn"/>
+        <value name="geboortedatumKind" field="geboortedatumKind" />
+    </mapping>
+
+    <mapping abstract="true" type-name="ZoekCriteriaBsn" class="nl.bzk.brp.business.dto.bevraging.zoekcriteria.ZoekCriteriaBsn">
+        <value name="burgerservicenummer" field="burgerservicenummer" usage="optional" nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="AbstractVraag" class="nl.bzk.brp.business.dto.bevraging.AbstractVraag">
+    	<structure name="opties" field="vraagOpties" usage="optional" nillable="true" map-as="Groep_BerichtOpties"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Groep_BerichtOpties" class="nl.bzk.brp.business.dto.bevraging.VraagOpties">
+    	<value name="historieMaterieel" field="historieMaterieel" usage="optional" nillable="true"  serializer="nl.bzk.brp.BindingUtil.jaNaarXmlString" deserializer="nl.bzk.brp.BindingUtil.xmlStringNaarJa" />
+		<value name="historieFormeel" field="historieFormeel" usage="optional" nillable="true"  serializer="nl.bzk.brp.BindingUtil.jaNaarXmlString" deserializer="nl.bzk.brp.BindingUtil.xmlStringNaarJa" />
+		<value name="aanschouwer" field="aanschouwer" usage="optional" nillable="true"/>
+    </mapping>
+
+</binding>

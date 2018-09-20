@@ -1,0 +1,111 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>root-pom</artifactId>
+        <version>0.1.10</version>
+    </parent>
+
+    <groupId>nl.bzk.brp.beheer</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.1.2</version>
+    <name>Beheer applicatie BRP - Top-level POM</name>
+    <description>
+	    Top level pom en dus parent project van de BRP Beheer applicatie.
+	</description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>dataaccess</module>
+        <module>web</module>
+    </modules>
+
+    <developers>
+        <developer>
+            <id>tiblo</id>
+            <name>Tim Blommerde</name>
+            <email>t.blommerde@sdb.nl</email>
+            <organization>SDB</organization>
+            <organizationUrl>http://www.sdb.nl/</organizationUrl>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>holee</id>
+            <name>Ho Sing Lee</name>
+            <email>hosing.lee@jdriven.com</email>
+            <organization>JDriven</organization>
+            <organizationUrl>http://www.jdriven.com/</organizationUrl>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
+    <properties>
+        <sonar.exclusions>**/package-info.java</sonar.exclusions>
+        <!-- De default JDBC properties bedoeld voor lokaal ontwikkelen met een lokale PostgreSQL database. Voor Unit Testen 
+            in de Continuous Integration omgeving is er een "ci" profile. -->
+        <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+        <maven.jdbc.url>jdbc:postgresql://localhost/brp</maven.jdbc.url>
+        <maven.jdbc.username>brp</maven.jdbc.username>
+        <maven.jdbc.password>brp</maven.jdbc.password>
+    </properties>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/beheer/tags/v0.1.2</connection>
+    </scm>
+    <build>
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>2.8</version>
+                    <configuration>
+                        <projectNameTemplate>BRP Beheer applicatie - ${project.artifactId}</projectNameTemplate>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>ci.build</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://fac-db05.modernodam.nl/brpbeheer</maven.jdbc.url>
+                <maven.jdbc.username>jenkins</maven.jdbc.username>
+                <maven.jdbc.password>0Hudson0</maven.jdbc.password>
+            </properties>
+
+        </profile>
+    </profiles>
+    	<repositories>
+
+		<repository>
+			<id>libs-release-brp</id>
+			<name>mGBA Artifactory-releases voor BRP</name>
+			<url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+		</repository>
+
+		<repository>
+			<snapshots>
+				<enabled>true</enabled>
+				<updatePolicy>always</updatePolicy>
+				<checksumPolicy>warn</checksumPolicy>
+			</snapshots>
+			<id>libs-snapshot-brp</id>
+			<name>mGBA Artifactory-snapshots voor BRP</name>
+			<url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+		</repository>
+
+	</repositories>
+
+</project>
+

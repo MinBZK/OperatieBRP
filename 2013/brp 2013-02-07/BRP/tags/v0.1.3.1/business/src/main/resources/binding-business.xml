@@ -1,0 +1,98 @@
+<binding package="nl.bzk.brp">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+    
+    <include path="classpath:/binding-model.xml" precompiled="true"/>
+
+	<mapping name="bevragen_VraagDetailsPersoon" class="nl.bzk.brp.business.dto.bevraging.VraagDetailsPersoonBericht">
+		<structure name="stuurgegevens" field="berichtStuurgegevens" map-as="Groep_BerichtStuurgegevens" usage="optional"/>
+		<structure name="vraag" field="vraag" map-as="Groep_BerichtVraag_Basis_DetailsPersoon" />
+    </mapping>
+    
+    <mapping name="bevragen_VraagPersonenOpAdresInclusiefBetrokkenheden" class="nl.bzk.brp.business.dto.bevraging.VraagPersonenOpAdresInclusiefBetrokkenhedenBericht">
+    	<structure name="stuurgegevens" field="berichtStuurgegevens" map-as="Groep_BerichtStuurgegevens" />
+    	<structure name="vraag" field="vraag" map-as="Bevraging_PersonenOpAdresInclusiefBetrokkenheden" />
+    </mapping>
+
+    <mapping name="bevragen_VraagKandidaatVader" class="nl.bzk.brp.business.dto.bevraging.VraagKandidaatVaderBericht">
+        <structure name="stuurgegevens" field="berichtStuurgegevens" map-as="Groep_BerichtStuurgegevens" usage="optional"/>
+        <structure name="vraag" field="vraag" map-as="KandidaatVaderVraag" />
+    </mapping>
+
+    <!-- Groep_BerichtVraag_Basis_DetailsPersoon -->
+    <mapping abstract="true" type-name="Groep_BerichtVraag_Basis_DetailsPersoon" class="nl.bzk.brp.business.dto.bevraging.DetailsPersoonVraag">
+    	<!--  TODO Hosing: opties tijden niet in gebruik -->
+        <structure name="opties" usage="optional"/>
+        <structure name="zoekcriteria">
+        	<!-- TODO hosing: peilmomenten tijdelijk niet in gebruik -->
+        	<structure name="peilmomentMaterieel" usage="optional" />
+            <structure name="peilmomentFormeel" usage="optional" />
+            <value name="burgerservicenummer" get-method="getBurgerservicenummer" set-method="setBurgerservicenummer"/>
+        </structure>
+    </mapping>
+    
+    <mapping abstract="true" type-name="Bevraging_PersonenOpAdresInclusiefBetrokkenheden" class="nl.bzk.brp.business.dto.bevraging.PersonenOpAdresInclusiefBetrokkenhedenVraag">
+    	<!--  TODO Hosing: opties tijden niet in gebruik -->
+        <structure name="opties" usage="optional"/>
+		<structure name="zoekcriteria" usage="optional">
+		    <!-- TODO hosing: peilmomenten tijdelijk niet in gebruik -->
+			<structure name="peilmomentMaterieel" usage="optional"/>
+			<structure name="peilmomentFormeel" usage="optional"/>
+			<value name="burgerservicenummer" get-method="getBurgerservicenummer" set-method="setBurgerservicenummer" usage="optional"/>
+			<value name="gemeenteCode" field="gemeenteCode" usage="optional"/>
+			<value name="naamOpenbareRuimte" field="naamOpenbareRuimte" usage="optional"/>
+			<value name="huisnummer" field="huisnummer" usage="optional"/>
+			<value name="huisletter" field="huisletter" usage="optional"/>
+			<value name="huisnummertoevoeging" field="huisnummertoevoeging" usage="optional"/>
+			<value name="postcode" field="postcode" usage="optional"/>
+		</structure>    
+    </mapping>
+
+    <mapping abstract="true" type-name="KandidaatVaderVraag" class="nl.bzk.brp.business.dto.bevraging.KandidaatVaderVraag">
+        <!--  TODO Hosing: opties tijden niet in gebruik -->
+        <structure name="opties" usage="optional"/>
+        <structure name="zoekcriteria">
+            <!-- TODO hosing: peilmomenten tijdelijk niet in gebruik -->
+            <structure name="peilmomentMaterieel" usage="optional"/>
+            <structure name="peilmomentFormeel" usage="optional"/>
+            <value name="burgerservicenummer" get-method="getBurgerservicenummer" set-method="setBurgerservicenummer"/>
+            <value name="geboortedatumKind" field="geboortedatumKind" />
+        </structure>    
+    </mapping>
+
+    <!-- migratie_Verhuizing_Bijhouding -->
+    <mapping name="migratie_Verhuizing_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.VerhuizingBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding"/>
+    </mapping>
+
+    <!-- Afstamming_InschrijvingAangifteGeboorte_Bijhouding -->
+    <mapping name="afstamming_InschrijvingAangifteGeboorte_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.InschrijvingGeboorteBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding"/>
+    </mapping>
+
+    <!-- Objecttype_Bericht_Bijhouding -->
+    <mapping abstract="true" type-name="Objecttype_Bericht_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.AbstractBijhoudingsBericht">
+        <structure name="stuurgegevens" field="berichtStuurgegevens" map-as="Groep_BerichtStuurgegevens" />
+        <structure name="overruleMeldingen" usage="optional"/>
+        <structure name="acties">
+            <structure name="inschrijvingGeboorte" map-as="Objecttype_Actie" set-method="voegActieToe" get-method="getActie" usage="optional"/>
+            <structure name="registratieNationaliteit" map-as="Objecttype_Actie" set-method="voegActieToe" get-method="getActie" usage="optional"/>
+            <structure name="verhuizing" map-as="Objecttype_Actie" set-method="voegActieToe" get-method="getActie" usage="optional"/>
+        </structure>
+    </mapping>
+
+    <!-- Groep_BerichtStuurgegevens -->
+    <mapping abstract="true" type-name="Groep_BerichtStuurgegevens" class="nl.bzk.brp.business.dto.BerichtStuurgegevens">
+        <value name="organisatie" field="organisatie"/>
+        <value name="applicatie" field="applicatie"/>
+        <value name="referentienummer" field="referentienummer"/>
+        <value name="crossReferentienummer" field="crossReferentienummer" usage="optional"/>
+        <!--Indien element indicatiePrevalidatie aanwezig, dan true anders false: -->
+        <structure name="indicatiePrevalidatie" flag-method="setPrevalidatieBericht" test-method="isPrevalidatieBericht" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Enum_BijhoudingCode" class="nl.bzk.brp.business.dto.bijhouding.BijhoudingCode">
+        <value name="bijhoudingCode" enum-value-method="getCode"/>
+    </mapping>
+
+</binding>

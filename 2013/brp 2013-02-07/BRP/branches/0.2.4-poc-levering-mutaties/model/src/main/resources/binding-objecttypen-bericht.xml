@@ -1,0 +1,220 @@
+<binding package="nl.bzk.brp">
+
+    <include path="classpath:/binding-groepen-bericht.xml" precompiled="false"/>
+    <include path="classpath:/binding-objecttypen.xml" precompiled="false"/>
+
+    <!-- Objecttype_Overrule (bijhouding)-->
+    <mapping type-name="Objecttype_Overrule" abstract="true" class="nl.bzk.brp.model.validatie.OverruleMelding">
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+        <value name="regelCode" field="code"/>
+        <value name="melding" field="omschrijving" usage="optional" nillable="true"/>
+        <value name="attribuutNaam" field="attribuutNaam" usage="optional" nillable="true"/>
+    </mapping>
+
+    <!-- Objecttype_PersoonVoornaam -->
+    <mapping abstract="true" type-name="AbstractPersoonVoornaamBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractPersoonVoornaamBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure name="volgnummer" field="volgnummer" map-as="Volgnummer"/>
+        <structure field="gegevens" map-as="PersoonVoornaamStandaardGroepBericht"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonVoornaam"
+             class="nl.bzk.brp.model.objecttype.bericht.PersoonVoornaamBericht">
+        <structure map-as="AbstractPersoonVoornaamBericht"/>
+    </mapping>
+
+    <!-- Objecttype_PersoonGeslachtsnaamcomponent -->
+    <mapping abstract="true" type-name="AbstractPersoonGeslachtsnaamcomponentBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractPersoonGeslachtsnaamcomponentBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure name="volgnummer" field="volgnummer" map-as="Volgnummer"/>
+        <structure field="gegevens" map-as="PersoonGeslachtsnaamcomponentStandaardGroepBericht"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonGeslachtsnaamcomponent"
+             class="nl.bzk.brp.model.objecttype.bericht.PersoonGeslachtsnaamcomponentBericht">
+        <structure map-as="AbstractPersoonGeslachtsnaamcomponentBericht"/>
+    </mapping>
+
+    <!-- Objecttype_PersoonNationaliteit -->
+    <mapping abstract="true" type-name="AbstractPersoonNationaliteitBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractPersoonNationaliteitBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure name="nationaliteitNaam" field="nationaliteitcode" map-as="Nationaliteitcode" usage="optional"/>
+        <structure field="gegevens" map-as="PersoonNationaliteitStandaardGroepBericht" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonNationaliteit"
+             class="nl.bzk.brp.model.objecttype.bericht.PersoonNationaliteitBericht">
+        <structure map-as="AbstractPersoonNationaliteitBericht"/>
+    </mapping>
+
+    <!-- Objecttype_PersoonAdres -->
+    <mapping abstract="true" type-name="AbstractPersoonAdresBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractPersoonAdresBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure field="gegevens" map-as="PersoonAdresStandaardGroepBericht"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_PersoonAdres"
+             class="nl.bzk.brp.model.objecttype.bericht.PersoonAdresBericht">
+        <structure map-as="AbstractPersoonAdresBericht"/>
+    </mapping>
+
+    <!-- Objecttype_Actie -->
+    <mapping abstract="true" type-name="AbstractActieBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractActieBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure name="datumAanvangGeldigheid" field="datumAanvangGeldigheid" map-as="Datum" nillable="true" usage="optional"/>
+        <structure name="datumEindeGeldigheid" field="datumEindeGeldigheid" map-as="Datum" nillable="true" usage="optional"/>
+        <structure name="tijdstipOntlening" field="tijdstipOntlening" map-as="DatumTijd"/>
+        <structure name="toelichtingOntlening" usage="optional"/>
+        <structure name="bronnen" field="bronnen" map-as="Container_ActieBronnen" usage="optional" nillable="true" />
+        <structure name="tijdstipVerwerkingMutatie" field="tijdstipVerwerkingMutatie" map-as="DatumTijd" nillable="true" usage="optional" />
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_Actie"
+             class="nl.bzk.brp.model.objecttype.bericht.ActieBericht">
+        <structure map-as="AbstractActieBericht"/>
+    </mapping>
+
+    <!-- Container_ActieBronnen -->
+    <mapping abstract="true" type-name="Container_ActieBronnen" class="java.util.List" create-type="java.util.ArrayList" >
+        <collection usage="optional">
+            <structure name="bron"  map-as="Objecttype_Bron" usage="optional" nillable="true" />
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_Bron"
+             class="nl.bzk.brp.model.objecttype.bericht.BronBericht">
+        <structure map-as="AbstractBronBericht" />
+    </mapping>
+
+    <mapping abstract="true" type-name="AbstractBronBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractBronBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure name="document" field="document" map-as="DocumentBericht"/>        
+    </mapping>
+
+    <!-- DocumentBericht -->
+    <mapping abstract="true" type-name="DocumentBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.DocumentBericht">
+        <structure map-as="AbstractDocumentBericht"/>
+    </mapping>
+    <mapping abstract="true" type-name="AbstractDocumentBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractDocumentBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure name="soortNaam" field="documentsoortNaam" map-as="Naam"/>
+        <structure field="standaard" usage="optional" map-as="DocumentStandaardGroepBericht"/>
+    </mapping>
+    
+
+    <!-- Objecttype Relatie -->
+    <mapping abstract="true" type-name="AbstractRelatieBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractRelatieBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure field="gegevens" map-as="RelatieStandaardGroepBericht"/>
+        <structure name="betrokkenheden" field="betrokkenheden" map-as="Container_RelatieBetrokkenheden"/>
+    </mapping>
+
+    <!-- LET OP!! Een aparte mapping gemaakt voor de betrokkenheden in AbstractRelatieBericht,
+         onderstaande abstracte mapping kan niet ge-include worden in de mapping voor AbstractRelatieBericht,
+         want dit geeft problemen in Jibx.
+    -->
+    <!-- Container_RelatieBetrokkenheden -->
+    <mapping abstract="true" type-name="Container_RelatieBetrokkenheden" class="java.util.List" create-type="java.util.ArrayList">
+        <collection usage="optional">
+            <structure name="kind" type="nl.bzk.brp.model.objecttype.bericht.BetrokkenheidBericht"
+                       factory="nl.bzk.brp.BindingUtil.newKindBetrokkenheid" usage="optional">
+                <structure map-as="Objecttype_Betrokkenheid" usage="optional"/>
+            </structure>
+        </collection>
+        <collection usage="optional">
+            <structure name="ouder" type="nl.bzk.brp.model.objecttype.bericht.BetrokkenheidBericht"
+                       factory="nl.bzk.brp.BindingUtil.newOuderBetrokkenheid" usage="optional">
+                <structure map-as="Objecttype_Betrokkenheid" usage="optional"/>
+            </structure>
+        </collection>
+        <collection usage="optional">
+            <structure name="partner" type="nl.bzk.brp.model.objecttype.bericht.BetrokkenheidBericht"
+                       factory="nl.bzk.brp.BindingUtil.newPartnerBetrokkenheid" usage="optional">
+                <structure map-as="Objecttype_Betrokkenheid" usage="optional"/>
+            </structure>
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_Relatie"
+             class="nl.bzk.brp.model.objecttype.bericht.RelatieBericht">
+        <structure map-as="AbstractRelatieBericht"/>
+    </mapping>
+
+    <!-- Objecttype_Betrokkenheid -->
+    <mapping abstract="true" type-name="AbstractBetrokkenheidBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractBetrokkenheidBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+        <structure name="persoon" field="betrokkene" map-as="Objecttype_Persoon" nillable="true" usage="optional"/>
+        <structure name="ouderschap" field="betrokkenheidOuderschap" map-as="BetrokkenheidOuderschapGroepBericht" nillable="true" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_Betrokkenheid"
+             class="nl.bzk.brp.model.objecttype.bericht.BetrokkenheidBericht">
+        <structure map-as="AbstractBetrokkenheidBericht"/>
+    </mapping>
+
+    <!-- Objecttype_Persoon -->
+    <mapping abstract="true" type-name="AbstractPersoonBericht"
+             class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractPersoonBericht">
+        <structure map-as="ObjectTypeIdentificeerbaar"/>
+          <!-- Identificatie nummers -->
+        <structure name="identificatienummers" field="identificatienummers" map-as="PersoonIdentificatienummersGroepBericht" usage="optional" nillable="true"/>
+        <!-- Geslachtsaanduiding -->
+        <structure name="geslachtsaanduiding" field="geslachtsaanduiding" map-as="PersoonGeslachtsaanduidingGroepBericht" usage="optional" nillable="true"/>
+        <structure name="samengesteldeNaam" field="samengesteldeNaam" map-as="PersoonSamengesteldeNaamGroepBericht" usage="optional" nillable="true"/>
+        <structure name="aanschrijving" field="aanschrijving" map-as="PersoonAanschrijvingGroepBericht" usage="optional" nillable="true"/>
+        <!-- Geboorte-->
+        <structure name="geboorte" field="geboorte" map-as="PersoonGeboorteGroepBericht" usage="optional" nillable="true"/>
+        <structure name="overlijden" field="overlijden" map-as="PersoonOverlijdenGroepBericht" usage="optional" nillable="true"/>
+        <structure name="verblijfsrecht" usage="optional"/>
+        <structure name="uitsluitingNLKiesrecht" usage="optional"/>
+        <structure name="eUVerkiezingen" usage="optional"/>
+        <structure name="bijhoudingsverantwoordelijkheid" usage="optional"/>
+        <structure name="opschorting" usage="optional"/>
+        <structure name="bijhoudingsgemeente" usage="optional"/>
+        <structure name="persoonskaart" usage="optional"/>
+        <structure name="immigratie" usage="optional"/>
+        <structure name="inschrijving" usage="optional"/>
+        <structure name="afgeleidAdministratief" usage="optional"/>
+        <structure name="betrokkenheden" usage="optional"/>
+        <!-- Voornamen -->
+        <collection name="voornamen" field="persoonVoornaam" item-type="nl.bzk.brp.model.objecttype.bericht.PersoonVoornaamBericht"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional" nillable="true">
+            <structure name="voornaam" map-as="Objecttype_PersoonVoornaam"/>
+        </collection>
+        <!-- Geslachtsnaam componenten -->
+        <collection name="geslachtsnaamcomponenten" field="geslachtsnaamcomponenten"
+                    item-type="nl.bzk.brp.model.objecttype.bericht.PersoonGeslachtsnaamcomponentBericht"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional" nillable="true">
+            <structure name="geslachtsnaamcomponent" map-as="Objecttype_PersoonGeslachtsnaamcomponent"/>
+        </collection>
+        <collection name="adressen" field="adressen" item-type="nl.bzk.brp.model.objecttype.bericht.PersoonAdresBericht"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional">
+            <structure name="adres" map-as="Objecttype_PersoonAdres"/>
+        </collection>
+        <!-- Nationaliteiten -->
+        <collection name="nationaliteiten" field="nationaliteiten" item-type="nl.bzk.brp.model.objecttype.bericht.PersoonNationaliteitBericht"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance" nillable="true" usage="optional">
+            <structure name="nationaliteit" map-as="Objecttype_PersoonNationaliteit" usage="optional" nillable="true"/>
+        </collection>
+        <!-- Indicaties -->
+        <structure name="indicaties" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_Persoon"
+             class="nl.bzk.brp.model.objecttype.bericht.PersoonBericht">
+        <structure map-as="AbstractPersoonBericht"/>
+    </mapping>
+
+
+</binding>

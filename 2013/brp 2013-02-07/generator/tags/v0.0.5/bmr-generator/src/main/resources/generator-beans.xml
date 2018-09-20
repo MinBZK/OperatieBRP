@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jee="http://www.springframework.org/schema/jee"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:util="http://www.springframework.org/schema/util"
+
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd       
+    ">
+
+    <context:annotation-config />
+    <context:component-scan base-package="nl.bzk.brp.bmr.generator" />
+    <aop:aspectj-autoproxy />
+
+    <!-- Dit zijn de pluggable code generators. Per code generator is er (1) een keyword, waarmee de generator wordt aangeduid 
+        op de command-line of maven configuratie, (2) een repository waaruit het model wordt geladen, en (3) een bean voor de codegenerator 
+        zelf. Een code generator is een klasse die het "nl.bzk.brp.bmr.generator.Generator" interface implementeert. -->
+
+    <bean id="generatoren" class="java.util.HashMap">
+        <constructor-arg>
+            <map>
+                <entry key="domein">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="domeinModelGenerator" />
+                        <constructor-arg value="Domein" />
+                    </bean>
+                </entry>
+                <entry key="schema">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="postgreSqlSchemaGenerator" />
+                        <constructor-arg value="Domein" />
+                    </bean>
+                </entry>
+                <entry key="schema-data-logischeElementen">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="postgreSqlLogischeElementenGenerator" />
+                        <constructor-arg value="Domein" />
+                    </bean>
+                </entry>
+                <entry key="tiles-definitie">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="tilesDefinitieGenerator" />
+                        <constructor-arg value="Applicatie" />
+                    </bean>
+                </entry>
+                <entry key="jsp">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="jspGenerator" />
+                        <constructor-arg value="Applicatie" />
+                    </bean>
+                </entry>
+                <entry key="message-properties">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="messagePropertiesGenerator" />
+                        <constructor-arg value="Applicatie" />
+                    </bean>
+                </entry>
+                <entry key="mvcController">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="mvcControllerGenerator" />
+                        <constructor-arg value="Applicatie" />
+                    </bean>
+                </entry>
+                <entry key="mvcFormBean">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="mvcFormBeanGenerator" />
+                        <constructor-arg value="Applicatie" />
+                    </bean>
+                </entry>
+                <entry key="mvcService">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="mvcServiceGenerator" />
+                        <constructor-arg value="Applicatie" />
+                    </bean>
+                </entry>
+                <entry key="gegevenswoordenboek-development">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="gegevensWoordenboekDevelopment" />
+                        <constructor-arg value="Domein" />
+                    </bean>
+                </entry>
+                <entry key="gegevenswoordenboek-public">
+                    <bean class="nl.bzk.brp.bmr.generator.GeneratorSpecificatie">
+                        <constructor-arg ref="gegevensWoordenboekPublic" />
+                        <constructor-arg value="Domein" />
+                    </bean>
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+</beans>

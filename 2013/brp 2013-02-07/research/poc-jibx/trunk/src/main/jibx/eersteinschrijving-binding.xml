@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<binding xmlns:tns="http://brp.bzk.nl/InschrijvingSchema">
+
+    <mapping abstract="true" class="nl.bzk.brp.poc.jibx.model.SamengesteldeNaam" type-name="tns:samengesteldeNaam" >
+        <namespace uri="http://brp.bzk.nl/InschrijvingSchema" default="elements"/>
+        <value name="voornaam" field="voorNaam"/>
+        <value name="achternaam" field="achterNaam"/>
+        <collection field="verantwoordingen" name="verantwoordingen" type="java.util.HashSet" usage="optional">
+            <structure map-as="tns:verantwoording" name="verantwoording"/>
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" class="nl.bzk.brp.poc.jibx.model.Persoon" type-name="tns:persoon" >
+        <namespace uri="http://brp.bzk.nl/InschrijvingSchema" default="elements"/>
+        <value name="bsn" field="bsn"/>
+        <collection field="namen" factory="nl.bzk.brp.poc.jibx.model.Persoon.setFactory">
+            <structure map-as="tns:samengesteldeNaam" name="samengesteldeNaam"/>
+        </collection>
+    </mapping>
+
+    <mapping name="bron" class="nl.bzk.brp.poc.jibx.model.Bron">
+        <namespace uri="http://brp.bzk.nl/InschrijvingSchema" default="elements"/>
+        <value name="type" field="type"/>
+        <value name="code" field="code"/>
+        <value name="nummer" field="nummer" style="attribute" ident="def"/>
+    </mapping>
+
+    <mapping abstract="true" class="nl.bzk.brp.poc.jibx.model.Verantwoording" type-name="tns:verantwoording">
+        <namespace uri="http://brp.bzk.nl/InschrijvingSchema" default="elements"/>
+        <value name="bron" field="bron" ident="ref"/>
+        <value name="toelichting" field="toelichting" usage="optional"/>
+    </mapping>
+
+    <mapping name="eersteInschrijving" class="nl.bzk.brp.poc.jibx.bericht.EersteInschrijving">
+        <namespace uri="http://brp.bzk.nl/InschrijvingSchema" default="elements"/>
+        <collection name="bronnen" field="bronnen" type="java.util.HashSet" usage="optional"/>
+
+        <structure map-as="tns:persoon" name="kind" field="kind"/>
+        <structure name="ouders">
+            <structure map-as="tns:persoon" name="ouder" field="ouder1"/>
+            <structure map-as="tns:persoon" name="ouder" field="ouder2"/>
+        </structure>
+    </mapping>
+
+</binding>

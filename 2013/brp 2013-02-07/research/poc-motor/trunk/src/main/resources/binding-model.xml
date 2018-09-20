@@ -1,0 +1,360 @@
+<binding direction="input">
+    <namespace uri="http://www.brp.nl/brp/0001" default="elements"/>
+
+    <format label="partij" type="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.Partij"
+            deserializer="nl.bzk.brp.pocmotor.factories.BindingFactory.partijVanPartijCode"/>
+    <format label="datumTijd" type="nl.bzk.brp.pocmotor.model.gedeeld.usr.attribuuttype.DatumTijd"
+            deserializer="nl.bzk.brp.pocmotor.factories.BindingFactory.datumTijdVanString"/>
+    <format label="datum" type="nl.bzk.brp.pocmotor.model.gedeeld.usr.attribuuttype.Datum"
+            deserializer="nl.bzk.brp.pocmotor.factories.BindingFactory.datumVanString"/>
+
+    <mapping name="BRPBericht" class="nl.bzk.brp.pocmotor.model.Bericht">
+        <structure name="afstamming01" map-as="bericht" usage="optional"/>
+        <structure name="verhuizing01" map-as="bericht" usage="optional"/>
+    </mapping>
+
+    <mapping type-name="bericht" abstract="true" class="nl.bzk.brp.pocmotor.model.Bericht">
+        <structure name="stuurgegevens">
+            <value name="berichtIdentificatie" field="berichtId"/>
+            <value name="tijdstipVerzonden" field="tijdstipVerzonden" usage="optional"
+                   deserializer="nl.bzk.brp.pocmotor.util.DatumEnTijdUtil.zetDatumEnTijdOmNaarDate"
+                   serializer="nl.bzk.brp.pocmotor.util.DatumEnTijdUtil.zetDateOmNaarDatumEnTijd"/>
+        </structure>
+        <structure name="bijhoudingen">
+            <collection field="bijhoudingen" item-type="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.BRPActie"
+                        factory="nl.bzk.brp.pocmotor.factories.BindingFactory.newListInstance"/>
+        </structure>
+    </mapping>
+
+    <mapping type-name="stuurgegevens" abstract="true" class="nl.bzk.brp.pocmotor.model.logisch.usr.groep.BerichtIdentiteit">
+        <value name="tijdstipVerzonden" set-method="setDatumTijdOntvangst" format="datumTijd"/>
+    </mapping>
+
+    <mapping name="actie" class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.BRPActie">
+        <structure field="identiteit">
+            <value name="soort" set-method="setSoort" enum-value-method="getNaam"/>
+            <value name="partij" set-method="setPartij" format="partij"/>
+        </structure>
+
+        <value name="datumAanvangGeldigheid" set-method="setDatumAanvangGeldigheid" format="datum" usage="optional"/>
+
+        <structure field="identiteit">
+            <value name="tijdstipOntlening" set-method="setDatumTijdOntlening" format="datumTijd" usage="optional"/>
+        </structure>
+        <structure name="bronnen" usage="optional">
+            <collection field="bronnen" item-type="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.Bron" usage="optional"
+                        factory="nl.bzk.brp.pocmotor.factories.BindingFactory.newSetInstance"/>
+        </structure>
+
+        <!-- Afstamming: -->
+        <structure name="familierechtelijkeBetrekking" map-as="familieRechtelijkeBetrekkingRelatie"
+                   set-method="voegRootObjectToe" usage="optional"/>
+
+        <!-- Verhuizing -->
+        <structure name="persoon" map-as="persoon" set-method="voegRootObjectToe" usage="optional"/>
+    </mapping>
+
+    <mapping type-name="familieRechtelijkeBetrekkingRelatie" class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.Relatie" abstract="true"
+             factory="nl.bzk.brp.pocmotor.factories.BindingFactory.familieRechtelijkeBetrekkingRelatie">
+        <structure name="kind" type="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.Betrokkenheid"
+                   factory="nl.bzk.brp.pocmotor.factories.BindingFactory.kindBetrokkenHeid"
+                   set-method="voegBetrokkenHeidToe">
+            <structure field="identiteit">
+                <structure field="betrokkene" map-as="kind"/>
+            </structure>
+        </structure>
+        <structure name="ouderBetrokkenheid" allow-repeats="true" ordered="false">
+            <structure name="ouder" type="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.Betrokkenheid" set-method="voegBetrokkenHeidToe"
+                       factory="nl.bzk.brp.pocmotor.factories.BindingFactory.ouderBetrokkenHeid">
+                <structure field="identiteit">
+                    <structure field="betrokkene" map-as="persoon"/>
+                </structure>
+                <structure field="ouder">
+                    <value name="datumIngangFamiliaireBetrekking" field="datumAanvang" format="datum"/>
+                </structure>
+                <structure name="verantwoordingen"/>
+            </structure>
+        </structure>
+    </mapping>
+
+    <mapping type-name="persoon" abstract="true" class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.Persoon">
+        <structure name="geboorte" field="geboorte" usage="optional">
+            <structure field="datumGeboorte">
+                <value name="datumGeboorte" set-method="setWaarde" type="java.lang.Integer"/>
+            </structure>
+            <structure field="buitenlandseGeboorteplaats">
+                <value name="buitenlandseGeboorteplaats" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="landGeboorte">
+                <structure field="identiteit">
+                    <structure field="landcode">
+                        <value name="landGeboorte" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure name="verantwoordingen"/>
+        </structure>
+        <structure name="identificatieNummer" usage="optional">
+            <structure field="identificatienummers">
+                <structure field="burgerservicenummer">
+                    <value name="burgerservicenummer" set-method="setWaarde" type="java.lang.String"/>
+                </structure>
+            </structure>
+        </structure>
+        <structure name="afgeleidAdministratief" usage="optional"/>
+        <collection field="adressen" factory="nl.bzk.brp.pocmotor.factories.BindingFactory.newSetInstance">
+            <structure name="adres" map-as="adres" usage="optional"/>
+        </collection>
+        <structure name="geslachtsAanduiding" field="geslachtsaanduiding" usage="optional">
+            <value name="geslachtsAanduiding" field="geslachtsaanduiding" enum-value-method="getCode"/>
+            <structure name="verantwoordingen"/>
+        </structure>
+        <structure name="samengesteldeNaam" field="samengesteldeNaam" usage="optional">
+            <structure field="voornamen">
+                <value name="voornamen" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="voorvoegsel">
+                <value name="voorvoegsel" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="geslachtsnaam">
+                <value name="geslachtsnaam" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure name="verantwoordingen"/>
+        </structure>
+    </mapping>
+
+    <mapping type-name="adres" abstract="true" class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.PersoonAdres">
+        <structure field="standaard">
+            <value name="soort" field="soort" enum-value-method="getCode"/>
+            <structure field="redenWijziging" usage="optional">
+                <structure field="identiteit">
+                    <structure field="code">
+                        <value name="redenWijziging" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure field="aangeverAdreshouding" usage="optional">
+                <structure field="identiteit">
+                    <structure field="code">
+                        <value name="aangeverAdreshouding" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <value name="datumAanvangAdreshouding" field="datumAanvangAdreshouding" format="datum" usage="optional"/>
+            <structure field="adresseerbaarObject" usage="optional">
+                <value name="adresseerbaarObject" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="identificatiecodeNummeraanduiding" usage="optional">
+                <value name="identificatieNummeraanduiding" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="land">
+                <structure field="identiteit">
+                    <structure field="landcode">
+                        <value name="land" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure field="gemeente">
+                <structure field="gemeenteStandaard">
+                    <structure field="gemeentecode">
+                        <value name="gemeente" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure field="woonplaats">
+                <structure field="identiteit">
+                    <structure field="naam">
+                        <value name="woonplaats" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure field="naamOpenbareRuimte">
+                <value name="naamOpenbareruimte" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="afgekorteNaamOpenbareRuimte">
+                <value name="afgekorteNaamOpenbareruimte" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="huisnummer" usage="optional">
+                <value name="huisnummer" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="huisletter" usage="optional">
+                <value name="huisletter" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="huisnummertoevoeging" usage="optional">
+                <value name="huisnummerToevoeging" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="postcode">
+                <value name="postcode" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+        </structure>
+        <structure name="verantwoordingen"/>
+    </mapping>
+
+    <mapping type-name="kind" abstract="true" class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.Persoon">
+        <structure name="inschrijving" field="inschrijving" usage="optional">
+            <value name="datumInschrijving" field="datumInschrijving" format="datum"/>
+            <structure name="verantwoordingen"/>
+        </structure>
+        <structure name="bijhoudingsVerantwoordelijkheid" field="bijhoudingsverantwoordelijkheid" usage="optional">
+            <value name="code" field="verantwoordelijke" enum-value-method="getCode"/>
+            <value name="datumAanvangGeldigheid" field="datumBijhoudingsverantwoordelijkheid" format="datum"/>
+            <structure name="verantwoordingen"/>
+        </structure>
+        <structure name="bijhoudingsGemeente" field="bijhoudingsgemeente" usage="optional">
+            <structure field="bijhoudingsgemeente">
+                <structure field="gemeenteStandaard">
+                    <structure field="gemeentecode">
+                        <value name="gemeente" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <value name="datumInschrijvingGemeente" field="datumInschrijvingInGemeente" format="datum"/>
+            <structure name="verantwoordingen"/>
+        </structure>
+        <structure name="identificatieNummer" usage="optional">
+            <structure field="identificatienummers">
+                <structure field="burgerservicenummer">
+                    <value name="burgerservicenummer" set-method="setWaarde" type="java.lang.String"/>
+                </structure>
+                <structure field="administratienummer">
+                    <value name="administratienummer" set-method="setWaarde" type="java.lang.String"/>
+                </structure>
+            </structure>
+            <structure name="verantwoordingen"/>
+        </structure>
+        <structure name="geboorte" field="geboorte" usage="optional">
+            <structure field="datumGeboorte">
+                <value name="datumGeboorte" set-method="setWaarde" type="java.lang.Integer"/>
+            </structure>
+            <structure field="gemeenteGeboorte">
+                <structure field="gemeenteStandaard">
+                    <structure field="gemeentecode">
+                        <value name="gemeente" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure field="woonplaatsGeboorte">
+                <structure field="identiteit">
+                    <structure field="naam">
+                        <value name="woonplaats" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure field="landGeboorte">
+                <structure field="identiteit">
+                    <structure field="landcode">
+                        <value name="land" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+            <structure name="verantwoordingen"/>
+        </structure>
+        <structure name="geslachtsAanduiding" field="geslachtsaanduiding" usage="optional">
+            <value name="geslachtsAanduiding" field="geslachtsaanduiding" enum-value-method="getCode"/>
+            <structure name="verantwoordingen"/>
+        </structure>
+
+        <!-- TODO Voornamen, fix van Jeanot -->
+        <structure name="voornamen" allow-repeats="true" ordered="false" usage="optional">
+            <structure name="voornaam" map-as="voornaam" set-method="voegVoorNaamToe"/>
+            <structure name="verantwoordingen"/>
+        </structure>
+
+        <structure name="geslachtsnaamComponenten" ordered="false" allow-repeats="true" usage="optional">
+            <structure name="geslachtsnaamComponent" map-as="geslachtsnaamComponent" set-method="voegGeslachtsNaamToe"/>
+            <structure name="verantwoordingen"/>
+        </structure>
+
+        <!-- TODO nationaliteit, fix van Jeanot -->
+        <structure name="nationaliteiten" allow-repeats="true" ordered="false" usage="optional">
+            <structure name="nationaliteit" map-as="nationaliteit" set-method="voegNationaliteitToe"/>
+        </structure>
+
+        <collection field="adressen" name="adressen" factory="nl.bzk.brp.pocmotor.factories.BindingFactory.newSetInstance" usage="optional">
+            <structure name="adres" map-as="adres" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" type-name="geslachtsnaamComponent"
+             class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.PersoonGeslachtsnaamcomponent">
+        <structure field="identiteit">
+            <structure field="volgnummer">
+                <value name="volgnummer" set-method="setWaarde" type="java.lang.Integer"/>
+            </structure>
+        </structure>
+        <structure field="standaard">
+            <structure field="voorvoegsel">
+                <value name="voorvoegsel" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+            <structure field="naam">
+                <value name="geslachtsnaam" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="voornaam" class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.PersoonVoornaam">
+        <structure field="identiteit">
+            <structure field="volgnummer">
+                <value name="volgnummer" set-method="setWaarde" type="java.lang.Integer"/>
+            </structure>
+        </structure>
+        <structure field="standaard">
+            <structure field="naam">
+                <value name="naam" set-method="setWaarde" type="java.lang.String"/>
+            </structure>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="nationaliteit" class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.PersoonNationaliteit">
+        <structure field="identiteit">
+            <structure field="nationaliteit">
+                <structure field="identiteit">
+                    <structure field="nationaliteitcode">
+                        <value name="nationaliteit" set-method="setWaarde" type="java.lang.String"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+        <structure field="standaard">
+            <structure field="redenVerkrijging">
+                <structure field="identiteit">
+                    <structure field="iD">
+                        <value name="redenVerkrijging" set-method="setWaarde" type="java.lang.Integer"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+        <structure name="verantwoordingen"/>
+    </mapping>
+
+    <mapping name="bron" class="nl.bzk.brp.pocmotor.model.logisch.usr.objecttype.Bron">
+        <value name="identificatieBronInBericht" field="identificatieBronInBericht" ident="def"/>
+        <structure field="identiteit">
+            <structure field="document">
+                <!-- DocumentIdentiteit-->
+                <structure field="identiteit">
+                    <structure field="soort">
+                        <structure field="identiteit">
+                            <value name="soort" field="categorieSoortDocument" enum-value-method="getNaam"/>
+                        </structure>
+                    </structure>
+                </structure>
+
+                <!-- DocumentStandaard-->
+                <structure field="standaard">
+                    <structure field="identificatie">
+                        <value name="identificatie" set-method="setWaarde" type="java.lang.String" usage="optional"/>
+                    </structure>
+                    <structure field="aktenummer">
+                        <value name="akteNummer" set-method="setWaarde" type="java.lang.String" usage="optional"/>
+                    </structure>
+                    <structure field="omschrijving">
+                        <value name="omschrijving" set-method="setWaarde" type="java.lang.String" usage="optional"/>
+                    </structure>
+                    <value name="partij" field="partij" format="partij" usage="optional"/>
+                </structure>
+            </structure>
+        </structure>
+    </mapping>
+
+</binding>

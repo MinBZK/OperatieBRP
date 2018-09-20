@@ -1,0 +1,67 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.model.operationeel.kern;
+
+import javax.persistence.Embeddable;
+
+import nl.bzk.brp.model.algemeen.attribuuttype.kern.Aktenummer;
+import nl.bzk.brp.model.algemeen.attribuuttype.kern.DocumentIdentificatie;
+import nl.bzk.brp.model.algemeen.attribuuttype.kern.DocumentOmschrijving;
+import nl.bzk.brp.model.algemeen.stamgegeven.kern.Partij;
+import nl.bzk.brp.model.logisch.kern.DocumentStandaardGroep;
+import nl.bzk.brp.model.operationeel.kern.basis.AbstractDocumentStandaardGroepModel;
+
+
+/**
+ * Vorm van historie: formeel. Motivatie: het objecttype wordt gebruikt voor de verantwoording van een specifieke BRP
+ * actie. Denkbaar is dat twee verschillende BRP acties verwijzen naar hetzelfde Document; relevant is welke gegevens er
+ * toen geregistreerd stonden bij het Document, vandaar dat formele historie relevant is. NB: dit onderdeel van het
+ * model is nog in ontwikkeling. Denkbaar is dat de modellering anders wordt. RvdP 17 jan 2012.
+ *
+ *
+ *
+ * Generator: nl.bzk.brp.generatoren.java.OperationeelModelGenerator.
+ * Metaregister versie: 1.1.8.
+ * Generator versie: 1.0-SNAPSHOT.
+ * Generator gebouwd op: 2012-11-27 12:02:51.
+ * Gegenereerd op: Tue Nov 27 14:55:36 CET 2012.
+ */
+@Embeddable
+public class DocumentStandaardGroepModel extends AbstractDocumentStandaardGroepModel implements DocumentStandaardGroep {
+
+    /**
+     * Standaard constructor (t.b.v. Hibernate/JPA).
+     *
+     */
+    protected DocumentStandaardGroepModel() {
+        super();
+    }
+
+    /**
+     * Basis constructor die direct alle velden instantieert.
+     *
+     * @param identificatie identificatie van Standaard.
+     * @param aktenummer aktenummer van Standaard.
+     * @param omschrijving omschrijving van Standaard.
+     * @param partij partij van Standaard.
+     */
+    public DocumentStandaardGroepModel(final DocumentIdentificatie identificatie, final Aktenummer aktenummer,
+            final DocumentOmschrijving omschrijving, final Partij partij)
+    {
+        super(identificatie, aktenummer, omschrijving, partij);
+    }
+
+    /**
+     * Copy constructor om vanuit het bericht model een instantie van het operationeel model te maken.
+     *
+     * @param documentStandaardGroep te kopieren groep.
+     */
+    public DocumentStandaardGroepModel(final DocumentStandaardGroep documentStandaardGroep) {
+        super(documentStandaardGroep);
+    }
+
+}

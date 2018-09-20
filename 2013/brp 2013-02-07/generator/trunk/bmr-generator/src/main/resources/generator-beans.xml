@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p" xmlns:context="http://www.springframework.org/schema/context" xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jee="http://www.springframework.org/schema/jee" xmlns:jpa="http://www.springframework.org/schema/data/jpa" xmlns:util="http://www.springframework.org/schema/util"
+
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+        http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-2.0.xsd       
+    ">
+
+    <context:annotation-config />
+    <context:component-scan base-package="nl.bzk.brp.bmr.generator" />
+    <aop:aspectj-autoproxy />
+
+    <!-- Dit zijn de pluggable code generators. Per code generator is er (1) een keyword, waarmee de generator wordt aangeduid op de command-line of maven configuratie, (2) een repository waaruit het model wordt geladen, en (3) een bean voor de codegenerator zelf. Een code generator is een klasse die 
+        het "nl.bzk.brp.bmr.generator.Generator" interface implementeert. -->
+
+    <bean id="generatoren" class="java.util.HashMap">
+        <constructor-arg>
+            <map>
+                <entry key="domein" value-ref="domeinModelGenerator" />
+                <entry key="schema" value-ref="postgreSqlSchemaGenerator" />
+                <entry key="schema-data-logischeElementen" value-ref="postgreSqlLogischeElementenGenerator" />
+                <entry key="tiles-definitie" value-ref="tilesDefinitieGenerator" />
+                <entry key="jsp" value-ref="jspGenerator" />
+                <entry key="message-properties" value-ref="messagePropertiesGenerator" />
+                <entry key="mvcController" value-ref="mvcControllerGenerator" />
+                <entry key="mvcFormBean" value-ref="mvcFormBeanGenerator" />
+                <entry key="mvcService" value-ref="mvcServiceGenerator" />
+                <entry key="gegevenswoordenboek-development" value-ref="gegevensWoordenboekDevelopment" />
+                <entry key="gegevenswoordenboek-public" value-ref="gegevensWoordenboekPublic" />
+            </map>
+        </constructor-arg>
+    </bean>
+</beans>

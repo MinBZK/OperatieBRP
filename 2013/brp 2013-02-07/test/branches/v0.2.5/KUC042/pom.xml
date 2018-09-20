@@ -1,0 +1,135 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>test-parent</artifactId>
+        <groupId>nl.bzk.brp.test</groupId>
+        <version>0.1.6-SNAPSHOT</version>
+    </parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.bzk.brp.test</groupId>
+	<artifactId>KUC042</artifactId>
+	<version>0.0.5-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>KUC042-Registreren-H-en-P</name>
+
+	<!---
+	 | Men kan de verschillende profiles actieveren:
+	 |
+	 | let op: dburl, dbuser en dbpassword is in de parent gedefinieerd
+	 | -DprojectEnv=[ART,DEV,TST,LOCALHOST]
+	 | -DtestScript=[locatie ART]
+	 +-->
+
+	<properties>
+		<testScript>${project.build.directory}/classes/ART</testScript>
+		<projectEnv>LOCALHOST</projectEnv>
+		<projectName>ART</projectName>
+	</properties>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>nl.bzk.brp.test</groupId>
+			<artifactId>art-engine</artifactId>
+			<version>1.0.1-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>./</directory>
+				<filtering>false</filtering>
+				<includes>
+					<include>**/*</include>
+				</includes>
+				<excludes>
+					<exclude>ART/ActualResults/**/*</exclude>
+					<exclude>output/**/*</exclude>
+					<exclude>cte/**/*</exclude>
+					<exclude>review records/**/*</exclude>
+					<exclude>target/**/*</exclude>
+				</excludes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<version>2.5.1</version>
+				<executions>
+					<execution>
+						<id>extract-ARTengine</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>nl.bzk.brp.test</groupId>
+									<artifactId>art-engine</artifactId>
+									<overWrite>true</overWrite>
+									<includes>**/*</includes>
+									<excludes>default.properties,Voorbeeld*/**/*</excludes>
+								</artifactItem>
+							</artifactItems>
+							<outputDirectory>${project.build.directory}/engine</outputDirectory>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>eviware</groupId>
+				<artifactId>maven-soapui-plugin</artifactId>
+				<version>4.0.1</version>
+				<dependencies>
+					<dependency>
+						<groupId>postgresql</groupId>
+						<artifactId>postgresql</artifactId>
+						<version>9.1-901-1.jdbc4</version>
+					</dependency>
+					<dependency>
+						<groupId>jxl</groupId>
+						<artifactId>jxl</artifactId>
+						<version>2.6.12</version>
+					</dependency>
+					 <dependency>
+					  <groupId>junit</groupId>
+					  <artifactId>junit</artifactId>
+					  <version>4.4</version>
+				   </dependency>
+				</dependencies>
+				<configuration>
+<!--
+					<printReport>true</printReport>
+					<exportAll>true</exportAll>
+					<reportFormat>HTML</reportFormat>
+					<coverage >true</coverage >
+					<outputFolder>${basedir}/target/output/</outputFolder>
+-->
+					<globalProperties>
+						<value>projectEnv=${projectEnv}</value>
+						<value>dataSetNaam=${dataSetNaam}</value>
+						<value>testScript=${testScript}</value>
+					</globalProperties>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<goals>
+							<goal>test</goal>
+						</goals>
+						<configuration>
+							<projectFile>${project.build.directory}/engine/${projectName}-soapui-project.xml</projectFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<scm>
+		<connection>scm:svn:https://www.modernodam.nl/svn/brp-code/test/trunk/KUC042</connection>
+	</scm>
+</project>

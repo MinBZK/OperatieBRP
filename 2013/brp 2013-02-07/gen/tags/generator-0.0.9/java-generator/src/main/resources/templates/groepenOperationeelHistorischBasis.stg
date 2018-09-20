@@ -1,0 +1,168 @@
+group groepenOperationeelHistorischBasis;
+
+import "generieke-templates.stg"
+
+groepOperationeelHistorischBasis(groep, identDb, identDbObjectType, heeftMaterieleHistorie) ::= <<
+package <groep.packageName>;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Embedded;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.SequenceGenerator;
+
+<if(heeftMaterieleHistorie)>
+import nl.bzk.brp.model.attribuuttype.Datum;
+<endif>
+import nl.bzk.brp.model.attribuuttype.DatumTijd;
+import nl.bzk.brp.model.basis.<historieType()>;
+import nl.bzk.brp.model.basis.<historieType()>Impl;
+<groep.imports; separator="\n">
+
+
+/**
+ * .
+ *
+ */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public abstract class <groep.name> extends
+        <groep.extendsFrom> implements <historieType()>
+{
+
+    @Id
+    @SequenceGenerator(name = "his<identDb>", sequenceName = "Kern.seq_His_<identDb>")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "his<identDb>")
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "<identDbObjectType>")
+    private <first(groep.fields).type> <first(groep.fields).name.lowerCamel>;
+
+    @Embedded
+    private <historieType()>Impl historie;
+
+    /**
+     * Default constructor tbv hibernate.
+     */
+    protected <groep.name>() {
+        super();
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param groep
+     * @param <first(groep.fields).name.lowerCamel>Model
+     */
+    protected <groep.name>(
+            final <groep.extendsFrom> groep,
+            final <first(groep.fields).type> <first(groep.fields).name.lowerCamel>Model)
+    {
+        super(groep);
+        <first(groep.fields).name.lowerCamel> = <first(groep.fields).name.lowerCamel>Model;
+        if (groep instanceof <groep.name>) {
+            historie =
+                new <historieType()>Impl(
+                        ((<groep.name>) groep).getHistorie());
+        } else {
+            historie = new <historieType()>Impl();
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public <first(groep.fields).type> get<first(groep.fields).name>() {
+        return <first(groep.fields).name.lowerCamel>;
+    }
+
+    public <historieType()>Impl getHistorie() {
+        return historie;
+    }
+
+    @Override
+    public DatumTijd getDatumTijdRegistratie() {
+        return historie.getDatumTijdRegistratie();
+    }
+
+    @Override
+    public void setDatumTijdRegistratie(final DatumTijd datumTijdRegistratie) {
+        historie.setDatumTijdRegistratie(datumTijdRegistratie);
+    }
+
+    @Override
+    public DatumTijd getDatumTijdVerval() {
+        return historie.getDatumTijdVerval();
+    }
+
+    @Override
+    public void setDatumTijdVerval(final DatumTijd datumTijdVerval) {
+        historie.setDatumTijdVerval(datumTijdVerval);
+    }
+
+    @Override
+    public ActieModel getActieInhoud() {
+        return historie.getActieInhoud();
+    }
+
+    @Override
+    public void setActieInhoud(final ActieModel actieInhoud) {
+        historie.setActieInhoud(actieInhoud);
+    }
+
+    @Override
+    public ActieModel getActieVerval() {
+        return historie.getActieVerval();
+    }
+
+    @Override
+    public void setActieVerval(final ActieModel actieVerval) {
+        historie.setActieVerval(actieVerval);
+    }
+<if(heeftMaterieleHistorie)>
+
+    @Override
+    public Datum getDatumAanvangGeldigheid() {
+        return historie.getDatumAanvangGeldigheid();
+    }
+
+    @Override
+    public void setDatumAanvangGeldigheid(final Datum datumAanvangGeldigheid) {
+        historie.setDatumAanvangGeldigheid(datumAanvangGeldigheid);
+    }
+
+    @Override
+    public Datum getDatumEindeGeldigheid() {
+        return historie.getDatumEindeGeldigheid();
+    }
+
+    @Override
+    public void setDatumEindeGeldigheid(final Datum datumEindeGeldigheid) {
+        historie.setDatumEindeGeldigheid(datumEindeGeldigheid);
+    }
+
+    @Override
+    public ActieModel getActieAanpassingGeldigheid() {
+        return historie.getActieAanpassingGeldigheid();
+    }
+
+    @Override
+    public void setActieAanpassingGeldigheid(final ActieModel actieAanpassingGeldigheid) {
+        historie.setActieAanpassingGeldigheid(actieAanpassingGeldigheid);
+    }
+<endif>
+}
+
+>>
+
+historieType() ::= <<
+<if(heeftMaterieleHistorie)>MaterieleHistorie<else>FormeleHistorie<endif>
+>>

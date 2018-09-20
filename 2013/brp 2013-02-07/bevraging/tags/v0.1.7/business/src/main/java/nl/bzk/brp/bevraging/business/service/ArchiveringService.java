@@ -1,0 +1,33 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.bevraging.business.service;
+
+import nl.bzk.brp.bevraging.domein.ber.Richting;
+
+
+
+/**
+ * Service voor het archiveren van een bericht, inkomend en uitgaand.
+ */
+public interface ArchiveringService {
+
+    /**
+     * Archiveert een bericht.
+     * @param data het bericht dat gearchiveerd dient te worden.
+     * @param richting of het in ingaand of uitgaand bericht is.
+     * @return id van het bericht dat is gearchiveerd.
+     */
+    Long archiveer(String data, Richting richting);
+
+    /**
+     * Werkt de data van een bericht bij in de database.
+     * @param berichtId Id van het bericht wat bijgewerkt moet worden.
+     * @param nieuweData De data die bij het bericht hoort.
+     */
+    void werkDataBij(final Long berichtId, final String nieuweData);
+
+}

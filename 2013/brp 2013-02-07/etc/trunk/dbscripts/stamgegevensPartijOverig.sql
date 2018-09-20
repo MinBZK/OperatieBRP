@@ -1,0 +1,3 @@
+INSERT INTO Kern.Partij (ID, Naam, Srt, DatAanv, DatEinde, PartijStatusHis,  GemStatusHis) values (2000,$$Migratie voorziening$$,7,20120101,null,'A','A');	INSERT INTO Kern.His_Partij (ID, Partij, TsReg, DatAanv, DatEinde) values (2000,2000,Now(),20120101,null);
+INSERT INTO Kern.Partij (ID, Naam, Srt, DatAanv, DatEinde, PartijStatusHis,  GemStatusHis) values (2001,$$Wetgever$$,1,20120101,null,'A','A');	INSERT INTO Kern.His_Partij (ID, Partij, TsReg, DatAanv, DatEinde) values (2001,2001,Now(),20120101,null);
+INSERT INTO Kern.Partij (ID, Naam, Srt, DatAanv, DatEinde, PartijStatusHis,  GemStatusHis) values (2002,$$Minister$$,2,20120101,null,'A','A');	INSERT INTO Kern.His_Partij (ID, Partij, TsReg, DatAanv, DatEinde) values (2002,2002,Now(),20120101,null);

@@ -1,0 +1,60 @@
+group attribuuttype;
+
+attribuutTypeBasisClass(attribuut, metaregisterVersie) ::= <<
+/**
+ * Deze code is gegenereerd vanuit het metaregister van het BRP, versie <metaregisterVersie>.
+ *
+ */
+package <attribuut.packageName>;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.MappedSuperclass;
+
+<attribuut.imports:{importLibrary | import <importLibrary>;}; separator="\n">
+import nl.bzk.brp.model.basis.<attribuut.extendsFrom>;
+
+/**
+ * <attribuut.javaDoc>
+ * @version <metaregisterVersie>.
+ */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+public abstract class <attribuut.name>Basis extends <attribuut.extendsFrom>\<<attribuut.baseTypeName>\> {
+
+    /**
+     * Private constructor t.b.v. Hibernate.
+     */
+    private <attribuut.name>() {
+        super(null);
+    }
+	
+    /**
+     * De (op dit moment) enige constructor voor deze immutable class.
+     *
+     * @param waarde de waarde
+     */
+    public <attribuut.name>(final <attribuut.baseTypeName> waarde) {
+        super(waarde);
+    }
+}
+
+>>
+
+attribuutTypeClass(attribuut) ::= <<
+package <attribuut.packageName>;
+
+<attribuut.imports:{importLibrary | import <importLibrary>;}; separator="\n">
+import javax.persistence.Embeddable;
+
+import <attribuut.packageName>.basis.<attribuut.name>Basis;
+
+/**
+ * <attribuut.javaDoc>
+ */
+@Embeddable
+public final class <attribuut.name> extends <attribuut.name>Basis {
+
+}
+
+>>

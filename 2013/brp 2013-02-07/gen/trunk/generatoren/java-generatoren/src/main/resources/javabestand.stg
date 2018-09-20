@@ -1,0 +1,336 @@
+objecttype(object, generator, datum) ::= <<
+
+package <object.packagePad>;
+
+<object.imports;separator="\n">
+
+/**
+ * <object.javaDoc;separator=" ">
+ *
+ */
+<if(object.annotaties)><object.annotaties:annotatie();separator="\n"><endif>
+public <if(object.final)>final <endif><if(object.abstractClass)>abstract <endif>class <object.naam><if(object.heeftSuperKlasse)> extends <javaType(object.superKlasse)><endif> <if(object.superInterfaces)>implements <object.superInterfaces:javaType();separator=", "><endif> {
+
+<object.velden:veld();separator="\n">
+
+<object.constructoren:constructor();separator="\n\n">
+
+<object.getters:getter();separator="\n\n">
+
+<object.setters:setter();separator="\n\n">
+
+<object.functies:functie();separator="\n\n">
+}
+
+>>
+
+interface(object, generator, datum) ::= <<
+
+package <object.packagePad>;
+
+<object.imports;separator="\n">
+
+/**
+ * <object.javaDoc;separator=" ">
+ *
+ */
+public interface <object.naam> <if(object.superInterfaces)>extends <object.superInterfaces:javaType();separator=", "><endif> {
+
+<object.functies:functieInterfaceDeclaratie();separator="\n\n">
+
+}
+
+>>
+
+enumeratie(object, generator, datum) ::= <<
+
+package <object.packagePad>;
+
+<object.imports;separator="\n">
+
+/**
+ * <object.javaDoc;separator=" ">
+ *
+ */
+public enum <object.naam> <if(object.superInterfaces)>implements <object.superInterfaces:javaType();separator=", "><endif> {
+
+<object.enumeratieWaarden:enumWaarde();separator=",\n">;
+
+<object.velden:veld();separator="\n">
+
+<object.constructoren:constructor();separator="\n">
+
+<object.getters:getter();separator="\n\n">
+
+<object.functies:functie();separator="\n\n">
+}
+
+>>
+
+
+javaType(javaType) ::= <<
+<javaType.naam><if(javaType.geparametriseerd)>\<<if(javaType.genericParameterSubtypesToegestaan)>? extends <endif><javaType(javaType.genericParameter)>\><endif>
+>>
+
+enumWaarde(enumWaarde) ::= <<
+    /**
+     * <enumWaarde.javaDoc; wrap="\n * ", separator=" ">
+     */
+    <enumWaarde.naam>(<enumWaarde.constructorParameters:enumConstructorParameter();separator=", ">)
+>>
+
+enumConstructorParameter(constructorParameter) ::= <<
+<if(constructorParameter.string)>"<constructorParameter.waarde>"<else><constructorParameter.waarde><endif>
+>>
+
+veld(veld) ::= <<
+<if(!veld.annotaties.empty)>
+    <veld.annotaties:annotatie();separator="\n">
+<endif>
+    <veld.accessModifier.modifierNaam> <if(veld.static)>static <endif><if(veld.final)>final <endif><javaType(veld.type)> <veld.naam><if(veld.geinstantieerd)> = <veld.geinstantieerdeWaarde><endif>;
+>>
+
+functie(fn) ::= <<
+    /**
+     * <fn.javaDoc; wrap="\n     * ", separator=" ">
+     *
+     <fn.parameters:functieParameterJavadoc(); separator ="\n">
+     <if(fn.returnValue)>* @return <fn.returnWaardeJavaDoc><endif>
+     */
+    <fn.annotaties:annotatie(); separator ="\n">
+    <fn.accessModifier.modifierNaam> <if(fn.static)>static <endif><javaType(fn.returnType)> <fn.naam>(<if(fn.parameters)><fn.parameters:functieParameter();separator=", "><endif>)<if(fn.exceptions)> throws <fn.thrownExceptions; separator=","><endif> {
+        <fn.body>
+    }
+>>
+
+constructor(cons) ::= <<
+    /**
+     * <cons.javaDoc; wrap="\n     * ", separator=" ">
+     *
+     <cons.parameters:functieParameterJavadoc(); separator ="\n">
+     */
+    <cons.annotaties:annotatie(); separator="\n">
+    <cons.accessModifier.modifierNaam> <cons.naam>(<if(cons.parameters)><cons.parameters:functieParameter();separator=", "><endif>)<if(cons.exceptions)> throws <cons.thrownExceptions; separator=","><endif> {
+        <cons.body>
+    }
+>>
+
+
+getter(getter) ::= <<
+<if(getter.overriden)>
+    /**
+     * {@inheritDoc}
+     */
+<else>
+    /**
+     * <getter.javaDoc; wrap="\n     * ", separator=" ">
+     *
+     * @return <getter.returnWaardeJavaDoc>
+     */<endif>
+    <getter.annotaties:annotatie(); separator="\n">
+    <getter.accessModifier.modifierNaam> <javaType(getter.returnType)> <getter.naam>()<if(getter.exceptions)> throws <getter.thrownExceptions; separator=","><endif> {
+        return <getter.accessingClassVariabeleNaam>;
+    }
+>>
+
+
+setter(setter) ::= <<
+    /**
+     * <setter.javaDoc; wrap="\n     * ", separator=" ">
+     *
+     <setter.parameters:functieParameterJavadoc(); separator ="\n">
+     */
+    <setter.accessModifier.modifierNaam> void <setter.naam>(<setter.parameters:functieParameter();separator=", ">)<if(setter.exceptions)> throws <setter.thrownExceptions; separator=","><endif> {
+        this.<setter.mutatingClassVariabeleNaam> = <setter.mutatingClassVariabeleNaam>;
+        <setter.body>
+    }
+>>
+
+
+functieInterfaceDeclaratie(functie) ::= <<
+    /**
+     * <functie.javaDoc; wrap="\n * ", separator=" ">
+     *
+     <functie.parameters:functieParameterJavadoc();separator="\n    ">
+     <if(functie.returnValue)>* @return <functie.returnWaardeJavaDoc><endif>
+     */
+    <javaType(functie.returnType)> <functie.naam>(<functie.parameters:functieInterfaceParameter();separator=", ">);
+>>
+
+
+functieInterfaceParameter(param) ::= <<
+<javaType(param.javaType)> <param.naam>
+>>
+
+
+functieParameter(param) ::= <<
+final <javaType(param.javaType)> <param.naam>
+>>
+
+
+functieParameterJavadoc(param) ::= <<
+* @param <param.naam> <param.javaDoc; wrap="\n * ", separator=" ">
+>>
+
+
+annotatie(annotatie) ::= <<
+@<annotatie.type.naam><if(annotatie.parameters)>(<annotatie.parameters:annotatieParameter();separator=", ">)<endif>
+>>
+
+annotatieParameter(param) ::= <<
+<param.parameterString>
+>>
+
+symboltable(object, generator, datum) ::= <<
+package <object.packagePad>;
+
+<object.imports;separator="\n">
+
+/**
+ * Opsomming van alle attributen zoals die in het BMR voorkomen en zoals die gebruikt kunnen worden in expressies.
+ *
+ */
+public enum <object.naam> {
+
+<object.symbols:enumWaarde();separator=",\n">;
+
+    private final String attributeSyntax;
+    private final ExpressieType type;
+    private final ExpressieType objectType;
+    private final Attributes indexedAttribute;
+    private final AttributeGetter getter;
+
+    /**
+     * Constructor.
+     *
+     * @param attributeSyntax  Naam (syntax) van het attribuut.
+     * @param type             Type van het attribuut.
+     * @param objectType       Type waartoe het attribuut behoort.
+     * @param indexedAttribute Indexed attribute waartoe het attribute behoort.
+     * @param getter           Getter voor het attribuut.
+     */
+    private Attributes(final String attributeSyntax, final ExpressieType type, final ExpressieType objectType,
+                       final Attributes indexedAttribute, final AttributeGetter getter)
+    {
+        this.attributeSyntax = attributeSyntax.toUpperCase();
+        this.type = type;
+        this.objectType = objectType;
+        this.indexedAttribute = indexedAttribute;
+        this.getter = getter;
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param attributeSyntax  Naam (syntax) van het attribuut.
+     * @param type             Type van het attribuut.
+     * @param objectType       Type waartoe het attribuut behoort.
+     * @param indexedAttribute Indexed attribute waartoe het attribute behoort.
+     */
+    private Attributes(final String attributeSyntax, final ExpressieType type, final ExpressieType objectType,
+                       final Attributes indexedAttribute)
+    {
+        this(attributeSyntax, type, objectType, indexedAttribute, null);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param attributeSyntax Naam (syntax) van het attribuut.
+     * @param type            Type van het attribuut.
+     * @param objectType      Type waartoe het attribuut behoort.
+     * @param getter          Getter voor het attribuut.
+     */
+    private Attributes(final String attributeSyntax, final ExpressieType type, final ExpressieType objectType,
+                       final AttributeGetter getter)
+    {
+        this(attributeSyntax, type, objectType, null, getter);
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param attributeSyntax Naam (syntax) van het attribuut.
+     * @param type            Type van het attribuut.
+     * @param objectType      Type waartoe het attribuut behoort.
+     */
+    private Attributes(final String attributeSyntax, final ExpressieType type, final ExpressieType objectType) {
+        this(attributeSyntax, type, objectType, null, null);
+    }
+
+    public String getSyntax() {
+        return attributeSyntax;
+    }
+
+    public ExpressieType getType() {
+        return type;
+    }
+
+    public ExpressieType getObjectType() {
+        return objectType;
+    }
+
+    public Attributes getIndexedAttribute() {
+        return indexedAttribute;
+    }
+
+    /**
+     * Geeft de waarde van het attribuut voor het betreffende (root)object terug.
+     *
+     * @param rootObject Object waarvan de attribuutwaarde bepaald moet worden.
+     * @return Waarde van het attribuut of NULL indien niet gevonden.
+     */
+    public Expressie getAttribuutWaarde(final RootObject rootObject) {
+        if (getter != null) {
+            return getter.getAttribuutWaarde(rootObject);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Geeft de waarde van het attribuut voor het betreffende geïndiceerde (root)object terug.
+     *
+     * @param rootObject Object waarvan de attribuutwaarde bepaald moet worden.
+     * @param index      Index van het object waarvoor de waarde bepaald moet worden.
+     * @return Waarde van het attribuut of NULL indien niet gevonden.
+     */
+    public Expressie getAttribuutWaarde(final RootObject rootObject, final int index) {
+        if (getter != null) {
+            return getter.getAttribuutWaarde(rootObject, index);
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Geeft de maximale indexwaarde voor een geïndiceerd attribuut.
+     *
+     * @param rootObject Object waarvan de maximale indexwaarde bepaald worden.
+     * @return Maximale indexwaarde of 0 indien een fout is opgetreden.
+     */
+    public int getMaxIndex(final RootObject rootObject) {
+        if (getter != null) {
+            return getter.getMaxIndex(rootObject);
+        } else {
+            return 0;
+        }
+    }
+
+    /**
+     * Geeft TRUE als het attribuut tot het geïndiceerd attribuut behoort (bijvoorbeeld Postcode als onderdeel van
+     * een Adres[]).
+     *
+     * @param attribuut Het te testen attribuut.
+     * @return TRUE als het attribuut tot het geïndiceerd attribuut behoort.
+     */
+    public boolean belongsToIndexedAttribute(final Attributes attribuut) {
+        return (attribuut.getType() == ExpressieType.INDEXED && getIndexedAttribute() == attribuut);
+    }
+
+    @Override
+    public String toString() {
+        return getObjectType().toString() + "." + getSyntax() + " (" + getType().toString() + ")";
+    }
+}
+>>

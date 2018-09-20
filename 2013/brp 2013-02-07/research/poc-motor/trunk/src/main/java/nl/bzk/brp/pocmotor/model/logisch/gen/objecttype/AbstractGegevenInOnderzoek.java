@@ -1,0 +1,48 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.pocmotor.model.logisch.gen.objecttype;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.MappedSuperclass;
+
+import nl.bzk.brp.pocmotor.model.basis.impl.AbstractDynamischObjectType;
+import nl.bzk.brp.pocmotor.model.logisch.usr.groep.GegevenInOnderzoekIdentiteit;
+
+
+/**
+ * Gegeven in onderzoek
+
+ * Generated Abstract Class
+  */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+public abstract class AbstractGegevenInOnderzoek extends AbstractDynamischObjectType {
+
+   // Groepen
+   protected GegevenInOnderzoekIdentiteit identiteit = new GegevenInOnderzoekIdentiteit();
+
+
+
+   // Sets
+
+
+   // Getters/Setters Groepen
+   public GegevenInOnderzoekIdentiteit getIdentiteit() {
+      return identiteit;
+   }
+
+   public void setIdentiteit(final GegevenInOnderzoekIdentiteit identiteit) {
+      this.identiteit = identiteit;
+   }
+
+
+
+   // Getters/Setters Sets
+
+
+}

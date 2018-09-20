@@ -1,0 +1,10 @@
+INSERT INTO kern.regel VALUES (1, 1, 'ABC1234', 'wer', 'wer jhsahda ahsdhas jkashajskd');
+INSERT INTO kern.regel VALUES (2, 1, 'VBC1554', 'weyyqwe', 'weyyqwe wfdkjjkwf kjsdfjksj');
+INSERT INTO kern.regel VALUES (3, 1, 'FBC8234', 'ewrer', 'ewrer sfsd kdsaklsadk');
+INSERT INTO kern.regel VALUES (4, 1, 'HDH1294', 'sdfsdf', 'sdfsdf sdiei fjjfnf');
+INSERT INTO kern.regel VALUES (5, 1, 'IRI1334', 'fkjsdj', 'fkjsdj jksdjf jklsdjkfjs kjsdfjs');
+INSERT INTO kern.regel VALUES (6, 2, 'ALC1234', 'sdfsdfio', 'sdfsdfio oirgjire sdifh');
+INSERT INTO kern.regel VALUES (7, 2, 'POP1374', 'sfjsn', 'sfjsn skefs skenfjks');
+INSERT INTO kern.regel VALUES (8, 2, 'TES1134', 'seuif', 'seuif jkef ioef');
+INSERT INTO kern.regel VALUES (9, 2, 'TER1294', 'cxvn', 'cxvn mfgjg ktrkgh');
+INSERT INTO kern.regel VALUES (10, 2, 'KIP1214', 'po', 'po oprtyipor');

@@ -1,0 +1,391 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.bzk.brp.bmr</groupId>
+    <artifactId>bmr-exporter</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
+
+    <name>bmr-exporter</name>
+    <url>http://maven.apache.org</url>
+
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	<postgres.version>9.1-901-1.jdbc4</postgres.version>
+    <slf4j.version>1.6.4</slf4j.version>
+    <hsqldb.version>2.2.8</hsqldb.version>
+    <hibernate.version>3.5.6-Final</hibernate.version>
+    </properties>
+  <dependencies>
+      
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.10</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+    	<groupId>org.dbunit</groupId>
+    	<artifactId>dbunit</artifactId>
+    	<version>2.4.8</version>
+    </dependency>
+    <dependency>
+		<groupId>org.firebirdsql.jdbc</groupId>
+<!-- 		<artifactId>jaybird-jdk16</artifactId>
+		<version>2.2.0</version>
+ -->
+            <artifactId>jaybird</artifactId>
+            <version>2.1.6</version>
+		<exclusions>
+		    <exclusion>
+		        <groupId>javax.jms</groupId>
+		        <artifactId>jms</artifactId>
+		    </exclusion>
+		</exclusions>
+  	</dependency>
+  	<dependency>
+        <groupId>org.hsqldb</groupId>
+        <artifactId>hsqldb</artifactId>
+        <version>2.2.8</version>
+    </dependency>
+<dependency>
+	<groupId>org.liquibase</groupId>
+	<artifactId>liquibase-core</artifactId>
+	<version>2.0.5</version>
+</dependency>
+    <dependency>
+		<groupId>com.sun.codemodel</groupId>
+		<artifactId>codemodel</artifactId>
+		<version>2.6</version>
+	</dependency>
+            <dependency>
+    <groupId>javax.persistence</groupId>
+    <artifactId>persistence-api</artifactId>
+    <version>1.0.2</version>
+</dependency>
+            <dependency>
+    <groupId>org.hibernate</groupId>
+    <artifactId>hibernate-annotations</artifactId>
+    <version>${hibernate.version}</version>
+</dependency>
+       
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>3.3.2.GA</version>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>${postgres.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.16.1-GA</version>
+        </dependency>
+
+        <!-- logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+        </dependency>
+        <dependency>
+            <groupId>asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>3.3.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.hibernate</groupId>
+            <artifactId>hibernate-tools</artifactId>
+            <version>3.2.4.GA</version>
+        </dependency>
+  </dependencies>
+  
+ 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-clean-plugin</artifactId>
+                <version>2.5</version>
+                <executions>
+                  <execution>
+                    <id>clean-generated-sources</id>
+                    <phase>initialize</phase>
+                    <goals>
+                      <goal>clean</goal>
+                    </goals>
+                    <configuration>
+                      <filesets>
+                          <fileset>
+                              <directory>src-gen</directory>
+                          </fileset>
+                        </filesets>
+                    </configuration>
+                  </execution>
+                </executions>
+              </plugin>
+            
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>hibernate3-maven-plugin</artifactId>
+                <version>3.0</version>
+                <executions>
+                    <execution>
+                        <id>hibernate-mapping-generation</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                <configuration>
+                    <hibernatetool destdir="target/classes">
+                        <jdbcconfiguration packagename="nl.bzk.brp.bmr.model" propertyfile="src/main/resources/database.properties"
+                            revengfile="src/main/resources/hibernate.reveng.xml" />
+                            <hbm2hbmxml />
+                    </hibernatetool>
+                </configuration>
+                        
+                        </execution>
+                    <execution>
+                        <id>hibernate-mapping-generation-ea</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                <configuration>
+                    <hibernatetool destdir="target/classes">
+                        <jdbcconfiguration packagename="nl.bzk.brp.bmr.model.ea" propertyfile="src/main/resources/database.properties"
+                            revengfile="src/main/resources/hibernate.reveng.enterpise.architect.xml" />
+                             <hbm2hbmxml />
+                    </hibernatetool>
+                </configuration>
+                        
+                        </execution>
+                    
+                    <execution>
+                        <id>hibernate-java-generation</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                <configuration>
+                    <hibernatetool destdir="target/generated-sources">
+                        <configuration configurationfile="src/main/resources/hibernate.cfg.xml"/>
+                        <hbm2java jdk5="true" ejb3="true" />
+                        <classpath>
+                          <path location="target/classes"/>
+                         </classpath>
+                    </hibernatetool>
+                </configuration>
+                        
+                        </execution>
+<!--                     <execution>
+                        <id>hibernate-dao-generation</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                <configuration>
+                    <hibernatetool destdir="target/classes">
+                        <configuration packagename="nl.bzk.brp.bmr.dao" configurationfile="src/main/resources/hibernate.cfg.xml"/>
+                        <hbm2dao jdk5="true" ejb3="true"/>
+                    </hibernatetool>
+                </configuration>
+                        
+                        </execution>
+                     -->
+                    </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                        <version>3.3.2.GA</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.firebirdsql.jdbc</groupId>
+                        <artifactId>jaybird</artifactId>
+                        <version>2.1.6</version>
+                        <exclusions>
+                            <exclusion>
+                                <groupId>javax.jms</groupId>
+                                <artifactId>jms</artifactId>
+                            </exclusion>
+                        </exclusions>
+                    </dependency>
+                    <dependency>
+                        <groupId>postgresql</groupId>
+                        <artifactId>postgresql</artifactId>
+                        <version>${postgres.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>cglib</groupId>
+                        <artifactId>cglib-nodep</artifactId>
+                        <version>2.2.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>jalopy-maven-plugin</artifactId>
+                <version>1.0-alpha-1</version>
+            </plugin>
+      
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>build-helper-maven-plugin</artifactId>
+        <version>1.7</version>
+        <executions>
+          <execution>
+            <id>add-source</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>add-source</goal>
+            </goals>
+            <configuration>
+              <sources>
+                <source>target/generated-sources</source>
+              </sources>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
+      
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-source-plugin</artifactId>
+        <version>2.1.2</version>
+        <executions>
+          <execution>
+            <id>attach-sources</id>
+            <phase>package</phase>
+            <goals>
+              <goal>jar-no-fork</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <attach>true</attach>
+        </configuration>
+      </plugin>
+             <plugin>
+           <groupId>com.google.code.maven-replacer-plugin</groupId>
+           <artifactId>replacer</artifactId>
+           <version>1.5.0</version>
+           <executions>
+               <execution>
+                   <phase>process-sources</phase>
+                   <goals>
+                       <goal>replace</goal>
+                   </goals>                   
+               </execution>
+           </executions>
+           <configuration>
+               <replacements>
+                   <replacement>
+                       <token>length="0"</token>
+                       <value></value>
+                   </replacement>         
+                   <replacement>
+                       <token>string</token>
+                       <value>java.lang.String</value>
+                   </replacement>         
+                   
+               </replacements>
+<filesToInclude>target/classes/**/*.hbm.xml</filesToInclude>
+               </configuration>
+       </plugin>
+  <plugin>
+          <groupId>org.liquibase</groupId>
+          <artifactId>liquibase-maven-plugin</artifactId>
+          <version>2.0.5</version>
+           <executions>
+            <execution>
+              <phase>process-resources</phase>
+              <goals>
+                <goal>update</goal>
+              </goals>
+              </execution>
+          </executions>
+          <configuration>
+                   <propertyFileWillOverride>false</propertyFileWillOverride>
+<!--                    <driver>org.firebirdsql.jdbc.FBDriver</driver>
+		            <url>jdbc:firebirdsql://brp-metaregister.modernodam.nl:3050/BRP</url>
+		            <username>GEN</username>
+		            <password>gen</password>
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+ -->                    
+ <driver>org.hsqldb.jdbcDriver</driver>
+<url>jdbc:hsqldb:file:database/brpcodegeneration.db;create=true;user=generator;password=generator</url>
+<username>generator</username>
+<password>generator</password>
+<changeLogFile>src/main/resources/bmr-initial-changelog.xml</changeLogFile>
+<promptOnNonLocalDatabase>false</promptOnNonLocalDatabase>
+              </configuration>
+              <dependencies>
+                  <dependency>
+                    <groupId>org.hsqldb</groupId>
+                    <artifactId>hsqldb</artifactId>
+                    <version>2.2.8</version>
+                </dependency>
+              </dependencies>
+        </plugin>
+        
+  <!-- <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>sql-maven-plugin</artifactId>
+        <version>1.3</version>
+        <executions>
+            <execution>
+                <id>import-sql</id>
+                <phase>process-resources</phase>
+                <goals>
+                    <goal>execute</goal>
+                </goals>
+            </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>org.hsqldb</groupId>
+            <artifactId>hsqldb</artifactId>
+            <version>${hsqldb.version}</version>
+          </dependency>
+        </dependencies>
+        <configuration>
+          <driver>org.hsqldb.jdbcDriver</driver>
+          <url>jdbc:hsqldb:hsqldb\\brpcodegeneration</url>
+          <username>sa</username>
+          <password></password>
+          <autocommit>true</autocommit>
+          <srcFiles>
+            <srcFile>target/sql/bmr.sql</srcFile>
+          </srcFiles>
+        </configuration>
+      </plugin> -->
+  	
+  	    </plugins>
+    </build>
+
+</project>

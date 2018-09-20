@@ -1,0 +1,10 @@
+INSERT INTO kern.rdnvervallenreisdoc VALUES (1, 'Q', 'qwe');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (2, 'W', 'asd');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (3, 'E', 'zxc');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (4, 'R', 'wer');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (5, 'T', 'sdf');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (6, 'Y', 'xcv');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (7, 'U', 'ert');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (8, 'I', 'dfg');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (9, 'O', 'cvb');
+INSERT INTO kern.rdnvervallenreisdoc VALUES (10, 'P', 'aaa');

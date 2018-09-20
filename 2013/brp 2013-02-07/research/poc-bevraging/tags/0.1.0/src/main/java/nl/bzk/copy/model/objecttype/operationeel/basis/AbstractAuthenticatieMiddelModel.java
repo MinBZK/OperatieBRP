@@ -1,0 +1,121 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.copy.model.objecttype.operationeel.basis;
+
+import javax.persistence.*;
+
+import nl.bzk.copy.model.attribuuttype.IPAdres;
+import nl.bzk.copy.model.basis.AbstractDynamischObjectType;
+import nl.bzk.copy.model.objecttype.logisch.basis.AuthenticatieMiddelBasis;
+import nl.bzk.copy.model.objecttype.operationeel.statisch.*;
+
+
+/**
+ * AbstractAuthenticatieMiddelModel.
+ */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public abstract class AbstractAuthenticatieMiddelModel extends AbstractDynamischObjectType
+        implements AuthenticatieMiddelBasis
+{
+
+    @Id
+    @SequenceGenerator(name = "AUTHENTICATIEMIDDEL", sequenceName = "AutAut.seq_Authenticatiemiddel")
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "AUTHENTICATIEMIDDEL")
+    private Integer id;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "Partij")
+    private Partij partij;
+
+    @Column(name = "Rol")
+    @Enumerated
+    private Rol rol;
+
+    @Column(name = "Functie")
+    @Enumerated
+    private Functie functie;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "CertificaatTbvOndertekening")
+    private Certificaat ondertekeningsCertificaat;
+
+    @ManyToOne
+    @JoinColumn(name = "CertificaatTbvSSL")
+    private Certificaat sslCertificaat;
+
+    @Embedded
+    @AttributeOverride(name = "waarde", column = @Column(name = "ipadres"))
+    private IPAdres ipAdres;
+
+    @Column(name = "AuthenticatiemiddelStatusHis")
+    @Enumerated(value = EnumType.STRING)
+    private StatusHistorie statushistorie;
+
+
+    /**
+     * Copy constructor. Om een model object te construeren uit een web object.
+     *
+     * @param authenticatiemiddel Object type dat gekopieerd dient te worden.
+     */
+    protected AbstractAuthenticatieMiddelModel(final AuthenticatieMiddelBasis authenticatiemiddel) {
+        super(authenticatiemiddel);
+
+        partij = authenticatiemiddel.getPartij();
+        rol = authenticatiemiddel.getRol();
+        functie = authenticatiemiddel.getFunctie();
+        ondertekeningsCertificaat = authenticatiemiddel.getOndertekeningsCertificaat();
+        sslCertificaat = authenticatiemiddel.getSslCertificaat();
+        ipAdres = getIpAdres();
+    }
+
+    /**
+     * Default constructor. Vereist voor Hibernate.
+     */
+    protected AbstractAuthenticatieMiddelModel() {
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    @Override
+    public Partij getPartij() {
+        return partij;
+    }
+
+    @Override
+    public Rol getRol() {
+        return rol;
+    }
+
+    @Override
+    public Functie getFunctie() {
+        return functie;
+    }
+
+    @Override
+    public Certificaat getOndertekeningsCertificaat() {
+        return ondertekeningsCertificaat;
+    }
+
+    @Override
+    public Certificaat getSslCertificaat() {
+        return sslCertificaat;
+    }
+
+    @Override
+    public IPAdres getIpAdres() {
+        return ipAdres;
+    }
+
+    @Override
+    public StatusHistorie getStatushistorie() {
+        return statushistorie;
+    }
+}

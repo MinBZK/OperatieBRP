@@ -1,0 +1,32 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.model.logisch.kern;
+
+import nl.bzk.brp.model.logisch.kern.basis.AdministratieveHandelingBasis;
+
+
+/**
+ * Een door het bijhoudingsorgaan ge�nitieerde activiteit in de BRP, waarmee persoonsgegevens worden bijgehouden.
+ *
+ * De binnen de BRP geadministreerde persoonsgegevens worden bijgehouden doordat wijzigingen worden doorgevoerd vanuit
+ * de gemeentelijke of ministeri�le verantwoordelijkheid. Het initiatief gegevens te wijzigen komt vanuit het
+ * betreffende bijhoudingsorgaan; deze stuurt daartoe een bericht aan de BRP die de daadwerkelijke bijhouding doet
+ * plaatsvinden. Voor de verwerking binnen de BRP wordt dit bericht uiteen gerafeld in ��n of meer Acties. Het geheel
+ * aan acties wordt de administratieve handeling genoemd; dit is in de BRP de weerslag van wat in termen van de
+ * burgerzakenmodule 'de zaak' zal zijn geweest. Qua niveau staat het op hetzelfde niveau als het bericht; het verschil
+ * bestaat eruit dat het bericht het vehikel is waarmee de administratieve handeling wordt bewerkstelligt.
+ *
+ *
+ *
+ * Generator: nl.bzk.brp.generatoren.java.LogischModelGenerator.
+ * Generator versie: 1.0-SNAPSHOT.
+ * Metaregister versie: 1.1.8.
+ * Gegenereerd op: Tue Nov 27 12:05:00 CET 2012.
+ */
+public interface AdministratieveHandeling extends AdministratieveHandelingBasis {
+
+}

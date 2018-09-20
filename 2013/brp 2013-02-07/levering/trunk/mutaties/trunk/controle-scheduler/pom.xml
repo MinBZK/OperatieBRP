@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>nl.bzk.brp</groupId>
+		<artifactId>brp-mutaties</artifactId>
+		<version>0.1.0-SNAPSHOT</version>
+	</parent>
+	<artifactId>brp-mutatie-controle-scheduler</artifactId>
+	<version>0.1.0-SNAPSHOT</version>
+	<name>BRP Mutatie queue controle scheduler</name>
+	<description>BRP scheduler die de tabel van Administratieve Handelingen controleert. Bij onverwerkte Administratieve Handelingen worden hun ID's op een JMS queue geplaatst.</description>
+	<packaging>war</packaging>
+	
+	<properties>
+	   <!-- Default uitstel van 5 minuten (5 * 60 * 1000) -->
+	   <maven.opruim.uitstel>300000</maven.opruim.uitstel>
+	</properties>
+	
+	<build>
+		<testResources>
+			<testResource>
+				<directory>${basedir}/src/test/resources</directory>
+				<filtering>true</filtering>
+				<excludes>
+					<exclude>*.sql</exclude>
+					<exclude>*.xml</exclude>
+				</excludes>
+			</testResource>
+		</testResources>
+
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+		</resources>
+	</build>
+	
+	<dependencies>
+	   <!-- database -->
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+	</dependencies>
+	
+	<profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>ci.build</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://fac-db06.modernodam.nl/brp_unittest</maven.jdbc.url>
+                <maven.jdbc.junit.url>jdbc:postgresql://fac-db06.modernodam.nl/brp_unittest</maven.jdbc.junit.url>
+                <maven.jdbc.username>jenkins</maven.jdbc.username>
+                <maven.jdbc.password>95thvef288ckf43re</maven.jdbc.password>
+            </properties>
+        </profile>
+    </profiles>
+
+	<scm>
+		<connection>scm:svn:https://www.modernodam.nl/svn/brp-code/levering/trunk/mutaties/trunk/controle-scheduler</connection>
+	</scm>
+
+</project>

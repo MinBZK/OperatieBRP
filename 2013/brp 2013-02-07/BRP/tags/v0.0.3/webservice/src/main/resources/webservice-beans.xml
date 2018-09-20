@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:jaxws="http://cxf.apache.org/jaxws"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+	        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+	<import resource="classpath:datasource-beans.xml" />
+	<import resource="classpath:business-beans.xml" />
+	<import resource="classpath:dataaccess-beans.xml" />
+
+	<context:property-placeholder location="classpath:brp.properties"
+		ignore-resource-not-found="true" />
+
+	<bean id="bijhoudingServiceImpl" class="nl.bzk.brp.web.BijhoudingServiceImpl" />
+
+	<bean id="jibxDatabindingBean" class="org.apache.cxf.jibx.JibxDataBinding" />
+
+	<jaxws:endpoint id="BijhoudingService" implementor="#bijhoudingServiceImpl"
+		address="/bijhouding" xmlns:s="http://www.brp.bzk.nl/bijhouding/ws/service"
+		serviceName="s:BijhoudingService" endpointName="s:BijhoudingPort">
+
+		<jaxws:dataBinding>
+			<ref bean="jibxDatabindingBean" />
+		</jaxws:dataBinding>
+
+		<jaxws:properties>
+			<entry key="schema-validation-enabled" value="true" />
+			<entry key="faultStackTraceEnabled" value="false" />
+			<entry key="exceptionMessageCauseEnabled" value="false" />
+		</jaxws:properties>
+
+		<jaxws:inInterceptors>
+			<ref bean="wss4jInInterceptor" />
+            <ref bean="logInbound"/>
+		</jaxws:inInterceptors>
+
+		<jaxws:outInterceptors>
+			<ref bean="wss4jOutInterceptor" />
+            <ref bean="logOutbound"/>
+		</jaxws:outInterceptors>
+
+        <jaxws:inFaultInterceptors>
+            <ref bean="logInbound"/>
+        </jaxws:inFaultInterceptors>
+
+        <jaxws:outFaultInterceptors>
+            <ref bean="logOutbound"/>
+        </jaxws:outFaultInterceptors>
+	</jaxws:endpoint>
+
+    <bean id="logInbound" class="org.apache.cxf.interceptor.LoggingInInterceptor"/>
+    <bean id="logOutbound" class="org.apache.cxf.interceptor.LoggingOutInterceptor"/>
+
+    <bean id="wss4jInInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JInInterceptor">
+		<constructor-arg>
+			<map>
+				<entry key="action" value="Timestamp Signature" />
+				<entry key="signaturePropRefId" value="signatureProperties" />
+				<entry key="signatureProperties">
+					<props>
+						<prop key="org.apache.ws.security.crypto.provider">org.apache.ws.security.components.crypto.Merlin</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.type">jks</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.password">${security.keystore.public.password}</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.file">${security.keystore.public.file}</prop>
+					</props>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+	<bean id="wss4jOutInterceptor" class="org.apache.cxf.ws.security.wss4j.WSS4JOutInterceptor">
+		<constructor-arg>
+			<map>
+				<entry key="action" value="Timestamp Signature" />
+				<entry key="user" value="${security.privatekey.alias}" />
+				<entry key="signaturePropRefId" value="signatureProperties" />
+				<entry key="signatureProperties">
+					<props>
+						<prop key="org.apache.ws.security.crypto.provider">org.apache.ws.security.components.crypto.Merlin</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.type">jks</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.password">${security.keystore.private.password}</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.keystore.alias">${security.privatekey.alias}</prop>
+						<prop key="org.apache.ws.security.crypto.merlin.file">${security.keystore.private.file}</prop>
+					</props>
+				</entry>
+				<entry key="passwordCallbackRef">
+					<bean
+						class="nl.bzk.brp.ws.service.interceptor.helper.ServerPasswordCallback">
+						<property name="password" value="${security.privatekey.password}" />
+					</bean>
+				</entry>
+			</map>
+		</constructor-arg>
+	</bean>
+
+</beans>

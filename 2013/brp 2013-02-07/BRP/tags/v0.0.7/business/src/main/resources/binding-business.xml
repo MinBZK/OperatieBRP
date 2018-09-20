@@ -1,0 +1,44 @@
+<binding>
+
+    <namespace uri="http://www.brp.nl/brp/0001" default="elements"/>
+    
+    <include path="classpath:/binding-model.xml" precompiled="true"/>
+
+    <mapping name="BRPBericht" class="nl.bzk.brp.business.dto.bijhouding.BijhoudingsBericht">
+        <collection field="brpActies" item-type="nl.bzk.brp.model.logisch.BRPActie"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance">
+            <structure name="Actie" map-as="verhuisActie"/>
+
+        </collection>
+    </mapping>
+
+    <mapping name="afstamming_InschrijvingAangifteGeboorte_Bijhouding_v0100"
+             class="nl.bzk.brp.business.dto.bijhouding.InschrijvingGeboorteBericht">
+        <structure name="stuurgegevens">
+            <structure name="zender">
+                <value name="organisatie" get-method="getAfzenderId" set-method="setAfzenderId"/>
+                <structure name="applicatie"/>
+            </structure>
+            <structure name="referentienummer"/>
+        </structure>
+        <structure name="bijhouding">
+            <collection get-method="getBrpActies" set-method="setBrpActies" item-type="nl.bzk.brp.model.logisch.BRPActie"
+                        factory="nl.bzk.brp.BindingUtil.newListInstance">
+                <structure name="InschrijvingGeboorte" map-as="inschrijvingGeboorteActie"/>
+                <!-- negeer RegistratieNationaliteit-->
+                <!--<structure name="RegistratieNationaliteit"/>-->
+            </collection>
+        </structure>
+    </mapping>
+
+    <mapping name="OpvragenPersoon" class="nl.bzk.brp.business.dto.bevraging.OpvragenPersoonBericht">
+        <structure field="afzender" map-as="afzenderPartij"/>
+        <value name="tijdstipVerzonden" set-method="setTijdstipVerzondenDate" get-method="getTijdstipVerzondenDate"/>
+        <structure field="opvragenPersoonCriteria"/>
+    </mapping>
+
+    <mapping name="opvragenPersoonCriteria" class="nl.bzk.brp.business.dto.bevraging.OpvragenPersoonCriteria">
+        <structure field="identificatienummers" map-as="identificatieNummers"/>
+    </mapping>
+
+</binding>

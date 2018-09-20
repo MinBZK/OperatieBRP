@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans
+            xmlns='http://www.springframework.org/schema/beans'
+            xmlns:context="http://www.springframework.org/schema/context"
+            xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+            xmlns:beans='http://www.springframework.org/schema/beans'
+            xmlns:jaxws='http://cxf.apache.org/jaxws'
+            xmlns:wsp='http://www.w3.org/2006/07/ws-policy'
+            xmlns:wsrm-policy='http://cxf.apache.org/policy'
+            xmlns:task="http://www.springframework.org/schema/task"
+            xmlns:cxf="http://cxf.apache.org/core"
+            xmlns:wsrm-mgr="http://cxf.apache.org/ws/rm/manager"
+            xmlns:wsrmp="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"
+            xmlns:wsrmp11="http://docs.oasis-open.org/ws-rx/wsrmp/200702"
+            xsi:schemaLocation='http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://cxf.apache.org/policy
+    http://cxf.apache.org/schemas/policy.xsd
+    http://www.w3.org/2006/07/ws-policy
+    http://www.w3.org/2006/07/ws-policy.xsd
+    http://cxf.apache.org/jaxws
+    http://cxf.apache.org/schemas/jaxws.xsd
+    http://www.springframework.org/schema/task
+    http://www.springframework.org/schema/task/spring-task.xsd
+    http://cxf.apache.org/core
+    http://cxf.apache.org/schemas/core.xsd
+    http://cxf.apache.org/ws/rm/manager
+    http://cxf.apache.org/schemas/configuration/wsrm-manager.xsd
+    http://schemas.xmlsoap.org/ws/2005/02/rm/policy
+    http://schemas.xmlsoap.org/ws/2005/02/rm/wsrm-policy.xsd
+    http://docs.oasis-open.org/ws-rx/wsrmp/200702
+    http://cxf.apache.org/schemas/configuration/wsrmp-1.1-schema-200702.xsd
+    '>
+
+<!-- 
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="com.mysql.jdbc.Driver" />
+		<property name="url" value="jdbc:mysql://127.0.0.1:3306/wsrm" />
+		<property name="username" value="root" />
+		<property name="password" value="killer" />
+		<property name="defaultAutoCommit" value="false" />
+	</bean>  -->
+
+	<bean id="dataSourcePostgreSQL" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="org.postgresql.Driver" />
+		<property name="url" value="jdbc:postgresql://localhost/wsrm" />
+		<property name="username" value="brp" />
+		<property name="password" value="brp" />
+		<property name="defaultAutoCommit" value="false" />
+	</bean>
+   
+    <cxf:bus>
+        <cxf:features>
+            <cxf:logging/>
+            
+            <wsrm-policy:policies enabled="true" />
+            
+			<wsrm-mgr:reliableMessaging>
+			
+				<wsrmp:RMAssertion>
+	               	<BaseRetransmissionInterval Milliseconds="4000"/>           
+ 					<AcknowledgementInterval Milliseconds="2000"/>
+				</wsrmp:RMAssertion>
+
+				<wsrm-mgr:deliveryAssurance>
+					<wsrm-mgr:ExactlyOnce />
+					<wsrm-mgr:InOrder />
+				</wsrm-mgr:deliveryAssurance>
+
+            	<RM10AddressingNamespace uri="http://www.w3.org/2005/08/addressing"/>
+
+				<sourcePolicy>
+					<wsrm-mgr:sequenceTerminationPolicy maxLength="5" />
+					<wsrm-mgr:retryPolicy maxRetries="10"/>
+				</sourcePolicy>
+				
+				<destinationPolicy acceptOffers="true" />
+				
+				<store>
+					<!-- <wsrm-mgr:jdbcStore driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+						url="jdbc:derby:bas;create=true" password="password" /> 
+					<wsrm-mgr:jdbcStore driverClassName="org.postgresql.Driver"
+						url="jdbc:postgresql://localhost/wsrm" userName="brp" password="brp"  />  -->
+						
+						<!-- 
+					<wsrm-mgr:jdbcStore dataSource="dataSource" tableExistsCode="1050" />
+					 -->
+					 
+					 <wsrm-mgr:jdbcStore dataSource="dataSourcePostgreSQL" tableExistsCode="0" keepConnection="false"  />
+						
+						<!-- 
+					<wsrm-mgr:jdbcStore driverClassName="com.mysql.jdbc.Driver"
+						url="jdbc:mysql://127.0.0.1:3306/wsrm?autocommit=false" userName="root" password="killer" tableExistsCode="1050" />
+						 -->
+				</store>
+			</wsrm-mgr:reliableMessaging>
+        </cxf:features>
+    </cxf:bus>
+    
+    <!-- 
+    <http:conduit name="{http://cxf.apache.org/hello_world_soap_http}GreeterPort.http-conduit">
+      <http:client DecoupledEndpoint="http://localhost:9990/decoupled_endpoint"/>
+    </http:conduit>
+     -->
+
+</beans>

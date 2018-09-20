@@ -1,0 +1,56 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+	        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+	<!-- Following is commented out as it is deprecated -->
+	<!-- <import resource="classpath:META-INF/cxf/cxf-extension-soap.xml" /> -->
+
+<!--
+	<jaxws:endpoint id="bewerkenNationaliteitGeneriek"
+		implementor="nl.bzk.brp.poc.berichtenverwerker.bewerkennationaliteitgeneriek.BewerkenNationaliteitGeneriekImpl"
+		address="/bewerkenennationaliteitgeneriek" />
+-->
+
+    <bean id="persoonEnNationaliteitService" class="nl.bzk.brp.poc.berichtenverwerker.service.impl.PersoonEnNationaliteitServiceImpl" />
+    <bean id="persoonDAO" class="nl.bzk.brp.poc.berichtenverwerker.dataaccess.impl.jpa.PersoonDAOImpl" />
+    <bean id="actieDAO" class="nl.bzk.brp.poc.berichtenverwerker.dataaccess.impl.jpa.ActieDAOImpl" />
+    <bean id="PersoonsNationaliteitDAO" class="nl.bzk.brp.poc.berichtenverwerker.dataaccess.impl.jpa.PersoonsNationaliteitDAOImpl" />
+
+    <bean id="bewerkNationaliteitService" class="nl.bzk.brp.poc.berichtenverwerker.servicegeneriek.service.BewerkenNationaliteitGeneriekImpl" />
+
+    <!-- JAX-WS Webservice Endpoint -->
+    <jaxws:endpoint id="bewerkenNationaliteitGeneriek"
+        implementor="#bewerkNationaliteitService"
+        address="/bewerkenennationaliteitgeneriek" />
+
+    <tx:annotation-driven />
+
+    <context:annotation-config />
+
+    <context:property-placeholder location="classpath:/jdbc.properties" />
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close" p:driverClassName="${jdbc.driverClassName}"
+        p:url="${jdbc.url}" p:username="${jdbc.username}" p:password="${jdbc.password}" />
+
+    <bean id="jpaAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter" p:database="${jpa.database}"
+        p:showSql="${jpa.showSql}" />
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+        p:dataSource-ref="dataSource" p:jpaVendorAdapter-ref="jpaAdapter">
+        <property name="loadTimeWeaver">
+            <bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver" />
+        </property>
+        <property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml" />
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager"
+        p:entityManagerFactory-ref="entityManagerFactory" />
+        
+</beans>

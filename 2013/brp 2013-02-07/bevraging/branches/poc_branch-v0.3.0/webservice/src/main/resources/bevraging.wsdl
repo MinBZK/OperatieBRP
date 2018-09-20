@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="bevraging"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+    xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+    xmlns:srv="http://www.brp.bzk.nl/bevraging/ws/service"
+	xmlns:tns="http://www.brp.bzk.nl/bevraging/ws/service"
+    xmlns:bev="http://www.brp.bzk.nl/bevraging/ws/service/model"
+	targetNamespace="http://www.brp.bzk.nl/bevraging/ws/service">
+
+	<wsdl:types>
+		<xsd:schema>
+			<xsd:import schemaLocation="brp_basis.xsd" namespace="http://www.brp.bzk.nl/bevraging/ws/basis" />
+            <xsd:import schemaLocation="bevraging.xsd" namespace="http://www.brp.bzk.nl/bevraging/ws/service/model" />
+		</xsd:schema>
+	</wsdl:types>
+
+	<wsdl:message name="OpvragenPersoonVraag">
+		<wsdl:part element="bev:OpvragenPersoonVraag" name="vraag" />
+	</wsdl:message>
+	<wsdl:message name="OpvragenPersoonAntwoord">
+		<wsdl:part element="bev:OpvragenPersoonAntwoord" name="antwoord" />
+	</wsdl:message>
+
+	<wsdl:portType name="OpvragenPersoonPortType">
+		<wsdl:operation name="OpvragenPersoon">
+			<wsdl:input message="tns:OpvragenPersoonVraag" />
+			<wsdl:output message="tns:OpvragenPersoonAntwoord" />
+		</wsdl:operation>
+	</wsdl:portType>
+
+	<wsdl:binding name="OpvragenPersoonBinding" type="tns:OpvragenPersoonPortType">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="OpvragenPersoon">
+			<soap:operation soapAction="" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:service name="OpvragenPersoonService">
+		<wsdl:port binding="tns:OpvragenPersoonBinding" name="OpvragenPersoonPort">
+			<soap:address location="http://localhost:8080/brp/services/opvragenpersoon" />
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>

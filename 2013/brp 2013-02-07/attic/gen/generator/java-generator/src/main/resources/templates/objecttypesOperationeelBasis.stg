@@ -1,0 +1,99 @@
+group objecttypesOperationeelBasis;
+
+import "generieke-templates.stg"
+
+objecttypeOperationeelBasis(type, stam, inlines, groepen, metaregisterVersie) ::= <<
+package <type.packageName>;
+
+/**
+ * De eerste laag implemenetatie van {@link}Persoon interface.
+ * Deze class is een onderdeel van de model tree.
+ * Deze implementatie wordt door de genrator gegenereerd.
+ *
+ */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public abstract class <type.name> extends <type.extendsFrom> implements <first(type.interfaces)> {
+
+    <type.fields:field(); separator="\n\n">
+
+    /**
+     * Copy constructor.
+     *
+     * @param persoon Object type dat gekopieerd dient te worden.
+     */
+    protected <type.name>(final <stam>Basis <stam.lowerCamel><type.constructor.parameters:parameter()>) {
+        super(<stam.lowerCamel>);
+        <inlines:initInline(); separator="\n">
+        <groepen:initGroep(); separator="\n">
+        <type.constructor.parameters:initComponent(); separator="\n">
+    }
+
+    /**
+     * Default constructor tbv hibernate.
+     */
+    protected <type.name>() {
+    }
+
+    /**
+     * Vervang een lijst van groepen met nieuwe data.
+     *
+     * @param groepen de lijst
+     */
+    public void vervangGroepen(final Groep ... groepen) {
+        for (Groep groep: groepen) {
+            if (groep == null) {
+                continue;
+	        <groepen:vervangGroep(); separator="\n">
+            }
+        }
+    }
+
+
+    <type.fields:getter(); separator="\n\n">
+    
+   
+
+}
+
+>>
+
+field(field) ::= <<
+<field.annotations; separator="\n">
+private <field.type> <field.name.lowerCamel><field.initializer>;
+>>
+
+parameter(parameter) ::= <<
+, final <parameter>Model <parameter.lowerCamel>
+>>
+
+initInline(inline) ::= <<
+<inline.lowerCamel> = <stam.lowerCamel>.get<inline>();
+>>
+
+initGroep(groep) ::= <<
+if (<stam.lowerCamel>.get<groep>Groep() != null) {
+    <groep.lowerCamel>Groep = new <stam><groep>GroepModel(<stam.lowerCamel>.get<groep>Groep());
+    <groep.lowerCamel>StatusHis = StatusHistorie.A;
+}
+>>
+
+initComponent(component) ::= <<
+this.<component.lowerCamel> = <component.lowerCamel>;
+>>
+
+vervangGroep(groep) ::= <<
+} else if (groep instanceof <stam><groep>GroepBasis) {
+    <groep.lowerCamel>Groep =
+        new <stam><groep>GroepModel(
+            (<stam><groep>GroepBasis) groep);
+    <groep.lowerCamel>StatusHis = StatusHistorie.A;
+>>
+
+getter(field) ::= <<
+@Override
+public <field.type> get<field.name>() {
+    return <field.name.lowerCamel>;
+}
+>>

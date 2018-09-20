@@ -1,0 +1,347 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Voorbeeldbericht bijhouding "Inschrijving door aangifte geboorte" - GKJ versie 1.0 dd. 2012-04-19 -->
+<!-- Casus: Françoise Isabella dos Santos da Victória ... -->
+<!-- -	Geboren op 16 april 2012 in het prachtige Hellevoetsluis … -->
+<!-- -	Aangifte op 18 april 2012 ... -->
+<!-- -	Moeder ingeschrevene in de BRP; Vader niet ingeschreven Braziliaan ... -->
+<!-- -	Gelijktijdig verzoek om Verstrekkingsbeperking Kind; triviale bron ... -->
+<!-- -	Nationaliteit (hypothetisch): Moeder wordt behandeld als Nederlander; vader Braziliaanse nationaliteit ... Kind beide; triviale bron ... -->
+
+<!-- Opmerkingen: -->
+<!-- 1) In geval van meerlingen; per geborene een apart bericht ...-->
+<!-- 2) Unieke communicatieIdentificatie Verzender t.b.v. foutafhandeling ('brp:cIDVerzendend') ... -->
+<!-- 3) Bij ouder attribuut 'brp:adresgevendeOuder' opgenomen tbv afleiding Bijhoudingsgemeente en Adres ... -->
+<!-- 4) Groepen 'Inschrijving', 'Bijhoudingsverantwoordelijkheid', Bijhoudingsgemeente' en 'Adres' afleidbaar door BRP ... -->
+<!-- 5) Groep 'Samengestelde naam' niet opgenomen; algoritmisch afleidbaar obv Voornaam/Geslachtsnaamcomponent ... -->
+<!-- 6) Groep 'Aanschrijving' niet opgenomen; algoritmisch afleidbaar obv Voornaam/Geslachtsnaamcomponent -->
+<!-- 7) Anr en BSN worden door Gemeente toegekend; voor BRPreview mogelijk een casus waarbij BSN door BRP wordt toegekend ... -->
+<!-- 8) Extra Actie voor gegevensgroepen rondom Nationaliteit (nationaliteit; Statenloos, Behandeld als Nederlander' -->
+<!--  ... -->
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified"
+           targetNamespace="http://www.brp.nl/brp/0001"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:ns="http://www.brp.nl/brp/0001">
+    <xs:element name="afstamming_InschrijvingAangifteGeboorte_Bijhouding_v0100"
+                type="ns:afstamming_InschrijvingAangifteGeboorte_Bijhouding_v0100Type"/>
+
+    <xs:complexType name="geslachtsnaamComponentenType">
+        <xs:sequence>
+            <xs:element type="ns:geslachtsnaamComponentType" name="geslachtsnaamComponent" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="documentType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="soort"/>
+            <xs:element type="xs:string" name="identificatie"/>
+            <xs:element type="xs:string" name="akteNummer"/>
+            <xs:element type="xs:string" name="partij"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="samengesteldeNaamType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="voornamen"/>
+            <xs:element type="xs:string" name="voorvoegsel"/>
+            <xs:element type="xs:string" name="geslachtsnaam"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="behandeldAlsNederlanderType">
+        <xs:sequence>
+            <xs:element name="waarde" type="ns:JaNeeType"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:simpleType name="JaNeeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="J"/>
+            <xs:enumeration value="N"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="tijdstipLaatsteWijzigingType">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute type="xs:string" name="noValue" use="optional"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
+
+    <xs:complexType name="nationaliteitType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="nationaliteitcode"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="nationaliteitenType">
+        <xs:sequence>
+            <xs:element type="ns:nationaliteitType" name="nationaliteit"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="InschrijvingGeboorteType">
+        <xs:sequence>
+            <xs:element type="xs:int" name="datumAanvangGeldigheid"/>
+            <xs:element type="xs:string" name="tijdstipOntlening"/>
+            <xs:element type="xs:string" name="toelichtingOntlening"/>
+            <xs:element type="ns:bronnenType" name="bronnen"/>
+            <xs:element type="ns:familierechtelijkeBetrekkingType" name="familierechtelijkeBetrekking"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="persoonType">
+        <xs:sequence maxOccurs="unbounded" minOccurs="0">
+            <xs:element type="ns:identificatieNummersType" name="identificatieNummers"/>
+            <xs:element type="ns:geboorteType" name="geboorte"/>
+            <xs:element type="ns:geslachtsAanduidingType" name="geslachtsAanduiding"/>
+            <xs:element type="ns:voornamenType" name="voornamen"/>
+            <xs:element type="ns:geslachtsnaamComponentenType" name="geslachtsnaamComponenten"/>
+            <xs:element type="ns:indicatiesType" name="indicaties"/>
+            <xs:element type="ns:afgeleidAdministratiefType" name="afgeleidAdministratief">
+                <xs:annotation>
+                    <xs:documentation>Laatste wijziging (versienummer) bijgehouden persoon; eerder opgehaald bij
+                        bevraging Uniformiteitsbeginsel Identificatie Personen; betekenis: 'Zender weet dat er een
+                        waarde is; is hem echter onbekend'
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="ns:samengesteldeNaamType" name="samengesteldeNaam"/>
+            <xs:element type="ns:nationaliteitenType" name="nationaliteiten"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="zenderType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="organisatie"/>
+            <xs:element type="xs:string" name="applicatie"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="voornaamType">
+        <xs:sequence>
+            <xs:element name="volgnummer" type="xs:int"/>
+            <xs:element name="naam" type="xs:string"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="geslachtsnaamComponentType">
+        <xs:sequence>
+            <xs:element type="xs:int" name="volgnummer"/>
+            <xs:element type="xs:string" name="voorvoegsel"/>
+            <xs:element type="xs:string" name="naam"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="bijhoudingType">
+        <xs:sequence>
+            <xs:element type="ns:InschrijvingGeboorteType" name="InschrijvingGeboorte">
+                <xs:annotation>
+                    <xs:documentation>Representatie van de Actie</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="ns:RegistratieNationaliteitType" name="RegistratieNationaliteit"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="voornamenType">
+        <xs:sequence>
+            <xs:element type="ns:voornaamType" name="voornaam" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="bronType">
+        <xs:sequence>
+            <xs:element type="ns:documentType" name="document">
+                <xs:annotation>
+                    <xs:documentation>Reguliere akte BS; verplicht</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="verstrekkingsBeperkingType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="waarde"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="afstamming_InschrijvingAangifteGeboorte_Bijhouding_v0100Type">
+        <xs:sequence>
+            <xs:element type="ns:stuurgegevensType" name="stuurgegevens">
+                <xs:annotation>
+                    <xs:documentation>StUF kent in Stuurgegevens nog 'berichtCode' en 'functie' als verplichte elementen
+                        Aandacht voor eventuele aanvullende elementen vanuit BRP-verwerking (TT)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="ns:bijhoudingType" name="bijhouding"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="indicatiesType">
+        <xs:sequence>
+            <xs:element type="ns:verstrekkingsBeperkingType" name="verstrekkingsBeperking" minOccurs="0"/>
+            <xs:element type="ns:behandeldAlsNederlanderType" name="behandeldAlsNederlander" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="identificatieNummersType">
+        <xs:sequence>
+            <xs:element name="burgerservicenummer" type="xs:string"/>
+            <xs:element type="xs:string" name="administratienummer" minOccurs="0"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="familierechtelijkeBetrekkingType">
+        <xs:sequence>
+            <xs:element type="ns:betrokkenhedenType" name="betrokkenheden" minOccurs="1" maxOccurs="1"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="betrokkenhedenType">
+        <xs:sequence>
+            <xs:element type="ns:kindType" name="kind" minOccurs="1" maxOccurs="1"/>
+            <xs:element type="ns:ouderType" name="ouder" maxOccurs="unbounded" minOccurs="0">
+                <xs:annotation>
+                    <xs:documentation>Ingeschreven ouder BRP Niet-ingeschreven vader</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RegistratieNationaliteitType">
+        <xs:sequence>
+            <xs:element type="xs:int" name="datumAanvangGeldigheid"/>
+            <xs:element type="xs:string" name="tijdstipOntlening"/>
+            <xs:element type="xs:string" name="toelichtingOntlening"/>
+            <xs:element type="ns:persoonType" name="persoon">
+                <xs:annotation>
+                    <xs:documentation>Bronnen triviaal; geen registratie in BRP Let op! SleutelVerzendendVluchtig
+                        verwijst naar eerder in bericht opgenomen persoon bij Kind
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="geboorteType">
+        <xs:sequence>
+            <xs:element name="datum" type="xs:int"/>
+            <xs:element type="xs:string" name="gemeentecode" minOccurs="0"/>
+            <xs:element type="xs:string" name="woonplaatscode" minOccurs="0"/>
+            <xs:element type="xs:string" name="buitenlandseGeboorteplaats" minOccurs="0"/>
+            <xs:element name="landcode" type="xs:string"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="afgeleidAdministratiefType">
+        <xs:sequence>
+            <xs:element name="tijdstipLaatsteWijziging">
+                <xs:complexType>
+                    <xs:simpleContent>
+                        <xs:extension base="xs:string">
+                            <xs:attribute type="xs:string" name="noValue" use="optional"/>
+                        </xs:extension>
+                    </xs:simpleContent>
+                </xs:complexType>
+            </xs:element>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="stuurgegevensType">
+        <xs:sequence>
+            <xs:element type="ns:zenderType" name="zender"/>
+            <xs:element type="xs:string" name="referentienummer"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="kindType">
+        <xs:sequence>
+            <xs:element type="ns:persoonType" name="persoon"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend"/>
+    </xs:complexType>
+
+    <xs:complexType name="geslachtsAanduidingType">
+        <xs:sequence>
+            <xs:element name="geslachtsAanduidingcode" type="ns:geslachtsAanduidingCodeType"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend" use="optional"/>
+    </xs:complexType>
+
+    <xs:simpleType name="geslachtsAanduidingCodeType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="V"/>
+            <xs:enumeration value="M"/>
+            <xs:enumeration value="O"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="ouderType">
+        <xs:sequence>
+            <xs:element type="xs:int" name="datumIngangFamilierechtelijkeBetrekking"/>
+            <xs:element type="ns:persoonType" name="persoon"/>
+        </xs:sequence>
+        <xs:attribute type="xs:string" name="cIDVerzendend" use="optional"/>
+        <xs:attribute type="xs:string" name="adresgevendeOuder" use="optional"/>
+    </xs:complexType>
+
+    <xs:complexType name="bronnenType">
+        <xs:sequence>
+            <xs:element type="ns:bronType" name="bron"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:element name="afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse_v0100"
+                type="ns:afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse_v0100Type"/>
+    <xs:complexType name="afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse_v0100Type">
+        <xs:sequence>
+            <xs:element type="ns:stuurgegevensType" name="stuurgegevens">
+                <xs:annotation>
+                    <xs:documentation>StUF kent in Stuurgegevens nog 'berichtCode' en 'functie' als verplichte elementen
+                        Aandacht voor eventuele aanvullende elementen vanuit BRP-verwerking (TT)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="ns:bijhoudingResultaatType" name="bijhoudingResultaat"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="bijgehoudenPersonenType">
+        <xs:sequence>
+            <xs:element type="ns:persoonType" name="persoon" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="bijhoudingResultaatType">
+        <xs:sequence>
+            <xs:element type="xs:string" name="verwerkingsResultaat">
+                <xs:annotation>
+                    <xs:documentation>Geen meldingen vanuit verwerking aanwezig; Verwerking geslaagd</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="xs:string" name="bijhoudingBRP"/>
+            <xs:element type="xs:string" name="hoogsteMeldingNiveau"/>
+            <xs:element type="xs:string" name="tijstipRegistratie"/>
+            <xs:element type="ns:bijgehoudenPersonenType" name="bijgehoudenPersonen">
+                <xs:annotation>
+                    <xs:documentation>Identificatienummer bijgehouden personen; i.c. Kind en ingeschreven Ouder ...
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

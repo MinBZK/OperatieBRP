@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+						http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+						http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+
+ 	<mvc:annotation-driven />
+	<!-- Configures the @Controller programming model -->
+	<bean
+		class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerExceptionResolver">
+		<property name="order" value="1" />
+	</bean>
+
+	<bean id="tilesConfigurer"
+		class="org.springframework.web.servlet.view.tiles2.TilesConfigurer">
+		<property name="definitions">
+			<list>
+				<value>/WEB-INF/tiles-defs/templates.xml</value>
+				<value>/WEB-INF/tiles-defs/homeViews.xml</value>
+				<value>/WEB-INF/tiles-defs/partijViews.xml</value>
+			</list>
+		</property>
+		<property name="checkRefresh" value="true" />
+	</bean>
+
+	<bean id="tilesViewResolver" class="org.springframework.js.ajax.AjaxUrlBasedViewResolver">
+		<property name="viewClass"
+			value="org.springframework.js.ajax.tiles2.AjaxTilesView" />
+	</bean>
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ReloadableResourceBundleMessageSource">
+		<!--property name="basename" value="classpath:messages/messages" / -->
+		<property name="basenames">
+			<list>
+				<value>classpath:messages/messages</value>
+			</list>
+		</property>
+		<property name="defaultEncoding" value="UTF-8" />
+	</bean>
+
+	<mvc:view-controller path="/home.html" />
+	<mvc:view-controller path="/error.html" />
+
+</beans>

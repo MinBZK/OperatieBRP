@@ -1,0 +1,71 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.model.web.objecttype.impl.gen;
+
+import nl.bzk.brp.model.attribuuttype.Datum;
+import nl.bzk.brp.model.attribuuttype.DatumTijd;
+import nl.bzk.brp.model.attribuuttype.OntleningsToelichting;
+import nl.bzk.brp.model.objecttype.interfaces.gen.ActieBasis;
+import nl.bzk.brp.model.objecttype.interfaces.usr.Verdrag;
+import nl.bzk.brp.model.objecttype.statisch.Partij;
+import nl.bzk.brp.model.objecttype.statisch.SoortActie;
+import nl.bzk.brp.model.web.AbstractObjectTypeWeb;
+
+/**
+ * Implementatie voor objecttype actie.
+ */
+@SuppressWarnings("serial")
+public abstract class AbstractActieWeb extends AbstractObjectTypeWeb implements ActieBasis {
+    private Partij partij;
+//    private Verdrag verdrag;
+    private DatumTijd tijdstipOntlening;
+    private DatumTijd tijdstipRegistratie;
+    private SoortActie soort;
+    private Datum datumAanvangGeldigheid;
+    private Datum datumEindeGeldigheid;
+    private OntleningsToelichting ontleningsToelichting;
+
+    @Override
+    public Partij getPartij() {
+        return partij;
+    }
+
+    @Override
+    public Verdrag getVerdrag() {
+        throw new UnsupportedOperationException("VerdragWeb moet gebouwd worden.");
+    }
+
+    @Override
+    public DatumTijd getTijdstipOntlening() {
+        return tijdstipOntlening;
+    }
+
+    @Override
+    public DatumTijd getTijdstipRegistratie() {
+        return tijdstipRegistratie;
+    }
+
+    @Override
+    public SoortActie getSoort() {
+        return soort;
+    }
+
+    @Override
+    public Datum getDatumAanvangGeldigheid() {
+        return datumAanvangGeldigheid;
+    }
+
+    @Override
+    public Datum getDatumEindeGeldigheid() {
+        return datumEindeGeldigheid;
+    }
+
+    @Override
+    public OntleningsToelichting getOntleningsToelichting() {
+        return ontleningsToelichting;
+    }
+}

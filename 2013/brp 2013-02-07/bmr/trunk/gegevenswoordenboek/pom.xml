@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.bmr</groupId>
+        <artifactId>parent</artifactId>
+        <version>0.0.7-SNAPSHOT</version>
+    </parent>
+    <artifactId>gegevenswoordenboek</artifactId>
+    <name>Uit het BMR gegenereerde artifacts - Gegevenswoordenboek</name>
+    <packaging>pom</packaging>
+
+    <properties>
+        <bmr.resources.directory>${project.build.directory}/generated-resources/bmr</bmr.resources.directory>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>nl.bzk.brp.generator</groupId>
+                <artifactId>bmr-maven-plugin</artifactId>
+                <configuration>
+                    <modelUri>classpath:/model/brp.bmrxmi</modelUri>
+                    <domein>BRP</domein>
+                    <outputDirectory>${bmr.resources.directory}</outputDirectory>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>nl.bzk.brp.bmr</groupId>
+                        <artifactId>brp-model</artifactId>
+                        <version>${project.version}</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>genereer-gegevenswoordenboek</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>genereer</goal>
+                        </goals>
+                        <configuration>
+                            <generatoren>
+                                <item>gegevenswoordenboek-public</item>
+                                <item>gegevenswoordenboek-development</item>
+                            </generatoren>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.agilejava.docbkx</groupId>
+                <artifactId>docbkx-maven-plugin</artifactId>
+                <version>2.0.14</version>
+                <executions>
+                    <execution>
+                        <id>documentation identifier</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>generate-html</goal>
+                            <goal>generate-pdf</goal>
+                        </goals>
+                        <configuration>
+                            <chunkedOutput>true</chunkedOutput>
+                            <sourceDirectory>${bmr.resources.directory}</sourceDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+                <configuration>
+                    <generatedSourceDirectory>${project.build.directory}/docbkx/generated</generatedSourceDirectory>
+                    <xincludeSupported>true</xincludeSupported>
+                    <paperType>A4</paperType>
+                    <fop1Extensions>1</fop1Extensions>
+                    <foCustomization>${basedir}/src/docbkx-stylesheet/fo/docbook.xsl</foCustomization>
+                    <tocSectionDepth>2</tocSectionDepth><!-- <bodyFontFamily>Verdana</bodyFontFamily> <titleFontFamily>Verdana</titleFontFamily> 
+                        <bodyFontMaster>12</bodyFontMaster> -->
+                    <bodyStartIndent>0pt</bodyStartIndent>
+                    <sectionAutolabelMaxDepth>4</sectionAutolabelMaxDepth>
+                    <sectionAutolabel>1</sectionAutolabel>
+                    <chapterAutolabel>I</chapterAutolabel>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+</project>

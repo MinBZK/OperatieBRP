@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>root-pom</artifactId>
+        <version>0.2.1</version>
+    </parent>
+    <artifactId>parent</artifactId>
+    <version>0.2.5.1-SNAPSHOT</version>
+    <name>BRP Service - Top-level POM</name>
+    <description>
+	    Top level pom en dus parent project van de BRP Service.
+    </description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>model</module>
+        <module>dataaccess</module>
+        <module>business</module>
+        <module>webservice</module>
+        <!-- TODO: (Eric Jan Malotaux, 2012-04-26) De distributie module probeert onder andere javadoc artifacts te assembleren,
+            maar die worden niet in gewone builds gemaakt, waardoor die faalt. Dus moet er iets verzonnen worden waardoor de distributie
+            alleen bij release builds (of zoiets) gebuild wordt.
+        <module>distributie</module>
+        -->
+    </modules>
+
+    <properties>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <built.on>${maven.build.timestamp}</built.on>
+        <sonar.exclusions>**/package-info.java</sonar.exclusions>
+        <!-- De default JDBC properties bedoeld voor lokaal ontwikkelen met een lokale PostgreSQL database. Voor Unit Testen
+            in de Continuous Integration omgeving is er een "ci" profile. -->
+        <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+        <maven.jdbc.url>jdbc:postgresql://localhost/brp</maven.jdbc.url>
+        <maven.jdbc.username>brp</maven.jdbc.username>
+        <maven.jdbc.password>brp</maven.jdbc.password>
+        <!-- speciale database connectie voor archivering/logging en protocollering -->
+        <maven.jdbc.alp.driverClassName>org.postgresql.Driver</maven.jdbc.alp.driverClassName>
+        <maven.jdbc.alp.url>jdbc:postgresql://localhost/brp</maven.jdbc.alp.url>
+        <maven.jdbc.alp.username>brp</maven.jdbc.alp.username>
+        <maven.jdbc.alp.password>brp</maven.jdbc.alp.password>
+        <!-- security -->
+        <maven.security.privatekey.alias>serverkey</maven.security.privatekey.alias>
+        <maven.security.privatekey.password>serverkeypassword</maven.security.privatekey.password>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>2.9</version>
+                    <configuration>
+                        <projectNameTemplate>${project.artifactId}</projectNameTemplate>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <profiles>
+
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>ci.build</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://fac-db06.modernodam.nl/brp</maven.jdbc.url>
+                <maven.jdbc.username>jenkins</maven.jdbc.username>
+                <maven.jdbc.password>95thvef288ckf43re</maven.jdbc.password>
+                <!-- speciale database connectie voor archivering/logging en protocollering -->
+                <maven.jdbc.alp.driverClassName>org.postgresql.Driver</maven.jdbc.alp.driverClassName>
+                <maven.jdbc.alp.url>jdbc:postgresql://fac-db06.modernodam.nl/brp</maven.jdbc.alp.url>
+                <maven.jdbc.alp.username>jenkins</maven.jdbc.alp.username>
+                <maven.jdbc.alp.password>95thvef288ckf43re</maven.jdbc.alp.password>
+
+            </properties>
+        </profile>
+
+        <profile>
+            <id>release</id>
+            <modules>
+                <module>model</module>
+                <module>dataaccess</module>
+                <module>business</module>
+                <module>webservice</module>
+                <module>distributie</module>
+            </modules>
+
+			<build>
+				<plugins>
+					<plugin>
+					  <groupId>org.apache.maven.plugins</groupId>
+					  <artifactId>maven-javadoc-plugin</artifactId>
+					  <executions>
+						<execution>
+						  <id>attach-javadocs</id>
+						  <goals>
+							<goal>jar</goal>
+						  </goals>
+						</execution>
+					  </executions>
+					</plugin>
+				</plugins>
+			</build>
+        </profile>
+
+    </profiles>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/BRP/branches/v0.2.5</connection>
+    </scm>
+
+</project>

@@ -1,0 +1,127 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.generator.java;
+
+import java.io.Writer;
+import java.util.List;
+
+import nl.bzk.brp.generator.GenerationPackageNames;
+import nl.bzk.brp.generator.JavaGeneratorUtils;
+import nl.bzk.brp.generator.java.domein.Field;
+import nl.bzk.brp.generator.java.domein.GenerationReport;
+import nl.bzk.brp.generator.java.domein.Identifier;
+import nl.bzk.brp.generator.java.domein.ObjectClass;
+import nl.bzk.brp.generator.java.domein.ObjectInterface;
+import nl.bzk.brp.metaregister.dataaccess.GroepDao;
+import nl.bzk.brp.metaregister.model.Groep;
+import nl.bzk.brp.metaregister.model.ObjectType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+
+@Component
+@Transactional
+public class JavaGroepOperationeelHistorischGenerator extends AbstractJavaGenerator<Groep> {
+
+    private static final String TEMPLATE_GROUP_NAME = "groepenOperationeelHistorisch";
+
+    private static final String TEMPLATE_NAAM       = "groepOperationeelHistorisch";
+
+    private static final Logger logger              = LoggerFactory
+                                                            .getLogger(JavaGroepOperationeelHistorischGenerator.class);
+
+    @Autowired(required = true)
+    private GroepDao            groepDao;
+
+    public JavaGroepOperationeelHistorischGenerator() {
+        setTemplateGroupName(TEMPLATE_GROUP_NAME);
+        setBasePackage(GenerationPackageNames.GROEP_OPERATIONEEL_HISTORISCH_PACKAGE);
+    }
+
+    @Override
+    public GenerationReport genereer() {
+        GenerationReport report = new GenerationReport();
+        report.setObjectType("Groepen Operationeel Historisch");
+        List<Groep> groepen = groepDao.getDynamischHistorisch();
+        for (Groep groep : groepen) {
+            Writer writer = creeerWriter(getTypeIdentifier(groep));
+            genereerElement(writer, report, groep);
+        }
+        return report;
+    }
+
+    public void genereerElement(final Writer writer, final GenerationReport report, final Groep groep) {
+        ObjectClass type = new ObjectClass(getTypeIdentifier(groep), getTypeName(groep));
+
+        type.setPackageName(basePackageName.getPackage());
+        String extendsFromType = getExtendsFromType(groep);
+        ObjectType objectType = groep.getObjectType();
+        String fieldType = JavaGeneratorUtils.getJavaType(objectType);
+
+        type.setExtendsFrom(extendsFromType);
+        Field field = new Field(fieldType, objectType.getIdentCode());
+        type.addAttribuut(field);
+
+        String sourceCode =
+            genereerGroep(type, getSuperSuperType(groep), objectType.getIdentCode(), getIdentDb(groep));
+
+        int result = write(sourceCode, writer);
+        logger.info("Groep:" + type.getName());
+        if (result > 0) {
+            report.addSucccess(type.getName().toString(), sourceCode);
+        } else {
+            report.addFailure(groep.getIdentCode(), "Fout bij het wegschrijven, resultaat=" + result);
+        }
+    }
+
+    private String getIdentDb(final Groep groep) {
+        String resultaat = groep.getObjectType().getIdentDb();
+        if (!"Standaard".equals(groep.getIdentDb())) {
+            resultaat += groep.getIdentDb();
+        }
+        return resultaat;
+    }
+
+    private String getSuperSuperType(final Groep groep) {
+        return formatType("Abstract%s%sGroep", groep);
+    }
+
+    private String getExtendsFromType(final Groep groep) {
+        return formatType("Abstract%s%sHisModel", groep);
+    }
+
+    private String getTypeIdentifier(final Groep groep) {
+        return formatType("%s%sHisModel", groep);
+    }
+
+    private String formatType(final String format, final Groep groep) {
+        return String.format(format, groep.getObjectType().getIdentCode(), groep.getIdentCode());
+    }
+
+    private String getTypeName(final Groep groep) {
+        String format = "Implementatie voor groep \"%s\" van objecttype \"%s\"";
+        return String.format(format, groep.getNaam(), groep.getObjectType().getNaam());
+    }
+
+    private String genereerGroep(final ObjectInterface type, final String superSuper, final String objectType,
+            final String identDb)
+    {
+        if (group == null || !group.isDefined(TEMPLATE_NAAM)) {
+            throw new IllegalStateException("onbekende of incorrecte template: " + TEMPLATE_NAAM);
+        }
+        contentTemplate = group.getInstanceOf(TEMPLATE_NAAM);
+        contentTemplate.add("groep", type);
+        contentTemplate.add("superSuper", superSuper);
+        contentTemplate.add("objectType", new Identifier(objectType));
+        contentTemplate.add("identDb", identDb);
+        return contentTemplate.render(AbstractJavaGenerator.MAX_LINE_WIDTH);
+    }
+
+}

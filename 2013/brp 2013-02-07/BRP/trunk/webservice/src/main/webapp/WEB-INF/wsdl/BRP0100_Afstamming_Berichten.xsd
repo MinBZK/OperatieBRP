@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 10-01-2013 Status:Concept -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:stuf="http://www.kinggemeenten.nl/StUF/StUF0302" xmlns:brp="http://www.bprbzk.nl/BRP/0100" targetNamespace="http://www.bprbzk.nl/BRP/0100" elementFormDefault="qualified" attributeFormDefault="unqualified" version="010001">
+	<import namespace="http://www.kinggemeenten.nl/StUF/StUF0302" schemaLocation="BRP0100_StUF.xsd"/>
+	<include schemaLocation="BRP0100_Afstamming_Basis.xsd"/>
+	<element name="AFS_RegistreerGeboorte_B" type="brp:Afstamming_RegistreerGeboorte_Bijhouding"/>
+	<element name="AFS_RegistreerGeboorte_BR" type="brp:Afstamming_RegistreerGeboorte_BijhoudingResultaat"/>
+	<!-- Bericht Inschrijving door geboorte -->
+	<complexType name="Afstamming_RegistreerGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDi02_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="inschrijvingDoorGeboorte" type="brp:Handeling_InschrijvingDoorGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling Eerste inschrijiving door geboorte  -->
+	<complexType name="Handeling_InschrijvingDoorGeboorte_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_InschrijvingDoorGeboorte">
+				<sequence>
+					<element name="partijCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="stuf:DatumTijd-e" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bijgehoudenDocumenten" type="brp:Container_AdministratieveHandelingBijgehoudenDocumenten_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_InschrijvingDoorGeboorte_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- BijhoudingResultaat -->
+	<complexType name="Afstamming_RegistreerGeboorte_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDu02_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="inschrijvingDoorGeboorte" type="brp:Handeling_InschrijvingDoorGeboorte_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="inschrijvingDoorGeboorteMetErkenning" type="brp:Handeling_InschrijvingDoorGeboorteMetErkenning_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

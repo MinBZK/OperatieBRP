@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!-- TODO Notitie: Deze mapping was aangemaakt om te kijken of het mogelijk 
+	is om hele jpa mapping in xml te doen zodat de java classes schoon waren 
+	van jpa annotaties, een reden is de de basis types gedeeld wordt tussen de 
+	dataacess laag en web laag, het mooist zou zijn als de basis types classes 
+	geen JPA gerelateerde dingen heeft -->
+<entity-mappings xmlns="http://java.sun.com/xml/ns/persistence/orm"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm http://java.sun.com/xml/ns/persistence/orm_2_0.xsd"
+	version="2.0">
+
+	<description>model mappings</description>
+	<package>nl.bzk.brp.model</package>
+
+	<mapped-superclass class="nl.bzk.brp.model.basis.AbstractAttribuutType">
+	</mapped-superclass>
+
+	<mapped-superclass
+		class="nl.bzk.brp.model.basis.AbstractStatischAttribuutType">
+	</mapped-superclass>
+
+	<mapped-superclass
+		class="nl.bzk.brp.model.basis.AbstractGegevensAttribuutType">
+		<attributes>
+			<transient name="inOnderzoek" />
+			<transient name="soortNull" />
+		</attributes>
+	</mapped-superclass>
+
+
+	<mapped-superclass class="nl.bzk.brp.model.basis.AbstractGroep">
+		<attributes>
+			<transient name="inOnderzoek" />
+			<transient name="statusHistorie" />
+		</attributes>
+	</mapped-superclass>
+
+
+	<mapped-superclass
+		class="nl.bzk.brp.model.groep.impl.gen.AbstractPersoonVoornaamStandaardGroepMdl">
+		<attributes>
+			<basic name="naam">
+				<column name="voornaam" />
+			</basic>
+		</attributes>
+	</mapped-superclass>
+
+	<mapped-superclass
+		class="nl.bzk.brp.model.objecttype.impl.gen.AbstractPersoonVoornaamMdl"
+		access="FIELD">
+		<!--sequence-generator name="seq_PersVoornaam" sequence-name="Kern.seq_PersVoornaam" 
+			/ -->
+		<attributes>
+			<embedded-id name="iD">
+				<attribute-override name="waarde">
+					<column name="id" />
+				</attribute-override>
+			</embedded-id>
+			<!-- generated-value strategy="SEQUENCE" generator="seq_PersVoornaam"/ -->
+			<!--/embedded-id -->
+			<embedded name="volgnummer">
+				<attribute-override name="waarde">
+					<column name="volgnr" />
+				</attribute-override>
+			</embedded>
+			<embedded name="gegevens">
+			</embedded>
+
+			<transient name="persoon" />
+		</attributes>
+	</mapped-superclass>
+
+	<entity class="nl.bzk.brp.model.objecttype.impl.usr.PersoonVoornaamMdl"
+		name="PersoonVoornaamMdl" access="FIELD">
+		<table name="PersVoornaam" schema="Kern" />
+	</entity>
+
+	<embeddable class="nl.bzk.brp.model.attribuuttype.TechnischIdMiddel"
+		access="FIELD">
+	</embeddable>
+
+	<embeddable class="nl.bzk.brp.model.attribuuttype.Volgnummer">
+	</embeddable>
+
+
+	<!-- TODO Notitie: Het is niet mogelijk met JPA XML mapping aan te geven 
+		welke impl class gebruikt moet worden. -->
+	<embeddable
+		class="nl.bzk.brp.model.groep.impl.usr.PersoonVoornaamStandaardGroepMdl"></embeddable>
+
+
+
+
+</entity-mappings>

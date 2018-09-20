@@ -1,0 +1,308 @@
+<binding package="nl.bzk.brp.model.groep.bericht">
+
+    <include path="classpath:/binding-attribuuttypen.xml" precompiled="false"/>
+
+    <!-- Mapping op de superclass tbv verzendendID -->
+    <mapping abstract="true" type-name="GroepIdentificeerbaar"
+             class="nl.bzk.brp.model.basis.AbstractGroepBericht">
+        <value style="attribute" name="cIDVerzendend" field="verzendendId" usage="optional" />
+    </mapping>
+
+    <!-- Groep_BerichtStuurgegevens -->
+    <mapping abstract="true" type-name="AbstractBerichtStuurgegevensGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractBerichtStuurgegevensGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="organisatie" field="organisatie" map-as="Organisatienaam"/>
+        <structure name="applicatie" field="applicatie" map-as="Applicatienaam"/>
+        <structure name="referentienummer" field="referentienummer" map-as="Sleutelwaardetekst"/>
+        <structure name="crossReferentienummer" field="crossReferentienummer" map-as="Sleutelwaardetekst" nillable="true" usage="optional"/>
+        <!--Indien element indicatiePrevalidatie aanwezig, dan true anders false: -->
+        <value name="indicatiePrevalidatie" field="indPrevalidatie" enum-value-method="getXmlCode"
+               usage="optional" nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="BerichtStuurgegevensGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.BerichtStuurgegevensGroepBericht">
+        <structure map-as="AbstractBerichtStuurgegevensGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_BerichtResultaat -->
+    <mapping abstract="true" type-name="AbstractBerichtResultaatGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractBerichtResultaatGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <value name="verwerkingCode" field="verwerkingsresultaat" enum-value-method="getCode"/>
+        <value name="bijhoudingCode" field="bijhoudingsresultaat" enum-value-method="getCode" nillable="true" usage="optional"/>
+        <value name="hoogsteMeldingsniveauCode" field="hoogsteMeldingNiveau" enum-value-method="getCode" nillable="true"/>
+        <structure name="tijdstipRegistratie" field="tijdstipRegistratie" map-as="DatumTijd" nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="BerichtResultaatGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.BerichtResultaatGroepBericht">
+        <structure map-as="AbstractBerichtResultaatGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonIdentificatienummers -->
+    <mapping abstract="true" type-name="AbstractPersoonIdentificatienummersGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonIdentificatienummersGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="burgerservicenummer" field="burgerservicenummer" map-as="Burgerservicenummer" usage="optional" nillable="true"/>
+        <structure name="administratienummer" field="administratienummer" map-as="Administratienummer" usage="optional" nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonIdentificatienummersGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonIdentificatienummersGroepBericht">
+        <structure map-as="AbstractPersoonIdentificatienummersGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonGeslachtsaanduiding -->
+    <mapping abstract="true" type-name="AbstractPersoonGeslachtsaanduidingGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonGeslachtsaanduidingGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <value name="code" field="geslachtsaanduiding" enum-value-method="getCode"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonGeslachtsaanduidingGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonGeslachtsaanduidingGroepBericht">
+        <structure map-as="AbstractPersoonGeslachtsaanduidingGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonSamengesteldeNaam -->
+    <mapping abstract="true" type-name="AbstractPersoonSamengesteldeNaamGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonSamengesteldeNaamGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="predikaatCode" field="predikaatCode" map-as="PredikaatCode" usage="optional" nillable="true"/>
+        <structure name="voornamen" field="voornamen" map-as="Voornaam" usage="optional" nillable="true"/>
+        <structure name="voorvoegsel" field="voorvoegsel" map-as="Voorvoegsel" usage="optional" nillable="true"/>
+        <structure name="scheidingsteken" field="scheidingsteken" map-as="Scheidingsteken" usage="optional" nillable="true"/>
+        <structure name="adellijkeTitelCode" field="adellijkeTitelCode" map-as="AdellijkeTitelCode" usage="optional" nillable="true"/>
+        <structure name="geslachtsnaam" field="geslachtsnaam" map-as="Geslachtsnaamcomponent"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonSamengesteldeNaamGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonSamengesteldeNaamGroepBericht">
+        <structure map-as="AbstractPersoonSamengesteldeNaamGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonGeboorte -->
+    <mapping abstract="true" type-name="AbstractPersoonGeboorteGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonGeboorteGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="datum" field="datumGeboorte" map-as="Datum"/>
+        <structure name="gemeenteCode" field="gemeenteGeboorteCode" map-as="Gemeentecode" usage="optional" nillable="true"/>
+        <structure name="woonplaatsCode" field="woonplaatsGeboorteCode" map-as="PlaatsCode" usage="optional" nillable="true"/>
+        <structure name="buitenlandseplaats" field="buitenlandseGeboortePlaats" map-as="BuitenlandsePlaats" usage="optional" nillable="true"/>
+        <structure name="buitenlandseRegio" field="buitenlandseRegioGeboorte" map-as="BuitenlandseRegio" usage="optional" nillable="true"/>
+        <structure name="landCode" field="landGeboorteCode" map-as="Landcode"/>
+        <structure name="omschrijvinglocatie" field="omschrijvingGeboorteLocatie" map-as="Omschrijving" usage="optional" nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonGeboorteGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonGeboorteGroepBericht">
+        <structure map-as="AbstractPersoonGeboorteGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonAfgeleidAdministratief -->
+    <mapping abstract="true" type-name="AbstractPersoonAfgeleidAdministratiefGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonAfgeleidAdministratiefGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="tijdstipLaatsteWijziging" field="tijdstipLaatsteWijziging" map-as="DatumTijd" usage="optional"/>
+        <value name="indicatieGegevensInOnderzoek" field="indGegevensInOnderzoek" enum-value-method="getXmlCode" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonAfgeleidAdministratiefGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonAfgeleidAdministratiefGroepBericht">
+        <structure map-as="AbstractPersoonAfgeleidAdministratiefGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonAanschrijving -->
+    <mapping abstract="true" type-name="AbstractPersoonAanschrijvingGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonAanschrijvingGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <value name="wijzeVanGebruikGeslachtsnaamEchtgenootGeregistreerdPartnerCode" field="gebruikGeslachtsnaam" enum-value-method="getCode" usage="optional" nillable="true"/>
+        <value name="indicatieAanschrijvenMetAdellijkeTitelsEnOfPredikaten" field="indAanschrijvenMetAdellijkeTitel" enum-value-method="getXmlCode" usage="optional" nillable="true"/>
+        <value name="indicatieAlgoritmischAfgeleid" field="indAanschrijvingAlgorthmischAfgeleid" enum-value-method="getXmlCode"/>
+        <structure name="predikaatCode" field="predikaatCode" map-as="PredikaatCode" usage="optional"  nillable="true"/>
+        <structure name="voornamen" field="voornamen" map-as="Voornaam" usage="optional" nillable="true"/>
+        <structure name="voorvoegsel" field="voorvoegsel" map-as="Voorvoegsel" usage="optional" nillable="true"/>
+        <structure name="scheidingsteken" field="scheidingsteken" map-as="Scheidingsteken" usage="optional" nillable="true"/>
+        <structure name="adellijkeTitelCode" field="adellijkeTitelCode" map-as="AdellijkeTitelCode" usage="optional" nillable="true"/>
+        <structure name="geslachtsnaam" field="geslachtsnaam" map-as="Geslachtsnaamcomponent" usage="optional" nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonAanschrijvingGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonAanschrijvingGroepBericht">
+        <structure map-as="AbstractPersoonAanschrijvingGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonBijhoudingsverantwoordelijkheid -->
+    <mapping abstract="true" type-name="AbstractPersoonBijhoudingsverantwoordelijkheidGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonBijhoudingsverantwoordelijkheidGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <value name="verantwoordelijkeCode" field="verantwoordelijke" enum-value-method="getCode"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonBijhoudingsverantwoordelijkheidGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonBijhoudingsverantwoordelijkheidGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure map-as="AbstractPersoonBijhoudingsverantwoordelijkheidGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonOpschorting -->
+    <mapping abstract="true" type-name="AbstractPersoonOpschortingGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonOpschortingGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <value name="redenBijhoudingCode" field="redenOpschorting" enum-value-method="getCode"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonOpschortingGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonOpschortingGroepBericht">
+        <structure map-as="AbstractPersoonOpschortingGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonBijhoudingsgemeente -->
+    <mapping abstract="true" type-name="AbstractPersoonBijhoudingsgemeenteGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonBijhoudingsgemeenteGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="code" field="bijhoudingsgemeentecode" map-as="Gemeentecode"/>
+        <structure name="datumInschrijvingInGemeente" field="datumInschrijvingInGemeente" map-as="Datum"/>
+        <value name="indicatieOnverwerktDocumentAanwezig" field="indOnverwerktDocumentAanwezig" enum-value-method="getXmlCode" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonBijhoudingsgemeenteGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonBijhoudingsgemeenteGroepBericht">
+        <structure map-as="AbstractPersoonBijhoudingsgemeenteGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_PersoonInschrijving -->
+    <mapping abstract="true" type-name="AbstractPersoonInschrijvingGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonInschrijvingGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="datum" field="datumInschrijving" map-as="Datum"/>
+        <structure name="versienummer" field="versienummer" map-as="Versienummer"/>
+        <structure name="vorigePersoon" usage="optional"/> <!-- TODO moet nog worden geimplementeerd -->
+        <structure name="volgendePersoon" usage="optional"/> <!-- TODO moet nog worden geimplementeerd -->
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonInschrijvingGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonInschrijvingGroepBericht">
+        <structure map-as="AbstractPersoonInschrijvingGroepBericht"/>
+    </mapping>
+
+    <!-- Standaard groep Persoon \ Geslachtsnaamcomponent -->
+    <mapping abstract="true" type-name="AbstractPersoonGeslachtsnaamcomponentStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonGeslachtsnaamcomponentStandaardGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="voorvoegsel" field="voorvoegsel" map-as="Voorvoegsel" usage="optional" nillable="true"/>
+        <structure name="scheidingsteken" field="scheidingsteken" map-as="Scheidingsteken" usage="optional" nillable="true"/>
+        <structure name="naam" field="geslachtsnaamcomponent" map-as="Geslachtsnaamcomponent" />
+        <structure name="predikaatCode" field="predikaatCode" map-as="PredikaatCode" usage="optional" nillable="true"/>
+        <structure name="adellijkeTitelCode" field="adellijkeTitelCode" map-as="AdellijkeTitelCode" usage="optional" nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonGeslachtsnaamcomponentStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonGeslachtsnaamcomponentStandaardGroepBericht">
+        <structure map-as="AbstractPersoonGeslachtsnaamcomponentStandaardGroepBericht"/>
+    </mapping>
+
+    <!-- Standaard groep Persoon \ Nationaliteit -->
+    <mapping abstract="true" type-name="AbstractPersoonNationaliteitStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonNationaliteitStandaardGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="redenVerliesNaam" field="redenVerliesNlNationaliteitNaam" map-as="RedenVerliesNaam" usage="optional"/>
+        <structure name="redenVerkrijgingNaam" field="redenVerkregenNlNationaliteitCode" map-as="RedenVerkrijgingCode" usage="optional" nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonNationaliteitStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonNationaliteitStandaardGroepBericht">
+        <structure map-as="AbstractPersoonNationaliteitStandaardGroepBericht"/>
+    </mapping>
+
+    <!-- Standaard groep Persoon \ Voornaam-->
+    <mapping abstract="true" type-name="AbstractPersoonVoornaamStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonVoornaamStandaardGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="naam" field="voornaam" map-as="Voornaam"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonVoornaamStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonVoornaamStandaardGroepBericht">
+        <structure map-as="AbstractPersoonVoornaamStandaardGroepBericht"/>
+    </mapping>
+
+    <!-- Standaard groep Persoon \ Adres -->
+    <mapping abstract="true" type-name="AbstractPersoonAdresStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractPersoonAdresStandaardGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <value name="soortCode" field="soort" enum-value-method="getCode" usage="optional"/>
+        <structure name="redenWijzigingCode" field="redenwijzigingCode" map-as="RedenWijzigingAdresCode" usage="optional"/>
+        <value name="aangeverAdreshoudingCode" field="aangeverAdreshouding" enum-value-method="getCode" usage="optional" nillable="true"/>
+        <structure name="datumAanvangAdreshouding" field="datumAanvangAdreshouding" map-as="Datum" usage="optional"/>
+        <structure name="adresseerbaarObject" field="adresseerbaarObject" map-as="Adresseerbaarobject" usage="optional" nillable="true"/>
+        <structure name="identificatiecodeNummeraanduiding" field="identificatiecodeNummeraanduiding" map-as="IdentificatiecodeNummeraanduiding" usage="optional" nillable="true"/>
+        <structure name="gemeenteCode" field="gemeentecode" map-as="Gemeentecode" usage="optional"/>
+        <structure name="naamOpenbareRuimte" field="naamOpenbareRuimte" map-as="NaamOpenbareRuimte" usage="optional" nillable="true"/>
+        <structure name="afgekorteNaamOpenbareRuimte" field="afgekorteNaamOpenbareRuimte" map-as="AfgekorteNaamOpenbareRuimte" usage="optional" nillable="true"/>
+        <structure name="gemeentedeel" field="gemeentedeel" map-as="Gemeentedeel" usage="optional" nillable="true"/>
+        <structure name="huisnummer" field="huisnummer" map-as="Huisnummer" usage="optional" nillable="true"/>
+        <structure name="huisletter" field="huisletter" map-as="Huisletter" usage="optional" nillable="true"/>
+        <structure name="huisnummertoevoeging" field="huisnummertoevoeging" map-as="Huisnummertoevoeging" usage="optional" nillable="true"/>
+        <structure name="postcode" field="postcode" map-as="Postcode" usage="optional" nillable="true"/>
+        <structure name="woonplaatsCode" field="woonplaatsCode" map-as="PlaatsCode" usage="optional" nillable="true"/>
+        <structure name="locatietovAdres" field="locatietovAdres" map-as="LocatieTovAdres" usage="optional" nillable="true"/>
+        <structure name="locatieOmschrijving" field="locatieOmschrijving" map-as="LocatieOmschrijving" usage="optional"/>
+        <structure name="buitenlandsAdresRegel1" field="buitenlandsAdresRegel1" map-as="Adresregel" usage="optional"/>
+        <structure name="buitenlandsAdresRegel2" field="buitenlandsAdresRegel2" map-as="Adresregel" usage="optional"/>
+        <structure name="buitenlandsAdresRegel3" field="buitenlandsAdresRegel3" map-as="Adresregel" usage="optional"/>
+        <structure name="buitenlandsAdresRegel4" field="buitenlandsAdresRegel4" map-as="Adresregel" usage="optional"/>
+        <structure name="buitenlandsAdresRegel5" field="buitenlandsAdresRegel5" map-as="Adresregel" usage="optional"/>
+        <structure name="buitenlandsAdresRegel6" field="buitenlandsAdresRegel6" map-as="Adresregel" usage="optional"/>
+        <structure name="landCode" field="landcode" map-as="Landcode" usage="optional" nillable="true"/>
+        <structure name="datumVertrekUitNederland" field="datumVertrekUitNederland" map-as="Datum" usage="optional"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="PersoonAdresStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.PersoonAdresStandaardGroepBericht">
+        <structure map-as="AbstractPersoonAdresStandaardGroepBericht"/>
+    </mapping>
+
+    <!-- Groep_BetrokkenheidOuderschap -->
+    <mapping abstract="true" type-name="AbstractBetrokkenheidOuderschapGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractBetrokkenheidOuderschapGroepBericht">
+        <structure map-as="GroepIdentificeerbaar"/>
+        <structure name="datumAanvang" field="datumAanvang" map-as="Datum" usage="optional" nillable="true"/>
+        <value name="indicatieAdresgevend" field="indAdresGevend" enum-value-method="getXmlCode" usage="optional"
+               nillable="true"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="BetrokkenheidOuderschapGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.BetrokkenheidOuderschapGroepBericht">
+        <structure map-as="AbstractBetrokkenheidOuderschapGroepBericht"/>
+    </mapping>
+
+    <!-- Standaard groep Relatie -->
+    <mapping abstract="true" type-name="AbstractRelatieStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.basis.AbstractRelatieStandaardGroepBericht">
+        <structure name="datumAanvang" field="datumAanvang" map-as="Datum" usage="optional"/>
+        <structure name="gemeenteAanvangCode" field="gemeenteAanvangCode" map-as="Gemeentecode" usage="optional"/>
+        <structure name="woonplaatsAanvangCode" field="woonPlaatsAanvangCode" map-as="PlaatsCode" usage="optional"/>
+        <structure name="buitenlandsePlaatsAanvang" field="buitenlandsePlaatsAanvang" map-as="BuitenlandsePlaats" usage="optional"/>
+        <structure name="buitenlandseRegioAanvang" field="buitenlandseRegioAanvang" map-as="BuitenlandseRegio" usage="optional"/>
+        <structure name="landAanvangCode" field="landAanvangCode" map-as="Landcode" usage="optional"/>
+        <structure name="omschrijvingLocatieAanvang" field="omschrijvingLocatieAanvang" map-as="Omschrijving" usage="optional"/>
+        <structure name="redenEindeCode" usage="optional"/> <!-- TODO Voorlopig nog even niet ge-mapped -->
+        <structure name="datumEinde" field="datumEinde" map-as="Datum" usage="optional"/>
+        <structure name="gemeenteEindeCode" field="gemeenteEindeCode" map-as="Gemeentecode" usage="optional"/>
+        <structure name="woonplaatsEindeCode" field="woonPlaatsEindeCode" map-as="PlaatsCode" usage="optional"/>
+        <structure name="buitenlandsePlaatsEinde" field="buitenlandsePlaatsEinde" map-as="BuitenlandsePlaats" usage="optional"/>
+        <structure name="buitenlandseRegioEinde" field="buitenlandseRegioEinde" map-as="BuitenlandseRegio" usage="optional"/>
+        <structure name="landEindeCode" field="landEindeCode" map-as="Landcode" usage="optional"/>
+        <structure name="omschrijvingLocatieEinde" field="omschrijvingLocatieEinde" map-as="Omschrijving" usage="optional"/>
+        <!-- LET OP hier horen geen betrokkenheden!! -->
+    </mapping>
+
+    <mapping abstract="true" type-name="RelatieStandaardGroepBericht"
+             class="nl.bzk.brp.model.groep.bericht.RelatieStandaardGroepBericht">
+        <structure map-as="AbstractRelatieStandaardGroepBericht"/>
+    </mapping>
+
+</binding>

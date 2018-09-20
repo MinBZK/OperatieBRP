@@ -1,0 +1,225 @@
+group objecttypesOperationeelBasis;
+
+import "generieke-templates.stg"
+
+objecttypeOperationeelBasis(type, stam, inlines, groepen) ::= <<
+package <type.packageName>;
+
+import java.util.HashSet;
+import java.util.Set;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Embedded;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.SequenceGenerator;
+import javax.validation.constraints.NotNull;
+
+import nl.bzk.brp.model.basis.AbstractDynamischObjectType;
+import nl.bzk.brp.model.basis.Groep;
+import nl.bzk.brp.model.groep.logisch.basis.PersoonBijhoudingsgemeenteGroepBasis;
+import nl.bzk.brp.model.groep.logisch.basis.PersoonBijhoudingsverantwoordelijkheidGroepBasis;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonAanschrijvingGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonAfgeleidAdministratiefGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonBijhoudingsgemeenteGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonBijhoudingsverantwoordelijkheidGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonEUVerkiezingenGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonGeboorteGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonGeslachtsaanduidingGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonIdentificatienummersGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonImmigratieGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonInschrijvingGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonOpschortingGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonOverlijdenGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonSamengesteldeNaamGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonUitsluitingNLKiesrechtGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonVerblijfsrechtGroepModel;
+import nl.bzk.brp.model.groep.operationeel.actueel.PersoonskaartGroepModel;
+import nl.bzk.brp.model.objecttype.logisch.basis.PersoonBasis;
+import nl.bzk.brp.model.objecttype.operationeel.BetrokkenheidModel;
+import nl.bzk.brp.model.objecttype.operationeel.PersoonAdresModel;
+import nl.bzk.brp.model.objecttype.operationeel.PersoonGeslachtsnaamcomponentModel;
+import nl.bzk.brp.model.objecttype.operationeel.PersoonIndicatieModel;
+import nl.bzk.brp.model.objecttype.operationeel.PersoonNationaliteitModel;
+import nl.bzk.brp.model.objecttype.operationeel.PersoonVoornaamModel;
+import nl.bzk.brp.model.objecttype.operationeel.statisch.SoortPersoon;
+import nl.bzk.brp.model.objecttype.operationeel.statisch.StatusHistorie;
+
+
+/**
+ * De eerste laag implemenetatie van {@link}Persoon interface.
+ * Deze class is een onderdeel van de model tree.
+ * Deze implementatie wordt door de genrator gegenereerd.
+ *
+ */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public abstract class <type.name> extends <type.extendsFrom> implements <first(type.interfaces)> {
+
+    <type.fields:field(); separator="\n\n">
+
+    /**
+     * Copy constructor.
+     *
+     * @param persoon Object type dat gekopieerd dient te worden.
+     */
+    protected <type.name>(final <stam>Basis <stam.lowerCamel><type.constructor.parameters:parameter()>) {
+        super(<stam.lowerCamel>);
+        <inlines:initInline(); separator="\n">
+        <groepen:initGroep(); separator="\n">
+        <type.constructor.parameters:initComponent(); separator="\n">
+    }
+
+    /**
+     * Default constructor tbv hibernate.
+     */
+    protected <type.name>() {
+    }
+
+    /**
+     * Vervang een lijst van groepen met nieuwe data.
+     *
+     * @param groepen de lijst
+     */
+    public void vervangGroepen(final Groep ... groepen) {
+        for (Groep groep: groepen) {
+            if (groep == null) {
+                continue;
+	        <groepen:vervangGroep(); separator="\n">
+            }
+        }
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    <type.fields:getter(); separator="\n\n">
+    
+    protected void setSoort(final SoortPersoon soort) {
+        this.soort = soort;
+    }
+
+    protected void setIdentificatienummers(final PersoonIdentificatienummersGroepModel identificatienummers) {
+        this.identificatienummers = identificatienummers;
+    }
+
+    protected void setGeslachtsaanduiding(final PersoonGeslachtsaanduidingGroepModel geslachtsaanduiding) {
+        this.geslachtsaanduiding = geslachtsaanduiding;
+    }
+
+    protected void setSamengesteldeNaam(final PersoonSamengesteldeNaamGroepModel samengesteldeNaam) {
+        this.samengesteldeNaam = samengesteldeNaam;
+    }
+
+    protected void setAanschrijving(final PersoonAanschrijvingGroepModel aanschrijving) {
+        this.aanschrijving = aanschrijving;
+    }
+
+    protected void setGeboorte(final PersoonGeboorteGroepModel geboorte) {
+        this.geboorte = geboorte;
+    }
+
+    protected void setOpschorting(final PersoonOpschortingGroepModel opschorting) {
+        this.opschorting = opschorting;
+    }
+
+    protected void setBijhoudenGemeente(final PersoonBijhoudingsgemeenteGroepModel bijhoudenGemeente) {
+        this.bijhoudenGemeente = bijhoudenGemeente;
+    }
+
+    protected void setOverlijden(final PersoonOverlijdenGroepModel overlijden) {
+        this.overlijden = overlijden;
+    }
+
+    protected void setInschrijving(final PersoonInschrijvingGroepModel inschrijving) {
+        this.inschrijving = inschrijving;
+    }
+
+    protected void setBijhoudingVerantwoordelijke(
+            final PersoonBijhoudingsverantwoordelijkheidGroepModel bijhoudingVerantwoordelijke)
+    {
+        this.bijhoudingVerantwoordelijke = bijhoudingVerantwoordelijke;
+    }
+
+    protected void setAfgeleidAdministratief(final PersoonAfgeleidAdministratiefGroepModel afgeleidAdministratief) {
+        this.afgeleidAdministratief = afgeleidAdministratief;
+    }
+
+    protected void setBetrokkenheden(final Set\<BetrokkenheidModel\> betrokkenheden) {
+        this.betrokkenheden = betrokkenheden;
+    }
+
+    protected void setAdressen(final Set\<PersoonAdresModel\> adressen) {
+        this.adressen = adressen;
+    }
+
+    protected void setPersoonVoornaam(final Set\<PersoonVoornaamModel\> voornamen) {
+        this.voornamen = voornamen;
+    }
+
+    protected void setGeslachtsnaamcomponenten(final Set\<PersoonGeslachtsnaamcomponentModel\> geslachtsnaamcomponenten) {
+        this.geslachtsnaamcomponenten = geslachtsnaamcomponenten;
+    }
+
+    protected void setNationaliteiten(final Set\<PersoonNationaliteitModel\> nationaliteiten) {
+        this.nationaliteiten = nationaliteiten;
+    }
+
+    protected void setIndicaties(final Set\<PersoonIndicatieModel\> indicaties) {
+        this.indicaties = indicaties;
+    }
+
+}
+
+>>
+
+field(field) ::= <<
+<field.annotations; separator="\n">
+private <field.type> <field.name.lowerCamel><field.initializer>;
+>>
+
+parameter(parameter) ::= <<
+, final <parameter>Model <parameter.lowerCamel>
+>>
+
+initInline(inline) ::= <<
+<inline.lowerCamel> = <stam.lowerCamel>.get<inline>();
+>>
+
+initGroep(groep) ::= <<
+if (<stam.lowerCamel>.get<groep>Groep() != null) {
+    <groep.lowerCamel>Groep = new <stam><groep>GroepModel(<stam.lowerCamel>.get<groep>Groep());
+    <groep.lowerCamel>StatusHis = StatusHistorie.A;
+}
+>>
+
+initComponent(component) ::= <<
+this.<component.lowerCamel> = <component.lowerCamel>;
+>>
+
+vervangGroep(groep) ::= <<
+} else if (groep instanceof <stam><groep>GroepBasis) {
+    <groep.lowerCamel>Groep =
+        new <stam><groep>GroepModel(
+            (<stam><groep>GroepBasis) groep);
+    <groep.lowerCamel>StatusHis = StatusHistorie.A;
+>>
+
+getter(field) ::= <<
+@Override
+public <field.type> get<field.name>() {
+    return <field.name.lowerCamel>;
+}
+>>

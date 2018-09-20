@@ -1,0 +1,61 @@
+group enumeraties;
+
+import "generieke-templates.stg"
+
+enumeratie(enumObject) ::= <<
+package <enumObject.packageName>;
+
+/**
+ * <enumObject.javaDoc>.
+ */
+public enum <enumObject.name> {
+
+    <enumObject.enumValues:enumWaarde(); separator=",\n">;
+
+    <enumObject.fields:attribuut();separator="\n">
+
+    <enumObject.constructors:constructor();separator="\n">
+    
+    <enumObject.accessors:getter();separator="\n">
+}
+
+>>
+
+enumWaarde(waarde) ::= <<
+/** <waarde.name>. */
+<waarde.nameCode>(<waarde.parameters:enumWaardeInitialisatie(); separator=", ">)
+>>
+
+enumWaardeInitialisatie(parameter) ::= <<
+<if(!strip(parameter))>null<else>"<parameter>"<endif>
+>>
+
+attribuut(field)  ::= <<
+/** <field.name.lowerCamel>. */
+private <field.type> <field.name.lowerCamel>;
+>>
+
+constructor(method) ::= <<
+/**
+ * Constructor.
+ *
+<method.parameters:parameterComment(); separator="\n">
+ *
+ */
+private <method.name>(<method.parameters:methodParameter(); separator=", ">) {
+    <method.parameters:methodAssignment(); separator="\n">
+}
+>>
+
+parameterComment(parameter) ::= <<
+ * @param <parameter.lowerCamel> de <parameter.lowerCamel>
+>>
+
+methodParameter(parameter) ::= <<
+final String <parameter.lowerCamel>
+>>
+
+methodAssignment(parameter) ::= <<
+this.<parameter.lowerCamel> = <parameter.lowerCamel>;
+>>
+

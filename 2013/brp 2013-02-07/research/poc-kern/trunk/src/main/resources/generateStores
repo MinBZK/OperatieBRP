@@ -1,0 +1,11 @@
+#!/bin/sh
+
+rm -f privatestore.jks key.rsa publicstore.jks
+keytool -genkey -alias serverkey -keypass serverkeypassword -keystore  privatestore.jks -storepass privatestore -dname "cn=serverkey" -keyalg RSA
+keytool -selfcert -alias serverkey -keystore privatestore.jks -storepass privatestore -keypass serverkeypassword
+keytool -export -alias serverKey -file key.rsa -keystore privatestore.jks -storepass privatestore
+keytool -import -alias serverKey -file key.rsa -keystore publicstore.jks -storepass publicstore -noprompt
+rm key.rsa
+keytool  -list -keystore privatestore.jks -storepass privatestore
+keytool  -list -keystore publicstore.jks -storepass publicstore
+

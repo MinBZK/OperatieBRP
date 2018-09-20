@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <packaging>pom</packaging>
+    <modules>
+        <module>algemeen</module>
+        <module>java-generatoren</module>
+        <module>jibx-generatoren</module>
+        <module>xsd-generatoren</module>
+        <module>generatoren-mojo</module>
+    </modules>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>root-pom</artifactId>
+        <version>0.2.5</version>
+    </parent>
+    <groupId>nl.bzk.brp.generatoren</groupId>
+    <artifactId>parent</artifactId>
+    <version>1.0</version>
+    <name>Generatoren parent</name>
+    <description>
+        Parent project voor de Generatoren die vanuit het BMR (Metaregister) de artifacten genereren die nodig
+        zijn om de BRP te bouwen.
+    </description>
+
+    <developers>
+        <developer>
+            <id>tiblo</id>
+            <name>Tim Blommerde</name>
+            <email>tim@jpoint.nl</email>
+            <organization>JPoint</organization>
+            <organizationUrl>http://www.jpoint.nl/</organizationUrl>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>oucho</id>
+            <name>Oussama Chougna</name>
+            <email>o.chougna@cimsolutions.nl</email>
+            <organization>Cimsolutions</organization>
+            <organizationUrl>http://www.cimsolutions.nl/</organizationUrl>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>ermul</id>
+            <name>Erik Mulder</name>
+            <email>erik.mulder@qsd.nl</email>
+            <organization>QSD</organization>
+            <organizationUrl>http://www.qsd.nl/</organizationUrl>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
+    <properties>
+        <metaregister.version>1.6.0</metaregister.version>
+    </properties>
+
+    <build>
+        <plugins>
+            <!-- ermul: Toegevoegd om makkelijker te kunnen debuggen. Kan verwijderd worden indien niet meer nodig
+      of ongewenst ivm performance / obfuscation. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>buildnumber-maven-plugin</artifactId>
+                <version>1.2</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>create-timestamp</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <doCheck>false</doCheck>
+                    <doUpdate>false</doUpdate>
+                    <timestampFormat>yyyy-MM-dd HH:mm:ss</timestampFormat>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <repositories>
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+        <snapshotRepository>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/v1.0</connection>
+    </scm>
+
+</project>

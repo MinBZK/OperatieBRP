@@ -1,0 +1,74 @@
+<binding package="nl.bzk.brp.model.logisch">
+    <namespace uri="http://www.brp.bzk.nl/bijhouden" default="elements"/>
+
+    <mapping name="BRPBericht" class="nl.bzk.brp.binding.BRPBericht">
+        <collection field="brpActies" item-type="nl.bzk.brp.model.logisch.BRPActie"
+                    factory="nl.bzk.brp.binding.util.BindingUtil.newListInstance"/>
+    </mapping>
+
+    <mapping name="Actie" class="nl.bzk.brp.model.logisch.BRPActie">
+        <value name="Soort" field="soort" enum-value-method="getNaam"/>
+        <structure field="partij">
+            <value name="Partij" field="id"/>
+        </structure>
+        <value name="DatumAanvangGeldigheid" field="datumAanvangGeldigheid"/>
+        <structure name="Verhuizing">
+            <collection field="rootObjecten" factory="nl.bzk.brp.binding.util.BindingUtil.newListInstance"
+                        item-type="nl.bzk.brp.model.logisch.Persoon">
+                <structure name="Persoon" map-as="persoon"/>
+            </collection>
+        </structure>
+    </mapping>
+
+    <mapping type-name="persoon" class="nl.bzk.brp.model.logisch.Persoon" abstract="true">
+        <structure name="IdentificatieNummers" field="identificatienummers">
+            <value name="Burgerservicenummer" field="burgerservicenummer"/>
+        </structure>
+
+        <collection field="adressen" factory="nl.bzk.brp.binding.util.BindingUtil.newSetInstance"
+                    item-type="nl.bzk.brp.model.logisch.PersoonAdres">
+            <structure name="Adres" map-as="adres"/>
+        </collection>
+    </mapping>
+
+    <mapping type-name="adres" class="nl.bzk.brp.model.logisch.PersoonAdres" abstract="true">
+        <value style="attribute" name="SoortAdresCode" field="soort" enum-value-method="getCode"/>
+        <structure field="redenWijziging">
+            <value name="RedenWijziging" field="code" usage="optional"/>
+        </structure>
+        <structure field="aangeverAdreshouding">
+            <value name="AangeverAdreshouding" field="code" usage="optional"/>
+        </structure>
+        <value name="DatumAanvangAdreshouding" field="datumAanvangAdreshouding" usage="optional"/>
+        <value name="AdresseerbaarObject" field="adresseerbaarObject" usage="optional"/>
+        <value name="IdentificatieNummeraanduiding" field="identificatiecodeNummeraanduiding" usage="optional"/>
+        <structure field="land">
+            <value name="Land" field="landcode"/>
+        </structure>
+        <structure field="gemeente">
+            <value name="Gemeente" field="gemeentecode"/>
+        </structure>
+        <structure field="woonplaats">
+            <value name="Woonplaats" field="woonplaatscode"/>
+        </structure>
+        <value name="NaamOpenbareruimte" field="naamOpenbareRuimte" usage="optional"/>
+        <value name="AfgekorteNaamOpenbareruimte" field="afgekorteNaamOpenbareRuimte" usage="optional"/>
+        <value name="Huisnummer" field="huisnummer" usage="optional"/>
+        <value name="Huisletter" field="huisletter" usage="optional"/>
+        <value name="HuisnummerToevoeging" field="huisnummertoevoeging" usage="optional"/>
+        <value name="Postcode" field="postcode"/>
+    </mapping>
+
+    <mapping name="BerichtResultaat" class="nl.bzk.brp.binding.BerichtResultaat">
+        <value name="resultaat" field="resultaat" enum-value-method="getNaam"/>
+        <collection name="meldingen" field="meldingen" item-type="nl.bzk.brp.binding.Melding" usage="optional"
+                    factory="nl.bzk.brp.binding.util.BindingUtil.newListInstance"/>
+    </mapping>
+
+    <mapping name="melding" class="nl.bzk.brp.binding.Melding">
+        <value name="soort" field="soort" enum-value-method="getNaam"/>
+        <value name="code" field="code" enum-value-method="getNaam"/>
+        <value name="omschrijving" field="omschrijving"/>
+    </mapping>
+
+</binding>

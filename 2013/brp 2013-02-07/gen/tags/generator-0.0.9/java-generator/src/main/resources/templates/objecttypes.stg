@@ -1,0 +1,50 @@
+group objecttypes;
+
+import "generieke-templates.stg"
+
+
+objecttypeInterface(object) ::= <<
+package <object.packageName>;
+
+<object.imports; separator="\n">
+
+
+/**
+ * <object.javaDoc>
+ *
+ */
+public interface <object.name> extends <object.interfaces; separator=", "> {
+
+    <object.accessors:interfaceGetter(); separator="\n">
+}
+
+>>
+
+
+objecttypeStatisch(object) ::= <<
+package <object.packageName>;
+
+<object.imports; separator="\n">
+
+/**
+ * <object.javaDoc>
+ *
+ */
+<object.annotations; separator="\n">
+public class <object.name> extends <object.extendsFrom> {
+
+    <object.fields:attribuut();wrap, separator="\n">
+    <object.accessors:getter();wrap, separator="\n">
+	<object.constructors:constructor();separator="\n">
+	<object.modifiers:getter();wrap, separator="\n">
+
+}
+
+>>
+
+attribuut(field)  ::= <<
+/** <field.javaDoc;wrap> */
+<field.annotations; separator = "\n">
+<field.scope> <field.type> <field.name.lowerCamel>;
+
+>>

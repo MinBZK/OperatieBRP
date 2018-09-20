@@ -1,0 +1,61 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.expressietaal.symbols.solvers;
+
+import nl.bzk.brp.expressietaal.parser.syntaxtree.Expressie;
+import nl.bzk.brp.expressietaal.symbols.AttributeGetter;
+import nl.bzk.brp.model.RootObject;
+import nl.bzk.brp.model.logisch.kern.Persoon;
+
+
+/**
+ * Getter voor 'reisdocumenten' in objecttype 'PersoonReisdocument'.
+ * <p/>
+ * Generator: nl.bzk.brp.generatoren.java.SymbolTableGenerator.
+ * Metaregister versie: 1.6.0.
+ * Generator versie: 1.0-SNAPSHOT.
+ * Generator gebouwd op: 2013-01-31 14:31:48.
+ * Gegenereerd op: Thu Jan 31 15:38:27 CET 2013.
+ */
+public class PersoonReisdocumentenGetter implements AttributeGetter {
+
+    /**
+     * Geeft de waarde van attribuut 'reisdocumenten' uit het gegeven (root)object.
+     *
+     * @param rootObject Object waarvan het attribuut bepaald moet worden.
+     * @return Waarde van het attribuut.
+     */
+    @Override
+    public Expressie getAttribuutWaarde(final RootObject rootObject) {
+        return null;
+    }
+
+    /**
+     * Geeft de waarde van attribuut 'reisdocumenten' uit een bepaald
+     * geïndiceerd attribuut van een (root)object.
+     *
+     * @param rootObject Object waarvan het attribuut bepaald moet worden.
+     * @param index      Index van het attribuut waartoe het gezochte attribuut behoort.
+     * @return Waarde van het attribuut.
+     */
+    @Override
+    public Expressie getAttribuutWaarde(final RootObject rootObject, final Integer index) {
+        return null;
+    }
+
+    /**
+     * Geeft het aantal waarden van 'reisdocumenten' van een (root)object.
+     * Dit is gelijk aan het aantal elementen in de verzameling.
+     *
+     * @param rootObject Object waarvan het aantal waarden bepaald moet worden.
+     * @return Aantal waarden.
+     */
+    @Override
+    public Integer getMaxIndex(final RootObject rootObject) {
+        return ((Persoon) rootObject).getReisdocumenten().size();
+    }
+}

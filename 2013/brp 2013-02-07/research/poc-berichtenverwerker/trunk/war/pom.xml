@@ -1,0 +1,62 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>nl.bzk.brp.poc</groupId>
+		<artifactId>berichtenverwerker</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+	</parent>
+	<artifactId>berichtenverwerker-war</artifactId>
+	<name>POC Berichtenverwerker BRP - Service WAR file</name>
+	<packaging>war</packaging>
+
+   <dependencies>
+      <dependency>
+          <groupId>nl.bzk.brp.poc</groupId>
+          <artifactId>berichtenverwerker-bundle</artifactId>
+          <version>0.0.1-SNAPSHOT</version>
+      </dependency>
+   </dependencies>
+
+   <build>
+      <plugins>
+         <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>tomcat-maven-plugin</artifactId>
+            <version>1.1</version>
+            <configuration>
+               <server>mytomcat</server>
+               <url>http://localhost:8080/manager/text</url>
+               <path>/${project.build.finalName}</path>
+            </configuration>
+         </plugin>
+         <plugin>
+            <artifactId>maven-war-plugin</artifactId>
+            <version>2.1</version>
+            <configuration>
+                <webXml>src/main/webapp/WEB-INF/web.xml</webXml>
+                <webResources>
+                    <resource>
+                        <directory>../service/src/main/resources</directory>
+                        <targetPath>WEB-INF/wsdl</targetPath>
+                        <includes>
+                            <include>*.wsdl</include>
+                        </includes>
+                    </resource>
+                    <resource>
+                        <directory>src/main/webapp/WEB-INF</directory>
+                        <targetPath>WEB-INF</targetPath>
+                        <includes>
+                            <include>*.*</include>
+                        </includes>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+      </plugins>
+      <!-- Name of the generated WAR file -->
+      <finalName>berichtenverwerker</finalName>
+   </build>
+</project>

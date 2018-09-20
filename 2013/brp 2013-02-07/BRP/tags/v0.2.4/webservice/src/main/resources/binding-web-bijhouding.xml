@@ -1,0 +1,48 @@
+<binding direction="output">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements" prefix="brp"/>
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+
+    <include path="classpath:/binding-business-bijhouding.xml" precompiled="true"/>
+
+    <!-- Verhuizing antwoord -->
+    <mapping name="migratie_Verhuizing_BijhoudingResponse" class="nl.bzk.brp.web.bijhouding.VerhuizingAntwoordBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding_RESPONSE"/>
+    </mapping>
+
+    <!-- Correctie Adres NL antwoord -->
+    <mapping name="migratie_CorrectieAdresBinnenNL_BijhoudingResponse" class="nl.bzk.brp.web.bijhouding.CorrectieAdresNLAntwoordBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding_RESPONSE"/>
+    </mapping>
+
+    <!-- Afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse -->
+    <mapping name="afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse" class="nl.bzk.brp.web.bijhouding.InschrijvingGeboorteAntwoordBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding_RESPONSE"/>
+    </mapping>
+
+    <!-- bijh:huwelijkPartnerschap_RegistratieHuwelijk_BijhoudingResponse -->
+    <mapping name="huwelijkPartnerschap_RegistratieHuwelijk_BijhoudingResponse" class="nl.bzk.brp.web.bijhouding.HuwelijkEnGeregistreerdPartnerschapAntwoordBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding_RESPONSE"/>
+    </mapping>
+    
+    <!-- bijh:overlijden_RegistratieOverlijden_BijhoudingResponse -->
+    <mapping name="overlijden_RegistratieOverlijden_BijhoudingResponse" class="nl.bzk.brp.web.bijhouding.RegistratieOverlijdenAntwoordBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding_RESPONSE"/>
+    </mapping>
+
+    <!-- Generieke structuur voor een bijhouding response bericht: -->
+    <mapping abstract="true" type-name="Objecttype_Bericht_Bijhouding_RESPONSE" class="nl.bzk.brp.web.bijhouding.AbstractBijhoudingAntwoordBericht">
+        <structure map-as="Objecttype_Bericht"/>
+        <collection name="meldingen" get-method="getMeldingen" item-type="nl.bzk.brp.model.validatie.Melding"
+                    usage="optional"/>
+        <collection name="overruleMeldingen"
+        		    get-method="getOverruledMeldingen" set-method="setOverruledMeldingen"
+                    item-type="nl.bzk.brp.model.validatie.OverruleMelding"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional" nillable="true">
+            <structure name="overrule" map-as="Objecttype_Overrule" usage="optional" nillable="true"/>
+        </collection>
+        <collection name="bijgehoudenPersonen" field="bijgehoudenPersonen" usage="optional">
+            <structure name="persoon" map-as="BijgehoudenPersoon" usage="optional"/>
+        </collection>
+    </mapping>
+</binding>

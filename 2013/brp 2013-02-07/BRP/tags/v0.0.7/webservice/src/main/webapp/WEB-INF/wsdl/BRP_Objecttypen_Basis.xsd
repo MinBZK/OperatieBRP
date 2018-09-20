@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<!-- Datum:24-4-2012 Status:Concept -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.brp.nl/BRP/0001" targetNamespace="http://www.brp.nl/BRP/0001" elementFormDefault="qualified" attributeFormDefault="unqualified" version="0001">
+	<include schemaLocation="BRP_Attribuuttypen.xsd"/>
+	<!-- Schema met de basis definities (supertypen) gebruikt in de berichten voor de BRP. -->
+	<!-- -->
+	<!-- xsd attributegroep nodig voor Structuur -->
+	<attribute name="cIDVerzendend" type="brp:Sleutelwaardetekst-s"/>
+	<attributeGroup name="structuur">
+		<attribute ref="brp:cIDVerzendend"/>
+	</attributeGroup>
+	<!-- -->
+	<!-- Structuur = Objecttype of Groep -->
+	<complexType name="Structuur"/>
+	<complexType name="StructuurIdentificeerbaar">
+		<attributeGroup ref="brp:structuur"/>
+	</complexType>
+	<complexType name="StructuurFormeleHistorie">
+		<complexContent>
+			<extension base="brp:StructuurIdentificeerbaar">
+				<sequence>
+					<element name="tijdstipRegistratie" type="brp:DatumTijd" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="tijdstipVervallen" type="brp:DatumTijd" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+	<complexType name="StructuurMaterieleHistorie">
+		<complexContent>
+			<extension base="brp:StructuurFormeleHistorie">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="datumEindeGeldigheid" type="brp:Datum" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</extension>
+		</complexContent>
+	</complexType>
+</schema>

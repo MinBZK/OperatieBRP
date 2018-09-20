@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="dal"
+    nsURI="http://dal/1.0" nsPrefix="dal">
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractDomeinObject" eSuperTypes="#//AbstractType">
+    <eOperations name="getImports"/>
+    <eOperations name="getInterface" eType="#//AbstractType"/>
+    <eOperations name="getSuperType" eType="#//AbstractType"/>
+    <eOperations name="getVerplichteProperties"/>
+    <eOperations name="getClassNamePrefix"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//AbstractType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="interface" eType="#//AbstractType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractType" eSuperTypes="#//DomeinModelElement">
+    <eOperations name="getPackageNaam"/>
+    <eOperations name="isEntiteit"/>
+    <eOperations name="getProperties"/>
+    <eOperations name="isExtensionPoint"/>
+    <eOperations name="getVolgnummer"/>
+    <eOperations name="getPackage" eType="#//JavaPackage"/>
+    <eOperations name="getPad"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="package" eType="#//JavaPackage"
+        derived="true" eOpposite="#//JavaPackage/types"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="properties" upperBound="-1"
+        eType="#//BeanProperty" containment="true" eOpposite="#//BeanProperty/containingType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BasisInterface" eSuperTypes="#//EntiteitType">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="properties" upperBound="-1"
+        eType="#//BeanProperty"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BasisPersistentClass" eSuperTypes="#//EntiteitType">
+    <eOperations name="getDatabaseNaam"/>
+    <eOperations name="getIdProperty" eType="#//BeanProperty"/>
+    <eOperations name="getSchemaNaam"/>
+    <eOperations name="getSequenceGeneratorName"/>
+    <eOperations name="getSequenceNaam"/>
+    <eOperations name="getManyToOneProperties"/>
+    <eOperations name="getOneToManyProperties"/>
+    <eOperations name="heeftManyToOneProperties"/>
+    <eOperations name="heeftOneToManyProperties"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BeanProperty" eSuperTypes="#//DomeinModelElement">
+    <eOperations name="getContainingType" eType="#//AbstractType"/>
+    <eOperations name="getDatabaseNaam"/>
+    <eOperations name="getGetter"/>
+    <eOperations name="getAdder"/>
+    <eOperations name="getRemover"/>
+    <eOperations name="getOpposite"/>
+    <eOperations name="getSetter"/>
+    <eOperations name="getType" eType="#//AbstractType"/>
+    <eOperations name="getTypeNaam"/>
+    <eOperations name="getTypePackage"/>
+    <eOperations name="getTypeSpecificatie"/>
+    <eOperations name="isCollectie"/>
+    <eOperations name="isIdentifier"/>
+    <eOperations name="isManyToOne"/>
+    <eOperations name="isStatusHistorieIndicator"/>
+    <eOperations name="isVerplicht"/>
+    <eOperations name="getConstraintDefinitie" eType="#//ConstraintDefinitie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//AbstractType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="containingType" eType="#//AbstractType"
+        derived="true" eOpposite="#//AbstractType/properties"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="opposite" eType="#//BeanProperty"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="containingType" eType="#//AbstractType"
+        derived="true" eOpposite="#//AbstractType/properties"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ConstraintDefinitie" eSuperTypes="#//AbstractType">
+    <eOperations name="getStandardJavaType" eType="#//StandardJavaType"/>
+    <eOperations name="getLengteArgument">
+      <eParameters name="grens"/>
+      <eParameters name="waarde"/>
+    </eOperations>
+    <eOperations name="getSizeAnnotatie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="standardJavaType" eType="#//StandardJavaType"
+        eOpposite="#//StandardJavaType/constraintDefinitie"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DomeinModelElement">
+    <eOperations name="getNaam" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="naam" ordered="false" lowerBound="1"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString" defaultValueLiteral=""/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="EntiteitType" eSuperTypes="#//AbstractDomeinObject"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Enumeratie" eSuperTypes="#//AbstractDomeinObject">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="" upperBound="-1" eType="#//BeanProperty"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FactoryInterface" eSuperTypes="#//AbstractType"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Interface" eSuperTypes="#//EntiteitType">
+    <eOperations name="getImplementation" eType="#//PersistentClass"/>
+    <eOperations name="getMeervoudsNaam"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="implementation" eType="#//PersistentClass"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="JavaDomeinModel" eSuperTypes="#//JavaPackage"/>
+  <eClassifiers xsi:type="ecore:EClass" name="JavaPackage" eSuperTypes="#//DomeinModelElement">
+    <eOperations name="getContainingPackage"/>
+    <eOperations name="getPad"/>
+    <eOperations name="getQualifiedNaam"/>
+    <eOperations name="getSubPackages"/>
+    <eOperations name="getTypes"/>
+    <eOperations name="getExtensionPoints"/>
+    <eOperations name="getAllExtensionPoints"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subPackages" upperBound="-1"
+        eType="#//JavaPackage" containment="true" eOpposite="#//JavaPackage/containingPackage"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="types" upperBound="-1"
+        eType="#//AbstractType" containment="true" eOpposite="#//AbstractType/package"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="containingPackage" eType="#//JavaPackage"
+        derived="true" eOpposite="#//JavaPackage/subPackages"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="" eType="#//AbstractType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PersistentClass" eSuperTypes="#//BasisPersistentClass">
+    <eOperations name="getHistorieStatussen"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PersistentObjectFactory" eSuperTypes="#//AbstractType">
+    <eOperations name="getImports"/>
+    <eOperations name="isEntiteit"/>
+    <eOperations name="getFactoryInterface" eType="#//FactoryInterface"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="factoryInterface" eType="#//FactoryInterface"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="StandardJavaType" eSuperTypes="#//AbstractType">
+    <eOperations name="getConstraintDefinitie" eType="#//ConstraintDefinitie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="constraintDefinitie" eType="#//ConstraintDefinitie"
+        eOpposite="#//ConstraintDefinitie/standardJavaType"/>
+  </eClassifiers>
+</ecore:EPackage>

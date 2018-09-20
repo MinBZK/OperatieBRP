@@ -1,0 +1,149 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.bzk.brp</groupId>
+	<artifactId>brp-db</artifactId>
+	<version>1.0.3</version>
+	<packaging>jar</packaging>
+	<name>brp-db</name>
+	<parent>
+		<groupId>nl.bzk.brp</groupId>
+		<artifactId>root-pom</artifactId>
+		<version>0.1.17</version>
+	</parent>
+
+	<!---
+	 | Men kan de verschillende profiles actieveren:
+	 | 		1) -P create-db
+	 |		2) -Dcreate-db=true
+	 |   	3) In de persoonlijke .m2/settings.xml
+	 |
+	 | Opgenomen is ook een 'logische dependency' naar de whitebox filler
+	 +-->
+	<properties>
+		<svn.url>https://www.modernodam.nl/svn/brp-db/</svn.url>
+		<dbversion>${artifactId}-${version}</dbversion>
+		<dburl>jdbc:postgresql://localhost/brp</dburl>
+		<dbusername>brp</dbusername>
+		<dbpassword>brp</dbpassword>
+   		<timestamp>${maven.build.timestamp}</timestamp>
+   		<maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+		<whiteboxfiller.version>3.2.7</whiteboxfiller.version>
+	</properties>
+
+
+	<dependencies>
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.1-901.jdbc4</version>
+		</dependency>
+		<dependency>
+			<groupId>nl.bzk.brp.whitebox.vulling</groupId>
+			<artifactId>whiteboxfiller</artifactId>
+			<version>${whiteboxfiller.version}</version>
+            <scope>provided</scope>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>create-db</id>
+			<activation>
+				<property>
+					<name>create-db</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>sql-maven-plugin</artifactId>
+						<version>1.5</version>
+						<dependencies>
+						  <dependency>
+							<groupId>postgresql</groupId>
+							<artifactId>postgresql</artifactId>
+							<version>9.1-901.jdbc4</version>
+						  </dependency>
+						</dependencies>
+						<configuration>
+							<driver>org.postgresql.Driver</driver>
+							<url>${dburl}</url>
+							<username>${dbusername}</username>
+							<password>${dbpassword}</password>
+						</configuration>
+						<executions>
+							<execution>
+								<id>create-db</id>
+								<phase>compile</phase>
+								<goals>
+									<goal>execute</goal>
+								</goals>
+								<configuration>
+									<autocommit>false</autocommit>
+									<srcFiles>
+										<srcFile>target/classes/db/00-brp.sql</srcFile>
+										<srcFile>target/classes/db/01-stamgegevensStatisch.sql</srcFile>
+										<srcFile>target/classes/db/02-stamgegevensLand.sql</srcFile>
+										<srcFile>target/classes/db/03-stamgegevensNationaliteit.sql</srcFile>
+										<srcFile>target/classes/db/04-stamgegevensPlaats.sql</srcFile>
+										<srcFile>target/classes/db/05-stamgegevensPartijGemeente.sql</srcFile>
+										<srcFile>target/classes/db/06-stamgegevensUpdateSoortBericht.sql</srcFile>
+										<srcFile>target/classes/db/07-stamgegevensVerkrijgingVerliesNLNationaliteit.sql</srcFile>
+										<srcFile>target/classes/db/08-stamgegevensSoortDocument.sql</srcFile>
+										<srcFile>target/classes/db/09-stamgegevensReisDocument.sql</srcFile>
+										<srcFile>target/classes/db/10-stamgegevensVerblijfsTitel.sql</srcFile>
+										<srcFile>target/classes/db/11-stamgegevensVoorvoegsels.sql</srcFile>
+										<srcFile>target/classes/db/20-brpIndices.sql</srcFile>
+										<srcFile>target/classes/db/21-brp-indexen.sql</srcFile>
+										<srcFile>target/classes/db/90-brp-cascade-delete.sql</srcFile>
+										<srcFile>target/classes/db/99-brp-version.sql</srcFile>
+									</srcFiles>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+				  <archive>
+					<index>true</index>
+					<manifest>
+						<addDefaultSpecificationEntries />
+					</manifest>
+					<manifestEntries>
+					  	<url>${svn.url}</url>
+						<version>${version}</version>
+						<project-name>${name}</project-name>
+						<artifactId>${artifactId}</artifactId>
+						<dbversion>${dbversion}</dbversion>
+					</manifestEntries>
+				  </archive>
+				</configuration>
+      		</plugin>
+		</plugins>
+	</build>
+	<scm>
+		<connection>scm:svn:https://www.modernodam.nl/svn/brp-code/brp-db/tags/v1.0.3</connection>
+	</scm>
+</project>

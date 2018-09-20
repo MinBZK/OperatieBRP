@@ -1,0 +1,50 @@
+<binding package="nl.bzk.brp" direction="output">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0100" default="all" prefix="brp"/>
+    <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" prefix="stuf"/>
+
+    <include path="classpath:/binding-model-bevraging.xml" precompiled="true"/>
+    
+    <!-- Stuurgegevens hieruit nodig -->
+    <include path="classpath:/binding-stuf.xml" precompiled="true"/>
+
+    <mapping name="ALG_GeefDetailsPersoon_VR" class="nl.bzk.brp.web.bevraging.VraagDetailsPersoonAntwoordBericht">
+ 		<structure map-as="Objecttype_AbstractAntwoordBericht"/>
+ 		<structure name="antwoord" test-method="isPersoonGevonden" usage="optional">
+ 			<value name="entiteittype" constant="Antwoord" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        	<structure name="persoon" get-method="getPersoon" map-as="Objecttype_DetailsPersoon_AntwoordA"/>
+        </structure>
+    </mapping>
+
+    <mapping name="ALG_GeefPersonenOpAdresMetBetrokkenheden_ViR" class="nl.bzk.brp.web.bevraging.VraagPersonenOpAdresInclusiefBetrokkenhedenAntwoordBericht">
+ 		<structure map-as="Objecttype_AbstractAntwoordBericht"/>
+        <structure name="antwoord" test-method="isPersoonGevonden" usage="optional">
+            <value name="entiteittype" constant="Antwoord" style="attribute"
+                   ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+            <collection get-method="getPersonen"
+                        item-type="nl.bzk.brp.model.operationeel.kern.PersoonModel" usage="optional">
+                <structure name="persoon" map-as="Referentie_PersoonOpAdresMetBetrokkenheden_Antwoord" usage="optional"/>
+            </collection>
+        </structure>
+    </mapping>
+
+    <mapping name="ALG_BepaalKandidaatVader_ViR" class="nl.bzk.brp.web.bevraging.VraagKandidaatVaderAntwoordBericht">
+        <structure map-as="Objecttype_AbstractAntwoordBericht"/>
+        <structure name="antwoord" test-method="isPersoonGevonden" usage="optional">
+        	<value name="entiteittype" constant="Antwoord" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+	        <collection get-method="getPersonen"
+	                    item-type="nl.bzk.brp.model.operationeel.kern.PersoonModel" usage="optional">
+	            <structure name="persoon" map-as="Referentie_PersoonKandidaatVader_Antwoord" usage="optional"/>	         
+	        </collection>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_AbstractAntwoordBericht" class="nl.bzk.brp.web.AbstractAntwoordBericht">
+     	<structure name="stuurgegevens" get-method="getStuurgegevens" set-method="setStuurgegevens" type="nl.bzk.brp.model.bericht.ber.BerichtStuurgegevensGroepBericht" map-as="StuurgegevensDu02_Vraag"/>
+     	<structure name="resultaat" map-as="Groep_BerichtResultaat_Bevraging" get-method="getResultaat" set-method="setResultaat"/>
+        <collection name="meldingen" get-method="getMeldingen" item-type="nl.bzk.brp.model.bericht.ber.BerichtMeldingBericht" usage="optional">
+        	<structure map-as="Container_BerichtMeldingen_Bevraging"/>
+        </collection>
+    </mapping>
+
+</binding>

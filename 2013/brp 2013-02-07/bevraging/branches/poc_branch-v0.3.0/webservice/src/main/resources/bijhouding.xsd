@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:bijh="http://www.brp.bzk.nl/bijhouding/ws/service/model"
+        xmlns:brp="http://www.brp.bzk.nl/bevraging/ws/basis"
+        targetNamespace="http://www.brp.bzk.nl/bijhouding/ws/service/model"
+        elementFormDefault="qualified" attributeFormDefault="unqualified" version="000001">
+
+    <import namespace="http://www.brp.bzk.nl/bevraging/ws/basis" schemaLocation="brp_basis.xsd" />
+
+    <element name="bijhouding" type="bijh:bijhouding"/>
+    <element name="bijhoudingResultaat" type="bijh:bijhoudingResultaat"/>
+    <complexType name="bijhouding">
+        <sequence>
+            <element name="afzenderId" type="brp:PartijId" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="abonnementId" type="brp:AbonnementId" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="tijdstipVerzonden" type="brp:DatTijd" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element type="integer" name="soortActieID"/>
+            <element name="verhuizing" type="bijh:verhuizing"/>
+        </sequence>
+    </complexType>
+    <complexType name="verhuizing">
+        <sequence>
+            <element type="brp:Persoon" name="aanmelder"/>
+            <element type="bijh:Persoon" name="verhuizer"/>
+            <element type="brp:Adres" name="nieuwAdres"/>
+            <element type="bijh:document" name="document"/>
+            <element type="date" name="datumAanvGeldigheid"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="document">
+        <sequence>
+            <element type="integer" name="soortDocumentID"/>
+            <element name="omschrijvingDoc" minOccurs="0">
+                <simpleType>
+                    <restriction base="string">
+                        <maxLength value="120"/>
+                    </restriction>
+                </simpleType>
+            </element>
+        </sequence>
+    </complexType>
+
+    <!-- Gebaseerd op brp:persoon, maar dan alleen met een BSN -->
+    <complexType name="Persoon">
+        <complexContent>
+            <restriction base="brp:Persoon">
+                <sequence>
+                    <element name="bsn" type="brp:BSN"/>
+                </sequence>
+            </restriction>
+        </complexContent>
+    </complexType>
+
+    <simpleType name="bijhoudingResultaat">
+        <restriction base="string">
+            <enumeration value="GOED"/>
+            <enumeration value="FOUT"/>
+        </restriction>
+    </simpleType>
+
+    <complexType name="Adres">
+        <sequence>
+            <element name="afgekorteNaamOpenbareRuimte" type="brp:AfgekorteNOR" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="postcode" type="brp:Postcode" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="gemeenteDeel" type="brp:Gemdeel" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="huisletter" type="brp:Huisletter" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="huisnummer" type="brp:Huisnr" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="huisnummerToevoeging" type="brp:Huisnrtoevoeging" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="LocatieTOVAdres" type="brp:LocOms" minOccurs="0" maxOccurs="1" nillable="false" />
+        </sequence>
+        <attribute name="soortAdresCode" type="string" use="optional" />
+        <attribute name="soortAdresNaam" type="string" use="optional" />
+    </complexType>
+</schema>

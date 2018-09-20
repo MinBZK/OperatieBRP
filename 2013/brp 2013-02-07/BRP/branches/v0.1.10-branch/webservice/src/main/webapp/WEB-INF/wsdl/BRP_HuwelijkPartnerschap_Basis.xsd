@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum:22-06-2012 Status:Concept -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.bprbzk.nl/BRP/0001" targetNamespace="http://www.bprbzk.nl/BRP/0001" elementFormDefault="qualified" attributeFormDefault="unqualified" version="000102">
+	<include schemaLocation="BRP_Bijhouding_Basis.xsd"/>
+	<!-- -->
+	<!-- Registratie Huwelijk/GeregistreerdPartnerschap -->
+	<complexType name="View_RegistratieHuwelijk_HuwelijkPartnerschap">
+		<complexContent>
+			<restriction base="brp:View_RegistratieHuwelijk">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="brp:DatumTijd" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="huwelijk" type="brp:View_Huwelijk_HuwelijkPartnerschap" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Huwelijk_HuwelijkPartnerschap">
+		<complexContent>
+			<restriction base="brp:View_Huwelijk">
+				<sequence>
+					<element name="datumAanvang" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="gemeenteAanvangCode" type="brp:Gemeentecode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="woonplaatsAanvangCode" type="brp:Woonplaatscode" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="betrokkenheden" type="brp:Container_RelatieBetrokkenheden_Huwelijk" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_RelatieBetrokkenheden_Huwelijk">
+		<complexContent>
+			<restriction base="brp:Container_RelatieBetrokkenheden">
+				<sequence>
+					<element name="partner" type="brp:View_Partner_HuwelijkPartnerschap" nillable="false" minOccurs="2" maxOccurs="2"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="View_Partner_HuwelijkPartnerschap">
+		<complexContent>
+			<restriction base="brp:View_Partner">
+				<sequence>
+					<element name="persoon" type="brp:Referentie_Persoon" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Wijziging Geslachtsnaamcomponent -->
+	<complexType name="View_WijzigingGeslachtsnaamcomponent_HuwelijkPartnerschap">
+		<complexContent>
+			<restriction base="brp:View_WijzigingGeslachtsnaamcomponent">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="brp:DatumTijd" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objectype_Persoon_WijzigingGeslachtsnaamcomponent" nillable="true" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objectype_Persoon_WijzigingGeslachtsnaamcomponent">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="identificatienummers" type="brp:Groep_PersoonIdentificatienummers_Referentie" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="afgeleidAdministratief" type="brp:Groep_PersoonAfgeleidAdministratief_Referentie" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="geslachtsnaamcomponenten" type="brp:Container_PersoonGeslachtsnaamcomponenten_HuwelijkPartnerschap" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Container_PersoonGeslachtsnaamcomponenten_HuwelijkPartnerschap">
+		<complexContent>
+			<restriction base="brp:Container_PersoonGeslachtsnaamcomponenten_Bijhouding">
+				<sequence>
+					<element name="geslachtsnaamcomponent" type="brp:Objecttype_PersoonGeslachtsnaamcomponent_HuwelijkPartnerschap" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Nog te bepalen het volgende: Wijizging Geslachtsnaamcomponent bij RegistratieHuwelijk alleen van toepassing bij personen met een vreemde nationaliteit -->
+	<!-- Welke gegevens in dat geval wel/niet van toepassing nog definitief te bepalen. Aanname is nu alles excl. Titel/Predikaat -->
+	<complexType name="Objecttype_PersoonGeslachtsnaamcomponent_HuwelijkPartnerschap">
+		<complexContent>
+			<restriction base="brp:Objecttype_PersoonGeslachtsnaamcomponent_Bijhouding">
+				<sequence>
+					<element name="volgnummer" type="brp:Volgnummer" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="voorvoegsel" type="brp:Voorvoegsel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="scheidingsteken" type="brp:Scheidingsteken" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="naam" type="brp:Geslachtsnaamcomponent" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Wijziging Naamgebruik -->
+	<complexType name="View_WijzigingNaamgebruik_HuwelijkPartnerschap">
+		<complexContent>
+			<restriction base="brp:View_WijzigingNaamgebruik">
+				<sequence>
+					<element name="datumAanvangGeldigheid" type="brp:Datum" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="brp:DatumTijd" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bronnen" type="brp:Container_ActieBronnen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="persoon" type="brp:Objectype_Persoon_WijzigingNaamgebruik" nillable="true" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Objectype_Persoon_WijzigingNaamgebruik">
+		<complexContent>
+			<restriction base="brp:Objecttype_Persoon">
+				<sequence>
+					<element name="identificatienummers" type="brp:Groep_PersoonIdentificatienummers_Referentie" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="aanschrijving" type="brp:Groep_PersoonAanschrijving_HuwelijkPartnerschap" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="afgeleidAdministratief" type="brp:Groep_PersoonAfgeleidAdministratief_Referentie" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<complexType name="Groep_PersoonAanschrijving_HuwelijkPartnerschap">
+		<complexContent>
+			<restriction base="brp:Groep_PersoonAanschrijving_Bijhouding">
+				<sequence>
+					<element name="wijzeVanGebruikGeslachtsnaamEchtgenootGeregistreerdPartnerCode" type="brp:WijzeGebruikGeslachtsnaamCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="indicatieAlgoritmischAfgeleid" type="brp:JaNee" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="voorvoegsel" type="brp:Voorvoegsel" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="scheidingsteken" type="brp:Scheidingsteken" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="geslachtsnaam" type="brp:Geslachtsnaam" nillable="true" minOccurs="0" maxOccurs="1"/>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

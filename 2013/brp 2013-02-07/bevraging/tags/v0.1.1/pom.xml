@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+<!--
+
+03/11/2011 Bahui:
+
+Generate with:
+
+>mvn clean eclipse:clean eclipse:eclipse  generate-sources
+
+then refresh and clean all eclispe projects
+
+-->
+
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>root-pom</artifactId>
+        <version>0.1.2</version>
+    </parent>
+
+    <groupId>nl.bzk.brp.bevraging</groupId>
+    <artifactId>parent</artifactId>
+    <version>0.1.1</version>
+    <name>Bevraging Service BRP - Top-level POM</name>
+    <description>
+	    Top level pom en dus parent project van de BRP Bevraging Service.
+    </description>
+    <packaging>pom</packaging>
+
+    <modules>
+        <module>model</module>
+        <module>dataaccess</module>
+        <module>business</module>
+        <module>webservice</module>
+    </modules>
+
+    <developers>
+        <developer>
+            <id>tiblo</id>
+            <name>Tim Blommerde</name>
+            <email>t.blommerde@sdb.nl</email>
+            <organization>SDB</organization>
+            <organizationUrl>http://www.sdb.nl/</organizationUrl>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>ermal</id>
+            <name>Eric Jan Malotaux</name>
+            <email>Eric.Jan.Malotaux@ordina.nl&gt;</email>
+            <organization>Ordina</organization>
+            <organizationUrl>http://www.ordina.nl/</organizationUrl>
+            <timezone>+1</timezone>
+        </developer>
+        <developer>
+            <id>bahui</id>
+            <name>Bas Huisman</name>
+            <email>bashuisman@lostlemon.nl</email>
+            <organization>Lost Lemon</organization>
+            <organizationUrl>http://www.lostlemon.nl/</organizationUrl>
+            <timezone>+1</timezone>
+        </developer>
+    </developers>
+
+    <properties>
+        <sonar.exclusions>**/package-info.java</sonar.exclusions>
+        <!--
+            De default JDBC properties bedoeld voor lokaal ontwikkelen met een lokale PostgreSQL database.
+            Voor Unit Testen in de Continuous Integration omgeving is er een "ci" profile.
+        -->
+        <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+        <maven.jdbc.url>jdbc:postgresql://localhost/brp</maven.jdbc.url>
+        <maven.jdbc.username>brp</maven.jdbc.username>
+        <maven.jdbc.password>brp</maven.jdbc.password>
+    </properties>
+
+    <build>
+        <resources>
+            <!--
+                Alleen de property files worden gefilterd voor de veiligheid. Anders kunnen files onbedoeld gewijzigd worden.
+                Het is al gebleken dat bijvoorbeeld de *.jks keystores door filtering onbruikbaar gemaakt worden.
+            -->
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <includes>
+                    <include>*.properties</include>
+                </includes>
+                <filtering>true</filtering>
+            </resource>
+            <!--
+                Niet-gefilterde files moeten toch expliciet als resources worden opgenomen; anders worden ze niet meegekopieëerd.
+            -->
+            <resource>
+                <directory>${basedir}/src/main/resources</directory>
+                <excludes>
+                    <exclude>*.properties</exclude>
+                </excludes>
+                <filtering>false</filtering>
+            </resource>
+        </resources>
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>2.8</version>
+                    <configuration>
+                        <projectNameTemplate>BRP Bevraging - ${project.artifactId}</projectNameTemplate>
+                    </configuration>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+    </build>
+    <profiles>
+        <profile>
+            <id>ci</id>
+            <activation>
+                <property>
+                    <name>BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <properties>
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://fac-db05.modernodam.nl/brp</maven.jdbc.url>
+                <maven.jdbc.username>jenkins</maven.jdbc.username>
+                <maven.jdbc.password>0Hudson0</maven.jdbc.password>
+            </properties>
+
+        </profile>
+        <profile>
+            <id>test</id>
+            <properties>
+                <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+                <maven.jdbc.url>jdbc:postgresql://btst-db/brp</maven.jdbc.url>
+                <maven.jdbc.username>brp</maven.jdbc.username>
+                <maven.jdbc.password>brp</maven.jdbc.password>
+            </properties>
+        </profile>
+
+    </profiles>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/bevraging/tags/v0.1.1</connection>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </repository>
+    </repositories>
+
+</project>
+

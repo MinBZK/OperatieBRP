@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+                        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+                        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd  ">
+	
+	<context:property-placeholder location="classpath:monitor.properties" />
+	<context:annotation-config />
+	<context:component-scan base-package="nl.bzk.brp.monitor.web" />
+	<context:component-scan base-package="nl.bzk.brp.monitor.schedular" />
+
+	<task:scheduler id="taskScheduler" />
+	<task:executor id="taskExecutor" pool-size="1" />
+	<task:annotation-driven executor="taskExecutor"
+		scheduler="taskScheduler" />
+
+	<!-- bean id="JmxClient" class="nl.bzk.brp.monitor.schedular.JmxClient"> 
+		<constructor-arg value="service:jmx:rmi:///jndi/rmi://:9999/jmxrmi" /> </bean -->
+
+	<!-- Imports the configurations of the different infrastructure systems 
+		of the application -->
+	<import resource="classpath:jndi-datasource-context.xml" />
+	<import resource="webmvc-context.xml" />
+	<import resource="dataaccess-beans.xml" />
+
+</beans>

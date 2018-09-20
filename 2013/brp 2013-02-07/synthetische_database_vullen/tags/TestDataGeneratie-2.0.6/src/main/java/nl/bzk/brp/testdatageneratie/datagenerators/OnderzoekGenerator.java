@@ -1,0 +1,122 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.brp.testdatageneratie.datagenerators;
+
+import static nl.bzk.brp.testdatageneratie.RandomService.isFractie;
+
+import java.util.concurrent.Callable;
+
+import nl.bzk.brp.testdatageneratie.BronnenRepo;
+import nl.bzk.brp.testdatageneratie.HibernateSessionFactoryProvider;
+import nl.bzk.brp.testdatageneratie.PersoonIds;
+import nl.bzk.brp.testdatageneratie.RandomService;
+import nl.bzk.brp.testdatageneratie.Settings;
+import nl.bzk.brp.testdatageneratie.domain.kern.Gegeveninonderzoek;
+import nl.bzk.brp.testdatageneratie.domain.kern.HisOnderzoek;
+import nl.bzk.brp.testdatageneratie.domain.kern.Onderzoek;
+import nl.bzk.brp.testdatageneratie.domain.kern.Personderzoek;
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.log4j.Logger;
+import org.hibernate.Session;
+
+
+public class OnderzoekGenerator implements Callable<Boolean> {
+
+    private static Logger    log = Logger.getLogger(OnderzoekGenerator.class);
+    private final int        numberOfRecordsToProcess;
+    private final int        batchBlockSize;
+    private final PersoonIds persoonIds;
+
+    public OnderzoekGenerator(final int numberOfRecordsToProcess, final int batchBlockSize, final PersoonIds persoonIds)
+    {
+        this.numberOfRecordsToProcess = numberOfRecordsToProcess;
+        this.batchBlockSize = batchBlockSize;
+        this.persoonIds = persoonIds;
+    }
+
+    @Override
+    public Boolean call() {
+
+        Session kernSession = null;
+        try {
+            kernSession = HibernateSessionFactoryProvider.getInstance().getKernFactory().openSession();
+            kernSession.beginTransaction();
+
+            log.info("@@@@@@@@@ Onderzoeken / Gegevens in onderzoek @@@@@@@@@@@@@@@@");
+
+            for (long i = 1; i <= numberOfRecordsToProcess; i++) {
+
+                nl.bzk.brp.testdatageneratie.domain.bronnen.OnderzoekId onderzoekBron =
+                    BronnenRepo.getBron(nl.bzk.brp.testdatageneratie.domain.bronnen.Onderzoek.class).getId();
+
+                Onderzoek onderzoek = new Onderzoek();
+                onderzoek.setDatbegin(onderzoekBron.getStart());
+                onderzoek.setDateinde(onderzoekBron.getEind());
+
+                if (isFractie(2))
+                    onderzoek.setOms(RandomStringUtils.randomAlphabetic(50));
+
+                if (Settings.SAVE) {
+                    kernSession.save(onderzoek);
+                    kernSession.save(new HisOnderzoek(onderzoek));
+                }
+
+                Gegeveninonderzoek gegeveninonderzoek = new Gegeveninonderzoek();
+                gegeveninonderzoek.setOnderzoek(onderzoek);
+                gegeveninonderzoek.setDbobject(onderzoekBron.getDbobject());
+                gegeveninonderzoek.setIdent(RandomService.random.nextLong());
+
+                if (Settings.SAVE) {
+                    kernSession.save(gegeveninonderzoek);
+                }
+
+                int personderzoekAantal = 1;
+                if (isFractie(2)) {
+                    personderzoekAantal = 2;
+                }
+
+                Long vorigePersoonId = null;
+                for (int j = 1; j <= personderzoekAantal; j++) {
+                    Long persoonId = RandomService.nextLong(persoonIds.getRangeSize()) + persoonIds.getMin();
+                    if (!persoonId.equals(vorigePersoonId)) {
+                        Personderzoek personderzoek = new Personderzoek();
+                        personderzoek.setOnderzoek(onderzoek);
+                        personderzoek.setPers(persoonId);
+
+                        vorigePersoonId = persoonId;
+
+                        if (Settings.SAVE) {
+                            kernSession.save(personderzoek);
+                        }
+                    }
+                }
+
+                if (i % batchBlockSize == 0) {
+                    log.debug(i);
+                    if (Settings.SAVE) {
+                        kernSession.getTransaction().commit();
+                        kernSession.clear();
+                        kernSession.getTransaction().begin();
+                    }
+                }
+            }
+
+            log.info("########## Onderzoeken / Gegevens in onderzoek ##############");
+
+            kernSession.getTransaction().commit();
+        } finally {
+            if (kernSession != null)
+                try {
+                    kernSession.close();
+                } catch (RuntimeException e) {
+                    log.error("", e);
+                }
+        }
+        return true;
+    }
+
+}

@@ -1,0 +1,49 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.copy.model.groep.operationeel.historisch;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import nl.bzk.copy.model.groep.operationeel.AbstractPersoonGeboorteGroep;
+import nl.bzk.copy.model.groep.operationeel.historisch.basis.AbstractPersoonGeboorteHisModel;
+import nl.bzk.copy.model.objecttype.operationeel.PersoonModel;
+
+
+/**
+ * User implementatie van PersoonGeboorteHis.
+ */
+@Entity
+@Table(schema = "kern", name = "His_PersGeboorte")
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public class PersoonGeboorteHisModel extends AbstractPersoonGeboorteHisModel {
+
+    /**
+     * Default constructor tbv hibernate.
+     */
+    @SuppressWarnings("unused")
+    private PersoonGeboorteHisModel() {
+        super();
+    }
+
+    /**
+     * .
+     *
+     * @param persoonGeboorteGroep .
+     * @param persoonModel         .
+     */
+    public PersoonGeboorteHisModel(final AbstractPersoonGeboorteGroep persoonGeboorteGroep,
+                                   final PersoonModel persoonModel)
+    {
+        super(persoonGeboorteGroep, persoonModel);
+    }
+
+
+}

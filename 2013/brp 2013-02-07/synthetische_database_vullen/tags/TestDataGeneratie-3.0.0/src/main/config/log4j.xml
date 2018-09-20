@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<!DOCTYPE log4j:configuration SYSTEM "log4j.dtd">
+
+<log4j:configuration xmlns:log4j="http://jakarta.apache.org/log4j/">
+
+    <appender name="ConsoleAppender" class="org.apache.log4j.ConsoleAppender">
+        <param name="Target" value="System.out" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} %-5p (%-18C{1}:%-3L) %m%n" />
+            <!-- %d %-5p %c %x - %m%n -->
+        </layout>
+    </appender>
+
+    <appender name="DebugFileAppender" class="org.apache.log4j.RollingFileAppender">
+        <param name="File" value="syndbgen-debug.log" />
+        <param name="MaxBackupIndex" value="0" />
+        <param name="MaxFileSize" value="100KB" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} %-5p (%-18C{1}:%-3L) %m%n" />
+            <!-- %d %-5p %c %x - %m%n -->
+        </layout>
+    </appender>
+
+    <appender name="InfoFileAppender" class="org.apache.log4j.FileAppender">
+        <param name="File" value="syndbgen-info.log" />
+        <param name="Append" value="false" />
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{dd MMM yyyy HH:mm:ss} %-5p (%-18C{1}:%-3L) %m%n" />
+            <!-- %d %-5p %c %x - %m%n -->
+        </layout>
+        <filter class="org.apache.log4j.varia.LevelRangeFilter">
+            <param name="levelMin" value="INFO" />
+            <param name="levelMax" value="FATAL" />
+        </filter>
+    </appender>
+
+    <logger name="nl.bzk.brp">
+        <level value="debug" />
+    </logger>
+
+    <logger name="org.hibernate">
+        <level value="warn" />
+    </logger>
+
+    <logger name="org.hibernate.SQL">
+        <level value="warn" />
+    </logger>
+
+    <root>
+        <priority value="warn" />
+        <appender-ref ref="ConsoleAppender" />
+        <!--appender-ref ref="DebugFileAppender" /-->
+        <appender-ref ref="InfoFileAppender" />
+    </root>
+
+</log4j:configuration>

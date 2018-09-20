@@ -1,0 +1,105 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>nl.bzk.brp.generator</groupId>
+    <artifactId>generator</artifactId>
+    <version>0.0.10-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Generator</name>
+    <description>Generatoren project om vanuit het BMR (Metaregister) de artifacten te genereren nodig om het BRP te bouwen.</description>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jdk.version>1.6</jdk.version>
+        <slf4j.version>1.6.4</slf4j.version>
+        <metaregister.version>1.0.22</metaregister.version>
+    </properties>
+    <modules>
+		<module>common</module>
+		<module>java-generator</module>
+		<module>maven-metaregister-plugin</module>
+	</modules>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>false</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>nl.bzk.brp.metaregister</groupId>
+                                    <artifactId>database</artifactId>
+                                    <type>zip</type>
+                                    <version>${metaregister.version}</version>
+                                    <classifier>database</classifier>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/database</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/trunk/generator</connection>
+    </scm>
+
+    <repositories>
+
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </repository>
+
+    </repositories>
+
+    <distributionManagement>
+
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+
+        <snapshotRepository>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </snapshotRepository>
+
+    </distributionManagement>
+
+</project>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.brp.nl/basis" xmlns:brp_nat="http://www.brp.nl/basis/nationaliteit"
+    xmlns:brp_vn="http://www.brp.nl/actie/verwijderennationaliteit" targetNamespace="http://www.brp.nl/actie/verwijderennationaliteit"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+    <import namespace="http://www.brp.nl/basis" schemaLocation="BRP_Basis.xsd" />
+    <import namespace="http://www.brp.nl/basis/nationaliteit" schemaLocation="BRP_Basis_Nationaliteit.xsd" />
+
+    <element name="VerwijderenNationaliteit">
+        <complexType>
+            <sequence>
+                <element name="Actie" type="brp_nat:Actie" nillable="false" minOccurs="1" maxOccurs="1" />
+                <element name="Pers" type="brp_vn:PersVerwijderenNationaliteit" nillable="false" minOccurs="1"
+                    maxOccurs="1" />
+            </sequence>
+        </complexType>
+    </element>
+
+    <complexType name="PersVerwijderenNationaliteit">
+        <complexContent>
+            <restriction base="brp_nat:Pers">
+                <sequence>
+                    <element name="PersNation" type="brp_vn:PersNationVerwijderenNationaliteit" nillable="false"
+                        minOccurs="1" maxOccurs="1" />
+                </sequence>
+                <attribute name="soort" type="string" use="required" fixed="Object" />
+                <attribute name="actie" type="string" use="required" fixed="Identificatie" />
+                <attribute name="link" type="string" use="required" fixed="Pers" />
+            </restriction>
+        </complexContent>
+    </complexType>
+
+    <complexType name="PersNationVerwijderenNationaliteit">
+        <complexContent>
+            <restriction base="brp_nat:PersNation">
+                <sequence>
+                    <element name="ID" type="brp:PersNationID-e" nillable="false" minOccurs="1" maxOccurs="1" />
+                </sequence>
+                <attribute name="soort" type="string" use="required" fixed="Object" />
+                <attribute name="actie" type="string" use="required" fixed="Verwijdering" />
+            </restriction>
+        </complexContent>
+    </complexType>
+
+</schema>

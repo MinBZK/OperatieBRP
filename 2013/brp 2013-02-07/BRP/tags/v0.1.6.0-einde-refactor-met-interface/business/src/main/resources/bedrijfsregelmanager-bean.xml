@@ -1,0 +1,37 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+            http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- Bedrijfsregel manager configuratie -->
+    <bean id="bedrijfsregelManager"
+          class="nl.bzk.brp.business.bedrijfsregels.BedrijfsRegelManagerImpl">
+
+        <constructor-arg index="0">
+            <map>
+                <entry key="#{T(nl.bzk.brp.model.gedeeld.SoortActie).VERHUIZING}">
+                    <list>
+                        <bean class="nl.bzk.brp.business.bedrijfsregels.impl.migratie.MR0502"/>
+                        <bean class="nl.bzk.brp.business.bedrijfsregels.impl.migratie.BRAL9003"/>
+                    </list>
+                </entry>
+                <entry key="#{T(nl.bzk.brp.model.gedeeld.SoortActie).AANGIFTE_GEBOORTE}">
+                    <list>
+                        <bean class="nl.bzk.brp.business.bedrijfsregels.impl.afstamming.BRBER00121"/>
+                        <bean class="nl.bzk.brp.business.bedrijfsregels.impl.afstamming.SamengesteldeNaamAfleiding"/>
+                        <bean class="nl.bzk.brp.business.bedrijfsregels.impl.afstamming.BijhoudingsGemeenteAfleiding"/>
+                        <bean class="nl.bzk.brp.business.bedrijfsregels.impl.afstamming.BRPUC00120"/>
+                        <bean class="nl.bzk.brp.business.bedrijfsregels.impl.afstamming.BRBY0118"/>
+                        <bean class="nl.bzk.brp.business.bedrijfsregels.impl.afstamming.BRBY0106"/>
+                    </list>
+                </entry>
+            </map>
+        </constructor-arg>
+    </bean>
+</beans>

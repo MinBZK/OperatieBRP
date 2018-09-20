@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:task="http://www.springframework.org/schema/task"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+        http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.1.xsd">
+
+    <import resource="classpath:datasource-context.xml"/>
+    <import resource="classpath:dataaccess-beans.xml"/>
+
+    <context:annotation-config/>
+    <context:component-scan base-package="nl.bzk.brp.bevraging"/>
+
+    <task:executor id="executor" pool-size="5" queue-capacity="2000"/>
+
+    <!-- tool chain beans -->
+    <bean id="bevraagJpaChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="warmDatabaseOpStap"/>
+                <ref bean="hibernateReportStap"/>
+                <ref bean="bevraagPersoonslijstJpaStap"/>
+                <ref bean="rapporteerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="serializeChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="ruimBlobsOpStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobStap"/>
+                <ref bean="serializeerPersoonsLijstStap"/>
+                <ref bean="rapporteerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="createChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="ruimBlobsOpStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobStap"/>
+                <ref bean="rapporteerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="serializeSmileChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="ruimBlobsOpStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobSmileStap"/>
+                <ref bean="serializeerSmilePersoonsLijstStap"/>
+                <ref bean="rapporteerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="createSmileChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="ruimBlobsOpStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobSmileStap"/>
+                <ref bean="rapporteerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="serializeAfterburnerChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="ruimBlobsOpStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobAfterburnerStap"/>
+                <ref bean="serializeerAfterburnerPersoonsLijstStap"/>
+                <ref bean="rapporteerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="serializeVmChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="ruimBlobsOpStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobExternalizableStap"/>
+                <ref bean="serializeerExternalizablePersoonsLijstStap"/>
+                <ref bean="rapporteerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="createVmChain" class="org.apache.commons.chain.impl.ChainBase">
+        <constructor-arg>
+            <list value-type="org.apache.commons.chain.Command">
+                <ref bean="timingStap"/>
+                <ref bean="databaseInfoStap"/>
+                <ref bean="ruimBlobsOpStap"/>
+                <ref bean="collecteerBsnStap"/>
+                <ref bean="creeerBlobExternalizableStap"/>
+                <ref bean="rapporteerStap"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <bean id="catalog" class="org.apache.commons.chain.impl.CatalogBase">
+        <constructor-arg>
+            <map>
+                <entry key="bevragen-jpa" value-ref="bevraagJpaChain"/>
+                <entry key="serializeer-json" value-ref="serializeChain"/>
+                <entry key="serializeer-smile" value-ref="serializeSmileChain"/>
+                <entry key="serializeer-afterburner" value-ref="serializeAfterburnerChain"/>
+                <entry key="serializeer-vm" value-ref="serializeVmChain"/>
+
+                <entry key="create-vm" value-ref="createVmChain"/>
+                <entry key="create-json" value-ref="createChain"/>
+                <entry key="create-smile" value-ref="createSmileChain"/>
+            </map>
+        </constructor-arg>
+    </bean>
+</beans>

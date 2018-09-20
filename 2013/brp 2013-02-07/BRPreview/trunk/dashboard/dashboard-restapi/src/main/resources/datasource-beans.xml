@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	">
+	
+	<context:property-placeholder location="classpath:dashboard-restapi.properties" />
+
+    <bean id="berichtenDao" class="nl.bzk.brp.preview.dataaccess.impl.BerichtDaoImpl">
+        <property name="sequence" ref="berichtenSequence"/>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate" autowire="byName">
+        <constructor-arg ref="brpreviewDataSource" />
+    </bean>
+
+    <bean name="brpreviewDataSource" id="brpreviewDataSource" class="org.apache.commons.dbcp.BasicDataSource" autowire="byName" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+
+    <bean id="berichtenSequence" class="${jdbc.sequenceMaxValueIncrementerClassName}">
+        <constructor-arg ref="brpreviewDataSource" />
+        <constructor-arg value="dashboard.seq_berichten"/>
+    </bean>
+    
+    <bean id="administratieveHandelingDao" class="nl.bzk.brp.preview.dataaccess.impl.AdministratieveHandelingDaoImpl"/>
+    <bean id="correctieAdresDao" class="nl.bzk.brp.preview.dataaccess.impl.CorrectieAdresDaoImpl"/>
+    <bean id="verhuizingDao" class="nl.bzk.brp.preview.dataaccess.impl.VerhuizingDaoImpl"/>
+    <bean id="huwelijkDao" class="nl.bzk.brp.preview.dataaccess.impl.HuwelijkDaoImpl"/>
+    <bean id="overlijdenDao" class="nl.bzk.brp.preview.dataaccess.impl.OverlijdenDaoImpl"/>
+
+    <bean id="geboorteDao" class="nl.bzk.brp.preview.dataaccess.impl.GeboorteDaoImpl"/>
+
+    <bean id="brpJdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate" autowire="byName">
+        <constructor-arg ref="brpDataSource" />
+    </bean>
+
+    <bean name="brpDataSource" id="brpDataSource" class="org.apache.commons.dbcp.BasicDataSource" autowire="byName" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.brp.driverClassName}" />
+        <property name="url" value="${jdbc.brp.url}" />
+        <property name="username" value="${jdbc.brp.username}" />
+        <property name="password" value="${jdbc.brp.password}" />
+    </bean>
+
+</beans>

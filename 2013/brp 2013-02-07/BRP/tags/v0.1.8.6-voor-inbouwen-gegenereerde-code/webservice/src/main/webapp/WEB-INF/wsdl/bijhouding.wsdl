@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="bijhouding"
+	xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:bijh="http://www.bprbzk.nl/BRP/0001"
+	xmlns:tns="http://www.bprbzk.nl/BRP/bijhouding/service"
+	targetNamespace="http://www.bprbzk.nl/BRP/bijhouding/service">
+
+	<wsdl:types>
+		<xsd:schema>
+			<xsd:import schemaLocation="BRP_Migratie_Berichten.xsd" namespace="http://www.bprbzk.nl/BRP/0001" />
+			<xsd:import schemaLocation="BRP_Afstamming_Berichten.xsd" namespace="http://www.bprbzk.nl/BRP/0001" />
+			<xsd:import schemaLocation="BRP_HuwelijkPartnerschap_Berichten.xsd" namespace="http://www.bprbzk.nl/BRP/0001" />
+		</xsd:schema>
+	</wsdl:types>
+
+	<!-- Verhuizing -->
+	<wsdl:message name="Verhuizing">
+		<wsdl:part
+		    element="bijh:migratie_Verhuizing_Bijhouding"
+			name="verhuizing" />
+	</wsdl:message>
+
+	<wsdl:message name="VerhuizingResponse">
+		<wsdl:part
+			element="bijh:migratie_Verhuizing_BijhoudingResponse"
+			name="verhuizingResponse" />
+	</wsdl:message>
+
+    <!-- Correctie Adres NL-->
+	<wsdl:message name="CorrectieAdresNL">
+		<wsdl:part
+		    element="bijh:migratie_CorrectieAdresBinnenNL_Bijhouding"
+			name="correctieAdresNL" />
+	</wsdl:message>
+
+	<wsdl:message name="CorrectieAdresNLResponse">
+		<wsdl:part
+			element="bijh:migratie_CorrectieAdresBinnenNL_BijhoudingResponse"
+			name="correctieAdresNLResponse" />
+	</wsdl:message>
+
+	<!-- Geboorte aangifte -->
+	<wsdl:message name="Afstamming">
+		<wsdl:part
+			element="bijh:afstamming_InschrijvingAangifteGeboorte_Bijhouding"
+			name="afstamming" />
+	</wsdl:message>
+
+	<wsdl:message name="AfstammingResponse">
+		<wsdl:part
+			element="bijh:afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse"
+			name="afstammingResponse" />
+	</wsdl:message>
+
+	<!-- Huwelijk -->
+	<wsdl:message name="Huwelijk">
+		<wsdl:part
+		    element="bijh:huwelijkPartnerschap_RegistratieHuwelijk_Bijhouding"
+			name="huwelijk" />
+	</wsdl:message>
+
+	<wsdl:message name="HuwelijkResponse">
+		<wsdl:part
+			element="bijh:huwelijkPartnerschap_RegistratieHuwelijk_BijhoudingResponse"
+			name="huwelijkResponse" />
+	</wsdl:message>
+
+	<wsdl:portType name="BijhoudingPortType">
+		<!-- Verhuizing -->
+		<wsdl:operation name="verhuizing">
+			<wsdl:input message="tns:Verhuizing" />
+			<wsdl:output message="tns:VerhuizingResponse" />
+		</wsdl:operation>
+        <!-- Correctie Adres NL -->
+		<wsdl:operation name="correctieAdresNL">
+			<wsdl:input message="tns:CorrectieAdresNL" />
+			<wsdl:output message="tns:CorrectieAdresNLResponse" />
+		</wsdl:operation>
+		<!-- Geboorte aangifte -->
+		<wsdl:operation name="inschrijvingGeboorte">
+			<wsdl:input message="tns:Afstamming" />
+			<wsdl:output message="tns:AfstammingResponse" />
+		</wsdl:operation>
+		<!-- Huwelijk -->
+		<wsdl:operation name="registreerHuwelijkEnPartnerschap">
+			<wsdl:input message="tns:Huwelijk" />
+			<wsdl:output message="tns:HuwelijkResponse" />
+		</wsdl:operation>
+	</wsdl:portType>
+
+	<wsdl:binding name="BijhoudingBinding" type="tns:BijhoudingPortType">
+		<soap:binding style="document"
+			transport="http://schemas.xmlsoap.org/soap/http" />
+		<wsdl:operation name="verhuizing">
+			<soap:operation soapAction="verhuizing" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+        <wsdl:operation name="correctieAdresNL">
+			<soap:operation soapAction="correctieAdresNL" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="inschrijvingGeboorte">
+			<soap:operation soapAction="inschrijvingGeboorte" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+		<wsdl:operation name="registreerHuwelijkEnPartnerschap">
+			<soap:operation soapAction="registreerHuwelijkEnPartnerschap" />
+			<wsdl:input>
+				<soap:body use="literal" />
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal" />
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+
+	<wsdl:service name="BijhoudingService">
+		<wsdl:port binding="tns:BijhoudingBinding" name="BijhoudingPort">
+			<soap:address location="http://localhost:8080/BRP/services/bijhouding" />
+		</wsdl:port>
+	</wsdl:service>
+
+</wsdl:definitions>

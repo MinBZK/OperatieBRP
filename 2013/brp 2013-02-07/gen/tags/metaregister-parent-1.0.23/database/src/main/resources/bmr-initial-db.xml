@@ -1,0 +1,826 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
+<!--     <changeSet author="mikevanvendeloo" id="upate-to-latest-disable-foreign-key-checks" runAlways="true">
+        <sql>SET REFERENTIAL_INTEGRITY FALSE;</sql>
+    </changeSet> -->
+    <changeSet author="mikevanvendeloo" id="1340971728993-1" context="bmr-tables">
+        <comment>Maak alle tabellen voor het BMR aan</comment>
+        <createTable tableName="AFKORTING">
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK792_AFKORTING" />
+            </column>
+            <column name="AFKORTING" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="SOORT" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="VOLGNUMMER" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="APPLICATIE">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1012_APPLICATIE" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="ASPECT">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK827_ASPECT" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="BEDRIJFSREGEL_EXT">
+            <column name="BEDRIJFSREGEL" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1067_BEDRIJFSREGEL_EXT" />
+            </column>
+            <column name="EA_REQUIREMENT" type="INT" />
+            <column name="INTAKE_STATUS" type="VARCHAR(10)">
+                <constraints nullable="false" />
+            </column>
+            <column defaultValue="N" name="SPECIFICATIES_GEWIJZIGD" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="SPECIFICATIE_WIJZIGINGEN" type="LONGVARCHAR" />
+            <column name="AFDWINGEN_IN_GBA" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="TERUGKOPPELING" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="BEDRIJFSREGEL_IMPLEMENTATIE">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1074_BEDRIJFSREGEL_IMPLEMENTA" />
+            </column>
+            <column name="BEDRIJFSREGEL" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="PLAATS" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="BEDRIJFSREGELATTRIBUUT">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK610_BEDRIJFSREGELATTRIBUUT" />
+            </column>
+            <column name="BEDRIJFSREGEL" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="ATTRIBUUT" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="VOLGNUMMER" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="BERICHTSJABLOON_EIGENSCHAPPEN">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1009_BERICHTSJABLOON_EIGENSCH" />
+            </column>
+            <column name="BERICHTSJABLOON" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="SOORT_BERICHTSJABLOON" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="VERWIJZINGEN" type="LONGVARCHAR" />
+            <column name="STUF_BERICHTNAAM" type="VARCHAR(30)" />
+        </createTable>
+
+        <createTable tableName="BERICHTSJABLOON_ITEM">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK989_BERICHTSJABLOON_ITEM" />
+            </column>
+            <column name="SYNCID" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="SJABLOON" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="OUDER" type="INT" />
+            <column name="SOORT" type="VARCHAR(2)" />
+            <column name="NAAM" type="VARCHAR(80)" />
+            <column name="IDENTIFIER" type="VARCHAR(30)" />
+            <column name="STUF_MNEMONIC" type="VARCHAR(30)" />
+            <column name="POSTFIX" type="VARCHAR(80)" />
+            <column name="ATTRIBUUT" type="INT" />
+            <column name="TYPE_" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="OUDERATTRIBUUT" type="INT" />
+            <column name="VOLGNUMMER" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="VISUALISATIE" type="VARCHAR(1000)" />
+            <column name="ACTIE" type="CHAR(1)" />
+            <column name="AANTAL_MIN" type="INT" />
+            <column name="AANTAL_MAX" type="INT" />
+            <column defaultValue="J" name="INXSD" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="NIVEAU" type="INT" />
+            <column name="MELDING" type="LONGVARCHAR" />
+            <column name="INSTRUCTIE" type="LONGVARCHAR" />
+            <column name="AANTEKENING" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="BRON">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1016_DATASET" />
+            </column>
+            <column name="FORMULIER" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="VOLGNUMMER" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="OBJECTTYPE" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="IDENTIFIER" type="VARCHAR(30)" />
+            <column name="NAAM" type="VARCHAR(80)" />
+            <column name="MEERVOUDSNAAM" type="VARCHAR(80)" />
+            <column name="LINK" type="INT" />
+        </createTable>
+
+        <createTable tableName="BRONATTRIBUUT">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1032_BRONVELD" />
+            </column>
+            <column name="BRON" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="VOLGNUMMER" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="ATTRIBUUT" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)" />
+        </createTable>
+
+        <createTable tableName="CONTROLE">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK830_CONTROLE" />
+            </column>
+            <column name="ELEMENT" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="ASPECT" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="CONTROLE_RESULTAAT">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK626_CONTROLE" />
+            </column>
+            <column name="CATEGORIE" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="OMSCHRIJVING" type="VARCHAR(250)">
+                <constraints nullable="false" />
+            </column>
+            <column name="STATUS" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="DETAILS" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="EA_CPINSTANCE">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1061_EA_CPINSTANCE" />
+            </column>
+            <column name="GUID" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="SOORT" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="EA_ELEMENT">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1048_EA_ELEMENT" />
+            </column>
+            <column name="GUID" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="SOORT" type="VARCHAR(80)" />
+            <column name="CODE" type="VARCHAR(80)" />
+            <column name="NAAM" type="VARCHAR(250)" />
+            <column name="OMSCHRIJVING" type="LONGVARCHAR" />
+            <column name="STATUS" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="WIJZIGINGEN" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="EA_FOUTMELDING">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1040_EA_FOUTMELDING" />
+            </column>
+            <column name="REQUIREMENT" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="OMSCHRIJVING" type="LONGVARCHAR">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="EA_REQUIREMENT">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1041_EA_BEDRIJFSREGEL" />
+            </column>
+            <column name="SOORT" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="CODE" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="NAAM" type="VARCHAR(250)">
+                <constraints nullable="false" />
+            </column>
+            <column name="OMSCHRIJVING" type="LONGVARCHAR" />
+            <column name="TAGS" type="LONGVARCHAR" />
+            <column name="STATUS" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="WIJZIGINGEN" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="EA_TRACE">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1054_EA_TRACE" />
+            </column>
+            <column name="REQUIREMENT" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="ELEMENT" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="ELEMENT">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK593_ELEMENT" />
+            </column>
+            <column name="SYNCID" type="INT" />
+            <column name="ORG_SYNCID" type="INT" />
+            <column name="SOORT" type="VARCHAR(2)">
+                <constraints nullable="false" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="OUDER" type="INT" />
+            <column name="TYPE_" type="INT" />
+            <column name="VOLGNUMMER" type="INT" />
+            <column name="TECHNISCHE_NAAM" type="VARCHAR(80)" />
+            <column name="IDENT_DB_ACTIE" type="VARCHAR(80)" />
+            <column name="IDENT_DB" type="VARCHAR(30)" />
+            <column name="IDENT_CODE" type="VARCHAR(80)" />
+            <column name="AFLEIDBAAR" type="CHAR(1)" />
+            <column name="HISTORIE_VASTLEGGEN" type="CHAR(1)" />
+            <column name="INSOM" type="CHAR(1)" />
+            <column name="CODE" type="VARCHAR(80)" />
+            <column name="BESCHRIJVING" type="LONGVARCHAR" />
+            <column name="PATROONCODE" type="VARCHAR(10)" />
+            <column name="LAAG" type="INT" />
+            <column name="SCHEMA_" type="INT" />
+            <column name="VERSIE" type="INT" />
+            <column name="VERSIE_TAG" type="CHAR(1)" />
+            <column defaultValueComputed="Current_Timestamp" name="MOMENT_CREATIE" type="TIMESTAMP" />
+            <column name="MOMENT_LAATSTE_WIJZIGING" type="TIMESTAMP" />
+            <column name="GEBRUIKER_LAATSTE_WIJZIGING" type="INT" />
+            <column defaultValue="N" name="GECONTROLEERD" type="CHAR(1)">
+                <constraints nullable="false" />
+            </column>
+            <column name="MEERVOUDSNAAM" type="VARCHAR(80)" />
+            <column name="SOORT_BEDRIJFSREGEL" type="VARCHAR(10)" />
+            <column name="EXPORT" type="CHAR(1)" />
+            <column name="IN_DB" type="CHAR(1)" />
+            <column name="GEN_SLEUTEL" type="CHAR(1)" />
+            <column name="IN_XSD" type="CHAR(1)" />
+            <column name="VERPLICHT_IN_XSD" type="CHAR(1)" />
+            <column name="FINAAL_SUPERTYPE" type="INT" />
+            <column name="HISTORIE_LAAG" type="CHAR(1)" />
+            <column name="INVERSE_ASSOCIATIE_IN_XSD" type="CHAR(1)" />
+            <column name="VIEWS_PER_DISCRIMINATOR_WAARDE" type="CHAR(1)" />
+            <column name="LOOKUP" type="CHAR(1)" />
+            <column name="DISCRIMINATOR_ATTRIBUUT" type="VARCHAR(30)" />
+            <column name="GROEP" type="INT" />
+            <column name="VERPLICHT" type="CHAR(1)" />
+            <column name="KOPPELING" type="CHAR(1)" />
+            <column name="SOORT_INHOUD" type="CHAR(1)" />
+            <column name="WAARDE" type="VARCHAR(80)" />
+            <column name="RELATIEF_ID_INVERSE_ASSOCIATIE" type="INT" />
+            <column name="WEERGAVE" type="VARCHAR(80)" />
+            <column name="INVERSE_ASSOCIATIE_NAAM" type="VARCHAR(80)" />
+            <column name="INVERSE_ASSOCIATIE_IDENT_CODE" type="VARCHAR(80)" />
+            <column name="VOORKOMEN_LENGTE" type="CHAR(1)" />
+            <column name="VOORKOMEN_AANTAL_DECIMALEN" type="CHAR(1)" />
+            <column name="MINIMUM_LENGTE" type="INT" />
+            <column name="MAXIMUM_LENGTE" type="INT" />
+            <column name="AANTAL_DECIMALEN" type="INT" />
+            <column name="KERN_SCHEMA" type="INT" />
+            <column name="METASTRUCTUUR_VERSIE" type="INT" />
+        </createTable>
+
+        <createTable tableName="EXPORTREGEL">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK855_EXPORT_REGEL" />
+            </column>
+            <column name="SOORT" type="VARCHAR(30)">
+                <constraints nullable="false" />
+            </column>
+            <column name="LAAG" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="INTERNE_IDENTIFIER" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="SYNCID" type="INT" />
+            <column name="NAAM" type="VARCHAR(120)" />
+            <column name="EXPORT_IDENTIFIER" type="VARCHAR(80)" />
+        </createTable>
+
+        <createTable tableName="FORMULIER">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1014_FORMULIER" />
+            </column>
+            <column name="APPLICATIE" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="FRAME">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1020_FRAME" />
+            </column>
+            <column name="FORMULIER" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="BRON" type="INT" />
+            <column name="VOLGNUMMER" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)" />
+        </createTable>
+
+        <createTable tableName="FRAMEVELD">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1023_FRAMEVELD" />
+            </column>
+            <column name="FRAME" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="VOLGNUMMER" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="ATTRIBUUT" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="INSTELLING">
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK628_INSTELLING" />
+            </column>
+            <column name="WAARDE" type="VARCHAR(80)" />
+        </createTable>
+
+        <createTable tableName="OBJECTTYPE_STATISTIEK">
+            <column name="OBJECTTYPE_SYNCID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1088_OBJECTTYPE_STATISTIEK" />
+            </column>
+            <column name="OBJECTTYPE_NAAM" type="VARCHAR(80)" />
+            <column name="AANTAL_INITIEEL" type="INT" />
+            <column name="AANTAL_INSERTS_PER_JAAR" type="INT" />
+            <column name="AANTAL_UPDATES_PER_JAAR" type="INT" />
+            <column name="AANTAL_QUERIES_PER_JAAR" type="INT" />
+            <column name="MOTIVATIE" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="OM_RESYNC_REGEL">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1002_OM_RESYNC_REGEL" />
+            </column>
+            <column name="ORG_SYNCID" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="HISTORIE_LAAG" type="CHAR(1)" />
+            <column name="IDENTIFIER" type="VARCHAR(30)" />
+            <column name="ASSIGNED_SYNCID" type="INT">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="PLAATS_IN_ARCHITECTUUR">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1072_LOCATIE_IN_SOFTWARE" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="RAPPORTAGE">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK850_RAPPORTAGE" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="GEGENEREERD_OP" type="TIMESTAMP">
+                <constraints nullable="false" />
+            </column>
+            <column name="BESCHRIJVING" type="LONGVARCHAR">
+                <constraints nullable="false" />
+            </column>
+            <column name="BESTANDSNAAM" type="VARCHAR(255)" />
+            <column name="DATA" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="SOORT_BEDRIJFSREGEL">
+            <column name="CODE" type="VARCHAR(10)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK584_SOORT_BEDRIJFSREGEL" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="SOORT_BERICHTSJABLOON">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1006_SOORT_BERICHTSJABLOON" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="SOORT_ELEMENT">
+            <column name="CODE" type="VARCHAR(2)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK716_SOORT_ELEMENT" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="SOORT_EXPORT">
+            <column name="ID" type="VARCHAR(30)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK857_EXPORT_SOORT" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="SOORT_TEKST">
+            <column name="CODE" type="VARCHAR(10)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK833_TEKST_SOORT" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="VOLGNUMMER" type="INT" />
+        </createTable>
+
+        <createTable tableName="STATUS_INTAKE">
+            <column name="CODE" type="VARCHAR(10)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1068_STATUS_INTAKE_BEDRIJFSRE" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="TAG_IN_CODE">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1079_TAG_IN_CODE" />
+            </column>
+            <column name="SOORT" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="CODE" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+            <column name="PACKAGE" type="VARCHAR(80)" />
+            <column name="KLASSE" type="VARCHAR(80)" />
+            <column name="METHODE" type="VARCHAR(80)" />
+            <column name="REGEL" type="INT" />
+            <column name="KOLOM" type="INT" />
+        </createTable>
+
+        <createTable tableName="TEKST">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK835_TEKST" />
+            </column>
+            <column name="MOMENT_CREATIE" type="TIMESTAMP" />
+            <column defaultValueComputed="Current_Timestamp" name="MOMENT_LAATSTE_WIJZIGING" type="TIMESTAMP" />
+            <column name="GEBRUIKER_LAATSTE_WIJZIGING" type="INT" />
+            <column name="ELEMENT" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="SOORT" type="VARCHAR(10)">
+                <constraints nullable="false" />
+            </column>
+            <column name="TEKST" type="LONGVARCHAR">
+                <constraints nullable="false" />
+            </column>
+            <column name="HTML_TEKST" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="TUPLE">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK984_TUPLE" />
+            </column>
+            <column name="OBJECTTYPE" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="RELATIEF_ID" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="CODE" type="VARCHAR(20)" />
+            <column name="NAAM" type="VARCHAR(200)" />
+            <column name="NAAM_MANNELIJK" type="VARCHAR(200)" />
+            <column name="NAAM_VROUWELIJK" type="VARCHAR(200)" />
+            <column name="OMSCHRIJVING" type="VARCHAR(250)" />
+            <column name="HEEFT_MATERIELE_HISTORIE" type="CHAR(1)" />
+            <column name="DATUM_AANVANG_GELDIGHEID" type="INT" />
+            <column name="DATUM_EINDE_GELDIGHEID" type="INT" />
+            <column name="CATEGORIE_SOORT_ACTIE" type="VARCHAR(20)" />
+            <column name="CATEGORIE_SOORT_DOCUMENT" type="VARCHAR(20)" />
+        </createTable>
+
+        <createTable tableName="VERSIE_TAG">
+            <column name="CODE" type="CHAR(1)">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK843_VERSIE_STATUS" />
+            </column>
+            <column name="NAAM" type="VARCHAR(80)">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+
+        <createTable tableName="VERWIJZING">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK633_KRUISVERWIJZING" />
+            </column>
+            <column name="NIEUW_ELEMENT" type="INT" />
+            <column name="OUD_ELEMENT" type="INT" />
+            <column name="TOELICHTING" type="LONGVARCHAR" />
+        </createTable>
+
+        <createTable tableName="XSD_CODE_FRAGMENT">
+            <column name="ID" type="INT">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="PK1084_XSD_CODE_FRAGMENT" />
+            </column>
+            <column name="ELEMENT" type="INT">
+                <constraints nullable="false" />
+            </column>
+            <column name="FRAGMENT" type="LONGVARCHAR">
+                <constraints nullable="false" />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="mikevanvendeloo" id="1340971728993-2" failOnError="false" context="bmr-indexen">
+        <comment>Maak alle indexen voor het BMR aan</comment>
+        <createIndex indexName="UC1013_APPLICATIE" tableName="APPLICATIE" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC828_ASPECT" tableName="ASPECT" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC730_BEDRIJFSREGELATTRIBUUT" tableName="BEDRIJFSREGELATTRIBUUT" unique="true">
+            <column name="BEDRIJFSREGEL" />
+            <column name="ATTRIBUUT" />
+        </createIndex>
+
+        <createIndex indexName="UC731_BEDRIJFSREGELATTRIBUUT" tableName="BEDRIJFSREGELATTRIBUUT" unique="true">
+            <column name="BEDRIJFSREGEL" />
+            <column name="VOLGNUMMER" />
+        </createIndex>
+
+        <createIndex indexName="UC1075_BEDRIJFSREGEL_IMPLEMENTA" tableName="BEDRIJFSREGEL_IMPLEMENTATIE"
+            unique="true">
+            <column name="BEDRIJFSREGEL" />
+            <column name="PLAATS" />
+        </createIndex>
+
+        <createIndex indexName="UC1031_BRON" tableName="BRON" unique="true">
+            <column name="FORMULIER" />
+            <column name="VOLGNUMMER" />
+        </createIndex>
+
+        <createIndex indexName="UC1033_BRONVELD" tableName="BRONATTRIBUUT" unique="true">
+            <column name="BRON" />
+            <column name="VOLGNUMMER" />
+        </createIndex>
+
+        <createIndex indexName="UC1034_BRONVELD" tableName="BRONATTRIBUUT" unique="true">
+            <column name="BRON" />
+            <column name="ATTRIBUUT" />
+        </createIndex>
+
+        <createIndex indexName="UC831_CONTROLE" tableName="CONTROLE" unique="true">
+            <column name="ELEMENT" />
+            <column name="ASPECT" />
+        </createIndex>
+
+        <createIndex indexName="IX1063_EA_CPINSTANCE" tableName="EA_CPINSTANCE" unique="false">
+            <column name="GUID" />
+        </createIndex>
+
+        <createIndex indexName="UC1053_EA_REQUIREMENT" tableName="EA_REQUIREMENT" unique="true">
+            <column name="SOORT" />
+            <column name="CODE" />
+        </createIndex>
+
+        <createIndex indexName="UC1055_EA_TRACE" tableName="EA_TRACE" unique="true">
+            <column name="REQUIREMENT" />
+            <column name="ELEMENT" />
+        </createIndex>
+
+        <createIndex indexName="UC864_ELEMENT" tableName="ELEMENT" unique="true">
+            <column name="LAAG" />
+            <column name="VERSIE" />
+            <column name="NAAM" />
+            <column name="OUDER" />
+            <column name="SOORT" />
+        </createIndex>
+
+        <createIndex indexName="UC866_ELEMENT" tableName="ELEMENT" unique="true">
+            <column name="SYNCID" />
+            <column name="LAAG" />
+            <column name="VERSIE" />
+        </createIndex>
+
+        <createIndex indexName="UC1015_FORMULIER" tableName="FORMULIER" unique="true">
+            <column name="APPLICATIE" />
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC1021_FRAME" tableName="FRAME" unique="true">
+            <column name="FORMULIER" />
+            <column name="VOLGNUMMER" />
+        </createIndex>
+
+        <createIndex indexName="UC1024_FRAMEVELD" tableName="FRAMEVELD" unique="true">
+            <column name="FRAME" />
+            <column name="VOLGNUMMER" />
+        </createIndex>
+
+        <createIndex indexName="UC1025_FRAMEVELD" tableName="FRAMEVELD" unique="true">
+            <column name="FRAME" />
+            <column name="ATTRIBUUT" />
+        </createIndex>
+
+        <createIndex indexName="UC1003_OM_RESYNC_REGEL" tableName="OM_RESYNC_REGEL" unique="true">
+            <column name="ORG_SYNCID" />
+            <column name="HISTORIE_LAAG" />
+            <column name="IDENTIFIER" />
+        </createIndex>
+
+        <createIndex indexName="UC1073_LOCATIE_IN_SOFTWARE" tableName="PLAATS_IN_ARCHITECTUUR" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC851_RAPPORTAGE" tableName="RAPPORTAGE" unique="true">
+            <column name="NAAM" />
+            <column name="GEGENEREERD_OP" />
+        </createIndex>
+
+        <createIndex indexName="UC585_SOORT_BEDRIJFSREGEL" tableName="SOORT_BEDRIJFSREGEL" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC1007_SOORT_BERICHTSJABLOON" tableName="SOORT_BERICHTSJABLOON" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC740_SOORT_ELEMENT" tableName="SOORT_ELEMENT" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC858_EXPORT_SOORT" tableName="SOORT_EXPORT" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC834_TEKST_SOORT" tableName="SOORT_TEKST" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC988_TEKST_SOORT" tableName="SOORT_TEKST" unique="true">
+            <column name="VOLGNUMMER" />
+        </createIndex>
+
+        <createIndex indexName="UC1069_STATUS_INTAKE_BEDRIJFSRE" tableName="STATUS_INTAKE" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="IX1081_TAG_IN_CODE" tableName="TAG_IN_CODE" unique="false">
+            <column name="CODE" />
+        </createIndex>
+
+        <createIndex indexName="UC836_TEKST" tableName="TEKST" unique="true">
+            <column name="ELEMENT" />
+            <column name="SOORT" />
+        </createIndex>
+
+        <createIndex indexName="UC844_VERSIE_STATUS" tableName="VERSIE_TAG" unique="true">
+            <column name="NAAM" />
+        </createIndex>
+
+        <createIndex indexName="UC640_KRUISVERWIJZING" tableName="VERWIJZING" unique="true">
+            <column name="NIEUW_ELEMENT" />
+            <column name="OUD_ELEMENT" />
+        </createIndex>
+    </changeSet>
+    <changeSet author="mikevanvendeloo" id="1340971728993-3" context="bmr-sequences">
+        <comment>Maak alle sequences aan voor het BMR</comment>
+        <createSequence sequenceName="GAPPLICATIE" />
+
+        <createSequence sequenceName="GASPECT" />
+
+        <createSequence sequenceName="GBEDRIJFSREGELATTRIBUUT" />
+
+        <createSequence sequenceName="GBEDRIJFSREGEL_IMPLEMENTATIE" />
+
+        <createSequence sequenceName="GBERICHTSJABLOON_EIGENSCHAPPEN" />
+
+        <createSequence sequenceName="GBERICHTSJABLOON_ITEM" />
+
+        <createSequence sequenceName="GBERICHTSJABLOON_ITEM_SYNCID" />
+
+        <createSequence sequenceName="GBRON" />
+
+        <createSequence sequenceName="GBRONATTRIBUUT" />
+
+        <createSequence sequenceName="GCONTROLE" />
+
+        <createSequence sequenceName="GCONTROLE_RESULTAAT" />
+
+        <createSequence sequenceName="GEA_CPINSTANCE" />
+
+        <createSequence sequenceName="GEA_ELEMENT" />
+
+        <createSequence sequenceName="GEA_FOUTMELDING" />
+
+        <createSequence sequenceName="GEA_REQUIREMENT" />
+
+        <createSequence sequenceName="GEA_TRACE" />
+
+        <createSequence sequenceName="GELEMENT" />
+
+        <createSequence sequenceName="GELEMENTGENERATIE" />
+
+        <createSequence sequenceName="GEXPORTREGEL" />
+
+        <createSequence sequenceName="GFORMULIER" />
+
+        <createSequence sequenceName="GFRAME" />
+
+        <createSequence sequenceName="GFRAMEVELD" />
+
+        <createSequence sequenceName="GOM_RESYNC_REGEL" />
+
+        <createSequence sequenceName="GPLAATS_IN_ARCHITECTUUR" />
+
+        <createSequence sequenceName="GRAPPORTAGE" />
+
+        <createSequence sequenceName="GSOORT_BERICHTSJABLOON" />
+
+        <createSequence sequenceName="GSOORT_EXPORT" />
+
+        <createSequence sequenceName="GSYNCID" />
+
+        <createSequence sequenceName="GTAG_IN_CODE" />
+
+        <createSequence sequenceName="GTEKST" />
+
+        <createSequence sequenceName="GTUPLE" />
+
+        <createSequence sequenceName="GVERWIJZING" />
+
+        <createSequence sequenceName="GXSD_CODE_FRAGMENT" />
+    </changeSet>
+</databaseChangeLog>

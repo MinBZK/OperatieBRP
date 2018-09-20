@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="bmr"
+    nsURI="http://brp.bzk.nl/schema/bmr.ecore" nsPrefix="bmr">
+  <eClassifiers xsi:type="ecore:EClass" name="Attribuut" eSuperTypes="#//GelaagdElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="groep" eType="#//Groep"
+        eOpposite="#//Groep/attributen"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objectType" eType="#//ObjectType"
+        transient="true" eOpposite="#//ObjectType/attributen"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//Type"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="afleidbaar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="historieVastleggen" eType="#//Historie"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="verplicht" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="inverseAssociatieNaam"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="inverseAssociatie" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="gebruiktInBedrijfsRegels"
+        upperBound="-1" eType="#//BedrijfsRegel" derived="true" eOpposite="#//BedrijfsRegel/attributen"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AttribuutType" eSuperTypes="#//Type">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="type" eType="#//BasisType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="versie" eType="#//Versie"
+        transient="true" eOpposite="#//Versie/attribuutTypes"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="minimumLengte" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="maximumLengte" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="aantalDecimalen" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BasisType" eSuperTypes="#//Element"/>
+  <eClassifiers xsi:type="ecore:EClass" name="BedrijfsRegel" eSuperTypes="#//GelaagdElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attributen" upperBound="-1"
+        eType="#//Attribuut" eOpposite="#//Attribuut/gebruiktInBedrijfsRegels"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="element" eType="#//Element"
+        transient="true" eOpposite="#//Element/bedrijfsRegels"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="soortBedrijfsRegel" eType="#//SoortBedrijfsRegel"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="waarden" upperBound="-1"
+        eType="#//WaarderegelWaarde" containment="true" eOpposite="#//WaarderegelWaarde/bedrijfsRegel"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BerichtSjabloon" eSuperTypes="#//GelaagdElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="versie" eType="#//Versie"
+        transient="true" eOpposite="#//Versie/berichtSjablonen"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Domein" eSuperTypes="#//Element">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="schemas" upperBound="-1"
+        eType="#//Schema" containment="true" resolveProxies="false" eOpposite="#//Schema/domein"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Element" abstract="true" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bedrijfsRegels" upperBound="-1"
+        eType="#//BedrijfsRegel" containment="true" resolveProxies="false" eOpposite="#//BedrijfsRegel/element"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="beschrijving" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="teksten" upperBound="-1"
+        eType="#//Tekst" containment="true" resolveProxies="false" eOpposite="#//Tekst/element"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="laag" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="syncId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="soort" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="ElementSoort">
+    <eLiterals name="A"/>
+    <eLiterals name="AT" value="1"/>
+    <eLiterals name="B" value="2"/>
+    <eLiterals name="BR" value="3"/>
+    <eLiterals name="BS" value="4"/>
+    <eLiterals name="BT" value="5"/>
+    <eLiterals name="D" value="6"/>
+    <eLiterals name="G" value="7"/>
+    <eLiterals name="L" value="8"/>
+    <eLiterals name="OT" value="9"/>
+    <eLiterals name="S" value="10"/>
+    <eLiterals name="V" value="11"/>
+    <eLiterals name="W" value="12"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="GelaagdElement" abstract="true" eSuperTypes="#//Element">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="identifierDB" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="identifierCode" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="versieTag" eType="#//VersieTag"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="volgnummer" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="inSetOfModel" eType="#//InSetOfModel"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Groep" eSuperTypes="#//GelaagdElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objectType" eType="#//ObjectType"
+        transient="true" eOpposite="#//ObjectType/groepen"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attributen" upperBound="-1"
+        eType="#//Attribuut" eOpposite="#//Attribuut/groep"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="historieVastleggen" eType="#//Historie"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="verplicht" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Laag" eSuperTypes="#//Element"/>
+  <eClassifiers xsi:type="ecore:EClass" name="MetaRegister">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="domeinen" upperBound="-1"
+        eType="#//Domein" containment="true" resolveProxies="false"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="basisTypen" upperBound="-1"
+        eType="#//BasisType" containment="true" resolveProxies="false"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="applicaties" upperBound="-1"
+        eType="#//Applicatie" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ModelElement" abstract="true">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="naam" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ObjectType" eSuperTypes="#//Type">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attributen" upperBound="-1"
+        eType="#//Attribuut" containment="true" resolveProxies="false" eOpposite="#//Attribuut/objectType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="groepen" upperBound="-1"
+        eType="#//Groep" containment="true" resolveProxies="false" eOpposite="#//Groep/objectType"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="meervoudsNaam" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="soortInhoud" eType="#//SoortInhoud"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="subTypes" upperBound="-1"
+        eType="#//ObjectType" derived="true" eOpposite="#//ObjectType/superType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="superType" eType="#//ObjectType"
+        eOpposite="#//ObjectType/subTypes"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tuples" upperBound="-1"
+        eType="#//Tuple" containment="true" resolveProxies="false" eOpposite="#//Tuple/objectType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="versie" eType="#//Versie"
+        transient="true" eOpposite="#//Versie/objectTypes"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="afleidbaar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="historieVastleggen" eType="#//Historie"
+        defaultValueLiteral="false"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="kunstmatigeSleutel" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="lookup" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"
+        defaultValueLiteral="false"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Schema" eSuperTypes="#//Element">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="versies" upperBound="-1"
+        eType="#//Versie" containment="true" resolveProxies="false" eOpposite="#//Versie/schema"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="domein" eType="#//Domein"
+        transient="true" eOpposite="#//Domein/schemas"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SoortBedrijfsRegel">
+    <eLiterals name="ID"/>
+    <eLiterals name="UC" value="1"/>
+    <eLiterals name="WB" value="2"/>
+    <eLiterals name="VK" value="3"/>
+    <eLiterals name="OV" value="4"/>
+    <eLiterals name="LI" value="5"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SoortInhoud">
+    <eLiterals name="S"/>
+    <eLiterals name="D" value="1"/>
+    <eLiterals name="X" value="2"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="SoortTekst">
+    <eLiterals name="DEF" value="1"/>
+    <eLiterals name="DEFT" value="2"/>
+    <eLiterals name="POP" value="3"/>
+    <eLiterals name="MOB" value="4"/>
+    <eLiterals name="UITT" value="5"/>
+    <eLiterals name="CONT" value="6"/>
+    <eLiterals name="PSA" value="7"/>
+    <eLiterals name="REAT" value="8"/>
+    <eLiterals name="AAN" value="9"/>
+    <eLiterals name="LOG" value="10"/>
+    <eLiterals name="TUP" value="11"/>
+    <eLiterals name="XSD" value="12"/>
+    <eLiterals name="XML" value="13"/>
+    <eLiterals name="VOR" value="14"/>
+    <eLiterals name="BGR" value="15"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Tekst">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELongObject"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="element" eType="#//Element"
+        derived="true" eOpposite="#//Element/teksten"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="soort" eType="#//SoortTekst"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="tekst" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="htmlTekst" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Tuple">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="id" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//ELongObject"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objectType" eType="#//ObjectType"
+        transient="true" eOpposite="#//ObjectType/tuples"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="relatiefId" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="code" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="naam" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="naamMannelijk" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="naamVrouwelijk" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="omschrijving" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="heeftMaterieleHistorie"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBooleanObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="datumAanvangGeldigheid"
+        eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="datumEindeGeldigheid" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Type" abstract="true" eSuperTypes="#//GelaagdElement"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Versie" eSuperTypes="#//Element">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="schema" eType="#//Schema"
+        transient="true" eOpposite="#//Schema/versies"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="versieTag" eType="#//VersieTag"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objectTypes" upperBound="-1"
+        eType="#//ObjectType" containment="true" resolveProxies="false" eOpposite="#//ObjectType/versie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attribuutTypes" upperBound="-1"
+        eType="#//AttribuutType" containment="true" resolveProxies="false" eOpposite="#//AttribuutType/versie"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="berichtSjablonen" upperBound="-1"
+        eType="#//BerichtSjabloon" containment="true" resolveProxies="false" eOpposite="#//BerichtSjabloon/versie"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="VersieTag">
+    <eLiterals name="W"/>
+    <eLiterals name="V" value="1"/>
+    <eLiterals name="C" value="2"/>
+    <eLiterals name="B" value="3"/>
+    <eLiterals name="O" value="4"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="InSetOfModel">
+    <eLiterals name="Set" literal="S"/>
+    <eLiterals name="Model" value="1" literal="M"/>
+    <eLiterals name="Beide" value="2" literal="B"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="WaarderegelWaarde" eSuperTypes="#//GelaagdElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bedrijfsRegel" eType="#//BedrijfsRegel"
+        eOpposite="#//BedrijfsRegel/waarden"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="waarde" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="weergave" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="SoortTekstToTekstMapEntry" instanceClassName="java.util.Map$Entry">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="key" eType="#//SoortTekst"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="value" eType="#//Tekst"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Applicatie" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formulieren" upperBound="-1"
+        eType="#//Formulier" containment="true" eOpposite="#//Formulier/applicatie"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Formulier" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="applicatie" eType="#//Applicatie"
+        derived="true" eOpposite="#//Applicatie/formulieren"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="frames" upperBound="-1"
+        eType="#//Frame" containment="true" eOpposite="#//Frame/formulier"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bronnen" upperBound="-1"
+        eType="#//Bron" containment="true" eOpposite="#//Bron/formulier"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Frame" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="volgnummer" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formulier" eType="#//Formulier"
+        derived="true" eOpposite="#//Formulier/frames"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bron" eType="#//Bron" eOpposite="#//Bron/frames"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="velden" upperBound="-1"
+        eType="#//FrameVeld" containment="true" eOpposite="#//FrameVeld/frame"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="FrameVeld" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="volgnummer" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="frame" eType="#//Frame"
+        derived="true" eOpposite="#//Frame/velden"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attribuut" eType="#//Attribuut"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Bron" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="meervoudsvorm" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="identifier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="volgnummer" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="formulier" eType="#//Formulier"
+        derived="true" eOpposite="#//Formulier/bronnen"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="frames" upperBound="-1"
+        eType="#//Frame" derived="true" eOpposite="#//Frame/bron"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="objectType" eType="#//ObjectType"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="link" eType="#//Attribuut"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bronAttributen" upperBound="-1"
+        eType="#//BronAttribuut" containment="true" eOpposite="#//BronAttribuut/bron"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="BronAttribuut" eSuperTypes="#//ModelElement">
+    <eStructuralFeatures xsi:type="ecore:EReference" name="bron" eType="#//Bron" derived="true"
+        eOpposite="#//Bron/bronAttributen"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="attribuut" eType="#//Attribuut"/>
+    <eStructuralFeatures xsi:type="ecore:EAttribute" name="volgnummer" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EIntegerObject"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EEnum" name="Historie">
+    <eLiterals name="G"/>
+    <eLiterals name="F" value="1"/>
+    <eLiterals name="M" value="2"/>
+    <eLiterals name="B" value="3"/>
+    <eLiterals name="P" value="4"/>
+  </eClassifiers>
+</ecore:EPackage>

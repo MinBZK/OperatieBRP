@@ -1,0 +1,244 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema targetNamespace="http://www.brp.nl/brp/0001" xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:bijh="http://www.brp.nl/brp/0001" attributeFormDefault="unqualified" elementFormDefault="qualified">
+    <xs:element name="BRPBericht" type="bijh:BRPBericht"/>
+    <xs:complexType name="BRPBericht">
+        <xs:choice>
+            <xs:element name="afstamming01" type="bijh:afstamming01"/>
+            <xs:element name="verhuizing01" type="bijh:verhuizing01"/>
+        </xs:choice>
+    </xs:complexType>
+    <xs:complexType name="afstamming01">
+        <xs:sequence>
+            <xs:element type="bijh:stuurgegevens" name="stuurgegevens">
+                <xs:annotation>
+                    <xs:documentation>Stuurgegevens nader af te stemmen met TeamTechniek en KING (StUF) StUF kent in
+                        Stuurgegevens nog 'berichtCode' en 'functie' als verplichte elementen Aandacht voor eventuele
+                        aanvullende elementen vanuit BRP-verwerking (TT)
+                    </xs:documentation>
+                </xs:annotation>
+            </xs:element>
+            <xs:element type="bijh:bijhoudingen" name="bijhoudingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="verhuizing01">
+        <xs:sequence>
+            <xs:element type="bijh:stuurgegevens" name="stuurgegevens"/>
+            <xs:element type="bijh:bijhoudingen" name="bijhoudingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="berichtResultaat">
+        <xs:sequence>
+            <xs:element name="omschrijving" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="stuurgegevens">
+        <xs:sequence>
+            <xs:element type="xs:string" name="berichtIdentificatie"/>
+            <xs:element type="xs:string" name="tijdstipVerzonden"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="bijhoudingen">
+        <xs:sequence>
+            <xs:element type="bijh:actie" name="actie" minOccurs="1"
+                        maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="actie">
+        <xs:sequence>
+            <xs:element type="xs:string" name="soort"/>
+            <xs:element type="xs:string" name="partij"/>
+            <xs:element type="xs:int" name="datumAanvangGeldigheid"/>
+            <xs:element type="xs:long" name="tijdstipOntlening"/>
+            <xs:element type="bijh:bronnen" name="bronnen"/>
+            <xs:element type="bijh:persoon" name="persoon" minOccurs="0"/>
+            <xs:element type="bijh:familierechtelijkeBetrekking" name="familierechtelijkeBetrekking" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="persoon">
+        <xs:sequence>
+            <xs:element type="bijh:identificatieNummer" name="identificatieNummer" minOccurs="0"/>
+            <xs:element type="bijh:afgeleidAdministratief" name="afgeleidAdministratief" minOccurs="0"/>
+            <xs:element type="bijh:adres" name="adres" minOccurs="0"/>
+            <xs:element type="bijh:geboorte" name="geboorte" minOccurs="0"/>
+            <xs:element type="bijh:geslachtsAanduiding" name="geslachtsAanduiding" minOccurs="0"/>
+            <xs:element type="bijh:samengesteldeNaam" name="samengesteldeNaam" minOccurs="0"/>
+            <xs:element type="xs:string" name="datumIngangFamiliaireBetrekking" minOccurs="0"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="familierechtelijkeBetrekking">
+        <xs:sequence>
+            <xs:element type="bijh:kind" name="kind"/>
+            <xs:element type="bijh:ouderBetrokkenheid" name="ouderBetrokkenheid"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="kind">
+        <xs:sequence>
+            <xs:element type="bijh:inschrijving" name="inschrijving" minOccurs="0"/>
+            <xs:element type="bijh:bijhoudingsVerantwoordelijkheid" name="bijhoudingsVerantwoordelijkheid" minOccurs="0"/>
+            <xs:element type="bijh:bijhoudingsGemeente" name="bijhoudingsGemeente" minOccurs="0"/>
+            <xs:element type="bijh:identificatieNummer" name="identificatieNummer" minOccurs="0"/>
+            <xs:element type="bijh:geboorte" name="geboorte" minOccurs="0"/>
+            <xs:element type="bijh:geslachtsAanduiding" name="geslachtsAanduiding" minOccurs="0"/>
+            <xs:element type="bijh:voornamen" name="voornamen" minOccurs="0"/>
+            <xs:element type="bijh:geslachtsnaamComponenten" name="geslachtsnaamComponenten" minOccurs="0"/>
+            <xs:element type="bijh:nationaliteiten" name="nationaliteiten" minOccurs="0"/>
+            <xs:element type="bijh:adressen" name="adressen" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="adressen">
+        <xs:sequence>
+            <xs:element name="adres" type="bijh:adres"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="bijhoudingsGemeente">
+        <xs:sequence>
+            <xs:element type="xs:string" name="gemeente"/>
+            <xs:element type="xs:int" name="datumInschrijvingGemeente"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="bijhoudingsVerantwoordelijkheid">
+        <xs:sequence>
+            <xs:element type="xs:string" name="code"/>
+            <xs:element type="xs:int" name="datumAanvangGeldigheid"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="inschrijving">
+        <xs:sequence>
+            <xs:element type="xs:int" name="datumInschrijving"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="ouderBetrokkenheid">
+        <xs:sequence>
+            <xs:element type="bijh:persoon" name="ouder" maxOccurs="unbounded" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="geslachtsAanduiding">
+        <xs:sequence>
+            <xs:element type="xs:string" name="geslachtsAanduiding"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="samengesteldeNaam">
+        <xs:sequence>
+            <xs:element type="xs:string" name="voornamen"/>
+            <xs:element type="xs:string" name="voorvoegsel"/>
+            <xs:element type="xs:string" name="geslachtsnaam"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="voornaam">
+        <xs:sequence>
+            <xs:element name="volgnummer" type="xs:integer"/>
+            <xs:element name="naam" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="geslachtsnaamComponent">
+        <xs:sequence>
+            <xs:element type="xs:integer" name="volgnummer"/>
+            <xs:element type="xs:string" name="voorvoegsel"/>
+            <xs:element type="xs:string" name="geslachtsnaam"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="geslachtsnaamComponenten">
+        <xs:sequence>
+            <xs:element type="bijh:geslachtsnaamComponent" name="geslachtsnaamComponent"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="voornamen">
+        <xs:sequence>
+            <xs:element type="bijh:voornaam" name="voornaam" maxOccurs="unbounded" minOccurs="0"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="nationaliteit">
+        <xs:sequence>
+            <xs:element type="xs:string" name="nationaliteit"/>
+            <xs:element type="xs:string" name="redenVerkrijging"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="nationaliteiten">
+        <xs:sequence>
+            <xs:element type="bijh:nationaliteit" name="nationaliteit"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="geboorte">
+        <xs:sequence>
+            <xs:element name="datumGeboorte">
+                <xs:simpleType>
+                    <xs:restriction base="xs:integer">
+                        <!--              <xs:minLength value="8"/> -->
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element type="xs:string" name="gemeente" minOccurs="0"/>
+            <xs:element type="xs:string" name="woonplaats" minOccurs="0"/>
+            <xs:element type="xs:string" name="land" minOccurs="0"/>
+            <xs:element type="xs:string" name="buitenlandseGeboorteplaats" minOccurs="0"/>
+            <xs:element type="xs:string" name="landGeboorte" minOccurs="0"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="adres">
+        <xs:sequence>
+            <xs:element type="xs:string" name="soort"/>
+            <xs:element type="xs:string" name="redenWijziging" minOccurs="0"/>
+            <xs:element type="xs:string" name="aangeverAdreshouding" minOccurs="0"/>
+            <xs:element type="xs:int" name="datumAanvangAdreshouding" minOccurs="0"/>
+            <xs:element type="xs:string" name="adresseerbaarObject" minOccurs="0"/>
+            <xs:element type="xs:string" name="identificatieNummeraanduiding" minOccurs="0"/>
+            <xs:element type="xs:string" name="land"/>
+            <xs:element type="xs:string" name="gemeente"/>
+            <xs:element type="xs:string" name="woonplaats"/>
+            <xs:element type="xs:string" name="naamOpenbareruimte"/>
+            <xs:element type="xs:string" name="afgekorteNaamOpenbareruimte"/>
+            <xs:element type="xs:int" name="huisnummer" minOccurs="0"/>
+            <xs:element type="xs:string" name="huisletter" minOccurs="0"/>
+            <xs:element type="xs:string" name="huisnummerToevoeging" minOccurs="0"/>
+            <xs:element type="xs:string" name="postcode"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="bronnen">
+        <xs:sequence>
+            <xs:element type="bijh:bron" name="bron" maxOccurs="unbounded">
+                <xs:annotation>
+                    <xs:documentation>Aangifteformulier verhuizing</xs:documentation>
+                </xs:annotation>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="verantwoordingen">
+        <xs:sequence>
+            <xs:element type="xs:int" name="bron.identificatieBronInBericht" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="afgeleidAdministratief">
+        <xs:sequence>
+            <xs:element type="xs:long" name="laatsteWijziging"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="bron">
+        <xs:sequence>
+            <xs:element type="xs:byte" name="identificatieBronInBericht"/>
+            <xs:element type="xs:string" name="soort"/>
+            <xs:element type="xs:string" name="akteNummer" minOccurs="0"/>
+            <xs:element type="xs:string" name="identificatie" minOccurs="0"/>
+            <xs:element type="xs:string" name="omschrijving" minOccurs="0"/>
+            <xs:element type="xs:short" name="partij"/>
+        </xs:sequence>
+    </xs:complexType>
+    <xs:complexType name="identificatieNummer">
+        <xs:sequence>
+            <xs:element name="burgerservicenummer" type="xs:long"/>
+            <xs:element type="xs:string" name="administratienummer" minOccurs="0"/>
+            <xs:element type="bijh:verantwoordingen" name="verantwoordingen" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
+</xs:schema>

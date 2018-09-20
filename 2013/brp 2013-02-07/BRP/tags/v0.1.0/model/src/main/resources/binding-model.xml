@@ -1,0 +1,229 @@
+<binding package="nl.bzk.brp">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+
+    <!-- Objecttype_Melding (bijhouding)-->
+    <mapping name="melding" class="nl.bzk.brp.model.validatie.Melding">
+        <value name="regelCode" field="code" enum-value-method="getNaam"/>
+        <value name="soortCode" field="soort" enum-value-method="getCode"/>
+        <value name="melding" field="omschrijving"/>
+        <!--<structure name="attribuutNaam"/>-->
+    </mapping>
+
+    <!-- Objecttype_PersoonVoornaam -->
+    <mapping abstract="true" type-name="Objecttype_PersoonVoornaam" class="nl.bzk.brp.model.logisch.PersoonVoornaam">
+		<structure name="tijdstipRegistratie" usage="optional" />
+		<structure name="tijdstipVervallen" usage="optional" />
+		<structure name="datumAanvangGeldigheid" usage="optional" />
+		<structure name="datumEindeGeldigheid" usage="optional" />
+        <value name="volgnummer" field="volgnummer"/>
+        <value name="naam" field="naam"/>
+    </mapping>
+
+    <!-- Objecttype_PersoonGeslachtsnaamcomponent -->
+    <mapping abstract="true" type-name="Objecttype_PersoonGeslachtsnaamcomponent"
+             class="nl.bzk.brp.model.logisch.PersoonGeslachtsnaamcomponent">
+        <structure name="tijdstipRegistratie" usage="optional"/>
+        <structure name="tijdstipVervallen" usage="optional"/>
+        <structure name="datumAanvangGeldigheid" usage="optional"/>
+        <structure name="datumEindeGeldigheid" usage="optional"/>
+        <value name="volgnummer" field="volgnummer"/>
+        <value name="voorvoegsel" field="voorvoegsel" usage="optional"/>
+        <value name="scheidingsteken" field="scheidingsTeken" usage="optional"/>
+        <value name="naam" field="naam"/>
+        <structure name="predikaatCode" usage="optional"/>
+        <structure name="adellijkeTitelCode" usage="optional"/>
+    </mapping>
+
+    <mapping type-name="bijgehoudenPersoon" class="nl.bzk.brp.model.logisch.Persoon" abstract="true">
+        <structure name="identificatienummers" field="identificatienummers">
+            <value name="burgerservicenummer" field="burgerservicenummer"/>
+        </structure>
+    </mapping>
+
+    <!-- Objecttype_PersoonAdres -->
+    <mapping type-name="Objecttype_PersoonAdres" abstract="true" class="nl.bzk.brp.model.logisch.PersoonAdres">
+        <structure name="tijdstipRegistratie" usage="optional"/>
+        <structure name="tijdstipVervallen" usage="optional"/>
+        <structure name="datumAanvangGeldigheid" usage="optional"/>
+        <structure name="datumEindeGeldigheid" usage="optional"/>
+        <value name="soortCode" field="soort" enum-value-method="getCode" usage="optional"/>
+        <structure field="redenWijziging">
+            <value name="redenWijzigingCode" field="code" usage="optional"/>
+        </structure>
+        <structure field="aangeverAdreshouding">
+            <value name="aangeverAdreshoudingCode" field="code" usage="optional"/>
+        </structure>
+        <value name="datumAanvangAdreshouding" field="datumAanvangAdreshouding" usage="optional"/>
+        <value name="adresseerbaarObject" field="adresseerbaarObject" usage="optional"/>
+        <value name="identificatiecodeNummeraanduiding" field="identificatiecodeNummeraanduiding" usage="optional"/>
+        <structure field="gemeente">
+            <value name="gemeenteCode" field="gemeentecode" usage="optional"/>
+        </structure>
+        <value name="naamOpenbareRuimte" field="naamOpenbareRuimte" usage="optional"/>
+        <value name="afgekorteNaamOpenbareRuimte" field="afgekorteNaamOpenbareRuimte" usage="optional"/>
+        <value name="gemeentedeel" field="gemeentedeel" usage="optional"/>
+        <value name="huisnummer" field="huisnummer" usage="optional"/>
+        <value name="huisletter" field="huisletter" usage="optional"/>
+        <value name="huisnummertoevoeging" field="huisnummertoevoeging" usage="optional"/>
+        <value name="postcode" field="postcode" usage="optional"/>
+        <structure field="woonplaats">
+            <value name="woonplaatsCode" field="woonplaatscode" usage="optional"/>
+        </structure>
+        <value name="locatietovAdres" field="locatieTovAdres" usage="optional"/>
+        <value name="locatieOmschrijving" field="locatieOmschrijving" usage="optional"/>
+        <structure name="buitenlandsAdresRegel1" usage="optional"/>
+        <structure name="buitenlandsAdresRegel2" usage="optional"/>
+        <structure name="buitenlandsAdresRegel3" usage="optional"/>
+        <structure name="buitenlandsAdresRegel4" usage="optional"/>
+        <structure name="buitenlandsAdresRegel5" usage="optional"/>
+        <structure name="buitenlandsAdresRegel6" usage="optional"/>
+        <structure field="land">
+            <value name="landCode" field="landcode" usage="optional"/>
+        </structure>
+        <structure name="datumVertrekUitNederland" usage="optional"/>
+    </mapping>
+
+    <!-- bevraging -->
+    <mapping type-name="IdentificerendePersoonsGegevens" abstract="true" class="nl.bzk.brp.model.logisch.Persoon">
+        <structure field="identificatienummers">
+            <value name="A-nummer" field="administratienummer"/>
+            <value name="bsn" field="burgerservicenummer"/>
+        </structure>
+        <structure field="persoonGeboorte">
+            <value name="geboortedatum" field="datumGeboorte"/>
+        </structure>
+        <structure field="persoonGeslachtsAanduiding">
+            <value name="geslachtsAanduiding" field="geslachtsAanduiding" enum-value-method="getCode"/>
+        </structure>
+        <value name="geslachtsNaam" field="geslachtsNaam"/>
+
+        <collection field="adressen" factory="nl.bzk.brp.BindingUtil.newSetInstance">
+            <structure name="adres" type="nl.bzk.brp.model.logisch.PersoonAdres">
+                <value name="huisnummer" field="huisnummer" usage="optional"/>
+                <value name="postcode" field="postcode"/>
+            </structure>
+        </collection>
+        <value name="voornaam" field="voornamen"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="afzenderPartij" class="nl.bzk.brp.model.gedeeld.Partij">
+        <value name="afzenderId" field="id"/>
+    </mapping>
+
+    <mapping abstract="true" type-name="identificatieNummers"
+             class="nl.bzk.brp.model.logisch.groep.PersoonIdentificatienummers">
+        <value name="bsn" field="burgerservicenummer"/>
+    </mapping>
+
+    <!-- Objecttype_Actie TODO: bij andere soorten acties nog oplossing nodig voor SoortActie -->
+    <mapping abstract="true" type-name="Objecttype_Actie" class="nl.bzk.brp.model.logisch.BRPActie"
+             post-set="initSoort">
+        <value name="datumAanvangGeldigheid" field="datumAanvangGeldigheid"/>
+        <structure name="tijdstipOntlening" usage="optional"/>
+        <structure name="toelichtingOntlening" usage="optional"/>
+        <structure name="bronnen" usage="optional"/>
+        <!-- View_InschrijvingGeboorte_Afstamming -->
+        <structure name="familierechtelijkeBetrekking" usage="optional">
+            <structure name="betrokkenheden">
+                <structure name="kind">
+                    <structure name="persoon" map-as="Objecttype_Persoon"
+                               set-method="voegPersoonToe" get-method="getPersoonRootObject"/>
+                </structure>
+               	<structure name="ouder"/>
+               	<structure name="ouder" usage="optional"/>
+            </structure>
+        </structure>
+        <!-- View_RegistratieNationaliteit_Afstamming TODO -->
+
+        <!-- View_Verhuizing_Migratie -->
+        <structure name="persoon" map-as="Objecttype_Persoon" set-method="voegPersoonToe"
+                   get-method="getPersoonRootObject" usage="optional"/>
+    </mapping>
+
+    <!-- Objecttype_Persoon -->
+    <mapping abstract="true" type-name="Objecttype_Persoon" class="nl.bzk.brp.model.logisch.Persoon">
+        <!-- Identificatie nummers -->
+        <structure name="identificatienummers" field="identificatienummers" usage="optional">
+            <structure name="tijdstipRegistratie" usage="optional"/>
+            <structure name="tijdstipVervallen" usage="optional"/>
+            <structure name="datumAanvangGeldigheid" usage="optional"/>
+            <structure name="datumEindeGeldigheid" usage="optional"/>
+            <value name="burgerservicenummer" field="burgerservicenummer" usage="optional"/>
+            <value name="administratienummer" field="administratienummer" usage="optional"/>
+        </structure>
+        <!-- GeslachtsAanduiding -->
+        <structure name="geslachtsaanduiding" field="persoonGeslachtsAanduiding" usage="optional">
+            <structure name="tijdstipRegistratie" usage="optional"/>
+            <structure name="tijdstipVervallen" usage="optional"/>
+            <structure name="datumAanvangGeldigheid" usage="optional"/>
+            <structure name="datumEindeGeldigheid" usage="optional"/>
+            <value name="code" field="geslachtsAanduiding" enum-value-method="getCode"/>
+        </structure>
+        <structure name="samengesteldeNaam" usage="optional"/>
+        <structure name="aanschrijving" usage="optional"/>
+        <!-- Geboorte-->
+        <structure name="geboorte" field="persoonGeboorte" usage="optional">
+            <structure name="tijdstipRegistratie" usage="optional"/>
+            <structure name="tijdstipVervallen" usage="optional"/>
+            <value name="datum" field="datumGeboorte"/>
+            <structure field="gemeenteGeboorte">
+                <value name="gemeenteCode" field="gemeentecode" usage="optional"/>
+            </structure>
+            <structure field="woonplaatsGeboorte">
+                <value name="woonplaatsCode" field="woonplaatscode" usage="optional"/>
+            </structure>
+            <value name="buitenlandseplaats" field="buitenlandsePlaats" usage="optional"/>
+            <value name="buitenlandseRegio" field="buitenlandseRegio" usage="optional"/>
+            <structure field="landGeboorte">
+                <value name="landCode" field="landcode"/>
+            </structure>
+            <value name="omschrijvinglocatie" field="omschrijvingLocatie" usage="optional"/>
+        </structure>
+        <structure name="overlijden" usage="optional"/>
+        <structure name="verblijfsrecht" usage="optional"/>
+        <structure name="uitsluitingNLKiesrecht" usage="optional"/>
+        <structure name="eUVerkiezingen" usage="optional"/>
+        <structure name="bijhoudingsverantwoordelijkheid" usage="optional"/>
+        <structure name="opschorting" usage="optional"/>
+        <structure name="bijhoudingsgemeente" usage="optional"/>
+        <structure name="persoonskaart" usage="optional"/>
+        <structure name="immigratie" usage="optional"/>
+        <structure name="inschrijving" usage="optional"/>
+        <structure name="afgeleidAdministratief" usage="optional"/>
+        <structure name="betrokkenheden" usage="optional"/>
+        <!-- Voornamen -->
+        <collection name="voornamen" field="persoonVoornamen" item-type="nl.bzk.brp.model.logisch.PersoonVoornaam"
+                    factory="nl.bzk.brp.BindingUtil.newTreeSetInstance" usage="optional">
+            <structure name="voornaam" map-as="Objecttype_PersoonVoornaam"/>
+        </collection>
+        <!-- Geslachtsnaam componenten -->
+        <collection name="geslachtsnaamcomponenten" field="geslachtsnaamcomponenten"
+                    item-type="nl.bzk.brp.model.logisch.PersoonGeslachtsnaamcomponent"
+                    factory="nl.bzk.brp.BindingUtil.newTreeSetInstance" usage="optional">
+            <structure name="geslachtsnaamcomponent" map-as="Objecttype_PersoonGeslachtsnaamcomponent"/>
+        </collection>
+        <collection name="adressen" field="adressen" item-type="nl.bzk.brp.model.logisch.PersoonAdres"
+                    factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+            <structure name="adres" map-as="Objecttype_PersoonAdres"/>
+        </collection>
+        <structure name="nationaliteiten" usage="optional"/>
+        <!-- Indicaties -->
+        <structure name="indicaties" usage="optional"/>
+    </mapping>
+
+    <!-- StructuurFormeleHistorie -->
+    <mapping abstract="true" type-name="StructuurFormeleHistorie"
+             class="nl.bzk.brp.model.basis.AbstractFormeleHistorie">
+        <value name="tijdstipRegistratie" field="datumTijdRegistratie"/>
+        <value name="tijdstipVervallen" field="datumTijdVerval"/>
+    </mapping>
+
+    <!-- StructuurMaterieleHistorie -->
+    <mapping abstract="true" type-name="StructuurMaterieleHistorie"
+             class="nl.bzk.brp.model.basis.AbstractMaterieleEnFormeleHistorie">
+        <value name="datumAanvangGeldigheid" field="datumAanvangGeldigheid"/>
+        <value name="datumEindeGeldigheid" field="datumEindeGeldigheid"/>
+    </mapping>
+
+</binding>

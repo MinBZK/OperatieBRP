@@ -1,0 +1,46 @@
+<binding package="nl.bzk.brp">
+
+    <namespace uri="http://www.brp.nl/BRP/0001" default="elements"/>
+    
+    <include path="classpath:/binding-model.xml" precompiled="true"/>
+
+    <mapping name="OpvragenPersoon" class="nl.bzk.brp.business.dto.bevraging.OpvragenPersoonBericht">
+        <structure field="afzender" map-as="afzenderPartij"/>
+        <value name="tijdstipVerzonden" set-method="setTijdstipVerzondenDate" get-method="getTijdstipVerzondenDate"/>
+        <structure field="opvragenPersoonCriteria"/>
+    </mapping>
+
+    <mapping name="opvragenPersoonCriteria" class="nl.bzk.brp.business.dto.bevraging.OpvragenPersoonCriteria">
+        <structure field="identificatienummers" map-as="identificatieNummers"/>
+    </mapping>
+
+    <!-- migratie_Verhuizing_Bijhouding_v0001 -->
+    <mapping name="migratie_Verhuizing_Bijhouding_v0001" class="nl.bzk.brp.business.dto.bijhouding.VerhuizingBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding"/>
+    </mapping>
+
+    <!-- Afstamming_InschrijvingAangifteGeboorte_Bijhouding_v0001 -->
+    <mapping name="afstamming_InschrijvingAangifteGeboorte_Bijhouding_v0001" class="nl.bzk.brp.business.dto.bijhouding.InschrijvingGeboorteBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding"/>
+    </mapping>
+
+    <!-- Objecttype_Bericht_Bijhouding -->
+    <mapping abstract="true" type-name="Objecttype_Bericht_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.BijhoudingsBericht">
+        <structure name="stuurgegevens" field="berichtStuurgegevens" map-as="Groep_BerichtStuurgegevens" usage="optional"/>
+        <structure name="overruleMeldingen" usage="optional"/>
+        <structure name="acties" usage="optional">
+            <structure name="inschrijvingGeboorte" map-as="Objecttype_Actie" set-method="voegActieToe" get-method="getActie" usage="optional"/>
+            <structure name="registratieNationaliteit" usage="optional"/>
+            <structure name="verhuizing" map-as="Objecttype_Actie" set-method="voegActieToe" get-method="getActie" usage="optional"/>
+        </structure>
+    </mapping>
+
+    <!-- Groep_BerichtStuurgegevens -->
+    <mapping abstract="true" type-name="Groep_BerichtStuurgegevens" class="nl.bzk.brp.business.dto.BerichtStuurgegevens">
+        <value name="organisatie" field="organisatie"/>
+        <value name="applicatie" field="applicatie"/>
+        <value name="referentienummer" field="referentienummer"/>
+        <value name="crossReferentienummer" field="crossReferentienummer" usage="optional"/>
+    </mapping>
+
+</binding>

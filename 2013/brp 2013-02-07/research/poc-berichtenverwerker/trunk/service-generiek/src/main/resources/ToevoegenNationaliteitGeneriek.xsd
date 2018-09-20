@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="windows-1252"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:brp="http://www.brp.nl/basis" xmlns:brp_nat="http://www.brp.nl/basis/nationaliteit"
+    xmlns:brp_tn="http://www.brp.nl/actie/toevoegennationaliteit" targetNamespace="http://www.brp.nl/actie/toevoegennationaliteit"
+    elementFormDefault="qualified" attributeFormDefault="unqualified">
+    <import namespace="http://www.brp.nl/basis" schemaLocation="BRP_Basis.xsd" />
+    <import namespace="http://www.brp.nl/basis/nationaliteit" schemaLocation="BRP_Basis_Nationaliteit.xsd" />
+
+    <element name="ToevoegenNationaliteit">
+        <complexType>
+            <sequence>
+                <element name="Actie" type="brp_nat:Actie" nillable="false" minOccurs="1" maxOccurs="1" />
+                <element name="Pers" type="brp_tn:PersToevoegenNationaliteit" nillable="false" minOccurs="1"
+                    maxOccurs="1" />
+            </sequence>
+        </complexType>
+    </element>
+
+    <complexType name="PersToevoegenNationaliteit">
+        <complexContent>
+            <restriction base="brp_nat:Pers">
+                <sequence>
+                    <element name="BSN" type="brp:BSN-e" nillable="false" minOccurs="1" maxOccurs="1" />
+                    <element name="PersNation" type="brp_tn:PersNationToevoegenNationaliteit" nillable="false"
+                        minOccurs="1" maxOccurs="1" />
+                </sequence>
+                <attribute name="soort" type="string" use="required" fixed="Object" />
+                <attribute name="actie" type="string" use="required" fixed="Identificatie" />
+                <attribute name="link" type="string" use="required" fixed="Pers" />
+            </restriction>
+        </complexContent>
+    </complexType>
+
+    <complexType name="PersNationToevoegenNationaliteit">
+        <complexContent>
+            <restriction base="brp_nat:PersNation">
+                <sequence>
+                    <element name="Nation" type="brp:NationID-e" minOccurs="1" maxOccurs="1" />
+                    <element name="DatAanvGel" type="brp:Dat-e" minOccurs="1" maxOccurs="1" />
+                    <element name="RdnVerk" type="brp:RdnVerkNLNationID-e" minOccurs="0" maxOccurs="1" />
+                </sequence>
+                <attribute name="soort" type="string" use="required" fixed="Object" />
+                <attribute name="actie" type="string" use="required" fixed="Toevoeging" />
+            </restriction>
+        </complexContent>
+    </complexType>
+
+</schema>

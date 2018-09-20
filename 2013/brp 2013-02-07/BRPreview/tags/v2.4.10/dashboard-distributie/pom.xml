@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>nl.bzk.brp.brpreview</groupId>
+		<artifactId>brpreview</artifactId>
+		<version>2.4.10</version>
+	</parent>
+	<artifactId>brpreview-distributie</artifactId>
+	<name>Distribute BRPreview Dashboard</name>
+	<description>Deployment distributie van het Dasboard en de RestAPI.</description>
+	<packaging>pom</packaging>
+	<properties>
+		<app.version>${project.version}</app.version>
+	</properties>
+
+	<build>
+		<plugins>
+			<plugin>
+				<artifactId>maven-eclipse-plugin</artifactId>
+				<configuration>
+					<eclipseProjectDir>..</eclipseProjectDir>
+					<useProjectReferences>false</useProjectReferences>
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
+	<profiles>
+		<profile>
+			<id>release</id>
+			<dependencies>
+				<dependency>
+					<groupId>nl.bzk.brp.brpreview</groupId>
+					<artifactId>brpreview-dashboard-web</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+				<dependency>
+					<groupId>nl.bzk.brp.brpreview</groupId>
+					<artifactId>dashboard-restapi</artifactId>
+					<version>${project.version}</version>
+					<type>war</type>
+				</dependency>
+			</dependencies>
+			<build>
+				<plugins>
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<descriptors>
+								<descriptor>deployment-package.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</plugin>
+					<plugin>
+						<!-- rename package directory to x.x.x (version number) -->
+						<artifactId>maven-antrun-plugin</artifactId>
+						<version>1.3</version>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<tasks>
+										<move todir="${project.build.directory}/${app.version}" failonerror="false">
+											<fileset dir="${project.build.directory}/${project.artifactId}-${project.version}" />
+										</move>
+									</tasks>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+</project>

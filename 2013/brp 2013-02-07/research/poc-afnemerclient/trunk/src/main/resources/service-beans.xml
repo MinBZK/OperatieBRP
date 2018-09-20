@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+            xmlns='http://www.springframework.org/schema/beans'
+            xmlns:context="http://www.springframework.org/schema/context"
+            xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+            xmlns:beans='http://www.springframework.org/schema/beans'
+            xmlns:jaxws='http://cxf.apache.org/jaxws'
+            xmlns:wsp='http://www.w3.org/2006/07/ws-policy'
+            xmlns:wsrm-policy='http://cxf.apache.org/policy'
+            xmlns:task="http://www.springframework.org/schema/task"
+            xmlns:cxf="http://cxf.apache.org/core"
+            xmlns:wsrm-mgr="http://cxf.apache.org/ws/rm/manager" 
+            xsi:schemaLocation='http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://cxf.apache.org/policy
+    http://cxf.apache.org/schemas/policy.xsd
+    http://www.w3.org/2006/07/ws-policy
+    http://www.w3.org/2006/07/ws-policy.xsd
+    http://cxf.apache.org/jaxws
+    http://cxf.apache.org/schemas/jaxws.xsd
+    http://www.springframework.org/schema/task
+    http://www.springframework.org/schema/task/spring-task.xsd
+    http://cxf.apache.org/core
+    http://cxf.apache.org/schemas/core.xsd
+    http://cxf.apache.org/ws/rm/manager
+    http://cxf.apache.org/schemas/configuration/wsrm-manager.xsd
+    '>
+
+    <context:property-placeholder location="classpath:afnemerclient.properties" />
+
+    <context:component-scan base-package="nl.bzk.brp.afnemerclient" />
+
+    <context:annotation-config />
+    <task:annotation-driven />
+
+	<import resource="classpath:META-INF/cxf/cxf.xml" />
+	<import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+
+	<bean id="jibxDatabindingBean" class="org.apache.cxf.jibx.JibxDataBinding" />
+
+    <!-- Scheduling -->
+    <task:scheduled-tasks scheduler="mutatieControleScheduler">
+        <task:scheduled ref="verstuurServiceImpl" method="verstuurBericht" fixed-delay="${verstuurder.tijdsinterval}"/>
+    </task:scheduled-tasks>
+    <task:scheduler id="mutatieControleScheduler" />
+
+</beans>

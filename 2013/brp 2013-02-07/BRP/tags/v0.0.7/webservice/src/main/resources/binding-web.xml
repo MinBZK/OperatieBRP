@@ -1,0 +1,48 @@
+<binding direction="output">
+
+    <namespace uri="http://www.brp.nl/brp/0001" default="elements"/>
+
+    <include path="classpath:/binding-model.xml" precompiled="true"/>
+
+    <!-- bevraging -->
+    <mapping name="OpvragenPersoonResultaat" class="nl.bzk.brp.web.bevraging.BevragingAntwoordBericht">
+        <value name="aantal" get-method="getAantal"/>
+        <collection field="gevondenPersonen" usage="optional">
+            <structure name="persoon" map-as="IdentificerendePersoonsGegevens"/>
+        </collection>
+        <collection name="meldingen" get-method="getMeldingen"
+                    item-type="nl.bzk.brp.model.validatie.Melding"
+                    usage="optional"/>
+    </mapping>
+
+    <!-- Verhuizing -->
+    <mapping name="BerichtResultaat"
+             class="nl.bzk.brp.web.bijhouding.VerhuizingAntwoordBericht">
+        <value name="resultaat" get-method="getVerwerkingsResultaat" enum-value-method="getCode"/>
+        <collection name="meldingen" get-method="getMeldingen"
+                    item-type="nl.bzk.brp.model.validatie.Melding"
+                    usage="optional"/>
+    </mapping>
+
+    <!-- Nieuw geborene -->
+    <mapping name="afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse_v0100"
+             class="nl.bzk.brp.web.bijhouding.InschrijvingGeboorteAntwoordBericht">
+        <structure name="stuurgegevens"/>
+        <structure name="bijhoudingResultaat">
+            <value name="verwerkingsResultaat" get-method="getVerwerkingsResultaat" enum-value-method="getCode"/>
+            <structure name="bijhoudingBRP"/>
+            <value name="hoogsteMeldingNiveau" get-method="getHoogsteMeldingNiveau"/>
+            <value name="tijdstipRegistratie" get-method="getTijdstipRegistratie"/>
+            <collection name="bijgehoudenPersonen" get-method="getBijgehoudenPersonen"
+                        item-type="nl.bzk.brp.model.logisch.Persoon"
+                        usage="optional">
+                <structure name="persoon" map-as="bijgehoudenPersoon"/>
+            </collection>
+            <collection name="meldingen" get-method="getMeldingen" item-type="nl.bzk.brp.model.validatie.Melding"
+                        usage="optional"/>
+                <!--<structure name="melding" type="melding"/>-->
+            <!--</collection>-->
+        </structure>
+    </mapping>
+
+</binding>

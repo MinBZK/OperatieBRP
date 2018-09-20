@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+	">
+
+    <bean id="berichtenDao" class="nl.bzk.brp.preview.dataaccess.impl.BerichtDaoImpl">
+        <property name="sequence"><ref bean="berichtenSequence" /></property>
+    </bean>
+
+    <bean id="jdbcTemplate" class="org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate">
+        <constructor-arg><ref bean="brpreviewDataSource" /></constructor-arg>
+    </bean>
+
+    <bean name="brpreviewDataSource" id="brpreviewDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+
+    <bean id="berichtenSequence" class="${jdbc.sequenceMaxValueIncrementerClassName}">
+        <constructor-arg><ref bean="brpreviewDataSource" /></constructor-arg>
+        <constructor-arg><value>dashboard.seq_berichten</value></constructor-arg>
+    </bean>
+
+</beans>

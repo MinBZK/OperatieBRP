@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans
+            xmlns='http://www.springframework.org/schema/beans'
+            xmlns:context="http://www.springframework.org/schema/context"
+            xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+            xmlns:beans='http://www.springframework.org/schema/beans'
+            xmlns:jaxws='http://cxf.apache.org/jaxws'
+            xmlns:wsp='http://www.w3.org/2006/07/ws-policy'
+            xmlns:wsrm-policy='http://cxf.apache.org/policy'
+            xmlns:task="http://www.springframework.org/schema/task"
+            xmlns:cxf="http://cxf.apache.org/core"
+            xmlns:wsrm-mgr="http://cxf.apache.org/ws/rm/manager"
+            xmlns:wsrmp="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"
+            xmlns:wsrmp11="http://docs.oasis-open.org/ws-rx/wsrmp/200702"
+            xsi:schemaLocation='http://www.springframework.org/schema/beans
+    http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/context
+    http://www.springframework.org/schema/context/spring-context.xsd
+    http://cxf.apache.org/policy
+    http://cxf.apache.org/schemas/policy.xsd
+    http://www.w3.org/2006/07/ws-policy
+    http://www.w3.org/2006/07/ws-policy.xsd
+    http://cxf.apache.org/jaxws
+    http://cxf.apache.org/schemas/jaxws.xsd
+    http://www.springframework.org/schema/task
+    http://www.springframework.org/schema/task/spring-task.xsd
+    http://cxf.apache.org/core
+    http://cxf.apache.org/schemas/core.xsd
+    http://cxf.apache.org/ws/rm/manager
+    http://cxf.apache.org/schemas/configuration/wsrm-manager.xsd
+    http://schemas.xmlsoap.org/ws/2005/02/rm/policy
+    http://schemas.xmlsoap.org/ws/2005/02/rm/wsrm-policy.xsd
+    http://docs.oasis-open.org/ws-rx/wsrmp/200702
+    http://cxf.apache.org/schemas/configuration/wsrmp-1.1-schema-200702.xsd
+    '>
+
+    <context:component-scan base-package="nl.bzk.brp.afnemerservice" />
+
+    <context:annotation-config />
+    <task:annotation-driven />
+
+	<bean id="jibxDatabindingBean" class="org.apache.cxf.jibx.JibxDataBinding" />
+
+	<jaxws:endpoint id="LeveringService"
+		implementor="nl.bzk.brp.afnemerservice.service.LeveringPortTypeImpl"
+		address="/levering" xmlns:s="http://www.bprbzk.nl/BRP/levering/service"
+		serviceName="s:LeveringService"
+		endpointName="s:LeveringPort"
+		>
+
+		<jaxws:dataBinding>
+			<ref bean="jibxDatabindingBean" />
+		</jaxws:dataBinding>
+
+		<jaxws:properties>
+			<entry key="schema-validation-enabled" value="false" />
+			<entry key="faultStackTraceEnabled" value="true" />
+			<entry key="exceptionMessageCauseEnabled" value="true" />
+		</jaxws:properties>
+
+        <jaxws:features>
+            <wsrm-policy:policies enabled="true" />
+            
+			<wsrm-mgr:reliableMessaging>
+			
+				<wsrmp:RMAssertion>
+	               	<BaseRetransmissionInterval Milliseconds="4000"/>           
+ 					<AcknowledgementInterval Milliseconds="2000"/>
+				</wsrmp:RMAssertion>
+
+				<wsrm-mgr:deliveryAssurance>
+					<wsrm-mgr:ExactlyOnce />
+					<wsrm-mgr:InOrder />
+				</wsrm-mgr:deliveryAssurance>
+
+            	<RM10AddressingNamespace uri="http://www.w3.org/2005/08/addressing"/>
+
+				<sourcePolicy>
+					<wsrm-mgr:sequenceTerminationPolicy maxLength="5" />
+					<wsrm-mgr:retryPolicy maxRetries="10"/>
+				</sourcePolicy>
+				
+				<destinationPolicy acceptOffers="true" />
+				
+				<store>
+					<wsrm-mgr:jdbcStore driverClassName="org.apache.derby.jdbc.EmbeddedDriver"
+						url="jdbc:derby:bas;create=true" password="password" />
+				</store>
+			</wsrm-mgr:reliableMessaging>
+			
+        </jaxws:features>
+    	
+	</jaxws:endpoint>
+
+	<cxf:bus>
+		<cxf:features>
+			<cxf:logging/>
+		</cxf:features>
+	</cxf:bus>
+
+</beans>

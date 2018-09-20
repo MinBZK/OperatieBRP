@@ -1,0 +1,55 @@
+group groepenOperationeelHistorisch;
+
+import "generieke-templates.stg"
+
+groepOperationeelHistorisch(groep, superSuper, objectType, identDb) ::= <<
+package <groep.packageName>;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+
+import nl.bzk.brp.model.groep.operationeel.<superSuper>;
+import nl.bzk.brp.model.groep.operationeel.historisch.basis.<groep.extendsFrom>;
+import nl.bzk.brp.model.objecttype.operationeel.<objectType>Model;
+
+
+/**
+ * User implementatie van {@link <groep.extendsFrom>}.
+ */
+@Entity
+@Table(schema = "kern", name = "<identDb>")
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public class <groep.name> extends
+        <groep.extendsFrom>
+{
+
+    /**
+     * Default constructor tbv hibernate.
+     */
+    @SuppressWarnings("unused")
+    private <groep.name>() {
+        super();
+    }
+
+    /**
+     * Constructor.
+     *
+     * @param groep
+     * @param <objectType.lowerCamel>
+     */
+    public <groep.name>(
+            final <superSuper> groep,
+            final <objectType>Model <objectType.lowerCamel>)
+    {
+        super(groep, <objectType.lowerCamel>);
+    }
+
+    public <groep.name> kopieer() {
+        return new <groep.name>(this, get<objectType>());
+    }
+}
+
+>>

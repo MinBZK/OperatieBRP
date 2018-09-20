@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="bijhouding"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:bevr="http://www.bprbzk.nl/BRP/0100"
+                  xmlns:tns="http://www.bprbzk.nl/BRP/bevraging/service"
+                  targetNamespace="http://www.bprbzk.nl/BRP/bevraging/service">
+
+    <wsdl:types>
+        <xsd:schema>
+            <xsd:import schemaLocation="BRP0100_Bevraging_Berichten.xsd" namespace="http://www.bprbzk.nl/BRP/0100"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="vraagDetailsPersoon">
+        <wsdl:part element="bevr:ALG_GeefDetailsPersoon_V" name="VraagDetailsPersoonBericht"/>
+    </wsdl:message>
+
+    <wsdl:message name="vraagDetailsPersoonAntwoord">
+        <wsdl:part element="bevr:ALG_GeefDetailsPersoon_VR" name="VraagDetailsPersoonAntwoord"/>
+    </wsdl:message>
+
+    <wsdl:message name="vraagPersonenOpAdresInclusiefBetrokkenheden">
+        <wsdl:part element="bevr:ALG_GeefPersonenOpAdresMetBetrokkenheden_Vi" name="VraagPersonenOpAdresInclusiefBetrokkenheden"/>
+    </wsdl:message>
+
+    <wsdl:message name="vraagPersonenOpAdresInclusiefBetrokkenhedenAntwoord">
+        <wsdl:part element="bevr:ALG_GeefPersonenOpAdresMetBetrokkenheden_ViR" name="VraagPersonenOpAdresInclusiefBetrokkenhedenAntwoord"/>
+    </wsdl:message>
+
+    <wsdl:message name="vraagKandidaatVader">
+        <wsdl:part element="bevr:ALG_BepaalKandidaatVader_Vi" name="VraagKandidaatVader"/>
+    </wsdl:message>
+
+    <wsdl:message name="vraagKandidaatVaderAntwoord">
+        <wsdl:part element="bevr:ALG_BepaalKandidaatVader_ViR" name="VraagKandidaatVaderAntwoord"/>
+    </wsdl:message>
+
+    <wsdl:portType name="BevragingPortType">
+        <wsdl:operation name="vraagDetailsPersoon">
+            <wsdl:input message="tns:vraagDetailsPersoon"/>
+            <wsdl:output message="tns:vraagDetailsPersoonAntwoord"/>
+        </wsdl:operation>
+        <wsdl:operation name="vraagPersonenOpAdresInclusiefBetrokkenheden">
+            <wsdl:input message="tns:vraagPersonenOpAdresInclusiefBetrokkenheden"/>
+            <wsdl:output message="tns:vraagPersonenOpAdresInclusiefBetrokkenhedenAntwoord"/>
+        </wsdl:operation>
+        <wsdl:operation name="vraagKandidaatVader">
+            <wsdl:input message="tns:vraagKandidaatVader"/>
+            <wsdl:output message="tns:vraagKandidaatVaderAntwoord"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="BevragingBinding" type="tns:BevragingPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="vraagDetailsPersoon">
+            <soap:operation soapAction="vraagDetailsPersoon"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="vraagPersonenOpAdresInclusiefBetrokkenheden">
+            <soap:operation soapAction="vraagPersonenOpAdresInclusiefBetrokkenheden"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="vraagKandidaatVader">
+            <soap:operation soapAction="vraagKandidaatVader"/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="BevragingService">
+        <wsdl:port binding="tns:BevragingBinding" name="BevragingPort">
+            <soap:address location="http://localhost:8080/BRP/services/bevraging"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

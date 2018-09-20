@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>parent</artifactId>
+        <groupId>nl.bzk.brp.generatoren</groupId>
+        <version>1.0</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>jibx-generatoren</artifactId>
+    <name>Generatoren JiBX</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>algemeen</artifactId>
+            <version>${version}</version>
+        </dependency>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>algemeen</artifactId>
+            <version>${version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>${groupId}</groupId>
+            <artifactId>java-generatoren</artifactId>
+            <version>${version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jibx</groupId>
+                <artifactId>maven-jibx-plugin</artifactId>
+                <version>1.2.4.5</version>
+                <executions>
+                    <!-- Uitgangspunt is binding.xsd, die de definitie van de binding files bevat.
+                    Hier genereren we de Java classes die deze binding representeren.
+                    Tevens wordt de daadwerkelijke binding gedaan op de gegenereerde classes.
+                    De JiBX generatoren gebruiken deze bindings voor de generatie van binding.xml files.
+                    We genereren naar target/generated-test-sources, omdat de binding classes alleen tijdens
+                    het genereren nodig zijn (en dat in de test fase is). De binding Java files komen zo
+                    niet in de artifact van gegenereerde code terecht. -->
+                    <execution>
+                        <id>jibx-meta-gen-and-bind</id>
+                        <configuration>
+                            <multimodule>true</multimodule>
+                            <schemaLocation>src/main/resources</schemaLocation>
+                            <sourceDirectories>
+                                <sourceDirectory>target/generated-test-sources</sourceDirectory>
+                            </sourceDirectories>
+                            <schemaBindingDirectory>target/generated-test-sources</schemaBindingDirectory>
+                            <defaultPackage>nl.bzk.brp.generatoren.jibx.model</defaultPackage>
+                        </configuration>
+                        <goals>
+                            <goal>schema-codegen</goal>
+                            <goal>bind</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/v1.0/jibx-generatoren</connection>
+    </scm>
+
+</project>

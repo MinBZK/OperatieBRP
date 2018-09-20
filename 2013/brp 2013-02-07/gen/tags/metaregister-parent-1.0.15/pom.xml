@@ -1,0 +1,106 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>nl.bzk.brp.metaregister</groupId>
+    <artifactId>metaregister-parent</artifactId>
+    <version>1.0.15</version>
+    <name>BRP Metaregister</name>
+    <packaging>pom</packaging>
+    <description>Metaregister projecten die het metaregister uitlezen, opnieuw genereren als HSQL database en een DAO laag maken om het BMR te ontsluiten voor code generatie.</description>
+    <modules>
+        <module>metamodel</module>
+        <module>database</module>
+        <module>dataaccess</module>
+    </modules>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jdk.version>1.6</jdk.version>
+        <hibernate.version>3.5.6-Final</hibernate.version>
+        <spring.version>3.1.1.RELEASE</spring.version>
+        <slf4j.version>1.6.4</slf4j.version>
+        <hsqldb.version>2.2.8</hsqldb.version>
+    </properties>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.hibernate</groupId>
+                <artifactId>hibernate-annotations</artifactId>
+                <!-- moet versie 3.5 zijn of nieuwer -->
+                <version>3.5.6-Final</version>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                    </exclusion>
+                </exclusions>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.5.1</version>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>${project.build.sourceEncoding}</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/metaregister-parent-1.0.15</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/metaregister-parent-1.0.15</developerConnection>
+        <url>https://www.modernodam.nl/svn/brp-code/gen/tags/metaregister-parent-1.0.15</url>
+    </scm>
+    <repositories>
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </repository>
+    </repositories>
+    <distributionManagement>
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+        <snapshotRepository>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>

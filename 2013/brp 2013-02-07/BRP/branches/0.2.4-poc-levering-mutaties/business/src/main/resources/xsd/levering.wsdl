@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions name="levering" 
+					xmlns:xsd="http://www.w3.org/2001/XMLSchema" 
+					xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+					xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" 
+					xmlns:lev="http://www.bprbzk.nl/BRP/0002"
+					xmlns:stuf="http://www.egem.nl/StUF/StUF0301"
+					xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+					xmlns:tns="http://www.bprbzk.nl/BRP/levering/service"
+                    xmlns:wsp="http://www.w3.org/2006/07/ws-policy"
+					targetNamespace="http://www.bprbzk.nl/BRP/levering/service">
+	<wsdl:types>
+		<xsd:schema>
+			<xsd:import schemaLocation="levering_verhuizing.xsd" namespace="http://www.bprbzk.nl/BRP/0002" />
+			<xsd:import schemaLocation="levering_verhuizing1.xsd" namespace="http://www.egem.nl/StUF/StUF0301" />
+		</xsd:schema>
+	</wsdl:types>
+	
+	<wsdl:message name="mutatiePersoon">
+		<wsdl:part name="MutatiePersoon" element="lev:LEV_LeveringBijgehoudenPersoon_Lv"/>
+	</wsdl:message>
+	
+	<wsdl:message name="antwoord">
+		<wsdl:part name="Antwoord" element="lev:LEV_LeveringBijgehoudenPersoon_Lv_Antwoord"/>
+	</wsdl:message>
+	
+	<wsdl:portType name="LeveringPortType">
+		<wsdl:operation name="mutatiePersoon">
+			<wsdl:input message="tns:mutatiePersoon"/>
+			<wsdl:output message="tns:antwoord"/>
+		</wsdl:operation>
+	</wsdl:portType>
+
+    <wsp:Policy wsu:Id="RM" xmlns:wsp="http://www.w3.org/2006/07/ws-policy"
+                xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd">
+        <wsam:Addressing xmlns:wsam="http://www.w3.org/2007/02/addressing/metadata">
+            <wsp:Policy/>
+        </wsam:Addressing>
+        <wsrmp:RMAssertion xmlns:wsrmp="http://schemas.xmlsoap.org/ws/2005/02/rm/policy">
+            <wsrmp:BaseRetransmissionInterval Milliseconds="10000"/>
+        </wsrmp:RMAssertion>
+    </wsp:Policy>
+
+	<wsdl:binding name="LeveringBinding" type="tns:LeveringPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<!-- Ten behoeve van WS-Addressing -->
+		<!--wsaw:UsingAddressing wsdl:required="true"/-->
+
+		<wsdl:operation name="mutatiePersoon">
+			<soap:operation soapAction="mutatiePersoon"/>
+			<wsdl:input>
+				<soap:body use="literal"/>
+			</wsdl:input>
+			<wsdl:output>
+				<soap:body use="literal"/>
+			</wsdl:output>
+		</wsdl:operation>
+	</wsdl:binding>
+	
+	<wsdl:service name="LeveringService">
+		<wsdl:port name="LeveringPort" binding="tns:LeveringBinding">
+			<soap:address location="http://localhost:8080/BRP/services/levering"/>
+            <wsp:PolicyReference URI="#RM" xmlns:wsp="http://www.w3.org/2006/07/ws-policy"/>
+		</wsdl:port>
+	</wsdl:service>
+</wsdl:definitions>

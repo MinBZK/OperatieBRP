@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 10-01-2013 Status:Concept -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:stuf="http://www.kinggemeenten.nl/StUF/StUF0302" xmlns:brp="http://www.bprbzk.nl/BRP/0100" targetNamespace="http://www.bprbzk.nl/BRP/0100" elementFormDefault="qualified" attributeFormDefault="unqualified" version="010001">
+	<import namespace="http://www.kinggemeenten.nl/StUF/StUF0302" schemaLocation="BRP0100_StUF.xsd"/>
+	<include schemaLocation="BRP0100_Migratie_Basis.xsd"/>
+	<element name="MIG_RegistreerVerhuizing_B" type="brp:Migratie_RegistreerVerhuizing_Bijhouding"/>
+	<element name="MIG_RegistreerVerhuizing_BR" type="brp:Migratie_RegistreerVerhuizing_BijhoudingResultaat"/>
+	<element name="MIG_CorrigeerAdres_B" type="brp:Migratie_CorrigeerAdresNederland_Bijhouding"/>
+	<element name="MIG_CorrigeerAdres_BR" type="brp:Migratie_CorrigeerAdresNederland_BijhoudingResultaat"/>
+	<!-- -->
+	<!-- Bericht Registreer Verhuizing -->
+	<complexType name="Migratie_RegistreerVerhuizing_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDi02_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="registratieBinnengemeentelijkeVerhuizing" type="brp:Handeling_RegistratieBinnengemeentelijkeVerhuizing_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="registratieIntergemeentelijkeVerhuizing" type="brp:Handeling_RegistratieIntergemeentelijkeVerhuizing_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling Registratie Binnengemeentelijke verhuizing -->
+	<complexType name="Handeling_RegistratieBinnengemeentelijkeVerhuizing_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_RegistratieBinnengemeentelijkeVerhuizing">
+				<sequence>
+					<element name="partijCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="stuf:DatumTijd-e" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bijgehoudenDocumenten" type="brp:Container_AdministratieveHandelingBijgehoudenDocumenten_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_RegistratieBinnengemeentelijkeVerhuizing_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling Registratie Intergemeentelijke verhuizing -->
+	<complexType name="Handeling_RegistratieIntergemeentelijkeVerhuizing_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_RegistratieIntergemeentelijkeVerhuizing">
+				<sequence>
+					<element name="partijCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="stuf:DatumTijd-e" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bijgehoudenDocumenten" type="brp:Container_AdministratieveHandelingBijgehoudenDocumenten_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_RegistratieIntergemeentelijkeVerhuizing_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Bericht Corrigeer adres -->
+	<complexType name="Migratie_CorrigeerAdresNederland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDi02_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="correctieAdresNederland" type="brp:Handeling_CorrectieAdresNederland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling Correctie adres Nederland -->
+	<complexType name="Handeling_CorrectieAdresNederland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_CorrectieAdresNederland">
+				<sequence>
+					<element name="partijCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="stuf:DatumTijd-e" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bijgehoudenDocumenten" type="brp:Container_AdministratieveHandelingBijgehoudenDocumenten_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_CorrectieAdresNederland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- BijhoudingResultaat Registreer verhuizing -->
+	<complexType name="Migratie_RegistreerVerhuizing_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDu02_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="registratieBinnengemeentelijkeVerhuizing" type="brp:Handeling_RegistratieBinnengemeentelijkeVerhuizing_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="registratieIntergemeentelijkeVerhuizing" type="brp:Handeling_RegistratieIntergemeentelijkeVerhuizing_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- BijhoudingResultaat Corrigeer adres Nederland -->
+	<complexType name="Migratie_CorrigeerAdresNederland_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDu02_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="correctieAdresNederland" type="brp:Handeling_CorrectieAdresNederland_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

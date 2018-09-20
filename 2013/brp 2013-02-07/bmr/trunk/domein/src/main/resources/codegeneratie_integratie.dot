@@ -1,0 +1,83 @@
+/*
+ * Genereer hiervan een PNG (Portable Network Graphics) file met de volgende
+ * command-line:
+ *
+ * dot -Tpng -o codegeneratie_integratie.png codegeneratie_integratie.dot
+ *
+ * Het "dot" commando is onderdeel van Graphviz (http://www.graphviz.org/).
+ */
+digraph CodeGeneratie {
+    node[shape=box];
+    edge[dir=back];
+
+    label="Integratie codegeneratie in maven build";
+    center=true;
+    compound=true;
+
+    subgraph cluster_generator {
+        label="component: nl.bzk.brp.generator";
+
+        bmr_metamodel[label="module: bmr-metamodel"];
+        bmr_ecore_metamodel[label="module: bmr-ecore-metamodel"];
+        emf_export[label="module: emf-export"];
+        bmr_generator[label="module: bmr-generator"];
+        bmr_maven_plugin[label="module: bmr-maven-plugin"];
+
+        bmr_generator -> bmr_maven_plugin;
+        bmr_metamodel -> emf_export;
+        bmr_ecore_metamodel -> emf_export;
+        bmr_ecore_metamodel -> bmr_generator;
+    }
+
+    subgraph cluster_bmr {
+        label="component: nl.bzk.brp.bmr";
+
+        subgraph cluster_brp_model {
+            label="module: brp-model";
+            brp_bmrxmi[label="model file: brp.bmrxmi"];
+            emf_export -> brp_bmrxmi [style=dotted];
+        }
+
+        subgraph cluster_bmr_domein {
+            label="module: domein";
+            rank=max;
+            brp_sql[label="SQL script: brp.sql"];
+            bmr_domein[label="Java package: nl.bzk.brp.domein.*"];
+
+            /*
+             * Alleen om te zorgen dat deze blokjes onderelkaar in plaats van
+             * naast elkaar komen te staan.
+             */
+            brp_sql -> bmr_domein [style=invis];
+        }
+
+        bmr_maven_plugin -> bmr_domein[lhead=cluster_bmr_domein];
+        brp_bmrxmi -> bmr_domein[ltail=cluster_brp_model, lhead=cluster_bmr_domein];
+    }
+
+    subgraph cluster_bevraging {
+        label="component: nl.bzk.brp.bevraging";
+        
+        bevraging_dataaccess[label="module: dataaccess"];
+        bevraging_business[label="module: business"];
+        bevraging_web[label="module: web"];
+
+        bmr_domein -> bevraging_dataaccess [ltail=cluster_bmr_domein];
+        bevraging_dataaccess -> bevraging_business;
+        bevraging_business -> bevraging_web;
+    }
+
+
+    subgraph cluster_beheer {
+        label="component: nl.bzk.brp.beheer";
+
+        beheer_dataaccess[label="module: dataaccess"];
+        beheer_web[label="module: web"];
+
+        bmr_domein -> beheer_dataaccess [ltail=cluster_bmr_domein];
+        bmr_maven_plugin -> beheer_web;
+        beheer_dataaccess -> beheer_web;
+        brp_bmrxmi -> beheer_web [ltail=cluster_brp_model];
+    }
+
+}

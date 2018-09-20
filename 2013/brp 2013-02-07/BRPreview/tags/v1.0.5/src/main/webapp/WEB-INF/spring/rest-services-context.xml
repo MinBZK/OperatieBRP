@@ -1,0 +1,83 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans     
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/mvc
+        http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd">
+
+
+    <!-- Mapping to Jackson engine for producing the json message -->
+    <bean
+        class="org.springframework.web.servlet.view.ContentNegotiatingViewResolver">
+        <property name="mediaTypes">
+            <map>
+                <entry key="json" value="application/json" />
+                <entry key="html" value="text/html" />
+            </map>
+        </property>
+         <property name="viewResolvers">
+		    <list>
+		      <bean class="org.springframework.web.servlet.view.BeanNameViewResolver"/>
+		      <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		        <property name="prefix" value="/WEB-INF/jsp/"/>
+		        <property name="suffix" value=".jsp"/>
+		      </bean>
+		    </list>
+		  </property>
+        <property name="defaultViews">
+            <list>
+                <bean
+                    class="org.springframework.web.servlet.view.json.MappingJacksonJsonView">
+                    <property name="prefixJson" value="false" />
+                    <property name="objectMapper" ref="brpJsonObjectMapper" />
+                </bean>
+            </list>
+        </property>
+    </bean>
+    
+    <bean class="org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+        <property name="order" value="1" />
+        <property name="messageConverters">
+            <list>
+                <ref bean="jsonConverter" />
+                <!-- Message converters -->
+                <!-- bean class="org.springframework.http.converter.StringHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.FormHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.ByteArrayHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.xml.SourceHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.BufferedImageHttpMessageConverter" />
+                <bean class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter" / -->
+            </list>
+        </property>
+    </bean>
+   
+    <bean id="jsonConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+   		<property name="supportedMediaTypes" value="application/json" />
+   		<property name="objectMapper" ref="brpJsonObjectMapper" />
+	</bean>
+	<bean id="jacksonSerializationConfig" class="org.codehaus.jackson.map.SerializationConfig"    factory-bean="brpJsonObjectMapper" factory-method="getSerializationConfig" />
+	
+   <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	    <property name="targetObject" ref="jacksonSerializationConfig" />
+	    <property name="targetMethod" value="setDateFormat" />
+	    <property name="arguments">
+	        <list>
+	            <value type="java.text.SimpleDateFormat">yyyy-MM-dd'T'HH:mm:ss.SSSZ</value>
+	        </list>
+	    </property>
+    </bean>
+    <bean class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+	    <property name="targetObject" ref="jacksonSerializationConfig" />
+	    <property name="targetMethod" value="disable" />
+	    <property name="arguments">
+	        <list>
+	            <value type="org.codehaus.jackson.map.SerializationConfig.Feature">WRITE_DATES_AS_TIMESTAMPS</value>
+	        </list>
+	    </property>
+	</bean>
+    <bean id="brpJsonObjectMapper" class="nl.bzk.brp.preview.service.JsonObjectMapperWithDateFormat" />
+
+</beans>

@@ -1,0 +1,87 @@
+<binding direction="output">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements"/>
+
+    <include path="classpath:/binding-model.xml" precompiled="true"/>
+    <include path="classpath:/binding-business.xml" precompiled="true"/>
+
+    <!-- bevraging -->
+    <mapping name="bevragen_VraagDetailsPersoon_Antwoord" class="nl.bzk.brp.web.bevraging.VraagDetailsPersoonAntwoord">
+ 		<structure map-as="Objecttype_AbstractAntwoordBericht"/>
+ 		<structure name="antwoord" test-method="isPersoonGevonden" usage="optional">
+        	<structure name="persoon" get-method="getPersoon" set-method="voegPersoonToe" map-as="PersoonDetails_Antwoord"/>
+        </structure>
+    </mapping>
+    
+    <mapping name="bevragen_VraagPersonenOpAdresInclusiefBetrokkenheden_Antwoord" class="nl.bzk.brp.web.bevraging.VraagPersonenOpAdresInclusiefBetrokkenhedenAntwoord">
+ 		<structure map-as="Objecttype_AbstractAntwoordBericht"/>        
+		<collection name="antwoord" get-method="getPersonen"
+                    item-type="nl.bzk.brp.model.logisch.Persoon" usage="optional">
+            <structure name="persoon" map-as="Referentie_Persoon_Antwoord_Basis" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping name="bevragen_VraagKandidaatVader_Antwoord" class="nl.bzk.brp.web.bevraging.VraagKandidaatVaderAntwoord">
+        <structure map-as="Objecttype_AbstractAntwoordBericht"/>        
+        <collection name="antwoord" get-method="getPersonen"
+                    item-type="nl.bzk.brp.model.logisch.Persoon" usage="optional">
+            <structure name="persoon" map-as="Referentie_PersoonMetAdres_Antwoord" usage="optional"/>
+        </collection>
+    </mapping>
+
+
+    <!-- Verhuizing antwoord -->
+    <mapping name="migratie_Verhuizing_BijhoudingResponse" class="nl.bzk.brp.web.bijhouding.VerhuizingAntwoordBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding_RESPONSE"/>
+    </mapping>
+
+    <!-- Afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse -->
+    <mapping name="afstamming_InschrijvingAangifteGeboorte_BijhoudingResponse" class="nl.bzk.brp.web.bijhouding.InschrijvingGeboorteAntwoordBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding_RESPONSE"/>
+    </mapping>
+
+    <!-- Objecttype_Bericht_Bijhouding RESPONSE !!-->
+    <mapping abstract="true" type-name="Objecttype_Bericht_Bijhouding_RESPONSE"
+             class="nl.bzk.brp.web.bijhouding.BijhoudingAntwoordBericht">
+        <structure map-as="Objecttype_AbstractBijhoudingAntwoordBericht"/>
+        <collection name="bijgehoudenPersonen" get-method="getBijgehoudenPersonen"
+                    item-type="nl.bzk.brp.model.logisch.Persoon" usage="optional">
+            <structure name="persoon" map-as="bijgehoudenPersoon" usage="optional"/>
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_AbstractAntwoordBericht" class="nl.bzk.brp.web.AbstractAntwoordBericht">
+     	<structure name="stuurgegevens" field="berichtStuurgegevens" map-as="Groep_BerichtStuurgegevens"/>
+     	<structure name="resultaat">
+            <value name="verwerkingCode" get-method="getVerwerkingsResultaat" enum-value-method="getCode"/>
+            <value name="hoogsteMeldingsniveauCode" get-method="getHoogsteMeldingNiveau" nillable="true"/>
+            <!--<value name="noValue" value-style="attribute" get-method="getHoogsteMeldingNiveau"/>-->
+        </structure>
+        <collection name="meldingen" get-method="getMeldingen" item-type="nl.bzk.brp.model.validatie.Melding"
+                    usage="optional"/>
+        <collection name="overruleMeldingen" 
+        				get-method="getOverruledMeldingen" set-method="setOverruledMeldingen"
+                        item-type="nl.bzk.brp.model.validatie.OverruleMelding"
+                        factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional">
+                 <structure name="overrule" map-as="Objecttype_Overrule2"/>
+        </collection>
+    </mapping>
+
+    <mapping abstract="true" type-name="Objecttype_AbstractBijhoudingAntwoordBericht" class="nl.bzk.brp.web.bijhouding.BijhoudingAntwoordBericht">
+        <structure name="stuurgegevens" get-method="getBerichtStuurgegevens" map-as="Groep_BerichtStuurgegevens"/>
+        <structure name="resultaat">
+            <value name="verwerkingCode" get-method="getVerwerkingsResultaat" enum-value-method="getCode"/>
+            <structure map-as="Enum_BijhoudingCode" get-method="getBijhoudingCode"/>
+            <value name="hoogsteMeldingsniveauCode" get-method="getHoogsteMeldingNiveau" nillable="true"/>
+            <value name="tijdstipRegistratie" get-method="getTijdstipRegistratie" nillable="true"/>
+        </structure>
+        <collection name="meldingen" get-method="getMeldingen" item-type="nl.bzk.brp.model.validatie.Melding"
+                    usage="optional"/>
+        <collection name="overruleMeldingen" 
+        				get-method="getOverruledMeldingen" set-method="setOverruledMeldingen"
+                        item-type="nl.bzk.brp.model.validatie.OverruleMelding"
+                        factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional">
+                 <structure name="overrule" map-as="Objecttype_Overrule2"/>
+        </collection>
+    </mapping>
+</binding>

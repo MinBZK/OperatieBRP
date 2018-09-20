@@ -1,0 +1,10 @@
+INSERT INTO kern.verdrag VALUES (1, 'ewq', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (2, 'dsa', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (3, 'cxz', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (4, 'rew', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (5, 'fds', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (6, 'vcx', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (7, 'tre', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (8, 'gfd', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (9, 'bvc', NULL, NULL);
+INSERT INTO kern.verdrag VALUES (10, 'zzz', NULL, NULL);

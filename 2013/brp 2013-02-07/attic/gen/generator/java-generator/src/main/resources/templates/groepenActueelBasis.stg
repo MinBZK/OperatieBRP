@@ -1,0 +1,54 @@
+group groepenActueelBasis;
+
+groepActueelBasis(groep, groepLogischBasis, metaregisterVersie) ::= <<
+package <groep.packageName>;
+
+import javax.persistence.Access;
+import javax.persistence.AccessType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.Transient;
+
+import nl.bzk.brp.model.basis.Onderzoekbaar;
+import nl.bzk.brp.model.groep.logisch.basis.<groepLogischBasis>;
+import nl.bzk.brp.model.groep.operationeel.<groep.extendsFrom>;
+
+
+/**
+ * <groep.javaDoc>.
+ */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public abstract class <groep.name> extends
+        <groep.extendsFrom> implements Onderzoekbaar
+{
+
+    @Transient
+    private boolean inOnderzoek;
+
+    /**
+     * Default constructor tbv hibernate.
+     */
+    protected <groep.name>() {
+        super();
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param groep De te kopieren groep
+     */
+    protected <groep.name>(
+            final <groepLogischBasis> groep)
+    {
+        super(groep);
+    }
+
+    @Override
+    public boolean isInOnderzoek() {
+        return inOnderzoek;
+    }
+
+}
+
+>>

@@ -1,0 +1,121 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>root-pom</artifactId>
+        <version>0.2.1</version>
+    </parent>
+    <groupId>nl.bzk.brp.metaregister</groupId>
+    <artifactId>metaregister-parent</artifactId>
+    <version>1.0.27</version>
+    <name>BRP Metaregister</name>
+    <packaging>pom</packaging>
+    <description>
+        Metaregister projecten die het metaregister uitlezen, opnieuw genereren als HSQL database en een DAO laag maken
+        om het BMR te ontsluiten voor code generatie
+    </description>
+
+    <modules>
+        <module>database</module>
+        <module>metamodel</module>
+        <module>dataaccess</module>
+    </modules>
+
+    <properties>
+        <hibernate.version>3.5.6-Final</hibernate.version>
+        <hsqldb.version>2.2.8</hsqldb.version>
+        <firebird.version>2.2.1</firebird.version>
+
+        <db.lokaal.pad>${project.build.directory}/database</db.lokaal.pad>
+        <db.lokaal.file.naam>brp-metaregister.db</db.lokaal.file.naam>
+    </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <configuration>
+                    <preparationGoals>clean</preparationGoals>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>org.hsqldb</groupId>
+                <artifactId>hsqldb</artifactId>
+                <version>${hsqldb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.firebirdsql.jdbc</groupId>
+                <artifactId>jaybird-jdk16</artifactId>
+                <version>${firebird.version}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/v1.0.27</connection>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/v1.0.27</developerConnection>
+        <url>https://www.modernodam.nl/svn/brp-code/gen/tags/v1.0.27</url>
+    </scm>
+
+    <repositories>
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </repository>
+    </repositories>
+
+    <distributionManagement>
+        <repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+        <snapshotRepository>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </snapshotRepository>
+    </distributionManagement>
+</project>

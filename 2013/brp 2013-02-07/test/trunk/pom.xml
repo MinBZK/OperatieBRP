@@ -1,0 +1,133 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<parent>
+		<groupId>nl.bzk.brp</groupId>
+		<artifactId>root-pom</artifactId>
+		<version>0.2.5</version>
+	</parent>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.bzk.brp.test</groupId>
+	<artifactId>test-parent</artifactId>
+	<version>0.1.6-SNAPSHOT</version>
+	<packaging>pom</packaging>
+	<name>brp-test-main</name>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<maven.build.timestamp.format>dd-MM-yyyy HH:mm.ss</maven.build.timestamp.format>
+
+		<buildnumber>${env.BUILD_NUMBER}</buildnumber>
+		<svnrevision>${env.SVN_REVISION}</svnrevision>
+		<timestamp>${maven.build.timestamp}</timestamp>
+
+        <jdk.version>1.6</jdk.version>
+        <slf4j.version>1.6.4</slf4j.version>
+        <spring.version>3.1.1.RELEASE</spring.version>
+        <postgres.version>9.1-901-1.jdbc4</postgres.version>
+        <art-engine.version>1.0.2-SNAPSHOT</art-engine.version>
+
+		<!--
+		 | generieke definities, te gebruiken over meerdere ART-projecten en testdata-project
+		 +-->
+		<dburl>jdbc:postgresql://localhost/brp-ART</dburl>
+		<dbuser>brp</dbuser>
+		<dbpassword>brp</dbpassword>
+
+	</properties>
+    <modules>
+        <module>KUC042</module>
+        <module>KUC091</module>
+    </modules>
+<!--
+        <module>testdata</module>
+-->
+    <dependencyManagement>
+        <dependencies>
+        	<!-- bouw de dependecy hier ipv. module, omdat de lifecycle van testdata anders KAN ZIJN dan de lifecycle van de ART's -->
+            <dependency>
+                <groupId>${groupId}</groupId>
+                <artifactId>brp-testdata</artifactId>
+                <version>${version}</version>
+            </dependency>
+
+			<dependency>
+				<groupId>nl.bzk.brp.test</groupId>
+				<artifactId>art-engine</artifactId>
+				<version>${art-engine.version}</version>
+			</dependency>
+
+            <!-- database drivers -->
+            <dependency>
+                <groupId>postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgres.version}</version>
+            </dependency>
+
+			<!-- test -->
+            <dependency>
+                <groupId>commons-dbutils</groupId>
+                <artifactId>commons-dbutils</artifactId>
+                <version>1.4</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring.version}</version>
+            </dependency>
+
+
+            <!-- logging -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-log4j12</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-simple</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>log4j</groupId>
+                <artifactId>log4j</artifactId>
+                <version>1.2.16</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <configuration>
+                    <encoding>UTF-8</encoding>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+	<scm>
+		<connection>scm:svn:https://www.modernodam.nl/svn/brp-code/test/trunk</connection>
+	</scm>
+</project>

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="bijhouding"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:bevr="http://www.brp.nl/brp/0001"
+                  xmlns:tns="http://www.brp.bzk.nl/bevraging/ws/service"
+                  targetNamespace="http://www.brp.bzk.nl/bevraging/ws/service">
+
+    <wsdl:types>
+        <xsd:schema>
+            <xsd:import schemaLocation="bevraging.xsd" namespace="http://www.brp.nl/brp/0001"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="OpvragenPersoon">
+        <wsdl:part element="bevr:OpvragenPersoon" name="OpvragenPersoon"/>
+    </wsdl:message>
+
+    <wsdl:message name="OpvragenPersoonResultaat">
+        <wsdl:part type="bevr:OpvragenPersoonResultaat" name="OpvragenPersoonResultaat"/>
+    </wsdl:message>
+
+    <wsdl:portType name="BevragingPortType">
+        <wsdl:operation name="bevraging">
+            <wsdl:input message="tns:OpvragenPersoon"/>
+            <wsdl:output message="tns:OpvragenPersoonResultaat"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="BevragingBinding" type="tns:BevragingPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="bevraging">
+            <soap:operation soapAction=""/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="BevragingService">
+        <wsdl:port binding="tns:BevragingBinding" name="BevragingPort">
+            <soap:address location="http://localhost:8080/BRP/services/bevraging"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

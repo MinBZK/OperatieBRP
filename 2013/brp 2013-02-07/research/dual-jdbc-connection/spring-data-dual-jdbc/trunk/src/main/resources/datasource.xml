@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xmlns:repository="http://www.springframework.org/schema/data/repository"
+    xsi:schemaLocation="http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+        http://www.springframework.org/schema/data/repository http://www.springframework.org/schema/data/repository/spring-repository.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <context:annotation-config />
+    <tx:annotation-driven />
+
+    <bean class="org.springframework.orm.jpa.support.PersistenceAnnotationBeanPostProcessor">
+        <property name="persistenceUnits">
+            <map>
+                <entry key="default" value="classpath:META-INF/persistence.xml"/>
+                <entry key="write" value="classpath:META-INF/persistence2.xml"/>
+            </map>
+    </property>
+        <property name="defaultPersistenceUnitName" value="default" />
+</bean>
+	<bean id="entityManagerFactory"
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+		<property name="dataSource" ref="defaultDataSource" />
+		<property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+		<property name="persistenceUnitName" value="default" />
+	</bean>
+
+    <bean id="entityManagerFactoryWrite"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="writeDataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+        <property name="persistenceXmlLocation" value="classpath:META-INF/persistence2.xml" />
+        <property name="persistenceUnitName" value="write" />
+    </bean>
+	
+	<bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+
+
+
+
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false" />
+        <property name="generateDdl" value="true" />
+        <property name="database" value="POSTGRESQL" />
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQLDialect" />
+    </bean>
+
+
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+
+    <context:property-placeholder location="classpath:jdbc.properties"/>
+
+    <bean id="templateDataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close"
+          abstract="true">
+        <property name="driverClassName" value="org.postgresql.Driver"/>
+        <property name="username" value="brp"/>
+        <property name="password" value="brp"/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive" value="200"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxIdle" value="5"/>
+        <property name="testOnBorrow" value="true"/>
+        <property name="testWhileIdle" value="true"/>
+        <property name="testOnReturn" value="false"/>
+        <property name="validationQuery" value="SELECT 41+1"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+    </bean>
+
+    <bean id="defaultDataSource" parent="templateDataSource">
+        <property name="url" value="jdbc:postgresql://localhost/brpread"/>
+    </bean>
+
+    <bean id="writeDataSource" parent="templateDataSource">
+        <property name="url" value="jdbc:postgresql://localhost/brp"/>
+    </bean>
+
+    <!--
+    Routering van datasource op basis van de huidige context
+    -->
+    <bean id="dataSource" class="nl.bzk.brp.repository.DataSourceRouter">
+        <property name="targetDataSources">
+            <map key-type="nl.bzk.brp.repository.AvailableDataSourceTypes">
+                <entry key="DEFAULT" value-ref="defaultDataSource"/>
+                <entry key="WRITE" value-ref="writeDataSource"/>
+            </map>
+        </property>
+        <property name="defaultTargetDataSource" ref="defaultDataSource"/>
+    </bean>
+
+</beans>

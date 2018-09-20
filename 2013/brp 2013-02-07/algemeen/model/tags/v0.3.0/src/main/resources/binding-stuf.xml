@@ -1,0 +1,98 @@
+<binding package="nl.bzk.brp">
+
+    <include path="classpath:/binding-attribuuttypen.xml" precompiled="false" />
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.basis.AbstractBerichtStuurgegevensGroepBericht" abstract="true"
+             type-name="AbstractStuurgegevensDi02_Vraag" ns="http://www.kinggemeenten.nl/StUF/StUF0302">
+        <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" default="all" prefix="stuf"/>
+        <structure name="zender" usage="optional">
+            <structure name="organisatie" map-as="Organisatienaam" field="organisatie"/>
+            <structure name="applicatie" map-as="Applicatienaam" field="applicatie"/>
+        </structure>
+        <structure name="referentienummer" map-as="Sleutelwaardetekst" field="referentienummer" usage="optional"/>
+    </mapping>
+
+    <!--  dit is de stuurgegevens voor bevraging, en wel het request/inkomend -->
+    <mapping class="nl.bzk.brp.model.bericht.ber.BerichtStuurgegevensGroepBericht" abstract="true"
+             type-name="StuurgegevensDi02_Vraag">
+        <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" default="all" prefix="stuf"/>
+        <value name="berichtcode" constant="Di02"/>
+        <structure map-as="AbstractStuurgegevensDi02_Vraag"/>
+        <value name="functie" field="functie" usage="optional"/>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.basis.AbstractBerichtStuurgegevensGroepBericht" abstract="true"
+             type-name="AbstractStuurgegevensDu02_Vraag" ns="http://www.kinggemeenten.nl/StUF/StUF0302">
+        <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" default="all" prefix="stuf"/>
+        <structure name="zender">
+            <structure name="organisatie" map-as="Organisatienaam" field="organisatie"/>
+            <structure name="applicatie" map-as="Applicatienaam" field="applicatie"/>
+        </structure>
+        <structure name="referentienummer" map-as="Sleutelwaardetekst" field="referentienummer"/>
+        <structure name="crossRefnummer" map-as="Sleutelwaardetekst" nillable="true"
+                   field="crossReferentienummer" usage="optional"/>
+    </mapping>
+
+    <!--  dit is de stuurgegevens voor bevraging, en wel het response/uitgaand -->
+    <mapping class="nl.bzk.brp.model.bericht.ber.BerichtStuurgegevensGroepBericht" abstract="true"
+             type-name="StuurgegevensDu02_Vraag">
+        <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" default="all" prefix="stuf"/>
+        <value name="berichtcode" constant="Du02"/>
+        <structure map-as="AbstractStuurgegevensDu02_Vraag"/>
+        <value name="functie" field="functie" usage="optional"/>
+    </mapping>
+
+    <!-- stuurgegevens_bijhouding 
+     | stuurgegevens bijhouding inkomend; wordt gerefereerd in de business: binding-business-bijhouding.xml.
+     +-->
+    <mapping class="nl.bzk.brp.model.bericht.ber.basis.AbstractBerichtStuurgegevensGroepBericht" abstract="true"
+             type-name="AbstractStuurgegevens_Bijhouding" ns="http://www.kinggemeenten.nl/StUF/StUF0302">
+        <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" default="all" prefix="stuf"/>
+        <structure name="zender">
+            <structure name="organisatie" map-as="Organisatienaam" field="organisatie"/>
+            <structure name="applicatie" map-as="Applicatienaam" field="applicatie"/>
+        </structure>
+        <structure name="ontvanger" usage="optional"/>
+        <structure name="referentienummer" map-as="Sleutelwaardetekst" field="referentienummer"/>
+        <structure name="crossRefnummer" map-as="Sleutelwaardetekst" nillable="true"
+                   field="crossReferentienummer" usage="optional"/>
+        <structure name="entiteittype" usage="optional"/>
+    </mapping>
+
+    <!--  voor bijhouding, inkomend
+     | merk op dat de berichtcode volledig wordt genegeerd.
+     +-->
+    <mapping class="nl.bzk.brp.model.bericht.ber.BerichtStuurgegevensGroepBericht" abstract="true"
+             type-name="Stuurgegevens_Bijhouding">
+        <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" default="all" prefix="stuf"/>
+        <structure name="berichtcode"/>
+        <structure map-as="AbstractStuurgegevens_Bijhouding"/>
+        <value name="functie" field="functie" usage="optional"/>
+    </mapping>
+
+    <!-- StuurgegevensDu02_BijhoudingResultaat 
+     | stuurgegevens bijhouding uitgaand; wordt gerefereerd in de web: binding-web-bijhouding.xml.
+     | We kunnen hier hardcoded onze organisatie en applicatienaam zetten, omdat we de zender zijn.
+     | Merk op dat de berichtcode nu al hardcoded hebben op Du02
+     +-->
+    <mapping class="nl.bzk.brp.model.bericht.ber.basis.AbstractBerichtStuurgegevensGroepBericht" abstract="true"
+             type-name="AbstractStuurgegevens_BijhoudingResultaat" ns="http://www.kinggemeenten.nl/StUF/StUF0302">
+        <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" default="all" prefix="stuf"/>
+        <structure name="zender">
+            <structure name="organisatie" map-as="Organisatienaam" field="organisatie"/>
+            <structure name="applicatie" map-as="Applicatienaam" field="applicatie"/>
+        </structure>
+        <structure name="referentienummer" map-as="Sleutelwaardetekst" field="referentienummer"/>
+        <structure name="crossRefnummer" map-as="Sleutelwaardetekst" nillable="true"
+                   field="crossReferentienummer" usage="optional"/>
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.bericht.ber.BerichtStuurgegevensGroepBericht" abstract="true"
+             type-name="StuurgegevensDu02_BijhoudingResultaat">
+        <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" default="all" prefix="stuf"/>
+        <value name="berichtcode" constant="Du02"/>
+        <structure map-as="AbstractStuurgegevens_BijhoudingResultaat"/>
+        <value name="functie" field="functie" usage="optional"/>
+    </mapping>
+
+</binding>

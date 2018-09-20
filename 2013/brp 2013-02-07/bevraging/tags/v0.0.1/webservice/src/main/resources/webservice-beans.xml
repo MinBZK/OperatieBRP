@@ -1,0 +1,29 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jaxws="http://cxf.apache.org/jaxws" xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:p="http://www.springframework.org/schema/p"
+    xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+	        http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd">
+
+   	<import resource="classpath:business-beans.xml" />	
+
+   	<import resource="classpath:dataaccess-beans.xml" />
+
+    <import resource="classpath:META-INF/cxf/cxf.xml" />
+    
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml" />
+    
+    <bean id="log" class="org.springframework.beans.factory.config.CommonsLogFactoryBean">
+        <property name="logName" value="nl.bzk.brp" />
+    </bean>
+
+    <bean id="opvragenPersoonService" class="nl.bzk.brp.bevraging.ws.service.brp.OpvragenPersoonService" />
+    
+    <bean id="berichtIdGenerator" class="nl.bzk.brp.bevraging.ws.service.algemeen.OptellerBerichtIdGenerator" />
+
+    <!-- JAX-WS Webservice Endpoint -->
+    <jaxws:endpoint id="opvragenPersoon" implementor="#opvragenPersoonService" address="/opvragenpersoon" />
+
+</beans>

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Datum: 10-01-2013 Status:Concept -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:stuf="http://www.kinggemeenten.nl/StUF/StUF0302" xmlns:brp="http://www.bprbzk.nl/BRP/0100" targetNamespace="http://www.bprbzk.nl/BRP/0100" elementFormDefault="qualified" attributeFormDefault="unqualified" version="010001">
+	<import namespace="http://www.kinggemeenten.nl/StUF/StUF0302" schemaLocation="BRP0100_StUF.xsd"/>
+	<include schemaLocation="BRP0100_Overlijden_Basis.xsd"/>
+	<element name="OVL_RegistreerOverlijden_B" type="brp:Overlijden_RegistreerOverlijden_Bijhouding"/>
+	<element name="OVL_RegistreerOverlijden_BR" type="brp:Overlijden_RegistreerOverlijden_BijhoudingResultaat"/>
+	<!-- -->
+	<!-- Bericht RegistreerOverlijden -->
+	<complexType name="Overlijden_RegistreerOverlijden_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Objecttype_Bericht_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDi02_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="parameters" type="brp:Groep_BerichtParameters_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<choice>
+						<element name="registratieOverlijdenNederland" type="brp:Handeling_RegistratieOverlijdenNederland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="registratieOverlijdenBuitenland" type="brp:Handeling_RegistratieOverlijdenBuitenland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- -->
+	<!-- Administratieve handeling Overlijden NL -->
+	<complexType name="Handeling_RegistratieOverlijdenNederland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_RegistratieOverlijdenNederland">
+				<sequence>
+					<element name="partijCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="stuf:DatumTijd-e" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bijgehoudenDocumenten" type="brp:Container_AdministratieveHandelingBijgehoudenDocumenten_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_RegistratieOverlijdenNederland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- Administratieve handeling Overlijden Buitenland -->
+	<complexType name="Handeling_RegistratieOverlijdenBuitenland_Bijhouding">
+		<complexContent>
+			<restriction base="brp:Handeling_RegistratieOverlijdenBuitenland">
+				<sequence>
+					<element name="partijCode" type="brp:GemeenteCode" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="tijdstipOntlening" type="stuf:DatumTijd-e" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="toelichtingOntlening" type="brp:Ontleningstoelichting" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="gedeblokkeerdeMeldingen" type="brp:Container_AdministratieveHandelingGedeblokkeerdeMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="bijgehoudenDocumenten" type="brp:Container_AdministratieveHandelingBijgehoudenDocumenten_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<element name="acties" type="brp:Container_Handeling_Acties_RegistratieOverlijdenBuitenland_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+				</sequence>
+				<attribute ref="stuf:entiteittype" use="required" fixed="AdministratieveHandeling"/>
+				<attribute ref="brp:technischeSleutel" use="prohibited"/>
+				<attribute ref="brp:referentieID" use="prohibited"/>
+				<attribute ref="brp:communicatieID" use="required"/>
+			</restriction>
+		</complexContent>
+	</complexType>
+	<!-- ... -->
+	<!-- BijhoudingResultaat -->
+	<complexType name="Overlijden_RegistreerOverlijden_BijhoudingResultaat">
+		<complexContent>
+			<restriction base="brp:Objecttype_BerichtResultaat_Bijhouding">
+				<sequence>
+					<element name="stuurgegevens" type="stuf:StuurgegevensDu02_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="resultaat" type="brp:Groep_BerichtResultaat_Bijhouding" nillable="false" minOccurs="1" maxOccurs="1"/>
+					<element name="meldingen" type="brp:Container_BerichtMeldingen_Bijhouding" nillable="true" minOccurs="0" maxOccurs="1"/>
+					<choice>
+						<element name="registratieOverlijdenNederland" type="brp:Handeling_RegistratieOverlijdenNederland_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+						<element name="registratieOverlijdenBuitenland" type="brp:Handeling_RegistratieOverlijdenBuitenland_Resultaat" nillable="false" minOccurs="1" maxOccurs="1"/>
+					</choice>
+				</sequence>
+			</restriction>
+		</complexContent>
+	</complexType>
+</schema>

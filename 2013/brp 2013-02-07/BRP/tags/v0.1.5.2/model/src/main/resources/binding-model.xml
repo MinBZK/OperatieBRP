@@ -1,0 +1,341 @@
+<binding package="nl.bzk.brp">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements" prefix="brp"/>
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+<!-- 
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="all" prefix=""/>
+ -->
+
+    <include path="classpath:/binding-model-objecttypen.xml" precompiled="false"/>
+
+    <!-- Objecttype_Melding (bijhouding)-->
+    <mapping name="melding" class="nl.bzk.brp.model.validatie.Melding">
+        <value name="regelCode" field="code" enum-value-method="getNaam"/>
+        <value name="soortCode" field="soort" enum-value-method="getCode"/>
+        <value name="melding" field="omschrijving"/>
+        <value name="attribuutNaam" field="attribuutNaam" usage="optional"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId" 
+            usage="optional" />
+    </mapping>
+
+    <mapping class="nl.bzk.brp.model.logisch.PersoonIndicatie"
+             marshaller="nl.bzk.brp.model.binding.PersoonIndicatieMapper"
+             unmarshaller="nl.bzk.brp.model.binding.PersoonIndicatieMapper"/>
+
+    <mapping type-name="bijgehoudenPersoon" class="nl.bzk.brp.model.logisch.Persoon" abstract="true">
+        <structure name="identificatienummers" field="identificatienummers">
+            <value name="burgerservicenummer" field="burgerservicenummer"/>
+        </structure>
+    </mapping>
+
+    <!-- StructuurFormeleHistorie -->
+    <mapping abstract="true" type-name="StructuurFormeleHistorie"
+             class="nl.bzk.brp.model.basis.AbstractFormeleHistorieEntiteit">
+        <value name="tijdstipRegistratie" field="datumTijdRegistratie"/>
+        <value name="tijdstipVervallen" field="datumTijdVerval"/>
+    </mapping>
+
+    <!-- StructuurMaterieleHistorie -->
+    <mapping abstract="true" type-name="StructuurMaterieleHistorie"
+             class="nl.bzk.brp.model.basis.AbstractMaterieleEnFormeleHistorieEntiteit">
+        <value name="datumAanvangGeldigheid" field="datumAanvangGeldigheid"/>
+        <value name="datumEindeGeldigheid" field="datumEindeGeldigheid"/>
+    </mapping>
+    
+    <!-- PersoonDetails_Antwoord -->
+    <mapping abstract="true" type-name="PersoonDetails_Antwoord" class="nl.bzk.brp.model.logisch.Persoon">
+        <!-- Identificatie nummers -->
+        <structure name="identificatienummers" field="identificatienummers" map-as="Groep_PersoonIdentificatienummers" usage="optional"/>
+        <!-- GeslachtsAanduiding -->
+        <structure name="geslachtsaanduiding" field="persoonGeslachtsAanduiding" map-as="Groep_PersoonGeslachtsaanduiding" usage="optional"/>
+        <!-- SamengesteldeNaam -->
+        <structure name="samengesteldeNaam" field="samengesteldenaam" map-as="Groep_PersoonSamengesteldeNaam" usage="optional"/>
+        <!-- Aanschrijving -->
+        <structure name="aanschrijving" field="samengesteldeAanschrijving" map-as="Groep_PersoonAanschrijving" usage="optional"/>
+        <!-- Geboorte-->
+        <structure name="geboorte" field="geboorte" map-as="Groep_PersoonGeboorte" usage="optional"/>
+        <!-- Overlijden -->
+        <structure name="overlijden" field="overlijden" map-as="Groep_PersoonOverlijden" usage="optional"/>
+        <structure name="verblijfsrecht" usage="optional"/>
+        <structure name="uitsluitingNLKiesrecht" usage="optional"/>
+        <structure name="eUVerkiezingen" usage="optional"/>
+        <!-- Bijhoudingsverantwoordelijkheid -->
+        <structure name="bijhoudingsverantwoordelijkheid" field="bijhoudingVerantwoordelijke" map-as="Groep_PersoonBijhoudingsverantwoordelijkheid" usage="optional"/>
+        <!-- Opschorting -->
+        <structure name="opschorting" field="redenOpschorting" map-as="Groep_PersoonOpschorting" usage="optional"/>
+        <!-- Bijhoudingsgemeente -->
+        <structure name="bijhoudingsgemeente" field="bijhoudingGemeente" map-as="Groep_PersoonBijhoudingsgemeente" usage="optional"/>
+        <structure name="persoonskaart" usage="optional"/>
+        <structure name="immigratie" usage="optional"/>
+        <structure name="inschrijving" field="inschrijving" map-as="Groep_PersoonInschrijving" usage="optional"/>
+        <structure name="afgeleidAdministratief" field="afgeleidAdministratief" map-as="Groep_PersoonAfgeleidAdministratief" usage="optional"/>
+        <!-- betrokkenheden -->
+        <structure name="betrokkenheden" usage="optional" test-method="heeftBetrokkenheden">
+            <structure get-method="getKindBetrokkenHeid" set-method="voegKindBetrokkenHeidToe"
+                       map-as="View_Kind_VanuitPersoon_Antwoord_Details"
+                       usage="optional"/>
+            <collection get-method="getOuderBetrokkenheden" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                        set-method="voegOuderBetrokkenhedenToe" ordered="false">
+                <structure name="ouder" map-as="View_Ouder_VanuitPersoon_Antwoord_Details" usage="optional"/>
+            </collection>
+            <collection get-method="getPartnerBetrokkenHeden" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                        set-method="voegPartnerBetrokkenHedenToe">
+                <structure name="partner" map-as="View_Partner_VanuitPersoon_Antwoord_Details" usage="optional"/>
+            </collection>
+        </structure>
+        <!-- Voornamen --> 
+        <collection name="voornamen" field="persoonVoornamen" item-type="nl.bzk.brp.model.logisch.PersoonVoornaam"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional" test-method="heeftVoornamen">
+            <structure name="voornaam" map-as="Objecttype_PersoonVoornaam"/>
+        </collection>
+        <!-- Geslachtsnaam componenten  -->
+        <collection name="geslachtsnaamcomponenten" field="geslachtsnaamcomponenten" test-method="heeftGeslachtsnaamComponenten"
+                    item-type="nl.bzk.brp.model.logisch.PersoonGeslachtsnaamcomponent"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional">
+            <structure name="geslachtsnaamcomponent" map-as="Objecttype_PersoonGeslachtsnaamcomponent"/>
+        </collection>
+        <!-- Adressen -->
+        <structure name="adressen" usage="optional"> <!-- TODO controlleer waarom optioneel is terwijl xsd zegt dat het minoccurs="1" is -->
+            <collection field="adressen" item-type="nl.bzk.brp.model.logisch.PersoonAdres"
+                        factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+                <structure name="adres" map-as="Objecttype_PersoonAdres"/>
+            </collection>
+        </structure>
+        <!-- Nationaliteiten -->
+        <collection name="nationaliteiten" field="nationaliteiten" item-type="nl.bzk.brp.model.logisch.groep.PersoonNationaliteit"
+                    factory="nl.bzk.brp.BindingUtil.newListInstance" usage="optional" test-method="heeftNationaliteiten">
+            <structure name="nationaliteit" map-as="Objecttype_PersoonNationaliteit"/>
+        </collection>
+        <!-- Reisdocumenten -->
+        <structure name="reisdocumenten" usage="optional"/>
+        <!-- Indicaties -->
+        <collection name="indicaties" item-type="nl.bzk.brp.model.logisch.PersoonIndicatie"
+                    factory="nl.bzk.brp.BindingUtil.newTreeSetInstance" usage="optional"
+                    get-method="getIndicaties" set-method="voegPersoonIndicatiesToe"
+                    test-method="indicatiesAanwezig">
+        </collection>
+    </mapping>
+
+    <!-- View_Ouder_VanuitPersoon_Antwoord_Details -->
+    <mapping abstract="true" type-name="View_Ouder_VanuitPersoon_Antwoord_Details" class="nl.bzk.brp.model.logisch.Betrokkenheid">
+        <structure name="familierechtelijkeBetrekking">
+            <structure name="betrokkenheden">
+                <structure field="relatie" usage="optional">
+                    <structure name="kind" get-method="getKindBetrokkenheid" set-method="voegKindBetrokkenheidToe">
+                        <structure name="persoon" field="betrokkene" map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+    </mapping>
+
+    <!-- View_Kind_VanuitPersoon_Antwoord_Details -->
+    <mapping abstract="true" type-name="View_Kind_VanuitPersoon_Antwoord_Details" class="nl.bzk.brp.model.logisch.Betrokkenheid">
+        <!-- De ouders moeten erin, die MOET je dus via relatie ophalen! -->
+        <structure field="relatie" usage="optional">
+            <collection get-method="getOuderBetrokkenheden" set-method="voegOuderBetrokkenhedenToe"
+                        item-type="nl.bzk.brp.model.logisch.Betrokkenheid" factory="nl.bzk.brp.BindingUtil.newListInstance">
+                <structure name="kind">
+                    <structure name="familierechtelijkeBetrekking">
+                        <structure name="betrokkenheden">
+                            <structure name="ouder">
+                                <structure name="persoon" field="betrokkene"
+                                           map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                                <structure name="ouderschap" usage="optional" test-method="heeftOuderschapGroep">
+                                    <value name="datumAanvang" field="datumAanvangOuderschap" usage="optional"/>
+                                </structure>
+                                <structure name="ouderlijkGezag" usage="optional" test-method="heeftOuderlijkGezagGroep">
+                                    <value name="indicatieOuderHeeftGezag" field="indOuderHeeftGezag" usage="optional" format="booleanNaarJaNee"/>
+                                </structure>
+                            </structure>
+                        </structure>
+                    </structure>
+                </structure>
+            </collection>
+        </structure>
+    </mapping>
+
+    <!-- Referentie_PersoonIdentificerend_Antwoord -->
+    <mapping abstract="true" type-name="Referentie_PersoonIdentificerend_Antwoord" class="nl.bzk.brp.model.logisch.Persoon">
+        <structure name="identificatienummers" field="identificatienummers" map-as="Groep_PersoonIdentificatienummers" usage="optional"/>
+        <structure name="geslachtsaanduiding" field="persoonGeslachtsAanduiding" map-as="Groep_PersoonGeslachtsaanduiding" usage="optional"/>
+        <structure name="samengesteldeNaam" field="samengesteldenaam" map-as="Groep_PersoonSamengesteldeNaam" usage="optional"/>
+        <structure name="geboorte" field="geboorte" map-as="Groep_PersoonGeboorte" usage="optional"/>
+        <structure name="afgeleidAdministratief" field="afgeleidAdministratief" map-as="Groep_PersoonAfgeleidAdministratief" usage="optional"/>
+        <structure name="indicaties" usage="optional"/>
+    </mapping>
+
+    <!-- View_Partner_VanuitPersoon_Antwoord_Details -->
+    <mapping abstract="true" type-name="View_Partner_VanuitPersoon_Antwoord_Details" class="nl.bzk.brp.model.logisch.Betrokkenheid">
+        <structure field="relatie">
+            <structure name="huwelijk" map-as="View_Huwelijk_Antwoord_Details_EN_View_GeregistreerdPartnerschap_Antwoord_Details"
+                       test-method="isHuwelijk" usage="optional"/>
+            <structure name="geregistreerdPartnerschap" map-as="View_Huwelijk_Antwoord_Details_EN_View_GeregistreerdPartnerschap_Antwoord_Details"
+                       test-method="isGeregistreerdPartnerschap" usage="optional"/>
+        </structure>
+    </mapping>
+
+    <!-- View_Huwelijk_Antwoord_Details EN View_GeregistreerdPartnerschap_Antwoord_Details-->
+    <mapping abstract="true" type-name="View_Huwelijk_Antwoord_Details_EN_View_GeregistreerdPartnerschap_Antwoord_Details"
+             class="nl.bzk.brp.model.logisch.Relatie">
+        <structure name="tijdstipRegistratie" usage="optional"/>
+        <structure name="tijdstipVervallen" usage="optional"/>
+        <value name="datumAanvang" field="datumAanvang" nillable="true"/>
+        <structure field="gemeenteAanvang" usage="optional">
+            <value name="gemeenteAanvangCode" field="gemeentecode" usage="optional"/>
+        </structure>
+        <structure field="plaatsAanvang" usage="optional">
+            <value name="woonplaatsAanvangCode" field="woonplaatscode" usage="optional"/>
+        </structure>
+        <value name="buitenlandsePlaatsAanvang" field="buitenlandsePlaatsAanvang" usage="optional"/>
+        <value name="buitenlandseRegioAanvang" field="buitenlandseRegioAanvang" usage="optional"/>
+        <structure field="landAanvang" usage="optional">
+            <value name="landAanvangCode" field="landcode" usage="optional" nillable="true"/>
+        </structure>
+        <value name="omschrijvingLocatieAanvang" field="omschrijvingLocatieAanvang" usage="optional"/>
+        <structure field="redenBeeindigingRelatie" usage="optional">
+            <value name="redenEindeCode" field="code" usage="optional"/>
+        </structure>
+        <value name="datumEinde" field="datumEinde" usage="optional"/>
+        <structure field="gemeenteEinde" usage="optional">
+            <value name="gemeenteEindeCode" field="gemeentecode" usage="optional"/>
+        </structure>
+        <structure field="plaatsEinde" usage="optional">
+            <value name="woonplaatsEindeCode" field="woonplaatscode" usage="optional"/>
+        </structure>
+        <value name="buitenlandsePlaatsEinde" field="buitenlandsePlaatsEinde" usage="optional"/>
+        <value name="buitenlandseRegioEinde" field="buitenlandseRegioEinde" usage="optional"/>
+        <structure field="landEinde" usage="optional">
+            <value name="landEindeCode" field="landcode" usage="optional"/>
+        </structure>
+        <value name="omschrijvingLocatieEinde" field="omschrijvingLocatieEinde" usage="optional"/>
+        <structure name="betrokkenheden" map-as="Container_RelatieBetrokkenheden_VanuitPartner"
+                   get-method="getPartnerBetrokkenheid" set-method="voegPartnerBetrokkenheidToe" usage="optional"/>
+    </mapping>
+
+    <!-- Container_RelatieBetrokkenheden_VanuitPartner -->
+    <mapping abstract="true" type-name="Container_RelatieBetrokkenheden_VanuitPartner" class="nl.bzk.brp.model.logisch.Betrokkenheid">
+        <structure name="partner">
+            <structure name="persoon" field="betrokkene" map-as="Referentie_PersoonIdentificerend_Antwoord"/>
+        </structure>
+    </mapping>
+    
+    <mapping abstract="true" type-name="Referentie_Persoon_Antwoord_Basis" class="nl.bzk.brp.model.logisch.Persoon">
+        <!-- Identificatie nummers -->
+        <structure name="identificatienummers" field="identificatienummers" map-as="Groep_PersoonIdentificatienummers"/>
+        <!-- GeslachtsAanduiding -->
+        <structure name="geslachtsaanduiding" field="persoonGeslachtsAanduiding" map-as="Groep_PersoonGeslachtsaanduiding" usage="optional"/>
+        <!-- SamengesteldeNaam -->
+        <structure name="samengesteldeNaam" field="samengesteldenaam" map-as="Groep_PersoonSamengesteldeNaam" usage="optional"/>
+        <!-- Geboorte-->
+        <structure name="geboorte" field="geboorte" map-as="Groep_PersoonGeboorte" usage="optional"/>
+        <structure name="afgeleidAdministratief" field="afgeleidAdministratief" map-as="Groep_PersoonAfgeleidAdministratief" usage="optional"/>
+        <!-- betrokkenheden -->
+        <structure name="betrokkenheden" usage="optional" test-method="heeftBetrokkenheden">
+        	<structure get-method="getKindBetrokkenHeid" set-method="voegKindBetrokkenHeidToe" map-as="View_Kind_VanuitPersoon_Antwoord" usage="optional"/>
+	        <collection get-method="getOuderBetrokkenheden" factory="nl.bzk.brp.BindingUtil.newListInstance" set-method="voegOuderBetrokkenhedenToe">
+	            <structure name="ouder" map-as="View_Ouder_VanuitPersoon_Antwoord" usage="optional"/>
+            </collection>
+            <collection get-method="getPartnerBetrokkenHeden" set-method="voegPartnerBetrokkenHedenToe" factory="nl.bzk.brp.BindingUtil.newListInstance">
+                <structure name="partner" map-as="View_Partner_VanuitPersoon_Antwoord" usage="optional"/>
+            </collection>
+        </structure>
+        <!-- Adressen -->
+        <collection name="adressen" field="adressen" item-type="nl.bzk.brp.model.logisch.PersoonAdres"
+                    factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+            <structure name="adres" map-as="Objecttype_PersoonAdres"/>
+        </collection>
+        <!-- Indicaties -->
+        <structure name="indicaties" usage="optional" test-method="indicatiesVerstrekkingsbeperkingAanwezig">
+	        <structure name="verstrekkingsbeperking" get-method="getIndicatiesVerstrekkingsbeperking" 
+	        			set-method="voegPersoonIndicatiesToe">
+	        	<value name="waarde" field="waarde" format="booleanNaarJaNee"/>
+	        </structure>
+        </structure>
+    </mapping>
+    <!--  wordt bv. gebruikt voor bevragen_VraagKandidaatVader_Antwoord, 
+     |    letop: dat indicaties alleen maar verstrekkingsbeperking bevat
+     |    letop: adres groep hebben we op optioneel gezet, omdat het ook KAN gaan om een niet INGESCHREVENE, deze hoeven geen adres te hebben. 
+     +-->
+    <mapping abstract="true" type-name="Referentie_PersoonMetAdres_Antwoord" class="nl.bzk.brp.model.logisch.Persoon">
+        <!-- Identificatie nummers -->
+        <structure name="identificatienummers" field="identificatienummers" map-as="Groep_PersoonIdentificatienummers"/>
+        <!-- GeslachtsAanduiding -->
+        <structure name="geslachtsaanduiding" field="persoonGeslachtsAanduiding" map-as="Groep_PersoonGeslachtsaanduiding" usage="optional"/>
+        <!-- SamengesteldeNaam -->
+        <structure name="samengesteldeNaam" field="samengesteldenaam" map-as="Groep_PersoonSamengesteldeNaam" usage="optional"/>
+        <!-- Geboorte-->
+        <structure name="geboorte" field="geboorte" map-as="Groep_PersoonGeboorte" usage="optional"/>
+        <structure name="afgeleidAdministratief" field="afgeleidAdministratief" map-as="Groep_PersoonAfgeleidAdministratief" usage="optional"/>
+        <!-- Adressen -->
+        <collection name="adressen" field="adressen" item-type="nl.bzk.brp.model.logisch.PersoonAdres"
+                    factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+            <structure name="adres" map-as="Objecttype_PersoonAdres"/>
+        </collection>
+        <!-- Indicaties -->
+        <structure name="indicaties" usage="optional" test-method="indicatiesVerstrekkingsbeperkingAanwezig">
+	        <structure name="verstrekkingsbeperking" get-method="getIndicatiesVerstrekkingsbeperking" 
+	        			set-method="voegPersoonIndicatiesToe">
+	        	<value name="waarde" field="waarde" format="booleanNaarJaNee"/>
+	        </structure>
+        </structure>  
+    </mapping>
+    
+    <!-- View_Kind_VanuitPersoon_Antwoord -->
+    <mapping abstract="true" type-name="View_Kind_VanuitPersoon_Antwoord" class="nl.bzk.brp.model.logisch.Betrokkenheid">
+            <!-- De ouders moeten erin, die MOET je dus via relatie ophalen! -->
+        <structure field="relatie" usage="optional">
+            <collection get-method="getOuderBetrokkenheden" set-method="voegOuderBetrokkenhedenToe"
+                        item-type="nl.bzk.brp.model.logisch.Betrokkenheid" factory="nl.bzk.brp.BindingUtil.newListInstance">
+                <structure name="kind">
+                    <structure name="familierechtelijkeBetrekking">
+                        <structure name="betrokkenheden">
+                            <structure name="ouder">
+                                <structure name="persoon" field="betrokkene"
+                                           map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                            </structure>
+                        </structure>
+                    </structure>
+                </structure>
+            </collection>
+        </structure>
+    </mapping>
+
+    <!-- View_Ouder_VanuitPersoon_Antwoord -->
+    <mapping abstract="true" type-name="View_Ouder_VanuitPersoon_Antwoord" class="nl.bzk.brp.model.logisch.Betrokkenheid">
+        <structure name="familierechtelijkeBetrekking">
+            <structure name="betrokkenheden">
+                <structure field="relatie" usage="optional">
+                    <structure name="kind" get-method="getKindBetrokkenheid" set-method="voegKindBetrokkenheidToe">
+                        <structure name="persoon" field="betrokkene" map-as="Referentie_PersoonIdentificerend_Antwoord"
+                                   usage="optional"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+    </mapping>
+    
+    <!-- View_Partner_VanuitPersoon_Antwoord -->
+    <mapping abstract="true" type-name="View_Partner_VanuitPersoon_Antwoord"
+             class="nl.bzk.brp.model.logisch.Betrokkenheid">
+        <structure field="relatie" usage="optional">
+            <structure name="huwelijk" test-method="isHuwelijk" usage="optional">
+                <structure name="betrokkenheden">
+                    <structure name="partner" get-method="getPartnerBetrokkenheid"
+                               set-method="voegPartnerBetrokkenheidToe" usage="optional">
+                        <structure name="persoon" field="betrokkene" map-as="Referentie_PersoonIdentificerend_Antwoord"
+                                   usage="optional"/>
+                    </structure>
+                </structure>
+            </structure>
+
+            <structure name="geregistreerdPartnerschap" test-method="isGeregistreerdPartnerschap" usage="optional">
+                <structure name="betrokkenheden">
+                    <structure name="partner" get-method="getPartnerBetrokkenheid" set-method="voegPartnerBetrokkenheidToe" usage="optional">
+                        <structure name="persoon" field="betrokkene" map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+    </mapping>
+</binding>

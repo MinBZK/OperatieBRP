@@ -1,0 +1,208 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>test-parent</artifactId>
+        <groupId>nl.bzk.brp.test</groupId>
+        <version>0.1.6-SNAPSHOT</version>
+    </parent>
+
+	<modelVersion>4.0.0</modelVersion>
+	<artifactId>brp-testdata</artifactId>
+	<version>0.1.6-SNAPSHOT</version>
+	<packaging>jar</packaging>
+	<name>brp-testdata</name>
+
+
+	<!---
+	 | Men kan de verschillende profiles actieveren:
+	 | 		-P convert-xls,fill-db
+	 |
+	 |		-Dconvert-xls=true -Dfill-db=true
+	 |
+	 | let op: dburl, dbuser en dbpassword is in de parent gedefinieerd
+	 |         de locatie van de sql bestand wordt ook gerefereerd in de assembly.xml
+	 +-->
+
+	<properties>
+		<xlsdir>${basedir}/src/main/resources/brp-testdata</xlsdir>
+		<sqlfile>${basedir}/target/brp-testdata/sierratestdatagenerator.sql</sqlfile>
+		<brp.sql-zip.filename>brp-testdata</brp.sql-zip.filename>
+	</properties>
+
+	<dependencies>
+<!-- Dit kunnen we aanzetten om te verifieren dat we deze database versie hebben -->
+		<dependency>
+			<groupId>nl.bzk.brp</groupId>
+			<artifactId>brp-db</artifactId>
+			<version>1.0.4-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>nl.bzk.brp.test</groupId>
+			<artifactId>sierratestdatagenerator</artifactId>
+			<version>0.0.10-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+
+	<profiles>
+		<!-- profile will be activated only
+		 | a) -P fill-db  	 	 ==> activate profile 'fill-db'
+		 | b) -Dconvert-xls=true ==> exact match of -D<name>=<value>
+		 +-->
+		<profile>
+			<id>fill-db</id>
+			<activation>
+				<property>
+					<name>fill-db</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>sql-maven-plugin</artifactId>
+						<version>1.5</version>
+
+						<dependencies>
+							  <dependency>
+								<groupId>postgresql</groupId>
+								<artifactId>postgresql</artifactId>
+								<version>${postgres.version}</version>
+							  </dependency>
+						</dependencies>
+
+						<configuration>
+							<driver>org.postgresql.Driver</driver>
+							<url>${dburl}</url>
+							<username>${dbuser}</username>
+							<password>${dbpassword}</password>
+						</configuration>
+						<executions>
+							<execution>
+								<id>fill-data</id>
+								<phase>test</phase>
+								<goals>
+									<goal>execute</goal>
+								</goals>
+								<configuration>
+									<autocommit>true</autocommit>
+									<srcFiles>
+										<srcFile>${sqlfile}</srcFile>
+									</srcFiles>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2.1</version>
+						<executions>
+							<execution>
+								<id>backup-db</id>
+								<phase>test</phase>
+								<goals>
+									<goal>java</goal>
+								</goals>
+								<configuration>
+									<arguments>
+										<argument>-b</argument>
+										<argument>-d</argument>
+										<argument>${dburl}</argument>
+										<argument>-u</argument>
+										<argument>${dbuser}</argument>
+										<argument>-p</argument>
+										<argument>${dbpassword}</argument>
+									</arguments>
+									<mainClass>nl.bzk.brp.art.util.main.UtilRunner</mainClass>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- profile will be activated only
+		 | a) -P convert-xls  	 ==> activate profile 'convert-xls'
+		 | b) -Dconvert-xls=true ==> exact match of -D<name>=<value>
+		 +-->
+		<profile>
+			<id>convert-xls</id>
+			<activation>
+				<property>
+					<name>convert-xls</name>
+					<value>true</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>1.2.1</version>
+						<executions>
+							<execution>
+								<id>build-sql</id>
+								<!-- zolang het NA process-classes en voor test (de *.sql moeten uit de jar file komen) -->
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>java</goal>
+								</goals>
+								<configuration>
+									<arguments>
+										<argument>-c</argument>
+										<argument>-x</argument>
+										<argument>${xlsdir}</argument>
+										<argument>-s</argument>
+										<argument>${sqlfile}</argument>
+									</arguments>
+									<mainClass>nl.bzk.brp.art.util.main.UtilRunner</mainClass>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<!-- zip de sql statements -->
+					<plugin>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>zip-sql</id>
+								<phase>package</phase>
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<finalName>${brp.sql-zip.filename}</finalName>
+							<descriptors>
+								<descriptor>${basedir}/src/assemble/brp-testdata.xml</descriptor>
+							</descriptors>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<build>
+		<resources>
+			<resource>
+				<directory>src/main/resources</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>**/*</include>
+				</includes>
+			</resource>
+		</resources>
+		<plugins>
+		</plugins>
+	</build>
+	<scm>
+		<connection>scm:svn:https://www.modernodam.nl/svn/brp-code/test/trunk/testdata</connection>
+	</scm>
+</project>

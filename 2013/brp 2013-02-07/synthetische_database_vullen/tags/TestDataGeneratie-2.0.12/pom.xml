@@ -1,0 +1,691 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- nieuwste version check van dependencies: mvn versions:display-dependency-updates -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.bzk.brp</groupId>
+	<artifactId>TestDataGeneratie</artifactId>
+	<packaging>jar</packaging>
+	<version>2.0.12</version>
+
+	<name>TestDataGeneratie</name>
+	<description>Vul de BRP database met correcte verdeling random data</description>
+	<url>https://www.moderniseringgba.nl/</url>
+	<inceptionYear>2011</inceptionYear>
+	<organization>
+		<name>mGBA</name>
+		<url>http://www.moderniseringgba.nl/</url>
+	</organization>
+
+	<properties>
+		<jdk.version>1.6</jdk.version>
+		<spring.version>3.0.5.RELEASE</spring.version>
+		<postgres.version>9.1-901-1.jdbc4</postgres.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+	<developers>
+		<developer>
+			<id>bash</id>
+			<name>Bas Huisman</name>
+			<email>bashuisman@lostlemon.nl</email>
+			<organization>Lost Lemon</organization>
+			<organizationUrl>http://www.lostlemon.nl/</organizationUrl>
+			<roles>
+				<role>Project lead</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+		<developer>
+			<id>oucho</id>
+			<name>Oussama Chougna</name>
+			<email>o.chougna@cimsolutions.nl</email>
+			<organization>Cimsolutions</organization>
+			<organizationUrl>http://www.cimsolutions.nl/</organizationUrl>
+			<roles>
+				<role>Developer</role>
+			</roles>
+			<timezone>+1</timezone>
+		</developer>
+
+	</developers>
+
+	<pluginRepositories>
+
+		<pluginRepository>
+			<id>Codehaus Snapshots</id>
+			<url>https://nexus.codehaus.org/content/repositories/releases</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+
+	</pluginRepositories>
+
+	<repositories>
+
+		<repository>
+			<id>java.net2</id>
+			<name>Repository hosting certain java/jee6 artifacts</name>
+			<url>http://download.java.net/maven/2</url>
+		</repository>
+		<repository>
+            <id>libs-release-brp</id>
+            <name>mGBA Artifactory-releases voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+        </repository>
+        <repository>
+            <snapshots>
+                <enabled>true</enabled>
+                <updatePolicy>always</updatePolicy>
+                <checksumPolicy>warn</checksumPolicy>
+            </snapshots>
+            <id>libs-snapshot-brp</id>
+            <name>mGBA Artifactory-snapshots voor BRP</name>
+            <url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+        </repository>
+
+	</repositories>
+
+	<profiles>
+		<!-- Profile to build the database -->
+		<profile>
+			<id>build-db</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>src/test/resources/database.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>sql-maven-plugin</artifactId>
+						<configuration>
+							<driver>${hibernate.connection.driver_class}</driver>
+							<url>${hibernate.connection.url}</url>
+							<username>${hibernate.connection.username}</username>
+							<password>${hibernate.connection.password}</password>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>install</phase>
+								<goals>
+									<goal>execute</goal>
+								</goals>
+								<configuration>
+									<srcFiles>
+										<srcFile>${basedir}/src/test/resources/db/brp.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/brpFixVerblijfsr.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensStatisch.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensAutVanAfgifteReisdoc.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensLand.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensNationaliteit.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensPartijGemeente.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensPlaats.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensRdnVervallenReisdoc-dummy.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensSoortNLReisdocument.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensSrtVerificatie-dummy.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensUpdateSoortBericht.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensVerkrijgingVerliesNLNationaliteit.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensRegel-dummy.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/stamgegevensVerdrag-dummy.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/autmiddel_en_certificaten.sql</srcFile>
+										<srcFile>${basedir}/src/test/resources/db/brpConstraintRemove.sql</srcFile>	
+									</srcFiles>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>postgresql</groupId>
+								<artifactId>postgresql</artifactId>
+								<version>${postgres.version}</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+					
+					<plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>${jdk.version}</source>
+                            <target>${jdk.version}</target>
+                            <optimize>true</optimize>
+                            <showWarnings>true</showWarnings>
+                            <encoding>utf-8</encoding>
+                            <debug>true</debug>
+                        </configuration>
+                    </plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- Profile to add the db constraints -->
+		<profile>
+			<id>finish-db</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>properties-maven-plugin</artifactId>
+						<version>1.0-alpha-2</version>
+						<executions>
+							<execution>
+								<phase>initialize</phase>
+								<goals>
+									<goal>read-project-properties</goal>
+								</goals>
+								<configuration>
+									<files>
+										<file>src/test/resources/database.properties</file>
+									</files>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>sql-maven-plugin</artifactId>
+						<configuration>
+							<driver>${hibernate.connection.driver_class}</driver>
+							<url>${hibernate.connection.url}</url>
+							<username>${hibernate.connection.username}</username>
+							<password>${hibernate.connection.password}</password>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>install</phase>
+								<goals>
+									<goal>execute</goal>
+								</goals>
+								<configuration>
+									<srcFiles>
+										<srcFile>${basedir}/src/test/resources/db/brpConstraintAdd.sql</srcFile>	
+										<srcFile>${basedir}/src/test/resources/db/brpIndices.sql</srcFile>	
+										<srcFile>${basedir}/src/test/resources/db/brp-indexen.sql</srcFile>	
+									</srcFiles>
+								</configuration>
+							</execution>
+						</executions>
+						<dependencies>
+							<dependency>
+								<groupId>postgresql</groupId>
+								<artifactId>postgresql</artifactId>
+								<version>${postgres.version}</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+					
+					<plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-compiler-plugin</artifactId>
+                        <configuration>
+                            <source>${jdk.version}</source>
+                            <target>${jdk.version}</target>
+                            <optimize>true</optimize>
+                            <showWarnings>true</showWarnings>
+                            <encoding>utf-8</encoding>
+                            <debug>true</debug>
+                        </configuration>
+                    </plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- Profiles for Hibernate Rev-Eng -->
+		<profile>
+			<id>reengineer-kern</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>hibernate3-maven-plugin</artifactId>
+						<version>3.0</version>
+						<executions>
+							<execution>
+								<id>hibernate-mapping-generation</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<hibernatetool destdir="src/main/resources">
+
+										<jdbcconfiguration packagename="nl.bzk.brp.testdatageneratie.domain.kern" propertyfile="src/test/resources/database.properties" revengfile="src/test/resources/hibernate.reveng.xml" reversestrategy="nl.bzk.brp.testdatageneratie.helper.SynDbGenReverseEngineeringStrategy" />
+
+										<hbm2hbmxml />
+									</hibernatetool>
+								</configuration>
+							</execution>
+							<execution>
+								<id>hibernate-configuration-generation</id>
+								<phase>generate-sources</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<hibernatetool destdir="src/test/resources/kern">
+
+										<jdbcconfiguration packagename="nl.bzk.brp.testdatageneratie.domain.kern" propertyfile="src/test/resources/database.properties" revengfile="src/test/resources/hibernate.reveng.xml" />
+
+										<hbm2cfgxml />
+									</hibernatetool>
+								</configuration>
+							</execution>
+							<execution>
+								<id>hibernate-java-generation</id>
+								<phase>process-resources</phase>
+								<goals>
+									<goal>run</goal>
+								</goals>
+								<configuration>
+									<hibernatetool destdir="src/main/java">
+										<configuration configurationfile="src/test/resources/kern/hibernate.cfg.xml" />
+										<hbm2java jdk5="true" ejb3="false" />
+									</hibernatetool>
+								</configuration>
+							</execution>
+						</executions>
+
+						<dependencies>
+							<dependency>
+								<groupId>org.hibernate</groupId>
+								<artifactId>hibernate-core</artifactId>
+								<!-- moet versie 3.3.2.GA zijn of ouder -->
+								<version>3.3.2.GA</version>
+							</dependency>
+							<dependency>
+								<groupId>postgresql</groupId>
+								<artifactId>postgresql</artifactId>
+								<version>${postgres.version}</version>
+							</dependency>
+							<dependency>
+								<groupId>cglib</groupId>
+								<artifactId>cglib</artifactId>
+								<version>2.2</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<profile>
+			<id>Hibernate-rev-eng-bronnen</id>
+			<activation>
+				<activeByDefault>false</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>hibernate3-maven-plugin</artifactId>
+						<version>2.2</version>
+						<executions>
+							<execution>
+								<id>hbm2hbmxml-bronnen</id>
+								<phase>install</phase>
+								<goals>
+									<goal>hbm2hbmxml</goal>
+								</goals>
+								<configuration>
+									<components>
+										<component>
+											<name>hbm2hbmxml</name>
+											<outputDirectory>src/main/resources/hbm</outputDirectory>
+										</component>
+									</components>
+									<componentProperties>
+										<configurationfile>/src/test/resources/hibernate_bronnen.cfg.xml</configurationfile>
+										<implementation>jdbcconfiguration</implementation>
+										<packagename>nl.bzk.brp.testdatageneratie.domain.bronnen</packagename>
+										<revengfile>/src/test/resources/hibernate.reveng.xml</revengfile>
+									</componentProperties>
+								</configuration>
+							</execution>
+
+							<execution>
+								<id>hbm2java-bronnen</id>
+								<phase>install</phase>
+								<goals>
+									<goal>hbm2java</goal>
+								</goals>
+								<configuration>
+									<components>
+										<component>
+											<name>hbm2java</name>
+											<implementation>configuration</implementation>
+											<outputDirectory>/src/main/java</outputDirectory>
+										</component>
+									</components>
+									<componentProperties>
+										<configurationfile>/src/test/resources/hibernate_bronnen.cfg.xml</configurationfile>
+										<packagename>nl.bzk.brp.testdatageneratie.domain.bronnen</packagename>
+									</componentProperties>
+								</configuration>
+							</execution>
+						</executions>
+
+						<dependencies>
+							<dependency>
+								<groupId>postgresql</groupId>
+								<artifactId>postgresql</artifactId>
+								<version>${postgres.version}</version>
+							</dependency>
+							<dependency>
+								<groupId>cglib</groupId>
+								<artifactId>cglib</artifactId>
+								<version>2.2</version>
+							</dependency>
+						</dependencies>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+
+		<!-- Profile to build TestDataGeneratie -->
+		<profile>
+			<id>build-testdatageneratie</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-assembly-plugin</artifactId>
+						<configuration>
+							<descriptorRefs>
+								<descriptorRef>jar-with-dependencies</descriptorRef>
+							</descriptorRefs>
+							<archive>
+								<manifest>
+									<mainClass>nl.bzk.brp.testdatageneratie.SynDbGen</mainClass>
+								</manifest>
+							</archive>
+						</configuration>
+						<executions>
+							<execution>
+								<id>make-assembly</id>
+								<!-- this is used for inheritance merges -->
+								<phase>package</phase>
+								<!-- bind to the packaging phase -->
+								<goals>
+									<goal>single</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-resources-plugin</artifactId>
+						<configuration>
+							<encoding>UTF-8</encoding>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-compiler-plugin</artifactId>
+						<configuration>
+							<source>${jdk.version}</source>
+							<target>${jdk.version}</target>
+							<optimize>true</optimize>
+							<showWarnings>true</showWarnings>
+							<encoding>utf-8</encoding>
+							<debug>true</debug>
+						</configuration>
+					</plugin>
+
+					<plugin>
+						<artifactId>maven-eclipse-plugin</artifactId>
+						<configuration>
+							<additionalProjectnatures>
+								<projectnature>org.eclipse.jdt.core.javanature</projectnature>
+								<projectnature>org.hibernate.eclipse.console.hibernateNature</projectnature>
+							</additionalProjectnatures>
+							<downloadSources>true</downloadSources>
+							<downloadJavadocs>false</downloadJavadocs>
+							<buildcommands>
+								<buildcommand>org.eclipse.jdt.core.javabuilder</buildcommand>
+								<buildcommand>org.hibernate.eclipse.console.hibernateBuilder</buildcommand>
+							</buildcommands>
+							<wtpversion>1.5</wtpversion>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
+	<reporting>
+		<plugins>
+			<!-- <plugin> <artifactId>maven-project-info-reports-plugin</artifactId> 
+				<version>2.3.1</version> </plugin> -->
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>dashboard-maven-plugin</artifactId>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-checkstyle-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-report-plugin</artifactId>
+				<version>2.4.3</version>
+				<configuration>
+					<showSuccess>false</showSuccess>
+					<argLine>-Xmx512m -XX:MaxPermSize=256m</argLine>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.6.1</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jxr-plugin</artifactId>
+				<version>2.1</version>
+			</plugin>
+			<plugin>
+				<!-- http://mojo.codehaus.org/taglist-maven-plugin/ -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>taglist-maven-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<tagListOptions>
+						<tagClasses>
+							<tagClass>
+								<displayName>Todo Work</displayName>
+								<tags>
+									<tag>
+										<matchString>todo</matchString>
+										<matchType>ignoreCase</matchType>
+									</tag>
+									<tag>
+										<matchString>fixme</matchString>
+										<matchType>ignoreCase</matchType>
+									</tag>
+								</tags>
+							</tagClass>
+						</tagClasses>
+					</tagListOptions>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- http://maven.apache.org/plugins/maven-pmd-plugin/ -->
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-pmd-plugin</artifactId>
+				<version>2.4</version>
+				<configuration>
+					<linkXref>true</linkXref>
+					<targetJdk>${jdk.version}</targetJdk>
+					<sourceEncoding>utf-8</sourceEncoding>
+					<excludeRoots>
+						<excludeRoot>target/generated</excludeRoot>
+					</excludeRoots>
+				</configuration>
+			</plugin>
+			<plugin>
+				<!-- http://mojo.codehaus.org/cobertura-maven-plugin/ -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+			<plugin>
+				<!-- http://mojo.codehaus.org/findbugs-maven-plugin/ -->
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>findbugs-maven-plugin</artifactId>
+				<version>2.3.2</version>
+				<configuration>
+					<onlyAnalyze>nl.lostlemon.*</onlyAnalyze>
+				</configuration>
+			</plugin>
+			<plugin>
+				<artifactId>maven-javadoc-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>jxr-maven-plugin</artifactId>
+			</plugin>
+		</plugins>
+	</reporting>
+
+	<dependencies>
+
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+		</dependency>
+
+		<dependency>
+			<groupId>commons-logging</groupId>
+			<artifactId>commons-logging</artifactId>
+			<version>1.1.1</version>
+		</dependency>
+
+		<!-- hibernate -->
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-core</artifactId>
+			<version>3.5.6-Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-entitymanager</artifactId>
+			<version>3.5.6-Final</version>
+		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-c3p0</artifactId>
+			<version>3.5.6-Final</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.6.1</version>
+		</dependency>
+
+		<!-- mysql -->
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.16</version>
+		</dependency>
+
+		<!-- postgresql -->
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>${postgres.version}</version>
+		</dependency>
+
+		<!-- dbcp -->
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+			<version>1.4</version>
+		</dependency>
+
+		<dependency>
+			<groupId>hibernate</groupId>
+			<artifactId>hibernate-tools</artifactId>
+			<version>3.2.3.GA</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-lang3</artifactId>
+			<version>3.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache-core</artifactId>
+			<version>2.5.0</version>
+		</dependency>
+
+	</dependencies>
+
+	<scm>
+		<connection>scm:svn:https://www.modernodam.nl/svn/brp-code/synthetische_database_vullen/tags/TestDataGeneratie-2.0.12</connection>
+	</scm>
+
+	<distributionManagement>
+		<repository>
+			<id>libs-release-brp</id>
+			<name>mGBA Artifactory-releases voor BRP</name>
+			<url>https://www.modernodam.nl/artifactory/libs-release-brp</url>
+		</repository>
+		<snapshotRepository>
+			<id>libs-snapshot-brp</id>
+			<name>mGBA Artifactory-snapshots voor BRP</name>
+			<url>https://www.modernodam.nl/artifactory/libs-snapshot-brp</url>
+		</snapshotRepository>
+	</distributionManagement>
+
+</project>

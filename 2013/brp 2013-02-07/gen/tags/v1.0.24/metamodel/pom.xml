@@ -1,0 +1,211 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp.metaregister</groupId>
+        <artifactId>metaregister-parent</artifactId>
+        <version>1.0.24</version>
+    </parent>
+    <artifactId>metamodel</artifactId>
+    <name>BMR Metamodel Reverse Engineering</name>
+    <description>Metamodel laag generator voor toegang tot de metamodel database waaruit code generatie plaatsvindt.
+    </description>
+
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/v1.0.24/metamodel</connection>
+        <developerConnection>
+            scm:svn:https://www.modernodam.nl/svn/brp-code/gen/tags/v1.0.24/metamodel
+        </developerConnection>
+        <url>https://www.modernodam.nl/svn/brp-code/gen/tags/v1.0.24/metamodel</url>
+    </scm>
+
+    <dependencies>
+    </dependencies>
+
+    <build>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>resources</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>unpack</id>
+                        <phase>initialize</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>${groupId}</groupId>
+                                    <artifactId>database</artifactId>
+                                    <type>zip</type>
+                                    <version>${version}</version>
+                                    <classifier>bmr-database</classifier>
+                                </artifactItem>
+                            </artifactItems>
+                            <outputDirectory>${project.build.directory}/database</outputDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>hibernate3-maven-plugin</artifactId>
+                <version>3.0</version>
+                <executions>
+                    <execution>
+                        <id>hibernate-mapping-generation</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <hibernatetool destdir="target/classes">
+                                <jdbcconfiguration packagename="nl.bzk.brp.metaregister.model" propertyfile="${project.build.outputDirectory}/database.properties" revengfile="src/main/buildconfig/hibernate.reveng.xml" />
+                                <hbm2hbmxml />
+                                <!--<hbm2cfgxml />-->
+
+                                <classpath>
+                                    <path location="target/classes" />
+                                </classpath>
+
+                                <hbm2java destdir="target/generated-sources" jdk5="true" ejb3="false">
+                                    <configuration configurationfile="src/main/buildconfig/hibernate.cfg.xml" />
+                                </hbm2java>
+                            </hibernatetool>
+                        </configuration>
+                    </execution>
+                </executions>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.hibernate</groupId>
+                        <artifactId>hibernate-core</artifactId>
+                        <!-- moet versie 3.3.2.GA zijn of ouder i.v.m. compatibiliteit met Hibernate Tools 3.2.3 -->
+                        <version>3.3.2.GA</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.hsqldb</groupId>
+                        <artifactId>hsqldb</artifactId>
+                        <version>${hsqldb.version}</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>cglib</groupId>
+                        <artifactId>cglib-nodep</artifactId>
+                        <version>2.2.2</version>
+                    </dependency>
+                    <dependency>
+                        <groupId>org.slf4j</groupId>
+                        <artifactId>slf4j-api</artifactId>
+                        <version>${slf4j.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated-sources</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>com.google.code.maven-replacer-plugin</groupId>
+                <artifactId>replacer</artifactId>
+                <version>1.5.0</version>
+                <executions>
+                    <execution>
+                        <id>fixes</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacements>
+                                <replacement>
+                                    <token>length="0"</token>
+                                    <value />
+                                </replacement>
+                                <replacement>
+                                    <token>string</token>
+                                    <value>java.lang.String</value>
+                                </replacement>
+                            </replacements>
+                            <filesToInclude>target/classes/**/*.hbm.xml</filesToInclude>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>sortedset</id>
+                        <phase>process-sources</phase>
+                        <goals>
+                            <goal>replace</goal>
+                        </goals>
+                        <configuration>
+                            <replacements>
+                                <replacement>
+                                    <token><![CDATA[<set ]]></token>
+                                    <value><![CDATA[<set sort="nl.bzk.brp.metaregister.helper.Vergelijker" ]]></value>
+                                </replacement>
+                            </replacements>
+                            <excludes>
+                                <exclude>target/classes/**/GeneriekElement.hbm.xml</exclude>
+                            </excludes>
+                            <filesToInclude>target/classes/**/*.hbm.xml</filesToInclude>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>2.1.2</version>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>jar-no-fork</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <attach>true</attach>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

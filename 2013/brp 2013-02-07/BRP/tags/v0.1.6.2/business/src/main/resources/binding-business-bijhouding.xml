@@ -1,0 +1,45 @@
+<binding package="nl.bzk.brp">
+    
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements" prefix="brp"/>
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+
+    <include path="classpath:/binding-model-bijhouding.xml" precompiled="true"/>
+    <include path="classpath:/binding-business.xml" precompiled="false"/>
+
+    <!-- migratie_Verhuizing_Bijhouding -->
+    <mapping name="migratie_Verhuizing_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.VerhuizingBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding"/>
+    </mapping>
+
+    <!-- Afstamming_InschrijvingAangifteGeboorte_Bijhouding -->
+    <mapping name="afstamming_InschrijvingAangifteGeboorte_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.InschrijvingGeboorteBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding"/>
+    </mapping>
+
+    <!-- Objecttype_Bericht -->
+    <mapping abstract="true" type-name="Objecttype_Bericht" class="nl.bzk.brp.business.dto.AbstractBRPBericht">
+        <structure name="stuurgegevens" field="berichtStuurgegevens" map-as="Groep_BerichtStuurgegevens" />
+    </mapping>
+
+    <!-- Objecttype_Bericht_Bijhouding -->
+    <mapping abstract="true" type-name="Objecttype_Bericht_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.AbstractBijhoudingsBericht">
+        <structure map-as="Objecttype_Bericht"/>
+        <collection name="overruleMeldingen" field="overruledMeldingen" usage="optional" nillable="true"
+                    item-type="nl.bzk.brp.model.validatie.OverruleMelding" factory="nl.bzk.brp.BindingUtil.newListInstance">
+                 <structure name="overrule" map-as="Objecttype_Overrule" usage="optional" nillable="true"/>
+        </collection>
+        <structure name="acties">
+            <structure name="inschrijvingGeboorte" usage="optional"
+                map-as="View_InschrijvingGeboorte_Afstamming" set-method="voegInschrijvingGeboorteActieToe" get-method="getInschrijvingGeboorteActie"/>
+            <structure name="registratieNationaliteit"  usage="optional"
+                map-as="View_RegistratieNationaliteit_Afstamming" set-method="voegRegistratieNationaliteitActieToe" get-method="getRegistratieNationaliteitActie"/>
+            <structure name="verhuizing" usage="optional"
+                map-as="View_Verhuizing_Migratie" set-method="voegVerhuizingActieToe" get-method="getVerhuizingActie"/>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="Enum_BijhoudingCode" class="nl.bzk.brp.business.dto.bijhouding.BijhoudingCode">
+        <value name="bijhoudingCode" enum-value-method="getCode"/>
+    </mapping>
+
+</binding>

@@ -1,0 +1,92 @@
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:p="http://www.springframework.org/schema/p" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+            http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+            http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+            http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <import resource="bedrijfsregelmanager-bean.xml" />
+
+    <context:component-scan base-package="nl.bzk.brp.business.actie" />
+    <context:component-scan base-package="nl.bzk.brp.business.service" /><!-- <context:component-scan 
+        base-package="nl.bzk.brp.business.service.impl" /> -->
+    <context:component-scan base-package="nl.bzk.brp.business.bedrijfsregels" />
+    <context:annotation-config />
+
+    <bean id="bijhoudingsBerichtVerwerker" class="nl.bzk.brp.business.service.BerichtVerwerkerImpl">
+        <property name="stappen" ref="bijhoudingsStappen" />
+    </bean>
+
+    <bean id="bevragingsBerichtVerwerker" class="nl.bzk.brp.business.service.BerichtVerwerkerImpl">
+        <property name="stappen" ref="bevragingsStappen" />
+    </bean>
+
+    <bean id="bijhoudingsStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.business.handlers.AbstractBerichtVerwerkingsStap">
+                <bean id="berichtgegevensValidatieStap" class="nl.bzk.brp.business.handlers.bijhouding.BijhoudingGegevensValidatieStap" />
+                <!-- TODO: (Eric Jan Malotaux, 2012-04-23) Let op: de lock stap commit de transactie in de nabewerking! Zie 
+                    https://www.modernodam.nl/jira/browse/BRP-1571 -->
+                <bean id="lock" class="nl.bzk.brp.business.handlers.LockStap" />
+                <bean id="transactieStapVoorBijhouding" class="nl.bzk.brp.business.handlers.bijhouding.BijhoudingTransactieStap" />
+                <ref bean="dashboardNotificatieStap" />
+                <bean id="bedrijfsregelValidatieStap" class="nl.bzk.brp.business.handlers.bijhouding.BedrijfsregelValidatieStap" />
+                <bean id="berichtUitvoerStap" class="nl.bzk.brp.business.handlers.bijhouding.BerichtUitvoerStap" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <!-- beans voor dashboardNotificatieStap -->
+    <bean id="dashboardNotificatieStap" class="nl.bzk.brp.business.dashboard.DashboardNotificatieStap">
+        <property name="notificators">
+            <list>
+                <ref bean="geboorteNotificator" />
+                <ref bean="verhuizingNotificator" />
+            </list>
+        </property>
+        <property name="actief" value="${dashboard.notificatie.actief:false}" />
+    </bean>
+    <bean id="geboorteNotificator" class="nl.bzk.brp.business.dashboard.GeboorteNotificator">
+        <property name="dashboardUri">
+            <bean id="dashboardVerhuisUri" class="java.net.URI">
+                <constructor-arg>
+                    <value>${dashboard.notificatie.geboorte.url:null}</value>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+    <bean id="verhuizingNotificator" class="nl.bzk.brp.business.dashboard.VerhuizingNotificator">
+        <property name="dashboardUri">
+            <bean id="dashboardVerhuisUri" class="java.net.URI">
+                <constructor-arg>
+                    <value>${dashboard.notificatie.verhuizing.url:null}</value>
+                </constructor-arg>
+            </bean>
+        </property>
+    </bean>
+    <bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+        <property name="messageConverters">
+            <list>
+                <bean id="jsonConverter" class="org.springframework.http.converter.json.MappingJacksonHttpMessageConverter">
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="bevragingsStappen" class="java.util.ArrayList">
+        <constructor-arg>
+            <list value-type="nl.bzk.brp.business.handlers.AbstractBerichtVerwerkingsStap">
+                <bean id="gegevensValidatieStap" class="nl.bzk.brp.business.handlers.bevraging.BevragingGegevensValidatieStap"/>
+                <!-- TODO: (Eric Jan Malotaux, 2012-04-23) Let op: de lock stap commit de transactie in de nabewerking! Zie 
+                    https://www.modernodam.nl/jira/browse/BRP-1571 -->
+                <bean id="lock" class="nl.bzk.brp.business.handlers.LockStap" />
+                <bean id="transactieStapVoorBevraging" class="nl.bzk.brp.business.handlers.bevraging.BevragingTransactieStap" />
+                <bean id="opvragenBerichtUitvoerStap" class="nl.bzk.brp.business.handlers.bevraging.OpvragenPersoonBerichtUitvoerStap" />
+            </list>
+        </constructor-arg>
+    </bean>
+
+    <tx:annotation-driven />
+</beans>

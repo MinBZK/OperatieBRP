@@ -1,0 +1,110 @@
+<binding package="nl.bzk.brp">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements" prefix="brp"/>
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+
+    <include path="classpath:/binding-objecttypen-bericht.xml" precompiled="false"/>
+
+    <!-- Inschrijving geboorte -->
+    <mapping abstract="true" type-name="View_InschrijvingGeboorte_Afstamming"
+             class="nl.bzk.brp.model.objecttype.bericht.ActieBericht"
+             factory="nl.bzk.brp.BindingUtil.newInschrijvingGeboorteActie">
+        <structure map-as="Objecttype_Actie"/>
+        <collection field="rootObjecten" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                    item-type="nl.bzk.brp.model.objecttype.bericht.RelatieBericht">
+            <structure name="familierechtelijkeBetrekking" factory="nl.bzk.brp.BindingUtil.newFamilieRechtelijkeBetrekking" nillable="false">
+                <structure map-as="Objecttype_Relatie"/>
+            </structure>
+        </collection>
+    </mapping>
+
+    <!-- Registratie nationaliteit -->
+    <mapping abstract="true" type-name="View_RegistratieNationaliteit_Afstamming"
+             class="nl.bzk.brp.model.objecttype.bericht.ActieBericht"
+             factory="nl.bzk.brp.BindingUtil.newRegistratieNationaliteitActie">
+        <structure map-as="Objecttype_Actie"/>
+        <collection field="rootObjecten" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                    item-type="nl.bzk.brp.model.objecttype.bericht.PersoonBericht">
+            <structure name="persoon" map-as="Objecttype_Persoon" nillable="true"/>
+        </collection>
+    </mapping>
+
+    <!-- Verhuizing -->
+    <mapping abstract="true" type-name="View_Verhuizing_Migratie"
+             class="nl.bzk.brp.model.objecttype.bericht.ActieBericht"
+             factory="nl.bzk.brp.BindingUtil.newVerhuizingActie">
+        <structure map-as="Objecttype_Actie"/>
+        <collection field="rootObjecten" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                    item-type="nl.bzk.brp.model.objecttype.bericht.PersoonBericht">
+            <structure name="persoon" map-as="Objecttype_Persoon"/>
+        </collection>
+    </mapping>
+
+    <!-- Correctie Adres NL -->
+    <mapping abstract="true" type-name="View_CorrectieAdresBinnenNL_Migratie"
+             class="nl.bzk.brp.model.objecttype.bericht.ActieBericht"
+             factory="nl.bzk.brp.BindingUtil.newCorrectieAdresNLActie">
+        <structure map-as="Objecttype_Actie"/>
+        <collection field="rootObjecten" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                    item-type="nl.bzk.brp.model.objecttype.bericht.PersoonBericht">
+            <structure name="persoon" map-as="Objecttype_Persoon"/>
+        </collection>
+    </mapping>
+
+    <!-- Registratie Huwelijk -->
+    <mapping abstract="true" type-name="View_RegistratieHuwelijk_HuwelijkPartnerschap"
+             class="nl.bzk.brp.model.objecttype.bericht.ActieBericht"
+             factory="nl.bzk.brp.BindingUtil.newHuwelijkActie">
+        <structure map-as="Objecttype_Actie"/>
+        <collection field="rootObjecten" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                    item-type="nl.bzk.brp.model.objecttype.bericht.RelatieBericht">
+            <structure name="huwelijk" factory="nl.bzk.brp.BindingUtil.newHuwelijk">
+                <structure map-as="Objecttype_Relatie"/>
+            </structure>
+        </collection>
+    </mapping>
+
+    <!-- Wijziging naamgebruik -->
+    <mapping abstract="true" type-name="View_WijzigingNaamgebruik_HuwelijkPartnerschap"
+             class="nl.bzk.brp.model.objecttype.bericht.ActieBericht"
+             factory="nl.bzk.brp.BindingUtil.newWijzigingNaamGebruikActie">
+        <structure map-as="Objecttype_Actie"/>
+        <collection field="rootObjecten" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                    item-type="nl.bzk.brp.model.objecttype.bericht.PersoonBericht">
+            <structure name="persoon" map-as="Objecttype_Persoon" nillable="true"/>
+        </collection>
+    </mapping>
+    
+    <!-- Registratie overlijden -->
+    <mapping abstract="true" type-name="View_Registratie_Overlijden"
+             class="nl.bzk.brp.model.objecttype.bericht.ActieBericht"
+             factory="nl.bzk.brp.BindingUtil.newRegistratieOverlijdenActie">
+        <structure map-as="Objecttype_Actie"/>
+        <collection field="rootObjecten" factory="nl.bzk.brp.BindingUtil.newListInstance"
+                    item-type="nl.bzk.brp.model.objecttype.bericht.PersoonBericht">
+            <structure name="persoon" map-as="Objecttype_Persoon"/>
+        </collection>
+    </mapping>
+
+
+    <!-- Objecttype_Melding (bijhouding)-->
+    <mapping name="melding" class="nl.bzk.brp.model.validatie.Melding">
+        <value name="regelCode" field="code" enum-value-method="getNaam"/>
+        <value name="soortCode" field="soort" enum-value-method="getCode"/>
+        <value name="melding" field="omschrijving"/>
+        <value name="attribuutNaam" field="attribuutNaam" usage="optional"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId" set-method="setVerzendendId"
+            usage="optional" />
+    </mapping>
+
+    <!-- Container_BerichtBijgehoudenPersonen_Bijhouding -->
+    <mapping abstract="true" type-name="AbstractBijgehoudenPersoon" class="nl.bzk.brp.model.objecttype.bericht.basis.AbstractPersoonBericht">
+        <structure name="identificatienummers" field="identificatienummers">
+           <structure name="burgerservicenummer" get-method="getBurgerservicenummer" set-method="setBurgerservicenummer" map-as="Burgerservicenummer"/>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="BijgehoudenPersoon" class="nl.bzk.brp.model.objecttype.bericht.PersoonBericht">
+        <structure map-as="AbstractBijgehoudenPersoon"/>
+    </mapping>
+</binding>

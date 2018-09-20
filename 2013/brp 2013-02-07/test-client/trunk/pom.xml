@@ -1,0 +1,206 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    
+    <!-- Mogelijkheden van Maven: -->
+    <!-- + Nieuwste version check van dependencies: 'mvn versions:display-dependency-updates' -->
+    <!-- + Kopieer dependencies naar target/lib: 'mvn clean dependency:copy-dependencies' -->
+    <!-- + Creeer runnable jar: 'mvn assembly:single' -->
+    
+    <name>test-client</name>
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>nl.bzk.brp</groupId>
+    <artifactId>test-client</artifactId>
+    <version>0.0.13-SNAPSHOT</version>
+    <description>client voor load tests</description>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>root-pom</artifactId>
+        <version>0.2.0</version>
+    </parent>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>add-source</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>add-source</goal>
+                        </goals>
+                        <configuration>
+                            <sources>
+                                <source>target/generated-sources</source>
+                            </sources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.4</version>
+                <configuration>
+                    <archive>
+                        <index>true</index>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <mainClass>nl.bzk.brp.testclient.TestClient</mainClass>
+                        </manifest>
+                    </archive>
+                </configuration>
+            </plugin>
+            <!-- Maakt het mogelijk om via "mvn clean dependency:copy-dependencies"
+                   de target/lib directory te vullen met de dependencies van dit project -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <configuration>
+                    <outputDirectory>${project.build.directory}/lib</outputDirectory>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.cxf</groupId>
+                <artifactId>cxf-codegen-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <configuration>
+                            <sourceRoot>${basedir}/target/generated-sources</sourceRoot>
+                            <wsdlOptions>
+                                <!-- Bevraging en bijhouding samengevoegd in 1 wsdl, ivm met gedeelde
+                                            namespace en wsdl2java issues (overschijft eerdere objectfactory door laatste
+                                            met zelfde namespace) -->
+                                <wsdlOption>
+                                    <wsdl>src/main/resources/wsdl/brp.wsdl</wsdl>
+                                    <bindingFiles>
+                                        <bindingFile>${basedir}/src/bindings/jaxb-bindings-brp.xml</bindingFile>
+                                    </bindingFiles>
+                                    <autoNameResolution>true</autoNameResolution>
+                                </wsdlOption>
+                            </wsdlOptions>
+                        </configuration>
+                        <goals>
+                            <goal>wsdl2java</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <!--  Via het commando 'mvn assembly:single' wordt er een runnable jar-bestand gegenereerd. 
+                NB: er dient een properties-bestand te worden meegegeven bij het opstarten, 
+                een voorbeeld staat in src/config/test-client.properties -->
+	            <artifactId>maven-assembly-plugin</artifactId>
+	            <version>2.3</version>
+	            <configuration>
+	                <archive>
+	                    <manifest>
+	                        <mainClass>nl.bzk.brp.testclient.TestClient</mainClass>
+	                    </manifest>
+	                </archive>
+	                <descriptorRefs>
+	                    <descriptorRef>jar-with-dependencies</descriptorRef>
+	                </descriptorRefs>
+	            </configuration>
+	            <executions>
+		          <execution>
+		            <id>make-assembly</id> <!-- this is used for inheritance merges -->
+		            <phase>package</phase> <!-- bind to the packaging phase -->
+		            <goals>
+		              <goal>single</goal>
+		            </goals>
+		          </execution>
+		        </executions>
+	        </plugin>  
+        </plugins>
+    </build>
+    <dependencies>
+        <!-- CXF -->
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-frontend-jaxws</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-transports-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.cxf</groupId>
+            <artifactId>cxf-rt-ws-security</artifactId>
+        </dependency>
+        <!-- logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+            <version>1.5</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-dbcp</groupId>
+            <artifactId>commons-dbcp</artifactId>
+            <version>1.4</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>9.1-901.jdbc4</version>
+        </dependency>
+
+    </dependencies>
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/test-client/trunk</connection>
+    </scm>
+
+
+    <profiles>
+
+        <profile>
+            <id>run</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.2.1</version>
+                        <executions>
+                            <execution>
+                                <id>run</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>nl.bzk.brp.testclient.TestClient</mainClass>
+                                    <arguments>
+                                        <argument>${basedir}\src\config\test-client.properties</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
+</project>

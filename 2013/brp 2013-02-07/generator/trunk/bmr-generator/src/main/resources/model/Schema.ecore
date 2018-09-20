@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ecore:EPackage xmi:version="2.0"
+    xmlns:xmi="http://www.omg.org/XMI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:ecore="http://www.eclipse.org/emf/2002/Ecore" name="Class Model"
+    nsURI="http://Class Model/1.0" nsPrefix="Class Model">
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractConstraint" eSuperTypes="#//SchemaElement">
+    <eOperations name="getKeywords" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getKolommenAlsString" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="AbstractTabelConstraint" eSuperTypes="#//AbstractConstraint #//TabelFeature"/>
+  <eClassifiers xsi:type="ecore:EClass" name="DataRegel">
+    <eOperations name="getTabel" eType="#//Tabel"/>
+    <eOperations name="getWaarden" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tabel" eType="#//Tabel"
+        derived="true" eOpposite="#//Tabel/dataRegels"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="waarden" upperBound="-1"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DataType">
+    <eOperations name="getPostgresType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Database" eSuperTypes="#//SchemaElement">
+    <eOperations name="getSchemas" eType="#//DatabaseSchema"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="schemas" upperBound="-1"
+        eType="#//DatabaseSchema" containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="DatabaseSchema" eSuperTypes="#//SchemaElement">
+    <eOperations name="getTabellen" upperBound="-1" eType="#//Tabel"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tabellen" upperBound="-1"
+        eType="#//Tabel" containment="true" eOpposite="#//Tabel/schema"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="ForeignKeyConstraint" eSuperTypes="#//SchemaElement">
+    <eOperations name="getForeignKeyKolommenAlsString" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getForeignKeyTabel" eType="#//Tabel"/>
+    <eOperations name="getPrimaryKeyTabel" eType="#//Tabel"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="primaryKeyTabel" eType="#//Tabel"
+        derived="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="foreignKeyTabel" eType="#//Tabel"
+        eOpposite="#//Tabel/foreignKeyConstraints"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="foreignKeyKolommen" upperBound="-1"
+        eType="#//Kolom"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Kolom" eSuperTypes="#//SchemaElement #//TabelFeature">
+    <eOperations name="getSyncID" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getJavaIdentifier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="isForeignKey" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="getAttribuutTypeAlsCommentaar" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getDataType" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getNullability" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="isIdentifierKolom" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="getTabel" eType="#//Tabel"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="tabel" eType="#//Tabel"
+        derived="true" eOpposite="#//Tabel/kolommen"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataType" eType="#//DataType"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="PrimaryKeyConstraint" eSuperTypes="#//AbstractTabelConstraint"/>
+  <eClassifiers xsi:type="ecore:EClass" name="SchemaElement">
+    <eOperations name="getNaam" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="Sequence" eSuperTypes="#//SchemaElement"/>
+  <eClassifiers xsi:type="ecore:EClass" name="Tabel" eSuperTypes="#//SchemaElement">
+    <eOperations name="getFeatures" eType="#//TabelFeature"/>
+    <eOperations name="getIdentifierKolom" eType="#//Kolom"/>
+    <eOperations name="getQualifiedNaam" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getKolommen" upperBound="-1" eType="#//Kolom"/>
+    <eOperations name="getSchema" eType="#//DatabaseSchema"/>
+    <eOperations name="getSyncID" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getJavaIdentifier" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EString"/>
+    <eOperations name="getSequence" eType="#//Sequence"/>
+    <eOperations name="getDataRegels" upperBound="-1" eType="#//DataRegel"/>
+    <eOperations name="heeftKunstmatigeSleutel" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="heeftTupels" eType="ecore:EDataType http://www.eclipse.org/emf/2002/Ecore#//EBoolean"/>
+    <eOperations name="getForeignKeyConstraints" eType="#//ForeignKeyConstraint"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="kolommen" upperBound="-1"
+        eType="#//Kolom" containment="true" eOpposite="#//Kolom/tabel"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="schema" eType="#//DatabaseSchema"
+        derived="true" eOpposite="#//DatabaseSchema/tabellen"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="dataRegels" upperBound="-1"
+        eType="#//DataRegel" containment="true" eOpposite="#//DataRegel/tabel"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="foreignKeyConstraints"
+        upperBound="-1" eType="#//ForeignKeyConstraint" containment="true" eOpposite="#//ForeignKeyConstraint/foreignKeyTabel"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="sequence" eType="#//Sequence"
+        containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="constraints" upperBound="-1"
+        eType="#//AbstractTabelConstraint" containment="true"/>
+    <eStructuralFeatures xsi:type="ecore:EReference" name="features" eType="#//TabelFeature"
+        containment="true"/>
+  </eClassifiers>
+  <eClassifiers xsi:type="ecore:EClass" name="UniekConstraint" eSuperTypes="#//AbstractTabelConstraint"/>
+  <eClassifiers xsi:type="ecore:EClass" name="TabelFeature"/>
+</ecore:EPackage>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jaxws="http://cxf.apache.org/jaxws"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+           http://cxf.apache.org/jaxws http://cxf.apache.org/schemas/jaxws.xsd
+           http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+           http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <import resource="classpath:META-INF/cxf/cxf.xml"/>
+    <import resource="classpath:META-INF/cxf/cxf-servlet.xml"/>
+
+    <context:component-scan base-package="nl.bzk.brp.pocmotor.acties" />
+    <context:component-scan base-package="nl.bzk.brp.pocmotor.service" />
+    <context:component-scan base-package="nl.bzk.brp.pocmotor.dal" />
+    <context:annotation-config />
+
+    <context:property-placeholder location="classpath:jdbc.properties" />
+
+    <jpa:repositories base-package="nl.bzk.brp.pocmotor.dal"/>
+
+    <bean id="bijhouding" class="nl.bzk.brp.pocmotor.web.BijhoudingServiceImpl" />
+
+    <bean id="jibxBean" class="org.apache.cxf.jibx.JibxDataBinding" scope="prototype"/>
+
+    <jaxws:endpoint id="bijhoudingService"
+                    implementor="#bijhouding"
+                    address="/bijhouding"
+                    wsdlLocation="/bijhouding.wsdl"
+                    xmlns:s="http://www.brp.bzk.nl/bijhouding/ws/service"
+                    serviceName="s:BijhoudingService"
+                    endpointName="s:BijhoudingPort">
+        <jaxws:dataBinding>
+            <ref bean="jibxBean"/>
+        </jaxws:dataBinding>
+    </jaxws:endpoint>
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="pocmotor" />
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaVendorAdapter" ref="jpaVendorAdapter" />
+    </bean>
+
+    <bean id="jpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="true" />
+        <property name="generateDdl" value="false" />
+        <property name="database" value="POSTGRESQL" />
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQLDialect" />
+    </bean>
+
+    <bean id="transactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory" />
+        <property name="dataSource" ref="dataSource" />
+        <property name="jpaDialect" ref="jpaDialect" />
+    </bean>
+
+    <bean id="jpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect" />
+
+    <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+    </bean>
+
+<!--
+    <jpa:repositories base-package="nl.bzk.brp.pocmotor.dal.jpa" entity-manager-factory-ref="entityManagerFactory" />
+
+    <task:annotation-driven />
+-->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+
+</beans>

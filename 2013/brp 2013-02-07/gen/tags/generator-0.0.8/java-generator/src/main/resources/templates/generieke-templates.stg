@@ -1,0 +1,44 @@
+constructor(method) ::= <<
+/**
+ * Constructor.
+ *
+<method.parameters:parameterComment(); separator="\n">
+ *
+ */
+<method.visibility> <method.name>(<method.parameters:methodParameter();wrap="    * ",separator=", ">) {
+    <method.parameters:methodAssignment(); separator="\n">
+}
+>>
+
+parameterComment(parameter) ::= <<
+ * @param <parameter.lowerCamel> <parameter.javaDoc>
+>>
+
+methodParameter(parameter) ::= <<
+final <parameter> <parameter.lowerCamel>
+>>
+
+methodAssignment(parameter) ::= <<
+this.<parameter.lowerCamel> =  <parameter.lowerCamel>;
+>>
+
+
+interfaceGetter(method) ::= <<
+/**
+ * <method.javaDoc;wrap=" ">
+ *
+ * @return <method.returnTypeDescription>
+ */
+<method.returnType> <method.name>();
+
+>>
+
+getter(method) ::= <<
+/**
+ * @return <method.javaDoc;wrap="    * ">
+ */
+public <method.returnType> <method.name>() {
+    <method.body>;
+}
+
+>>

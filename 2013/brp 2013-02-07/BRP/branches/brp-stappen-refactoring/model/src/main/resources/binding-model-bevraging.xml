@@ -1,0 +1,336 @@
+<binding package="nl.bzk.brp">
+
+    <namespace uri="http://www.bprbzk.nl/BRP/0100" default="all" prefix="brp"/>
+    <namespace uri="http://www.kinggemeenten.nl/StUF/StUF0302" prefix="stuf"/>
+
+    <include path="classpath:/binding-objecttypen-model.xml" precompiled="false"/>
+    <include path="classpath:/binding-historie-model.xml" precompiled="false"/>
+
+    <!-- Objecttype_DetailsPersoon_AntwoordA -->
+    <mapping type-name="Objecttype_DetailsPersoon_AntwoordA" abstract="true" class="nl.bzk.brp.model.operationeel.kern.PersoonModel">
+    	<value name="entiteittype" constant="Persoon" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+    	<value name="technischeSleutel" get-method="getTechnischeSleutel" set-method="setTechnischeSleutel" style="attribute"/>
+    	<value name="soortCode" get-method="getSoort" set-method="setSoort" enum-value-method="getCode"/>
+    	<structure name="afgeleidAdministratief" get-method="getAfgeleidAdministratief" set-method="setAfgeleidAdministratief" map-as="Groep_PersoonAfgeleidAdministratief"/>
+        <structure name="identificatienummers" get-method="getIdentificatienummers" set-method="setIdentificatienummers" map-as="Groep_PersoonIdentificatienummers"/>
+        <structure name="samengesteldeNaam" get-method="getSamengesteldeNaam" set-method="setSamengesteldeNaam" map-as="Groep_PersoonSamengesteldeNaam"/>
+        <structure name="geboorte" get-method="getGeboorte" set-method="setGeboorte" map-as="Groep_PersoonGeboorte"/>
+        <structure name="geslachtsaanduiding" get-method="getGeslachtsaanduiding" set-method="setGeslachtsaanduiding" map-as="Groep_PersoonGeslachtsaanduiding"/>
+        <structure name="inschrijving" get-method="getInschrijving" set-method="setInschrijving" map-as="Groep_PersoonInschrijving" nillable="true" usage="optional"/>
+        <structure name="bijhoudingsaard" get-method="getBijhoudingsaard" set-method="setBijhoudingsaard" map-as="Groep_PersoonBijhoudingsaard"/>
+        <structure name="bijhoudingsgemeente" get-method="getBijhoudingsgemeente" set-method="setBijhoudingsgemeente" map-as="Groep_PersoonBijhoudingsgemeente" nillable="true" usage="optional"/>
+        <structure name="opschorting" get-method="getOpschorting" set-method="setOpschorting" map-as="Groep_PersoonOpschorting" nillable="true" usage="optional"/>
+        <structure name="overlijden" get-method="getOverlijden" set-method="setOverlijden" map-as="Groep_PersoonOverlijden" nillable="true" usage="optional"/>
+        <collection name="voornamen" get-method="getVoornamen" set-method="setVoornamen" factory="nl.bzk.brp.BindingUtil.newSetInstance"
+                    item-type="nl.bzk.brp.model.operationeel.kern.PersoonVoornaamModel" usage="optional" test-method="heeftVoornamen">
+            <structure name="voornaam" map-as="Objecttype_PersoonVoornaam" nillable="true"/>
+        </collection>
+        <collection name="geslachtsnaamcomponenten" get-method="getGeslachtsnaamcomponenten" set-method="setGeslachtsnaamcomponenten"
+                    test-method="heeftGeslachtsnaamcomponenten" item-type="nl.bzk.brp.model.operationeel.kern.PersoonGeslachtsnaamcomponentModel"
+                    factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+            <structure name="geslachtsnaamcomponent" map-as="Objecttype_PersoonGeslachtsnaamcomponent"/>
+        </collection>
+        <structure name="aanschrijving" get-method="getAanschrijving" set-method="setAanschrijving" map-as="Groep_PersoonAanschrijving" nillable="true" usage="optional"/>
+        <structure name="adressen" usage="optional">
+            <collection get-method="getAdressen" set-method="setAdressen" item-type="nl.bzk.brp.model.operationeel.kern.PersoonAdresModel"
+                        factory="nl.bzk.brp.BindingUtil.newSetInstance" nillable="true">
+                <structure map-as="Container_PersoonAdressen"/>
+            </collection>
+        </structure>
+        <collection name="nationaliteiten" get-method="getNationaliteiten" set-method="setNationaliteiten" factory="nl.bzk.brp.BindingUtil.newSetInstance"
+                    item-type="nl.bzk.brp.model.operationeel.kern.PersoonNationaliteitModel" usage="optional" test-method="heeftNationaliteiten">
+            <structure name="nationaliteit" map-as="Objecttype_PersoonNationaliteit"/>
+        </collection>
+        <collection name="indicaties" item-type="nl.bzk.brp.model.operationeel.kern.PersoonIndicatieModel"
+                    factory="nl.bzk.brp.BindingUtil.newTreeSetInstance" nillable="true" usage="optional" test-method="heeftIndicaties"
+                    get-method="getIndicaties" set-method="setIndicaties">
+        </collection> 
+        <structure name="betrokkenheden" usage="optional" test-method="heeftBetrokkenheden">
+            <structure get-method="getKindBetrokkenHeid" set-method="voegKindBetrokkenheidToe"
+                       map-as="View_Kind_VanuitPersoon_Antwoord_Details" usage="optional"/>
+            <collection get-method="getOuderBetrokkenheden" set-method="voegBetrokkenhedenToe" factory="nl.bzk.brp.BindingUtil.newSetInstance" ordered="false" usage="optional">
+                <structure name="ouder" map-as="View_Ouder_VanuitPersoon_Antwoord_Details" usage="optional"/>
+            </collection>
+            <collection get-method="getPartnerBetrokkenHeden" set-method="voegBetrokkenhedenToe" factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+                <structure name="partner" map-as="View_Partner_VanuitPersoon_Antwoord_Details" usage="optional"/>
+            </collection>
+        </structure>
+        <structure name="verblijfstitel" usage="optional"/>                                
+        <structure name="bijzondereVerblijfsrechtelijkePositie" usage="optional"/>
+        <structure name="reisdocumenten" usage="optional"/>
+        <structure name="uitsluitingNLKiesrecht" usage="optional"/>
+        <structure name="eUVerkiezingen" usage="optional"/>
+        <structure name="persoonskaart" usage="optional"/>
+    </mapping>
+
+    <!-- Adres in het antwoord met wel of geen historie. -->
+    <mapping abstract="true" type-name="Container_PersoonAdressen"
+             class="nl.bzk.brp.model.operationeel.kern.PersoonAdresModel">
+        <structure usage="optional">
+            <structure name="adres" map-as="AbstractPersoonAdres"/>
+        </structure>
+    </mapping>
+
+    <!-- View_Ouder_VanuitPersoon_Antwoord_Details -->
+    <mapping abstract="true" type-name="View_Ouder_VanuitPersoon_Antwoord_Details" class="nl.bzk.brp.model.operationeel.kern.OuderModel">
+        <value name="entiteittype" constant="Betrokkenheid" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        <value name="technischeSleutel" style="attribute" constant="X"/>  
+        <structure name="familierechtelijkeBetrekking">
+           	<value name="entiteittype" constant="FamilierechtelijkeBetrekking" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+      		<value name="technischeSleutel" style="attribute" constant="X"/>          
+            <structure name="betrokkenheden">
+                <structure get-method="getRelatie" set-method="setRelatie" usage="optional">
+                    <structure name="kind" get-method="getKindBetrokkenheid" set-method="voegKindBetrokkenheidToe" usage="optional">
+                    	<value name="entiteittype" constant="Betrokkenheid" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        				<value name="technischeSleutel" style="attribute" constant="X"/>  
+                        <structure name="persoon" get-method="getPersoon" set-method="setPersoon"
+                                   map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+		<structure name="ouderlijkGezag" get-method="getOuderlijkGezag" set-method="setOuderlijkGezag" usage="optional">
+			<value name="technischeSleutel" style="attribute" constant="X"/>
+			<structure name="indicatieOuderHeeftGezag" get-method="getIndicatieOuderHeeftGezag" set-method="setIndicatieOuderHeeftGezag" map-as="JaNee" usage="optional"/>
+		</structure>
+    </mapping>
+
+    <!-- View_Kind_VanuitPersoon_Antwoord_Details -->
+    <mapping abstract="true" type-name="View_Kind_VanuitPersoon_Antwoord_Details" class="nl.bzk.brp.model.operationeel.kern.KindModel">
+        <!--  De ouders moeten erin, die MOET je dus via relatie ophalen! -->
+        <structure get-method="getRelatie" set-method="setRelatie" usage="optional">
+	        <structure name="kind">
+	            <value name="entiteittype" constant="Betrokkenheid" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        		<value name="technischeSleutel" style="attribute" constant="X"/>  
+	            <structure name="familierechtelijkeBetrekking">
+	            	<value name="entiteittype" constant="FamilierechtelijkeBetrekking" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        			<value name="technischeSleutel" style="attribute" constant="X"/>  
+	                <structure name="betrokkenheden">
+	                    <collection get-method="getOuderBetrokkenheden" set-method="voegBetrokkenhedenToe" item-type="nl.bzk.brp.model.operationeel.kern.OuderModel"
+	                		factory="nl.bzk.brp.BindingUtil.newSetInstance">
+		                     <structure name="ouder">
+						         <value name="entiteittype" style="attribute" constant="Betrokkenheid" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+					             <value name="technischeSleutel" style="attribute" constant="X"/>  		                     	
+		                         <structure name="persoon" get-method="getPersoon" set-method="setPersoon"
+		                                    map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>		                                    
+		                         <structure name="ouderlijkGezag" get-method="getOuderlijkGezag" set-method="setOuderlijkGezag" usage="optional">
+		                         	 <value name="technischeSleutel" style="attribute" constant="X"/>
+		                             <structure name="indicatieOuderHeeftGezag" get-method="getIndicatieOuderHeeftGezag" set-method="setIndicatieOuderHeeftGezag" map-as="JaNee" usage="optional"/>
+		                         </structure>
+		                     </structure>
+	                    </collection>
+	                </structure>
+	            </structure>
+	        </structure>
+        </structure>
+    </mapping>
+
+    <!-- Referentie_PersoonIdentificerend_Antwoord -->
+    <mapping abstract="true" type-name="Referentie_PersoonIdentificerend_Antwoord" class="nl.bzk.brp.model.operationeel.kern.PersoonModel">
+		<value name="entiteittype" style="attribute" constant="Persoon" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        <value name="technischeSleutel" get-method="getTechnischeSleutel" set-method="setTechnischeSleutel" style="attribute"/>
+        <value name="soortCode" get-method="getSoort" set-method="setSoort" enum-value-method="getCode"/>
+        <structure name="afgeleidAdministratief" get-method="getAfgeleidAdministratief" set-method="setAfgeleidAdministratief" map-as="Groep_PersoonAfgeleidAdministratief" nillable="true" usage="optional"/>
+        <structure name="identificatienummers" get-method="getIdentificatienummers" set-method="setIdentificatienummers" map-as="Groep_PersoonIdentificatienummers" nillable="true" usage="optional"/>
+        <structure name="samengesteldeNaam" get-method="getSamengesteldeNaam" set-method="setSamengesteldeNaam" map-as="Groep_PersoonSamengesteldeNaam"/>
+        <structure name="geboorte" get-method="getGeboorte" set-method="setGeboorte" map-as="Groep_PersoonGeboorte"/>
+        <structure name="geslachtsaanduiding" get-method="getGeslachtsaanduiding" set-method="setGeslachtsaanduiding" map-as="Groep_PersoonGeslachtsaanduiding"/>
+        <structure name="overlijden" get-method="getOverlijden" set-method="setOverlijden" map-as="Groep_PersoonOverlijden" nillable="true" usage="optional"/>
+        <collection name="indicaties" item-type="nl.bzk.brp.model.operationeel.kern.PersoonIndicatieModel"
+                    factory="nl.bzk.brp.BindingUtil.newTreeSetInstance" nillable="true" usage="optional" test-method="heeftIndicaties"
+                    get-method="getIndicaties" set-method="setIndicaties">
+        </collection> 
+    </mapping>
+
+    <!-- View_Partner_VanuitPersoon_Antwoord_Details -->
+    <mapping abstract="true" type-name="View_Partner_VanuitPersoon_Antwoord_Details" class="nl.bzk.brp.model.operationeel.kern.PartnerModel">
+        <value name="entiteittype" constant="Betrokkenheid" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        <value name="technischeSleutel" style="attribute" constant="X"/>    
+        <structure name="huwelijk" map-as="View_Huwelijk_Antwoord_Details"
+             get-method="getHuwelijkRelatie" set-method="setHuwelijkRelatie" usage="optional"/>
+        <structure name="geregistreerdPartnerschap" map-as="View_GeregistreerdPartnerschap_Antwoord_Details"
+             get-method="getPartnerRelatie" set-method="setPartnerRelatie" usage="optional"/>
+    </mapping>
+
+     <!-- View_Huwelijk_Antwoord_Details EN View_GeregistreerdPartnerschap_Antwoord_Details-->
+    <mapping abstract="true" type-name="View_GeregistreerdPartnerschap_Antwoord_Details" class="nl.bzk.brp.model.operationeel.kern.GeregistreerdPartnerschapModel">
+    	<value name="entiteittype" constant="GeregistreerdPartnerschap" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        <value name="technischeSleutel" style="attribute" constant="X"/>      
+		<structure map-as="View_Huwelijk_Antwoord_Details_EN_View_GeregistreerdPartnerschap_Antwoord_Details"/>
+    </mapping>
+    
+    <mapping abstract="true" type-name="View_Huwelijk_Antwoord_Details" class="nl.bzk.brp.model.operationeel.kern.HuwelijkModel">
+    	<value name="entiteittype" constant="Huwelijk" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        <value name="technischeSleutel" style="attribute" constant="X"/>    
+		<structure map-as="View_Huwelijk_Antwoord_Details_EN_View_GeregistreerdPartnerschap_Antwoord_Details"/>
+    </mapping>
+     
+    <mapping abstract="true" type-name="View_Huwelijk_Antwoord_Details_EN_View_GeregistreerdPartnerschap_Antwoord_Details" class="nl.bzk.brp.model.operationeel.kern.HuwelijkGeregistreerdPartnerschapModel">
+        <structure name="betrokkenheden" get-method="getPartnerBetrokkenheid" set-method="voegPartnerBetrokkenheidToe" map-as="Container_RelatieBetrokkenheden_VanuitPartner" usage="optional"/>
+        <structure get-method="getStandaard" set-method="setStandaard" map-as="Groep_HuwelijkGeregistreerdPartnerschapStandaard"/>
+    </mapping>
+
+	<!-- Container_RelatieBetrokkenheden_VanuitPartner -->
+    <mapping abstract="true" type-name="Container_RelatieBetrokkenheden_VanuitPartner" class="nl.bzk.brp.model.operationeel.kern.PartnerModel">
+        <structure name="partner">
+            <value name="entiteittype" constant="Betrokkenheid" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        	<value name="technischeSleutel" style="attribute" constant="X"/>  
+            <structure name="persoon" get-method="getPersoon" set-method="setPersoon"
+                       map-as="Referentie_PersoonIdentificerend_Antwoord"/>
+        </structure>
+    </mapping>
+    
+    <!-- Groep_BerichtResultaat_Bevraging -->
+    <mapping abstract="true" type-name="Groep_BerichtResultaat_Bevraging" class="nl.bzk.brp.model.bericht.ber.BerichtResultaatGroepBericht">
+     	<value name="entiteittype" constant="Resultaat" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+        <value name="verwerkingCode" get-method="getVerwerking" set-method="setVerwerking" enum-value-method="getCode"/>
+        <value name="hoogsteMeldingsniveauCode" get-method="getHoogsteMeldingsniveau" set-method="setHoogsteMeldingsniveau" enum-value-method="getCode" nillable="true" usage="optional"/>
+    </mapping>
+    
+<!-- TODO
+     <mapping abstract="true" type-name="Referentie_Persoon_Antwoord_Basis" class="nl.bzk.brp.model.operationeel.kern.PersoonModel">
+        <!- Identificatie nummers ->
+        <structure name="identificatienummers" get-method="getIdentificatienummers" set-method="setIdentificatienummers" map-as="Groep_PersoonIdentificatienummers_Model"/>
+        <!- Geslachtsaanduiding ->
+        <structure name="geslachtsaanduiding" get-method="getGeslachtsaanduiding" set-method="setGeslachtsaanduiding" map-as="Groep_PersoonGeslachtsaanduiding_Model" usage="optional"/>
+        <!- SamengesteldeNaam ->
+        <structure name="samengesteldeNaam" get-method="getSamengesteldeNaam" set-method="setSamengesteldeNaam" map-as="Groep_PersoonSamengesteldeNaam_Model" usage="optional"/>
+        <!- Geboorte ->
+        <structure name="geboorte" get-method="getGeboorte" set-method="setGeboorte" map-as="Groep_PersoonGeboorte_Model" usage="optional"/>
+        <structure name="afgeleidAdministratief" get-method="getAfgeleidAdministratief" set-method="setAfgeleidAdministratief" map-as="Groep_PersoonAfgeleidAdministratief_Model" usage="optional"/>
+        <!- betrokkenheden ->
+        <structure name="betrokkenheden" usage="optional" test-method="heeftBetrokkenheden">
+        	<structure get-method="getKindBetrokkenHeid" set-method="voegBetrokkenheidToe" map-as="View_Kind_VanuitPersoon_Antwoord" usage="optional"/>
+	        <collection get-method="getOuderBetrokkenheden" set-method="voegBetrokkenhedenToe" factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+	            <structure name="ouder" map-as="View_Ouder_VanuitPersoon_Antwoord" usage="optional"/>
+            </collection>
+            <collection get-method="getPartnerBetrokkenHeden" set-method="voegBetrokkenhedenToe" factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+                <structure name="partner" map-as="View_Partner_VanuitPersoon_Antwoord" usage="optional"/>
+            </collection>
+        </structure>
+        <!- Adressen ->
+        <collection name="adressen" get-method="getAdressen" set-method="setAdressen" item-type="nl.bzk.brp.model.operationeel.kern.PersoonAdresModel"
+                    factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+            <structure name="adres" map-as="Objecttype_PersoonAdres"/>
+        </collection>
+        <!- Indicaties ->
+         <structure name="indicaties" test-method="heeftVerstrekkingsBeperking" usage="optional">
+             <structure get-method="getIndicatieVerstrekkingsbeperking"
+                        set-method="voegPersoonIndicatieToe" usage="optional"/>
+         </structure>
+    </mapping>
+-->
+
+    <!--  wordt bv. gebruikt voor bevragen_VraagKandidaatVader_Antwoord,
+     |    letop: dat indicaties alleen maar verstrekkingsbeperking bevat
+     |    letop: adres groep hebben we op optioneel gezet, omdat het ook KAN gaan om een niet INGESCHREVENE, deze hoeven geen adres te hebben.
+     +-->
+<!-- TODO
+    <mapping abstract="true" type-name="Referentie_PersoonMetAdres_Antwoord" class="nl.bzk.brp.model.operationeel.kern.PersoonModel">
+        <!- Identificatie nummers ->
+        <structure name="identificatienummers" get-method="getIdentificatienummers" set-method="setIdentificatienummers" map-as="Groep_PersoonIdentificatienummers_Model"/>
+        <!- Geslachtsaanduiding ->
+        <structure name="geslachtsaanduiding" get-method="getGeslachtsaanduiding" set-method="setGeslachtsaanduiding" map-as="Groep_PersoonGeslachtsaanduiding_Model" usage="optional"/>
+        <!- SamengesteldeNaam ->
+        <structure name="samengesteldeNaam" get-method="getSamengesteldeNaam" set-method="setSamengesteldeNaam" map-as="Groep_PersoonSamengesteldeNaam_Model" usage="optional"/>
+        <!- Geboorte ->
+        <structure name="geboorte" get-method="getGeboorte" set-method="setGeboorte" map-as="Groep_PersoonGeboorte_Model" usage="optional"/>
+        <structure name="afgeleidAdministratief" get-method="getAfgeleidAdministratief" set-method="setAfgeleidAdministratief" map-as="Groep_PersoonAfgeleidAdministratief_Model" usage="optional"/>
+        <!- Adressen ->
+        <collection name="adressen" get-method="getAdressen" set-method="setAdressen" item-type="nl.bzk.brp.model.operationeel.kern.PersoonAdresModel"
+                    factory="nl.bzk.brp.BindingUtil.newSetInstance" usage="optional">
+            <structure name="adres" map-as="Objecttype_PersoonAdres"/>
+        </collection>
+        <!- Indicaties ->
+         <structure name="indicaties" test-method="heeftVerstrekkingsBeperking" usage="optional">
+             <structure get-method="getIndicatieVerstrekkingsbeperking"
+                        set-method="voegPersoonIndicatieToe" map-as="nl.bzk.brp.model.operationeel.kern.PersoonIndicatieModel" usage="optional"/>
+         </structure>
+    </mapping>
+-->
+
+    <!-- View_Kind_VanuitPersoon_Antwoord -->
+<!-- TODO
+    <mapping abstract="true" type-name="View_Kind_VanuitPersoon_Antwoord" class="nl.bzk.brp.model.operationeel.kern.BetrokkenheidModel">
+            <!- De ouders moeten erin, die MOET je dus via relatie ophalen! ->
+        <structure get-method="getRelatie" set-method="setRelatie" usage="optional">
+            <collection get-method="getOuderBetrokkenheden" set-method="voegBetrokkenhedenToe" item-type="nl.bzk.brp.model.operationeel.kern.BetrokkenheidModel"
+                        factory="nl.bzk.brp.BindingUtil.newSetInstance">
+                <structure name="kind">
+                    <structure name="familierechtelijkeBetrekking">
+                        <structure name="betrokkenheden">
+                            <structure name="ouder">
+                                <structure name="persoon" get-method="getBetrokkene" set-method="setBetrokkene"
+                                           map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                            </structure>
+                        </structure>
+                    </structure>
+                </structure>
+            </collection>
+        </structure>
+    </mapping>
+ -->
+ 
+    <!-- View_Ouder_VanuitPersoon_Antwoord -->
+<!-- TODO
+    <mapping abstract="true" type-name="View_Ouder_VanuitPersoon_Antwoord" class="nl.bzk.brp.model.operationeel.kern.BetrokkenheidModel">
+        <structure name="familierechtelijkeBetrekking">
+            <structure name="betrokkenheden">
+                <structure get-method="getRelatie" set-method="setRelatie" usage="optional">
+                    <structure name="kind" get-method="getKindBetrokkenheid" set-method="voegBetrokkenheidToe" usage="optional">
+                        <structure name="persoon" get-method="getBetrokkene" set-method="setBetrokkene"
+                                   map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+    </mapping>
+ -->
+ 
+    <!-- View_Partner_VanuitPersoon_Antwoord -->
+<!-- TODO
+    <mapping abstract="true" type-name="View_Partner_VanuitPersoon_Antwoord" class="nl.bzk.brp.model.operationeel.kern.BetrokkenheidModel">
+        <structure get-method="getRelatie" set-method="setRelatie" usage="optional">
+            <structure name="huwelijk" test-method="isHuwelijk" usage="optional">
+                <structure name="betrokkenheden">
+                    <structure name="partner" get-method="getPartnerBetrokkenheid" set-method="voegBetrokkenheidToe" usage="optional">
+                        <structure name="persoon" get-method="getBetrokkene" set-method="setBetrokkene"
+                                   map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                    </structure>
+                </structure>
+            </structure>
+
+            <structure name="geregistreerdPartnerschap" test-method="isGeregistreerdPartnerschap" usage="optional">
+                <structure name="betrokkenheden">
+                    <structure name="partner" get-method="getPartnerBetrokkenheid" set-method="voegBetrokkenheidToe" usage="optional">
+                        <structure name="persoon" get-method="getBetrokkene" set-method="setBetrokkene"
+                                   map-as="Referentie_PersoonIdentificerend_Antwoord" usage="optional"/>
+                    </structure>
+                </structure>
+            </structure>
+        </structure>
+    </mapping>
+-->
+
+	<!-- Container_BerichtMeldingen_Bevraging -->
+    <mapping abstract="true" type-name="Container_BerichtMeldingen_Bevraging" class="nl.bzk.brp.model.bericht.ber.BerichtMeldingBericht">
+		<structure map-as="AbstractBerichtMeldingBericht"/>
+    </mapping>	
+	
+    <mapping abstract="true" type-name="AbstractBerichtMeldingBericht" class="nl.bzk.brp.model.bericht.ber.basis.AbstractBerichtMeldingBericht">
+		<structure name="melding" field="melding" map-as="MeldingBericht"/>
+    </mapping>
+    
+    <mapping abstract="true" type-name="MeldingBericht" class="nl.bzk.brp.model.bericht.ber.MeldingBericht">
+        <value name="entiteittype" constant="Melding" style="attribute" ns="http://www.kinggemeenten.nl/StUF/StUF0302"/>
+    	<structure map-as="Objecttype_Melding_Bevraging"/>
+    </mapping>
+    
+    <mapping abstract="true" type-name="Objecttype_Melding_Bevraging" class="nl.bzk.brp.model.bericht.ber.basis.AbstractMeldingBericht">
+    	<value name="regelCode" field="regel"  enum-value-method="getCode" />
+		<value name="soortCode" field="soort" enum-value-method="getCode"/>
+		<structure name="melding" field="melding" map-as="Meldingtekst"/>
+		<!--<structure name="attribuut" field="attribuutNaam" map-as="LangeNaamEnumeratiewaarde" nillable="true" usage="optional"/>-->
+    </mapping>
+    
+</binding>

@@ -1,0 +1,270 @@
+<binding xmlns:ns1="http://nl.bzk/brp/bmr/metamodel" name="binding" package="nl.bzk.brp.bmr.metamodel" value-style="attribute">
+    <namespace uri="http://nl.bzk/brp/bmr/metamodel" default="elements" />
+    <mapping class="nl.bzk.brp.bmr.metamodel.MetaRegister" name="metaRegister">
+        <collection field="domeinen" usage="optional" create-type="java.util.ArrayList">
+            <structure map-as="ns1:domein" name="domein" />
+        </collection>
+        <collection field="basisTypen" usage="optional" create-type="java.util.ArrayList">
+            <structure map-as="ns1:basisType" name="basisType" />
+        </collection>
+    </mapping>
+    <mapping abstract="true" type-name="ns1:namedModelElement" class="nl.bzk.brp.bmr.metamodel.NamedModelElement">
+        <value name="naam" field="naam" usage="optional" />
+    </mapping>
+    <mapping abstract="true" class="nl.bzk.brp.bmr.metamodel.NamedModelElement" name="namedModelElement">
+        <structure map-as="ns1:namedModelElement" />
+    </mapping>
+    <mapping abstract="true" type-name="ns1:element" class="nl.bzk.brp.bmr.metamodel.Element">
+        <structure map-as="ns1:namedModelElement" />
+        <value name="syncId" field="syncId" usage="optional" />
+        <value name="beschrijving" field="beschrijving" usage="optional" />
+        <collection field="bedrijfsRegels" create-type="java.util.ArrayList">
+            <structure name="bedrijfsRegel" marshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" unmarshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" />
+        </collection>
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.NamedModelElement" class="nl.bzk.brp.bmr.metamodel.Element" name="element">
+        <structure map-as="ns1:element" />
+    </mapping>
+    <mapping abstract="true" class="nl.bzk.brp.bmr.metamodel.BasisType" type-name="ns1:basisType">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:element" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.Element" class="nl.bzk.brp.bmr.metamodel.BasisType" name="basisType">
+        <structure map-as="ns1:basisType" />
+    </mapping>
+    <mapping abstract="true" type-name="ns1:domein" class="nl.bzk.brp.bmr.metamodel.Domein">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:element" />
+        <collection field="schemas" usage="optional" create-type="java.util.ArrayList">
+            <structure />
+        </collection>
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.Element" class="nl.bzk.brp.bmr.metamodel.Domein" name="domein">
+        <structure map-as="ns1:domein" />
+    </mapping>
+    <mapping abstract="true" type-name="ns1:gelaagdElement" class="nl.bzk.brp.bmr.metamodel.GelaagdElement">
+        <structure map-as="ns1:element" />
+        <value name="laag" field="laag" usage="optional" />
+        <value name="versieTag" field="versieTag" usage="optional" />
+        <value name="identifierDB" field="identifierDB" usage="optional" />
+        <value name="identifierCode" field="identifierCode" usage="optional" />
+        <value name="volgnummer" field="volgnummer" usage="optional" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.Element" class="nl.bzk.brp.bmr.metamodel.GelaagdElement" name="gelaagdElement">
+        <structure map-as="ns1:gelaagdElement" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.GelaagdElement" class="nl.bzk.brp.bmr.metamodel.Attribuut" name="attribuut" post-set="setParent">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:gelaagdElement" />
+        <value field="type" usage="optional" name="type" ident="ref" />
+        <value name="historieVastleggen" field="historieVastleggen" usage="optional" />
+        <value name="afleidbaar" field="afleidbaar" usage="optional" />
+        <value name="verplicht" field="verplicht" usage="optional" />
+        <value name="inSetOfModel" field="inSetOfModel" usage="optional" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.GelaagdElement" class="nl.bzk.brp.bmr.metamodel.BedrijfsRegel" name="bedrijfsRegel" post-set="setParent">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:gelaagdElement" />
+        <value name="soortBedrijfsRegel" field="soortBedrijfsRegel" usage="optional" />
+        <collection field="attributen" create-type="java.util.ArrayList">
+            <structure name="attribuut" marshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" unmarshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" />
+        </collection>
+        <collection field="waarden" usage="optional" create-type="java.util.ArrayList">
+            <structure />
+        </collection>
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.GelaagdElement" class="nl.bzk.brp.bmr.metamodel.BerichtSjabloon" name="berichtSjabloon">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:gelaagdElement" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.GelaagdElement" class="nl.bzk.brp.bmr.metamodel.Groep" name="groep">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:gelaagdElement" />
+        <collection field="attributen" usage="optional" create-type="java.util.ArrayList">
+            <structure name="attribuut" marshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" unmarshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" />
+        </collection>
+        <value name="historieVastleggen" field="historieVastleggen" usage="optional" />
+        <value name="verplicht" field="verplicht" usage="optional" />
+        <value name="inSetOfModel" field="inSetOfModel" usage="optional" />
+    </mapping>
+    <mapping abstract="true" type-name="ns1:type" class="nl.bzk.brp.bmr.metamodel.Type">
+        <structure map-as="ns1:gelaagdElement" />
+    </mapping>
+    <mapping abstract="true" extends="nl.bzk.brp.bmr.metamodel.GelaagdElement" class="nl.bzk.brp.bmr.metamodel.Type" name="type">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:gelaagdElement" />
+    </mapping>
+    <mapping abstract="true" type-name="ns1:attribuutType" class="nl.bzk.brp.bmr.metamodel.AttribuutType" post-set="setParent">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:type" />
+        <value field="type" usage="optional" name="type" ident="ref" />
+        <value name="maximumLengte" field="maximumLengte" usage="optional" />
+        <value name="minimumLengte" field="minimumLengte" usage="optional" />
+        <value name="aantalDecimalen" field="aantalDecimalen" usage="optional" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.Type" class="nl.bzk.brp.bmr.metamodel.AttribuutType" name="attribuutType">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:attribuutType" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.Type" class="nl.bzk.brp.bmr.metamodel.ObjectType" name="objectType" post-set="setParent">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <value name="soortInhoud" field="soortInhoud" usage="optional" />
+        <value name="afleidbaar" field="afleidbaar" usage="optional" />
+        <value name="historieVastleggen" field="historieVastleggen" usage="optional" />
+        <value name="inSetOfModel" field="inSetOfModel" usage="optional" />
+        <value name="meervoudsNaam" field="meervoudsNaam" usage="optional" />
+        <value name="kunstmatigeSleutel" field="kunstmatigeSleutel" usage="optional" />
+        <value name="lookup" field="lookup" usage="optional" />
+        <value field="superType" usage="optional" name="superType" ident="ref" />
+        <collection field="subTypen" usage="optional" create-type="java.util.ArrayList">
+            <structure name="subType" marshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" unmarshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" />
+        </collection>
+        <collection field="attributen" usage="optional" create-type="java.util.ArrayList">
+            <structure name="attribuut" marshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" unmarshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" />
+        </collection>
+        <collection field="groepen" usage="optional" create-type="java.util.ArrayList">
+            <structure />
+        </collection>
+        <collection field="tuples" create-type="java.util.ArrayList">
+            <structure />
+        </collection>
+        <structure map-as="ns1:type" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.GelaagdElement" class="nl.bzk.brp.bmr.metamodel.WaarderegelWaarde" name="waarderegelWaarde">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:gelaagdElement" />
+        <value name="waarde" field="waarde" usage="optional" />
+        <value name="weergave" field="weergave" usage="optional" />
+    </mapping>
+    <mapping abstract="true" type-name="ns1:laag" class="nl.bzk.brp.bmr.metamodel.Laag">
+        <structure map-as="ns1:element" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.Element" class="nl.bzk.brp.bmr.metamodel.Laag" name="laag">
+        <structure map-as="ns1:laag" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.Element" class="nl.bzk.brp.bmr.metamodel.Schema" name="schema" post-set="setParent">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:element" />
+        <collection field="versies" create-type="java.util.ArrayList">
+            <structure />
+        </collection>
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.Element" class="nl.bzk.brp.bmr.metamodel.Versie" name="versie" post-set="setParent">
+        <value name="id" get-method="getIdAsString" set-method="setIdAsString" ident="def" />
+        <structure map-as="ns1:element" />
+        <value name="versieTag" field="versieTag" usage="optional" />
+        <collection field="objectTypes" create-type="java.util.ArrayList">
+            <structure name="objectType" marshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" unmarshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" />
+        </collection>
+        <collection field="attribuutTypes" create-type="java.util.ArrayList">
+            <structure map-as="ns1:attribuutType" name="attribuutType" />
+        </collection>
+        <collection field="berichtSjablonen" create-type="java.util.ArrayList">
+            <structure name="berichtSjabloon" />
+        </collection>
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.Tekst" name="tekst">
+        <value name="id" field="id" usage="optional" />
+        <value name="soort" field="soort" usage="optional" />
+        <value name="tekst" field="tekst" usage="optional" />
+        <value name="htmlTekst" field="htmlTekst" usage="optional" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.Tuple" name="tuple">
+        <value name="id" field="id" usage="optional" />
+        <value name="relatiefId" field="relatiefId" usage="optional" />
+        <value name="code" field="code" usage="optional" />
+        <value name="naam" field="naam" usage="optional" />
+        <value name="naamMannelijk" field="naamMannelijk" usage="optional" />
+        <value name="naamVrouwelijk" field="naamVrouwelijk" usage="optional" />
+        <value name="omschrijving" field="omschrijving" usage="optional" />
+        <value name="heeftMaterieleHistorie" field="heeftMaterieleHistorie" usage="optional" />
+        <value name="datumAanvang" field="datumAanvang" usage="optional" />
+        <value name="datumEinde" field="datumEinde" usage="optional" />
+    </mapping>
+    <mapping abstract="true" type-name="ns1:applicatie" class="nl.bzk.brp.bmr.metamodel.ui.Applicatie">
+        <structure map-as="ns1:namedModelElement" />
+        <collection field="formulieren" usage="optional" create-type="java.util.ArrayList">
+            <structure name="formulier" />
+        </collection>
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.NamedModelElement" class="nl.bzk.brp.bmr.metamodel.ui.Applicatie" name="applicatie">
+        <structure map-as="ns1:applicatie" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.ui.Bron" name="bron">
+        <value name="id" field="id" usage="optional" />
+        <value name="naam" field="naam" usage="optional" />
+        <value name="meervoudsNaam" field="meervoudsNaam" usage="optional" />
+        <value name="identifier" field="identifier" usage="optional" />
+        <value name="volgnummer" field="volgnummer" usage="optional" />
+        <structure field="formulier" usage="optional" />
+        <value field="objectType" name="objectType" usage="optional" ident="ref" />
+        <collection field="frames" create-type="java.util.ArrayList">
+            <structure name="frame" />
+        </collection>
+        <collection field="velden" create-type="java.util.ArrayList">
+            <structure name="bronAttribuut" />
+        </collection>
+        <structure field="attribuut" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.ui.FrameVeld" name="frameVeld">
+        <value name="id" field="id" usage="optional" />
+        <value name="volgnummer" field="volgnummer" usage="optional" />
+        <structure field="frame" usage="optional" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.ui.BronAttribuut" name="bronAttribuut">
+        <value name="id" field="id" usage="optional" />
+        <value name="naam" field="naam" usage="optional" />
+        <value name="volgnummer" field="volgnummer" usage="optional" />
+        <structure field="bron" usage="optional" />
+        <structure field="attribuut" usage="optional" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.ui.Formulier" name="formulier">
+        <value name="id" field="id" usage="optional" />
+        <value name="naam" field="naam" usage="optional" />
+        <structure field="applicatie" usage="optional" />
+        <collection field="frames" usage="optional" create-type="java.util.ArrayList">
+            <structure name="frame" />
+        </collection>
+        <collection field="bronnen" usage="optional" create-type="java.util.ArrayList">
+            <structure name="bron" />
+        </collection>
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.ui.Frame" name="frame">
+        <value name="id" field="id" usage="optional" />
+        <value name="naam" field="naam" usage="optional" />
+        <value name="volgnummer" field="volgnummer" usage="optional" />
+        <structure field="formulier" usage="optional" />
+        <structure field="bron" usage="optional" />
+        <collection field="velden" usage="optional" create-type="java.util.ArrayList">
+            <structure name="frameVeld" marshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" unmarshaller="nl.bzk.brp.bmr.metamodel.jibx.BmrIdDefRefMapper" />
+        </collection>
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.VersieTag" name="versieTag">
+        <value name="omschrijving" field="omschrijving" usage="optional" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.ElementSoort" name="elementSoort">
+        <value name="omschrijving" field="omschrijving" usage="optional" />
+    </mapping>
+    <mapping extends="nl.bzk.brp.bmr.metamodel.NamedModelElement" class="nl.bzk.brp.bmr.metamodel.ExportRegel" name="exportRegel">
+        <structure map-as="ns1:namedModelElement" />
+        <value name="soort" field="soort" usage="optional" />
+        <value name="laag" field="laag" usage="optional" />
+        <value name="interneIdentifier" field="interneIdentifier" usage="optional" />
+        <value name="syncId" field="syncId" usage="optional" />
+        <value name="exportIdentifier" field="exportIdentifier" usage="optional" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.InSetOfModel" name="inSetOfModel" />
+    <mapping class="nl.bzk.brp.bmr.metamodel.SoortBedrijfsRegel" name="soortBedrijfsRegel">
+        <value name="omschrijving" field="omschrijving" usage="optional" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.SoortExport" name="soortExport">
+        <value name="naam" field="naam" usage="optional" />
+        <value name="omschrijving" field="omschrijving" usage="optional" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.SoortInhoud" name="soortInhoud">
+        <value name="omschrijving" field="omschrijving" usage="optional" />
+    </mapping>
+    <mapping class="nl.bzk.brp.bmr.metamodel.SoortTekst" name="soortTekst">
+        <value name="omschrijving" field="omschrijving" usage="optional" />
+    </mapping>
+</binding>

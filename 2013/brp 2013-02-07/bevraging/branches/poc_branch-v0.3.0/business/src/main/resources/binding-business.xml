@@ -1,0 +1,42 @@
+<binding>
+    <namespace uri="http://www.brp.bzk.nl/bijhouding/ws/service/model" default="elements"/>
+
+    <!-- Include binding.xml from model layer -->
+    <include path="classpath:/binding-model.xml"
+             precompiled="true"/>
+
+    <mapping name="bijhouding" class="nl.bzk.brp.poc.business.dto.verzoek.Bijhouding">
+        <value name="afzenderId" field="afzenderId"/>
+        <value name="abonnementId" field="abonnementId"/>
+        <value name="tijdstipVerzonden" field="tijdstipVerzonden"
+               deserializer="nl.bzk.brp.poc.business.util.DatumUtility.zetXsdDatumTijdOmInDatum"/>
+        <value name="soortActieID" field="soortActieID"/>
+        <structure field="verhuizing"/>
+    </mapping>
+
+    <mapping name="verhuizing" class="nl.bzk.brp.poc.business.dto.verzoek.Verhuizing">
+        <structure name="aanmelder" field="aanmelder"/>
+        <structure name="verhuizer" field="verhuizer"/>
+        <structure name="nieuwAdres" field="nieuwAdres" map-as="adres"/>
+        <structure name="document"/>
+        <value name="datumAanvGeldigheid"
+               set-method="setDatumAanvangGeldigheid"
+               get-method="getDatumAanvangGeldigheid"/>
+    </mapping>
+
+    <!-- Mappen naar list of objects voorbeeld: -->
+    <!--
+    <mapping name="verhuizing" class="nl.bzk.brp.poc.business.dto.verzoek.Verhuizing" post-set="postSet">
+        <collection field="listOfObjects">
+            <structure name="aanmelder" type="nl.bzk.brp.poc.domein.PocPersoon" map-as="persoon"/>
+            <structure name="verhuizer" type="nl.bzk.brp.poc.domein.PocPersoon" map-as="persoon"/>
+            <structure name="nieuwAdres" type="nl.bzk.brp.poc.domein.PocPersoonAdres"/>
+        </collection>
+        <structure name="document"/>
+        <value name="datumAanvGeldigheid" field="datumAanvangGeldigheid"/>
+    </mapping> -->
+
+    <mapping name="bijhoudingResultaat" class="nl.bzk.brp.poc.business.dto.antwoord.BijhoudingResultaat">
+        <value name="omschrijving" field="resultaatOmschrijving"/>
+    </mapping>
+</binding>

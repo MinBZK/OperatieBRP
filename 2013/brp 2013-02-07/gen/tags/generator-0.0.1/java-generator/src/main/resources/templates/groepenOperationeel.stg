@@ -1,0 +1,60 @@
+group groepenLogischBasis;
+
+import "generieke-templates.stg"
+
+groepOperationeel(groep) ::= <<
+package <groep.packageName>;
+
+<groep.imports; separator="\n">
+
+
+/**
+ * <groep.javaDoc>.
+ */
+@MappedSuperclass
+@Access(AccessType.FIELD)
+@SuppressWarnings("serial")
+public abstract class <groep.name> extends AbstractGroep implements
+        <first(groep.interfaces)>
+{
+
+    <groep.fields:field(); separator="\n\n">
+
+    /**
+     * Default constructor tbv hibernate.
+     */
+    protected <groep.name>() {
+        super();
+    }
+
+    /**
+     * Copy constructor.
+     *
+     * @param groep De te kopieren groep
+     */
+    protected <groep.name>(
+            final <first(groep.interfaces)> groep)
+    {
+        <groep.fields:assignment(); separator="\n">
+    }
+
+    <groep.fields:getter(); separator="\n\n">
+}
+
+>>
+
+field(field) ::= <<
+<field.annotations; separator="\n">
+private <field.type> <field.name.lowerCamel>;
+>>
+
+assignment(field) ::= <<
+<field.name.lowerCamel> = groep.get<field.name>();
+>>
+
+getter(field) ::= <<
+@Override
+public <field.type> get<field.name>() {
+    return <field.name.lowerCamel>;
+}
+>>

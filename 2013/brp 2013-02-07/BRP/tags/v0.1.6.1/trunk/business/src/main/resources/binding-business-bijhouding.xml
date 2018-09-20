@@ -1,0 +1,54 @@
+<binding package="nl.bzk.brp">
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="elements" prefix="brp"/>
+    <namespace uri="http://www.bprbzk.nl/BRP/0001" default="attributes" prefix="brp"/>
+
+    <include path="classpath:/binding-model-bijhouding.xml" precompiled="true"/>
+
+    <!-- migratie_Verhuizing_Bijhouding -->
+    <mapping name="migratie_Verhuizing_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.VerhuizingBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding"/>
+    </mapping>
+
+    <!-- Afstamming_InschrijvingAangifteGeboorte_Bijhouding -->
+    <mapping name="afstamming_InschrijvingAangifteGeboorte_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.InschrijvingGeboorteBericht">
+        <structure map-as="Objecttype_Bericht_Bijhouding"/>
+    </mapping>
+
+    <!-- Objecttype_Bericht_Bijhouding -->
+    <mapping abstract="true" type-name="Objecttype_Bericht_Bijhouding" class="nl.bzk.brp.business.dto.bijhouding.AbstractBijhoudingsBericht">
+        <structure name="stuurgegevens" get-method="getBerichtStuurgegevens" set-method="setBerichtStuurgegevens"
+                map-as="Groep_BerichtStuurgegevens_oud" />
+        <collection name="overruleMeldingen" usage="optional" nillable="true"
+        				get-method="getOverruledMeldingen" set-method="setOverruledMeldingen"
+                        item-type="nl.bzk.brp.model.validatie.OverruleMelding"
+                        factory="nl.bzk.brp.BindingUtil.newListInstance">
+                 <structure name="overrule" map-as="Objecttype_Overrule" usage="optional" nillable="true"/>
+        </collection>
+        <structure name="acties">
+            <structure name="inschrijvingGeboorte" usage="optional"
+                map-as="Objecttype_Actie"  set-method="voegInschrijvingGeboorteActie" get-method="getInschrijvingGeboorteActie"/>
+            <structure name="registratieNationaliteit"  usage="optional"
+                map-as="Objecttype_Actie" set-method="voegRegistratieNationaliteitActie" get-method="getRegistratieNationaliteitActie"/>
+            <structure name="verhuizing" usage="optional"
+                map-as="Objecttype_Actie" set-method="voegVerhuizingActie" get-method="getVerhuizingActie"/>
+        </structure>
+    </mapping>
+
+    <mapping abstract="true" type-name="Enum_BijhoudingCode" class="nl.bzk.brp.business.dto.bijhouding.BijhoudingCode">
+        <value name="bijhoudingCode" enum-value-method="getCode"/>
+    </mapping>
+
+    <!-- Groep_BerichtStuurgegevens -->
+    <mapping abstract="true" type-name="Groep_BerichtStuurgegevens_oud" class="nl.bzk.brp.business.dto.BerichtStuurgegevens">
+        <namespace uri="http://www.bprbzk.nl/BRP/0001" default="all" prefix="brp"/>
+        <value style="attribute" name="cIDVerzendend" get-method="getVerzendendId"
+            set-method="setVerzendendId" usage="optional"/>
+        <value name="organisatie" field="organisatie"/>
+        <value name="applicatie" field="applicatie"/>
+        <value name="referentienummer" field="referentienummer" nillable="true"/>
+        <value name="crossReferentienummer" field="crossReferentienummer" usage="optional"/>
+        <!--Indien element indicatiePrevalidatie aanwezig, dan true anders false: -->
+        <value name="indicatiePrevalidatie" field="prevalidatieBericht" enum-value-method="getXmlCode" usage="optional" test-method="isPrevalidatieBericht" nillable="true"/>
+    </mapping>
+
+</binding>

@@ -1,0 +1,28 @@
+package nl.bzk.brp.model.attribuuttype;
+
+import javax.persistence.Embeddable;
+
+import nl.bzk.brp.model.attribuuttype.basis.IPAdresBasis;
+
+/**
+ * IPAdres.
+ */
+@Embeddable
+public final class IPAdres extends IPAdresBasis {
+
+    /**
+     * Private constructor t.b.v. Hibernate.
+     */
+    private IPAdres() {
+        super(null);
+    }
+
+    /**
+     * De (op dit moment) enige constructor voor deze immutable class.
+     *
+     * @param waarde de waarde
+     */
+    public IPAdres(final String waarde) {
+        super(waarde);
+    }
+}

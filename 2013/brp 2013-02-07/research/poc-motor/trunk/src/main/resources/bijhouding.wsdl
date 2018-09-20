@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<wsdl:definitions name="bijhouding"
+                  xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+                  xmlns:bijh="http://www.brp.nl/brp/0001"
+                  xmlns:tns="http://www.brp.bzk.nl/bijhouding/ws/service"
+                  targetNamespace="http://www.brp.bzk.nl/bijhouding/ws/service">
+
+    <wsdl:types>
+        <xsd:schema targetNamespace="http://www.brp.bzk.nl/bijhouding/ws/service">
+            <xsd:import schemaLocation="bijhouding.xsd" namespace="http://www.brp.nl/brp/0001"/>
+        </xsd:schema>
+    </wsdl:types>
+
+    <wsdl:message name="Bijhouding">
+        <wsdl:part element="bijh:BRPBericht" name="bericht"/>
+    </wsdl:message>
+    <wsdl:message name="BerichtResultaat">
+        <wsdl:part type="tns:berichtResultaat" name="berichtResultaat"/>
+    </wsdl:message>
+
+    <wsdl:portType name="BijhoudingPortType">
+        <wsdl:operation name="bijhouden">
+            <wsdl:input message="tns:Bijhouding"/>
+            <wsdl:output message="tns:BerichtResultaat"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="BijhoudingBinding" type="tns:BijhoudingPortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="bijhouden">
+            <soap:operation soapAction=""/>
+            <wsdl:input>
+                <soap:body use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+
+    <wsdl:service name="BijhoudingService">
+        <wsdl:port binding="tns:BijhoudingBinding" name="BijhoudingPort">
+            <soap:address location="http://localhost:8080/poc-motor/bijhouding"/>
+        </wsdl:port>
+    </wsdl:service>
+
+</wsdl:definitions>

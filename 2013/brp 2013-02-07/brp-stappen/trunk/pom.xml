@@ -1,0 +1,178 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>nl.bzk.brp</groupId>
+        <artifactId>root-pom</artifactId>
+        <version>0.2.3</version>
+    </parent>
+    <artifactId>brp-stappen</artifactId>
+    <version>0.1.0</version>
+    <name>BRP Stappen mechanisme</name>
+    <description>BRP stappen mechanisme basis klasses die door diverse stappen en modules gebruikt worden.</description>
+    <packaging>jar</packaging>
+
+    <properties>
+		<brp.model.version>0.3.0</brp.model.version>
+        <brp.dataaccess.version>${brp.model.version}</brp.dataaccess.version>
+        <maven.build.timestamp.format>yyyy-MM-dd HH:mm</maven.build.timestamp.format>
+        <built.on>${maven.build.timestamp}</built.on>
+        <sonar.exclusions>**/package-info.java</sonar.exclusions>
+        <!-- De default JDBC properties bedoeld voor lokaal ontwikkelen met een lokale PostgreSQL database. Voor Unit Testen 
+            in de Continuous Integration omgeving is er een "ci" profile. -->
+        <maven.jdbc.driverClassName>org.postgresql.Driver</maven.jdbc.driverClassName>
+        <maven.jdbc.url>jdbc:postgresql://localhost/brp</maven.jdbc.url>
+        <maven.jdbc.username>brp</maven.jdbc.username>
+        <maven.jdbc.password>brp</maven.jdbc.password>
+        <!-- speciale database connectie voor archivering/logging en protocollering -->
+        <maven.jdbc.alp.driverClassName>org.postgresql.Driver</maven.jdbc.alp.driverClassName>
+        <maven.jdbc.alp.url>jdbc:postgresql://localhost/brp</maven.jdbc.alp.url>
+        <maven.jdbc.alp.username>brp</maven.jdbc.alp.username>
+        <maven.jdbc.alp.password>brp</maven.jdbc.alp.password>
+        <!-- security -->
+        <maven.security.privatekey.alias>serverkey</maven.security.privatekey.alias>
+        <maven.security.privatekey.password>serverkeypassword</maven.security.privatekey.password>
+    </properties>
+
+	<dependencies>
+
+        <!-- BRP dependencies -->
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>model</artifactId>
+            <version>${brp.model.version}</version>
+        </dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>model</artifactId>
+			<classifier>tests</classifier>
+			<version>${brp.model.version}</version>
+			<scope>test</scope>
+		</dependency>
+		
+		<!-- Java / JEE -->
+        <dependency>
+            <groupId>javax.inject</groupId>
+            <artifactId>javax.inject</artifactId>
+        </dependency>
+        <dependency>
+         	<groupId>javax.servlet</groupId>
+    		<artifactId>servlet-api</artifactId>
+    		<version>2.5</version>
+    		<scope>provided</scope>
+    	</dependency>
+		
+		<!-- Spring -->
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-context</artifactId>
+			<version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-tx</artifactId>
+			<version>${spring.version}</version>
+        </dependency>
+		
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+
+        <!-- Commons -->
+        <dependency>
+            <groupId>commons-dbutils</groupId>
+            <artifactId>commons-dbutils</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+	</dependencies>
+	
+    <build>
+        <pluginManagement>
+            <plugins>
+
+                <!-- ermul: Toegevoegd om makkelijker te kunnen debuggen. Kan verwijderd worden indien niet meer nodig
+                of ongewenst ivm performance / obfuscation. -->
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.5.1</version>
+                    <configuration>
+                        <optimize>true</optimize>
+                        <showWarnings>true</showWarnings>
+                        <encoding>UTF-8</encoding>
+                       <debug>false</debug>
+                    </configuration>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-eclipse-plugin</artifactId>
+                    <version>2.9</version>
+                    <configuration>
+                        <projectNameTemplate>${project.artifactId}</projectNameTemplate>
+                    </configuration>
+                </plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-idea-plugin</artifactId>
+					<configuration>
+					  <jdkLevel>${jdk.version}</jdkLevel>
+					</configuration>
+				</plugin>
+                <plugin>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.3</version>
+                </plugin>
+
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <optimize>true</optimize>
+                    <showWarnings>true</showWarnings>
+                    <encoding>UTF-8</encoding>
+                    <debug>true</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+	
+    <scm>
+        <connection>scm:svn:https://www.modernodam.nl/svn/brp-code/brp-stappen/tags/v0.1.0</connection>
+    </scm>
+
+</project>

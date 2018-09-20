@@ -1,0 +1,53 @@
+<binding>
+
+    <namespace uri="http://www.brp.bzk.nl/bevraging" default="elements"/>
+
+    <include path="classpath:/binding-basis.xml" precompiled="false"/>
+
+    <mapping name="OpvragenPersoon" class="nl.bzk.brp.binding.bevraging.OpvragenPersoonBericht">
+        <structure field="afzender">
+            <value name="afzenderId" field="id"/>
+        </structure>
+        <value name="tijdstipVerzonden" set-method="setTijdstipVerzondenDate" get-method="getTijdstipVerzondenDate"/>
+        <structure field="opvragenPersoonCriteria"/>
+    </mapping>
+
+    <mapping name="opvragenPersoonCriteria" class="nl.bzk.brp.binding.bevraging.OpvragenPersoonCriteria">
+        <structure field="identificatienummers">
+            <value name="bsn" field="burgerservicenummer"/>
+        </structure>
+    </mapping>
+
+    <mapping name="OpvragenPersoonResultaat" class="nl.bzk.brp.binding.bevraging.OpvragenPersoonResultaat">
+        <value name="aantal" field="aantal"/>
+        <collection field="gevondenPersonen" factory="nl.bzk.brp.binding.util.BindingUtil.newSetInstance" usage="optional">
+            <structure name="persoon" map-as="IdentificerendePersoonsGegevens"/>
+        </collection>
+        <collection name="meldingen" get-method="getMeldingen" set-method="voegMeldingenToe" item-type="nl.bzk.brp.binding.Melding" 
+                    usage="optional"
+                    factory="nl.bzk.brp.binding.util.BindingUtil.newListInstance"/>
+    </mapping>
+
+    <mapping type-name="IdentificerendePersoonsGegevens" abstract="true" class="nl.bzk.brp.model.logisch.Persoon">
+        <structure field="identificatienummers">
+            <value name="A-nummer" field="administratienummer"/>
+            <value name="bsn" field="burgerservicenummer"/>
+        </structure>
+        <structure field="persoonGeboorte">
+            <value name="geboortedatum" field="datumGeboorte"/>
+        </structure>
+        <structure field="persoonGeslachtsAanduiding">
+            <value name="geslachtsAanduiding" field="geslachtsAanduiding" enum-value-method="getCode"/>
+        </structure>
+        <value name="geslachtsNaam" field="geslachtsNaam"/>
+
+        <collection field="adressen" factory="nl.bzk.brp.binding.util.BindingUtil.newSetInstance">
+            <structure name="adres" type="nl.bzk.brp.model.logisch.PersoonAdres">
+                <value name="huisnummer" field="huisnummer" usage="optional"/>
+                <value name="postcode" field="postcode"/>
+            </structure>
+        </collection>
+        <value name="voornaam" field="voornamen"/>
+    </mapping>
+
+</binding>
