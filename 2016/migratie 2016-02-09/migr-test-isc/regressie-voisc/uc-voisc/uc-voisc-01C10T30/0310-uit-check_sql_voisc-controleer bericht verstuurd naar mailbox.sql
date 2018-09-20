@@ -1,0 +1,1 @@
+select count(*) from voisc.bericht where status = 'SENT_TO_MAILBOX' having count(*)=3;

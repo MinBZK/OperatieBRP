@@ -1,0 +1,672 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:8080/" />
+<title>jbpm-console-login</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">jbpm-console-login</td></tr>
+</thead><tbody>
+<tr>
+	<td>store</td>
+	<td>beheerder</td>
+	<td>username</td>
+</tr>
+<tr>
+	<td>store</td>
+	<td>beheerder</td>
+	<td>password</td>
+</tr>
+<tr>
+	<td>store</td>
+	<td>306002</td>
+	<td>proces1</td>
+</tr>
+<tr>
+	<td>store</td>
+	<td>306030</td>
+	<td>proces2</td>
+</tr>
+<tr>
+	<td>store</td>
+	<td>306058</td>
+	<td>proces3</td>
+</tr>
+<tr>
+	<td>store</td>
+	<td>306103</td>
+	<td>proces4</td>
+</tr>
+<!--Inloggen (lange wachttijd voor laden jboss)-->
+<tr>
+	<td>open</td>
+	<td>/jbpm-console/app/processinstances.jsf</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>You must provide security credentials to access this management console. </td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=j_username</td>
+	<td>${username}</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=j_password</td>
+	<td>${password}</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForPageToLoad</td>
+	<td>60000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>Procesinstanties</td>
+	<td></td>
+</tr>
+<!--UC80101C10T10 - Overzicht processen-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Processen</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForPageToLoad</td>
+	<td>5000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[3]/td</td>
+	<td>${proces1}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td</td>
+	<td>${proces2}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces3}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[3]/td[4]/span</td>
+	<td>Opgeschort</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td[4]/span</td>
+	<td>In uitvoering</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td[4]/span</td>
+	<td>In uitvoering</td>
+</tr>
+<!--UC80101C10T20 - Aantal processen-->
+<tr>
+	<td>assertElementNotPresent</td>
+	<td>//tbody[2]/tr[4]</td>
+	<td></td>
+</tr>
+<!--UC80101C10T30 - Processelectie-->
+<tr>
+	<td>clickAndWait</td>
+	<td>xpath=(//a[contains(text(),'Bekijken')])[2]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[3]/td</td>
+	<td>ID ${proces2}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[4]/td/span</td>
+	<td>In uitvoering</td>
+</tr>
+<!--UC80101C10T40 - Wijzigen van processelectie-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Processen</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>xpath=(//a[contains(text(),'Bekijken')])[3]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[3]/td</td>
+	<td>ID ${proces1}</td>
+</tr>
+<!--UC80101C10T50 - Weergave details proces-->
+<!--UC80101C10T60 - Weergave type proces-->
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[2]/td/a</td>
+	<td>regexp:uc202 v\d+</td>
+</tr>
+<!--UC80101C10T70 - Weergave status van een proces-->
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[4]/td/span</td>
+	<td>Opgeschort</td>
+</tr>
+<!--UC80101C10T80 - Weergave ID van een proces-->
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[3]/td</td>
+	<td>ID ${proces1}</td>
+</tr>
+<!--UC80101C10T90 - Filteren type proces-->
+<!--UC80101C10T100 - Controle statussen van een proces-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Processen</td>
+	<td></td>
+</tr>
+<!--UC80101C10T90 -> UC80101C20T10 - Weergave van alle processen-->
+<tr>
+	<td>check</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces4}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td</td>
+	<td>${proces3}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[3]/td</td>
+	<td>${proces2}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[4]/td</td>
+	<td>${proces1}</td>
+</tr>
+<!--UC80101C10T90 -> UC80101C20T20 - Geen beeindigde processen weergeven-->
+<tr>
+	<td>check</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>uncheck</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces4}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces3}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td</td>
+	<td>${proces2}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[3]/td</td>
+	<td>${proces1}</td>
+</tr>
+<!--UC80101C10T90 -> UC80101C20T30 - Geen opgeschorte en beeindigde processen weergeven-->
+<tr>
+	<td>check</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>uncheck</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>uncheck</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces4}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces3}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td</td>
+	<td>${proces2}</td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces1}</td>
+	<td></td>
+</tr>
+<!--UC80101C10T90 -> UC80101C20T40 - De opgeschorte processen verbergen via de filter-->
+<tr>
+	<td>check</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>uncheck</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces4}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td</td>
+	<td>${proces3}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[3]/td</td>
+	<td>${proces2}</td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces1}</td>
+	<td></td>
+</tr>
+<!--UC80101C10T90 -> UC80101C20T50 - De draaiende en opgeschorte processen verbergen via de filter-->
+<tr>
+	<td>uncheck</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>uncheck</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces4}</td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces3}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces2}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces1}</td>
+	<td></td>
+</tr>
+<!--UC80101C10T90 -> UC80101C20T60 - Alle processen via de filter verbergen-->
+<!--[[[ NO TEST - zelfde resultaat als alles tonen ]]]-->
+<!--UC80101C10T90 -> UC80101C20T70 - De draaiende en beeindigde processen uit de weergave filteren-->
+<tr>
+	<td>uncheck</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>uncheck</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces4}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces3}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces2}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces1}</td>
+</tr>
+<!--UC80101C10T90 -> UC80101C20T80 - De draaiende processen uit de weergave filteren-->
+<tr>
+	<td>uncheck</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces4}</td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces3}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces2}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td</td>
+	<td>${proces1}</td>
+</tr>
+<!--UC80101C10T110 - Controle partijen-->
+<!--UC80101C10T120 - Filteren van partijen-->
+<tr>
+	<td>check</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=partij_i</td>
+	<td>0599</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces4}</td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces3}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td</td>
+	<td>${proces2}</td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces1}</td>
+	<td></td>
+</tr>
+<!--UC80101C10T130 - Filteren van administratienummers-->
+<tr>
+	<td>check</td>
+	<td>id=running_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=suspended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=partij_i</td>
+	<td>0599</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=anummer_i</td>
+	<td>5245329185</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces4}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces3}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td</td>
+	<td>${proces2}</td>
+</tr>
+<tr>
+	<td>assertTextNotPresent</td>
+	<td>${proces1}</td>
+	<td></td>
+</tr>
+<!--UC80101C10T140 - Filteren op het ID van een proces-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Bekijken</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[3]/td</td>
+	<td>ID ${proces2}</td>
+</tr>
+<!--UC80101C10T150 - Sorteren van processen in de proceslijst-->
+<!--[[[ NO TEST - reeds getest door volgorde van processen bij filteren ]]]-->
+<!--UC80101C10T160 - Weergave start van een proces-->
+<tr>
+	<td>open</td>
+	<td>/jbpm-console/app/procins.jsf?id=${proces2}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[5]/td</td>
+	<td>regexp:.+</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[6]/td</td>
+	<td></td>
+</tr>
+<!--UC80101C10T170 - Weergave einde van een proces-->
+<tr>
+	<td>open</td>
+	<td>/jbpm-console/app/procins.jsf?id=${proces4}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[5]/td</td>
+	<td>regexp:.+</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='leftmenu']/tbody/tr[6]/td</td>
+	<td>regexp:.+</td>
+</tr>
+<!--UC80101C10T180 - Weergave van de flowchart van een proces-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Procesplaat</td>
+	<td></td>
+</tr>
+<tr>
+	<td>verifyElementPresent</td>
+	<td>css=div &gt; img</td>
+	<td></td>
+</tr>
+<!--UC80101C10T190 - Weergave van processtappen-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Processen</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//a[contains(text(),'Bekijken')]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Stappen</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[1]/td[3]</td>
+	<td>end (log einde foutafhandeling)</td>
+</tr>
+<!--Afmelden-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Afmelden</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>You must provide security credentials to access this management console. </td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

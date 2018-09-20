@@ -1,0 +1,1 @@
+UPDATE autaut.levsautorisatie set populatiebeperking = 'WAAR';

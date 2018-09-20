@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>nl.bzk.migratiebrp.build.latestsnapshot</groupId>
+	<artifactId>migr-build-latestsnapshot-test</artifactId>
+	<version>1.0</version>
+	<packaging>pom</packaging>
+	<name>Migr - Build - Latest snapshot enforcer - Test</name>
+
+	<dependencies>
+		<dependency>
+			<groupId>nl.bzk.migratiebrp.build</groupId>
+			<artifactId>migr-build-lastestsnapshot</artifactId>
+			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>nl.bzk.brp.levering.kern</groupId>
+			<artifactId>brp-levering-kern-lo3conversie</artifactId>
+			<version>90-SNAPSHOT</version>
+		</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-enforcer-plugin</artifactId>
+				<version>1.4.1</version>
+				<dependencies>
+					<dependency>
+						<groupId>nl.bzk.migratiebrp.build</groupId>
+						<artifactId>migr-build-lastestsnapshot</artifactId>
+						<version>1.0</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>enforce</id>
+						<configuration>
+							<rules>
+								<latestSnapshotRule implementation="nl.bzk.migratiebrp.build.latestsnapshot.LatestSnapshotRule">
+									<groupId>nl.bzk.brp.levering.kern</groupId>
+									<artifactId>brp-levering-kern-lo3conversie</artifactId>
+								</latestSnapshotRule>
+							</rules>
+						</configuration>
+						<goals>
+							<goal>enforce</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+</project>

@@ -1,0 +1,1 @@
+call mvn -U -f sync-as.pom.xml install -Ddeploy.propfile=conf\sync-as-labmita01_integratie_proefsync.properties -Ddeploy.target=install -Dapplication.source=D:\mGBA\repos\isc-code-poc-historie\migr-synchronisatie-runtime\target -Dapplication.file=migr-sync-runtime.zip

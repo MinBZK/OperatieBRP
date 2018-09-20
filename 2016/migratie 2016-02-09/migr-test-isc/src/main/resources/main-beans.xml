@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+  xmlns:context="http://www.springframework.org/schema/context"
+  xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+  xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+  xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+    http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd
+  ">
+
+  <context:annotation-config />
+
+  <!-- Test environment -->
+
+    <bean name="correlator" class="nl.bzk.migratiebrp.test.isc.environment.correlatie.Correlator" />
+    <bean name="idGenerator" class="nl.bzk.migratiebrp.test.isc.environment.id.IdGeneratorImpl" />
+
+    <bean name="testEnviroment" class="nl.bzk.migratiebrp.test.isc.EnvironmentImpl" />
+    <bean name="jbpmHelperKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.JbpmHelperKanaal" />
+    <bean name="jbpmCleanKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.CleanJbpmKanaal" />
+
+
+    <!-- KANAAL: BZM -->
+    <bean name="bzmBhgOverlijdenKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.BzmBhgOverlijdenKanaal" />
+    <bean name="bzmBhgVerblijfAdresKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.BzmBhgVerblijfAdresKanaal" />
+    <bean name="bzmBhgBevragingKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.bzm.BzmBhgBevragingKanaal" />
+
+    <!-- KANAAL: BRP, LEVERING, SYNC, VOISC (Isc Queue) -->
+    <bean name="archiefKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.ArchiefQueueKanaal" />
+    <bean name="archiefDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.ArchiefDlqKanaal" />
+    <bean name="leveringKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.LeveringQueueKanaal" />
+    <bean name="vospgKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.VospgQueueKanaal" />
+    <bean name="vospgAltKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.VospgAltQueueKanaal" />
+    <bean name="voiscOntvangstDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.VoiscOntvangstDlqKanaal" />
+    <bean name="voiscVerzendenDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.VoiscVerzendenDlqKanaal" />
+    <bean name="syncKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.SyncQueueKanaal" />
+    <bean name="syncAltKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.SyncAltQueueKanaal" />
+    <bean name="syncVerzoekDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.SyncVerzoekDlqKanaal" />
+    <bean name="syncAntwoordDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.SyncAntwoordDlqKanaal" />
+
+    <!-- KANAAL: MAILBOX -->
+    <bean id="mailboxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.mailbox.MailboxKanaal" />
+
+    <!-- KANAAL: WACHT -->
+    <bean id="wachtKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.WachtKanaal" />
+    <bean id="dummyKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.DummyKanaal" />
+    <bean id="quitKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.QuitKanaal" />
+
+    <!-- KANALEN: JBPM -->
+    <bean name="handKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.HandKanaal" />
+    <bean name="nodeCheckKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.NodeCheckKanaal" />
+    <bean name="transCheckKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.TransCheckKanaal" />
+    <bean name="transitieKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jbpm.TransitieKanaal" />
+    <bean name="deleteProcessenKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.isc.DeleteProcessenKanaal" />
+
+    <!-- KANALEN: SQL -->
+    <bean id="checkSqlBrpKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlBrpKanaal" />
+    <bean id="checkSqlGbavKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlGbavKanaal" />
+    <bean id="checkSqlIscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlIscKanaal" />
+    <bean id="checkSqlVoiscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlVoiscKanaal" />
+
+    <bean id="checkSqlResultKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlResultKanaal" />
+    <bean id="checkSqlExistsKnaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CheckSqlExistsKanaal" />
+
+    <bean id="sqlBrpKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlBrpKanaal" />
+    <bean id="sqlGbavKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlGbavKanaal" />
+    <bean id="sqlIscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlIscKanaal" />
+    <bean id="sqlVoiscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.SqlVoiscKanaal" />
+
+    <bean id="cleanDbKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.CleanDatabaseKanaal" />
+
+  <!-- KANAAL: PL -->
+    <bean id="checkPlKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.pl.CheckPlKanaal" />
+    <bean id="checkPlResultKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.pl.CheckPlResultKanaal" />
+
+    <!-- KANAAL: GEMEENTE -->
+    <bean id="gemeenteKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GemeenteQueueKanaal" />
+    <bean id="gemeenteAltKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GemeenteAltQueueKanaal" />
+
+    <!-- KANAAL: AUTORISATIE -->
+    <bean id="autorisatieKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.AutorisatieQueueKanaal" />
+    <bean id="autorisatieAltKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.AutorisatieAltQueueKanaal" />
+
+    <!-- KANELEN: PERSOON, ABONNEMENT, AFNEMERSINDICATIE -->
+    <bean id="abonnementKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.AbonnementKanaal" />
+    <bean id="persoonKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.PersoonKanaal" />
+    <bean id="afnemersindicatieKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.AfnemersindicatieKanaal" />
+
+    <bean id="deleteAbonnementenKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeleteAbonnementenKanaal" />
+    <bean id="deletePersonenKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeletePersonenKanaal" />
+    <bean id="deletePartijenKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeletePartijenKanaal" />
+
+    <bean id="hornetQKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.HornetQKanaal" />
+    <bean id="hornetQAltKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.HornetQAltKanaal" />
+    <bean id="hornetQDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.HornetQDlqKanaal" />
+    
+    <!-- KANALEN: JMX -->
+    <bean id="brpGbaCentraleJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpGbaCentraleJmxKanaal" />
+    <bean id="brpMessageBrokerJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpMessageBrokerJmxKanaal" />
+    <bean id="brpMutatieLeveringJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpMutatieLeveringJmxKanaal" />
+    <bean id="brpVerzendingJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.BrpVerzendingJmxKanaal" />
+    <bean id="iscJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.IscJmxKanaal" />
+    <bean id="hornetqJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.HornetQJmxKanaal" />
+    <bean id="mailboxJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.MailboxJmxKanaal" />
+    <bean id="opschonenJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.OpschonenJmxKanaal" />
+    <bean id="tellingenJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.TellingenJmxKanaal" />
+    <bean id="voiscJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.VoiscJmxKanaal" />
+    <bean id="syncJmxKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jmx.SyncJmxKanaal" />
+
+    <!-- KANALEN: ISC -->
+    <bean name="iscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.isc.IscKanaal" />
+
+    <!-- KANALEN: SELENIUM -->
+    <bean name="selenium" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.selenium.SeleniumKanaal">
+        <property name="baseUrl" value="${selenium.baseurl}" />
+    </bean>
+
+    <!--  KANAAL: BRP QUEUES -->
+    <bean name="brpGbaArchiefKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaArchiefKanaal" />
+    <bean name="brpGbaArchiefDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaArchiefDlqKanaal" />
+    <bean name="brpGbaBijhoudingKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaBijhoudingenKanaal" />
+    <bean name="brpGbaBijhoudingDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaBijhoudingenDlqKanaal" />
+    <bean name="brpGbaAfnemerindicatiesKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAfnemerindicatiesKanaal" />
+    <bean name="brpGbaAfnemerindicatiesDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAfnemerindicatiesDlqKanaal" />
+    <bean name="brpGbaAfnemerindicatiesAntwoordKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAfnemerindicatiesAntwoordKanaal" />
+    <bean name="brpGbaAfnemerindicatiesAntwoordDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaAfnemerindicatiesAntwoordDlqKanaal" />
+    <bean name="brpGbaToevalligeGebeurtenissenKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaToevalligeGebeurtenissenKanaal" />
+    <bean name="brpGbaToevalligeGebeurtenissenDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaToevalligeGebeurtenissenDlqKanaal" />
+    <bean name="brpGbaToevalligeGebeurtenissenAntwoordKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaToevalligeGebeurtenissenAntwoordKanaal" />
+    <bean name="brpGbaToevalligeGebeurtenissenAntwoordDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaToevalligeGebeurtenissenAntwoordDlqKanaal" />
+    <bean name="brpGbaLeveringKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaLeveringKanaal" />
+    <bean name="brpGbaLeveringDlqKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.GbaLeveringDlqKanaal" />
+
+    <bean name="brpBrpBijhoudingKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.jms.BrpBijhoudingenKanaal" />
+
+
+    <!-- KANALEN: DUMP -->
+    <bean name="dumpIscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.dump.DumpKanaal" />
+
+  	<!-- KANALEN: GBAV -->
+    <bean id="deleteInitVullingKanaal" class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeleteInitVullingKanaal" />
+    <bean id="deleteGbavKanaal" class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.DeleteGbavKanaal" />
+    <bean id="gbavPersoonKanaal" class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.GbavPersoonKanaal" />
+    <bean id="gbavAutorisatieKanaal" class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.GbavAutorisatieKanaal" />
+    <bean id="gbavAfnemersindicatieKanaal" class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.GbavAfnemersindicatieKanaal" />
+    <bean id="gbavBerichtKanaal" class=" nl.bzk.migratiebrp.test.isc.environment.kanaal.sync.GbavBerichtKanaal" />
+
+    <!-- KANALEN: SSH -->
+    <bean name="initNaarBrpSshKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.SshExecKanaal">
+      <property name="naam" value="initNaarBrpSsh" />
+      <property name="host" value="${initNaarBrpSsh.host:localhost}" />
+      <property name="username" value="${initNaarBrpSsh.username:jboss}" />
+      <property name="password" value="${initNaarBrpSsh.password:secret}" />
+    </bean>
+    <bean name="initNaarBrpScphKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.ScpKanaal">
+      <property name="naam" value="initNaarBrpScp" />
+      <property name="host" value="${initNaarBrpSsh.host:localhost}" />
+      <property name="username" value="${initNaarBrpSsh.username:jboss}" />
+      <property name="password" value="${initNaarBrpSsh.password:secret}" />
+    </bean>
+    <bean name="initNaarLo3SshKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.SshExecKanaal">
+      <property name="naam" value="initNaarLoSsh" />
+      <property name="host" value="${initNaarLo3Ssh.host:localhost}" />
+      <property name="username" value="${initNaarLo3Ssh.username:jboss}" />
+      <property name="password" value="${initNaarLo3Ssh.password:secret}" />
+    </bean>
+    <bean name="proefsyncSshKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.SshExecKanaal">
+      <property name="naam" value="proefsyncSsh" />
+      <property name="host" value="${proefsyncSsh.host:localhost}" />
+      <property name="username" value="${proefsyncSsh.username:jboss}" />
+      <property name="password" value="${proefsyncSsh.password:secret}" />
+    </bean>
+    <bean name="leveringsvergelijkingSshKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.ssh.SshExecKanaal">
+      <property name="naam" value="leveringsvergelijkingSsh" />
+      <property name="host" value="${leveringsvergelijkingSsh.host:localhost}" />
+      <property name="username" value="${leveringsvergelijkingSsh.username:jboss}" />
+      <property name="password" value="${leveringsvergelijkingSsh.password:secret}" />
+    </bean>
+
+  	<!-- KANALEN: IV -->
+    <bean id="ivNaarIscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.IvNaarIscKanaal" />
+    <bean id="ivNaarVoiscKanaal" class="nl.bzk.migratiebrp.test.isc.environment.kanaal.sql.IvNaarVoiscKanaal" />
+
+
+    <context:property-placeholder location="datasource.properties" />
+</beans>

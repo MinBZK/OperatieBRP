@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <bean id="voiscEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="VoiscEntities" />
+        <property name="dataSource" ref="voiscDataSource" />
+        <property name="jpaVendorAdapter">
+		    <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+		        <property name="generateDdl" value="false" />
+		    </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.transaction.manager_lookup_class">com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup</prop>
+                <prop key="hibernate.dialect">${voisc.hibernate.dialect:org.hibernate.dialect.PostgreSQLDialect}</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                <prop key="hibernate.transaction.jta.platform">nl.bzk.migratiebrp.voisc.database.repository.jta.AtomikosJtaPlatform</prop>
+            </props>
+        </property>
+    </bean>
+
+</beans>

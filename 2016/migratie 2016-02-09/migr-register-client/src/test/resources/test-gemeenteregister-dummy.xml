@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <bean id="dummyGemeenteRegisterService" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true" />
+        <property name="sessionTransacted" value="true" />
+
+        <property name="connectionFactory" ref="gemeenteConnectionFactory" />
+        <property name="destination" ref="gemeenteVerzoekQueue" />
+
+        <property name="messageListener">
+        	<bean class="nl.bzk.migratiebrp.register.client.DummyGemeenteRegisterService">
+				<property name="jmsTemplate">
+		    		<bean class="org.springframework.jms.core.JmsTemplate">
+		        		<property name="connectionFactory" ref="gemeenteConnectionFactory"/>
+		        		<property name="sessionTransacted" value="true"/>
+		        		<property name="defaultDestination" ref="gemeenteRegisterTopic" />
+		    		</bean>
+				</property>
+			</bean>
+        </property>
+    </bean>
+</beans>

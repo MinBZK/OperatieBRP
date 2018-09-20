@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+
+	<bean name="queueConnectionFactory" class="org.hornetq.jms.client.HornetQXAConnectionFactory" >
+		<constructor-arg value="false" />
+		 <constructor-arg>
+			<bean name="transportConfiguration" class="org.hornetq.api.core.TransportConfiguration">
+			    <constructor-arg value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory" />
+			    <constructor-arg>
+			        <map key-type="java.lang.String" value-type="java.lang.Object">
+			            <entry key="host" value="${hornetq.queue.host:127.0.0.1}" />
+			            <entry key="port" value="${hornetq.queue.port:5445}" />
+			        </map>
+			    </constructor-arg>
+			</bean>
+		 </constructor-arg>
+        <property name="connectionTTL" value="600000"/>
+        <property name="callTimeout" value="30000"/>
+        <property name="retryInterval" value="1000"/>
+        <property name="retryIntervalMultiplier" value="1.5"/>
+        <property name="reconnectAttempts" value="1000"/>
+        <property name="maxRetryInterval" value="60000"/>
+        <property name="producerWindowSize" value="100"/>
+	</bean>
+
+	<bean name="queueSyncVerzoek" class="org.hornetq.jms.client.HornetQQueue">
+	   <constructor-arg value="${sync.queue.verzoek:sync.verzoek}" />
+	</bean>
+
+	<bean name="queueSyncAntwoord" class="org.hornetq.jms.client.HornetQQueue">
+	   <constructor-arg value="${sync.queue.antwoord:sync.antwoord}" />
+	</bean>
+
+    <bean id="syncParameters" class="nl.bzk.migratiebrp.synchronisatie.dal.service.SyncParameters" scope="singleton">
+        <property name="initieleVulling" value="true" />
+    </bean>
+
+</beans>

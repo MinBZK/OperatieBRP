@@ -1,0 +1,1 @@
+select * from migblok.blokkering as row where anr = '2952487585'

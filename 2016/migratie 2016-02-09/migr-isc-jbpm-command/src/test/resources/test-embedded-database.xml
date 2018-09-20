@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<bean id="embeddedDatabaseServer" class="org.h2.tools.Server" factory-method="createTcpServer" init-method="start" destroy-method="stop" >
+    	<constructor-arg value="-tcp,-tcpAllowOthers,-tcpPort,9107,-baseDir,target/h2"/>
+	</bean>
+
+	<bean id="initializeIscDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedDatabaseServer">
+		<property name="driverClassName" value="org.h2.Driver" />
+		<property name="url" value="jdbc:h2:tcp://localhost:9107/isc" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+    <jdbc:initialize-database ignore-failures="ALL" data-source="initializeIscDataSource">
+        <jdbc:script location="classpath:sql/mig-drop.sql"  />
+        <jdbc:script location="classpath:sql/jbpm-drop.sql"  />
+        <jdbc:script location="classpath:sql/qrtz-drop.sql" />
+        <jdbc:script location="classpath:sql/jbpm-create.sql" />
+        <jdbc:script location="classpath:sql/mig-create.sql" />
+        <jdbc:script location="classpath:sql/mig-data.sql" />
+        <jdbc:script location="classpath:sql/qrtz-create.sql" />
+    </jdbc:initialize-database>
+</beans>

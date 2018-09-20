@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+	   	http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+	">
+
+
+    <bean id="jmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="maxConcurrentConsumers" value="${jms.maxConcurrentConsumers:1}"/>
+
+        <property name="connectionFactory" ref="queueConnectionFactory"/>
+        <property name="destination" ref="queueSyncVerzoek"/>
+
+        <property name="messageListener" ref="syncMessageHandler"/>
+    </bean>
+
+    <bean name="syncMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.SynchronisatieMessageHandler">
+        <property name="syncBerichtServices">
+            <list>
+                <ref bean="synchroniseerNaarBrpService" />
+				<ref bean="leesUitBrpService" />
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.AfnemersindicatieService"/>
+                <bean class="nl.bzk.migratiebrp.synchronisatie.runtime.service.AutorisatieService"/>
+            </list>
+        </property>
+    </bean>
+
+    <!-- Synchroniseer naar BRP Service -->
+    <bean name="synchroniseerNaarBrpService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.SynchroniseerNaarBrpService"/>
+    <context:component-scan base-package="nl.bzk.migratiebrp.synchronisatie.runtime.service.synchronisatie"/>
+
+	<!-- Dummy BRP connectie -->
+	<bean name="brpNotificator" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.synchronisatie.pl.BrpNotificatorDummy"/>
+
+	<bean name="leesUitBrpService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.LeesUitBrpService"/>
+</beans>

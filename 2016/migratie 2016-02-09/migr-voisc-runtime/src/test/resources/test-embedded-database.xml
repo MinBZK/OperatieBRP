@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+	<bean id="embeddedDatabaseServer" class="org.hsqldb.server.Server" init-method="start" destroy-method="stop" >
+ 		<property name="port" value="9012" />
+ 		<property name="properties">
+ 			<bean class="org.hsqldb.persist.HsqlProperties">
+ 				<constructor-arg>
+		 			<props>
+		 				<prop key="hsqldb.reconfig_logging">false</prop>
+		 				<prop key="server.database.0">file:target/hsqldb/activemq</prop>
+		 				<prop key="server.dbname.0">activemq</prop>
+		 				<prop key="server.database.1">file:target/hsqldb/voisc</prop>
+		 				<prop key="server.dbname.1">voisc</prop>
+		 			</props>
+ 				</constructor-arg>
+ 			</bean>
+ 		</property>
+ 	</bean>
+
+	<bean id="initializeActivemqDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedDatabaseServer">
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9012/activemq" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+	<bean id="initializeVoiscDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedDatabaseServer">
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9012/voisc" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+    <jdbc:initialize-database ignore-failures="ALL" data-source="initializeActivemqDataSource">
+        <jdbc:script location="classpath:sql/activemq-drop.sql"  />
+        <jdbc:script location="classpath:sql/postgres.sql" />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="initializeActivemqDataSource">
+        <jdbc:script location="classpath:sql/activemq-create.sql" />
+    </jdbc:initialize-database>
+
+    <jdbc:initialize-database ignore-failures="ALL" data-source="initializeVoiscDataSource">
+        <jdbc:script location="classpath:sql/voisc-drop.sql"  />
+        <jdbc:script location="classpath:sql/postgres.sql" />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="initializeVoiscDataSource">
+        <jdbc:script location="classpath:sql/voisc-create.sql"  />
+        <jdbc:script location="classpath:sql/voisc-data.sql" />
+    </jdbc:initialize-database>
+</beans>

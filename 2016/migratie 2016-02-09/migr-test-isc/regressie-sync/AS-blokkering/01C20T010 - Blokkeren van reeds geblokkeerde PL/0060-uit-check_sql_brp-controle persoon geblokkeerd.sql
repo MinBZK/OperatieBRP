@@ -1,0 +1,1 @@
+select tsreg from migblok.blokkering where anr = '2952487585';

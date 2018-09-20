@@ -1,0 +1,46 @@
+
+<assembly
+	xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+	<id>mailbox</id>
+	<formats>
+		<format>zip</format>
+	</formats>
+	<includeBaseDirectory>false</includeBaseDirectory>
+	<files>
+        <file>
+            <source>target/${project.build.finalName}.jar</source>
+            <outputDirectory>/lib</outputDirectory>
+            <filtered>false</filtered>
+        </file>
+	</files>
+	<fileSets>
+		<fileSet>
+			<outputDirectory>/</outputDirectory>
+			<directory>src/main/assembly/</directory>
+			<excludes>
+			    <exclude>assembly.xml</exclude>
+			</excludes>
+		</fileSet>
+		<fileSet>
+            <outputDirectory>/keystores</outputDirectory>
+            <directory>src/test/resources/keystores</directory>
+            <includes>
+                <include>*.jks</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <outputDirectory>/sql</outputDirectory>
+            <directory>target/voisc-db-sql/sql</directory>
+            <includes>
+                <include>*.sql</include>
+            </includes>
+        </fileSet>
+	</fileSets>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>/lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>	
+</assembly>

@@ -1,0 +1,1 @@
+update mig_bericht set tijdstip = tijdstip - INTERVAL '1879 minutes';

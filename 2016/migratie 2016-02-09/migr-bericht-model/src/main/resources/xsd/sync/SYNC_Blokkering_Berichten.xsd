@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+    targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified" attributeFormDefault="unqualified"
+    version="000101">
+  
+    <include schemaLocation="SYNC_Objecttypen.xsd"/>
+    
+    <!-- 
+     | Berichten die te maken hebben met het blokkeren en deblokkeren van persoonslijsten.
+     +-->
+
+    <element name="blokkeringVerzoek" type="sync:BlokkeringVerzoekType" />
+    <element name="blokkeringAntwoord" type="sync:BlokkeringAntwoordType" />
+    <element name="blokkeringInfoVerzoek" type="sync:BlokkeringInfoVerzoekType" />
+    <element name="blokkeringInfoAntwoord" type="sync:BlokkeringInfoAntwoordType" />
+    <element name="deblokkeringVerzoek" type="sync:DeblokkeringVerzoekType"/>
+    <element name="deblokkeringAntwoord" type="sync:DeblokkeringAntwoordType"/>
+
+    <!-- Blokkering (ISC -> SYNC) -->
+    
+    <complexType name="BlokkeringVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"  />
+            <element name="persoonsaanduiding" type="sync:PersoonsaanduidingType" minOccurs="1" maxOccurs="1"  />
+            <element name="processId" type="sync:ProcessIdType" minOccurs="1" maxOccurs="1" />
+            <element name="gemeenteNaar" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+            <element name="gemeenteRegistratie" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+    
+    <complexType name="BlokkeringAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Ok">
+                            <annotation><documentation>
+                                Dit resultaat geeft aan dat de blokkering succesvol is geregistreerd.
+                            </documentation></annotation>
+                        </enumeration>                  
+                        <enumeration value="Geblokkeerd" >
+                            <annotation><documentation>
+                                Dit resultaat geeft aan dat het anummer reeds geblokkeerd is.
+                            </documentation></annotation>
+                        </enumeration>                  
+                    </restriction>
+                </simpleType>
+            </element>
+            <sequence minOccurs="0" maxOccurs="1">
+                <element name="persoonsaanduiding" type="sync:PersoonsaanduidingType" minOccurs="1" maxOccurs="1"  />
+                <element name="processId" type="sync:ProcessIdType" minOccurs="1" maxOccurs="1" />
+                <element name="gemeenteNaar" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+            </sequence>
+        </sequence>
+    </complexType>
+    
+    <!--  Blokkering info (ISC -> SYNC) -->
+
+    <complexType name="BlokkeringInfoVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"  />
+        </sequence>
+    </complexType>
+    
+    <complexType name="BlokkeringInfoAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Ok">
+                            <annotation><documentation>
+                                Dit resultaat geeft aan dat de informatie succesvol is opgehaald (als er een blokkering 
+                                aanwezig is dan zijn de relevante gegevens gevuld).
+                            </documentation></annotation>
+                        </enumeration>                  
+                    </restriction>
+                </simpleType>
+            </element>
+            <sequence minOccurs="0" maxOccurs="1">
+                <element name="persoonsaanduiding" type="sync:PersoonsaanduidingType" minOccurs="1" maxOccurs="1"  />
+                <element name="processId" type="sync:ProcessIdType" minOccurs="1" maxOccurs="1" />
+                <element name="gemeenteNaar" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+            </sequence>
+        </sequence>
+    </complexType>
+
+    <!-- Deblokkering (ISC -> SYNC) -->
+
+    <complexType name="DeblokkeringVerzoekType">
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1"  />
+            <element name="processId" type="sync:ProcessIdType" minOccurs="1" maxOccurs="1" />
+            <element name="gemeenteRegistratie" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+        </sequence>
+    </complexType>
+ 
+    <complexType name="DeblokkeringAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Ok">
+                            <annotation><documentation>
+                                Dit resultaat geeft aan dat de deblokkering succesvol is geregistreerd.
+                            </documentation></annotation>
+                        </enumeration>                  
+                    </restriction>
+                </simpleType>
+            </element>
+        </sequence>
+    </complexType>
+</schema>

@@ -1,0 +1,28 @@
+
+
+select a.tsreg, a.tsverval, a.nadereaandverval, 
+
+ai_v.lo3categorie || ai_v.lo3stapelvolgnr::text || ai_v.lo3voorkomenvolgnr::text as Ai_herkomst, 
+av_v.lo3categorie || av_v.lo3stapelvolgnr::text || av_v.lo3voorkomenvolgnr::text as Av_herkomst, 
+a.indvoorkomentbvlevmuts, case when a.actievervaltbvlevmuts is null then null else true end as isActieMutsGevuld, 
+
+d.admhnd as admhndai, f.admhnd as admhndav, g.admhnd as admhndgaav, l.naam as naamai, n.naam as naamav, o.naam as naamgaav
+from kern.his_persuitslkiesr a
+
+left join kern.actie d on d.id = a.actieinh
+left join kern.actie f on f.id = a.actieverval
+left join kern.actie g on g.id = a.actievervaltbvlevmuts
+
+left join verconv.lo3voorkomen ai_v on ai_v.actie = a.actieinh
+left join verconv.lo3voorkomen av_v on av_v.actie = a.actieverval
+left join verconv.lo3voorkomen amuts_v on amuts_v.actie = a.actievervaltbvlevmuts
+
+left join kern.admhnd h on h.id = d.admhnd
+left join kern.admhnd j on j.id = f.admhnd
+left join kern.admhnd k on k.id = g.admhnd
+
+left join kern.srtadmhnd l on l.id = h.srt
+left join kern.srtadmhnd n on n.id = j.srt
+left join kern.srtadmhnd o on o.id = k.srt
+
+order by a.tsreg DESC;

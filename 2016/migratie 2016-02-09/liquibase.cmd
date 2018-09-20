@@ -1,0 +1,1 @@
+mvn -f liquibase.pom.xml initialize

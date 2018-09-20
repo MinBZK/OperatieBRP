@@ -1,0 +1,490 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:id="http://jbpm.org/jbpm4jsf/identity"
+>
+    <ui:composition template="../app/t_loggedin.xhtml">
+        <ui:define name="actions">
+            <ga:checkRole roles="#{access.role.identities}">
+                <ga:responseActions>
+                    <!-- First identify the view mode -->
+
+                    <ga:checkRole roles="#{access.role.identities.group}">
+                        <f:setPropertyActionListener value="groups" target="#{viewModeDefault}"/>
+                    </ga:checkRole>
+                    <ga:checkRole roles="#{access.role.identities.user}">
+                        <f:setPropertyActionListener value="users" target="#{viewModeDefault}"/>
+                    </ga:checkRole>
+                    <ga:parameter name="view" target="#{viewMode}" 
+                    default="#{empty viewModeDefault ? 'users' : viewModeDefault}"/>
+                    <ga:parameter name="page" target="#{page}" default="1">
+                        <f:convertNumber integerOnly="true"/>
+                    </ga:parameter>
+
+                    <!-- User view mode actions -->
+
+                    <ga:checkRole roles="#{access.role.identities.user}">
+                        <ga:parameter name="name" target="#{userName}" default="">
+                            <f:converter converterId="gravel.StringWildcardFilter"/>
+                        </ga:parameter>
+                        <ga:parameter name="email" target="#{userEmail}" default="">
+                            <f:converter converterId="gravel.StringWildcardFilter"/>
+                        </ga:parameter>
+                        <id:listUsers unless="#{viewMode != 'users'}" target="#{users}"/>
+                        <gd:filter if="#{users != null}" source="#{users}" target="#{users}" entryVar="e" filter="#{userName}" 
+                        filterArgument="#{e.name}"/>
+                        <gd:filter if="#{users != null}" source="#{users}" target="#{users}" entryVar="e" filter="#{userEmail}" 
+                        filterArgument="#{e.email}"/>
+                        <gd:sort if="#{users != null}" source="#{users}" target="#{users}" entryVar="e" argument="#{e.name}"/>
+                        <gd:pager target="#{users_pager}" value="#{users}" page="#{page}"/>
+                    </ga:checkRole>
+
+                    <!-- Group view mode actions -->
+
+                    <ga:checkRole roles="#{access.role.identities.group}">
+                        <ga:parameter name="gname" target="#{groupName}" default="">
+                            <f:converter converterId="gravel.StringWildcardFilter"/>
+                        </ga:parameter>
+                        <ga:parameter name="gtype" target="#{groupType}" default="">
+                            <f:converter converterId="gravel.StringWildcardFilter"/>
+                        </ga:parameter>
+                        <ga:parameter name="gpname" target="#{groupParentName}" default="">
+                            <f:converter converterId="gravel.StringWildcardFilter"/>
+                        </ga:parameter>
+                        <id:listGroups unless="#{viewMode != 'groups'}" target="#{groups}"/>
+                        <gd:filter if="#{groups != null}" source="#{groups}" target="#{groups}" entryVar="e" filter="#{groupName}" 
+                        filterArgument="#{e.name}"/>
+                        <gd:filter if="#{groups != null}" source="#{groups}" target="#{groups}" entryVar="e" filter="#{groupType}" 
+                        filterArgument="#{e.type}"/>
+                        <gd:filter if="#{groups != null}" source="#{groups}" target="#{groups}" entryVar="e" filter="#{groupParentName}" 
+                        filterArgument="#{e.parent.name}"/>
+                        <gd:sort if="#{groups != null}" source="#{groups}" target="#{groups}" entryVar="e" argument="#{e.name}"/>
+                        <gd:pager target="#{groups_pager}" value="#{groups}" page="#{page}"/>
+                    </ga:checkRole>
+                </ga:responseActions>
+            </ga:checkRole>
+        </ui:define>
+
+        <ui:define name="menu">
+            <ga:checkRole roles="#{access.role.identities}" message="#{msgs.unauthorized}">
+                <table class="leftmenu">
+                    <tbody>
+                        <tr class="leftmenuheader">
+                            <th colspan="2"><h:outputText value="#{msgs['menu.actions']}"/></th>
+                        </tr>
+                        <tr class="leftmenu" style="height:80px">
+                            <td colspan="2">
+                                <h:form>
+                                    <gs:ul>
+                                        <ga:checkRole roles="#{access.role.identities.user}">
+                                            <ga:checkRole roles="#{access.role.identities.user.add}">
+                                                <gs:li>
+                                                    <h:outputText value="#{msgs['identities.action.adduser.beforelink']} "/>
+                                                    <h:outputLink>
+                                                        <f:param name="view" value="adduser"/>
+                                                        <h:outputText value="#{msgs['identities.action.adduser.link']}"/>
+                                                    </h:outputLink>
+                                                    <h:outputText value=" #{msgs['identities.action.adduser.afterlink']}"/>
+                                                </gs:li>
+                                            </ga:checkRole>
+                                        </ga:checkRole>
+                                        <ga:checkRole roles="#{access.role.identities.group}">
+                                            <ga:checkRole roles="#{access.role.identities.group.add}">
+                                                <gs:li>
+                                                    <h:outputText value="#{msgs['identities.action.addgroup.beforelink']} "/>
+                                                    <h:outputLink>
+                                                        <f:param name="view" value="addgroup"/>
+                                                        <h:outputText value="#{msgs['identities.action.addgroup.link']}"/>
+                                                    </h:outputLink>
+                                                    <h:outputText value=" #{msgs['identities.action.addgroup.afterlink']}"/>
+                                                </gs:li>
+                                            </ga:checkRole>
+                                        </ga:checkRole>
+                                    </gs:ul>
+                                </h:form>
+                            </td>
+                        </tr>
+                        <tr class="leftmenuheader">
+                            <th colspan="2" class="nf"><h:outputText value="#{msgs['menu.views']}"/></th>
+                        </tr>
+                        <tr class="leftmenu">
+                            <td colspan="2">
+                                <gs:ul>
+                                    <ga:checkRole roles="#{access.role.identities.user}">
+                                        <gs:li>
+                                            <h:outputLink 
+                                            style="#{empty viewMode or viewMode == 'users' ? 'font-weight:bold' : ''}">
+                                                <f:param name="view" value="users"/>
+                                                <h:outputText value="#{msgs['identities.view.users']}"/>
+                                            </h:outputLink>
+                                        </gs:li>
+                                    </ga:checkRole>
+                                    <ga:checkRole roles="#{access.role.identities.group}">
+                                        <gs:li>
+                                            <h:outputLink style="#{viewMode == 'groups' ? 'font-weight:bold' : ''}">
+                                                <f:param name="view" value="groups"/>
+                                                <h:outputText value="#{msgs['identities.view.groups']}"/>
+                                            </h:outputLink>
+                                        </gs:li>
+                                    </ga:checkRole>
+                                </gs:ul>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </ga:checkRole>
+        </ui:define>
+
+        <ui:define name="body">
+            <ga:checkRole roles="#{access.role.identities}">
+                <ga:checkRole roles="#{access.role.identities.user}">
+                    <gs:div>
+                        <ga:attribute name="rendered" value="#{users != null}"/>
+                        <table class="results">
+                            <thead>
+                                <tr>
+                                    <th colspan="6">
+                                        <ui:decorate template="t_pager.xhtml">
+                                            <ui:define name="pager_params">
+                                                <f:param name="view" value="users"/>
+                                                <f:param name="name" value="#{userName}"/>
+                                                <f:param name="email" value="#{userEmail}"/>
+                                            </ui:define>
+                                            <ui:param name="pager" value="#{users_pager}"/>
+                                        </ui:decorate>
+                                       <h:outputText value="Users"/>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <h:outputText value="#{msgs['identities.users.heading.id']}"/>
+                                    </td>
+                                    <td style="width:100px;">
+                                        <h:outputText value="#{msgs['identities.users.heading.name']}"/>
+                                    </td>
+                                    <td style="width:120px;">
+                                        <h:outputText value="#{msgs['identities.users.heading.email']}"/>
+                                    </td>
+                                    <td style="width:260px;">
+                                        <h:outputText value="#{msgs['identities.users.heading.memberships']}"/>
+                                    </td>
+                                    <td colspan="2">
+                                        <h:outputText value="#{msgs['identities.users.heading.actions']}"/>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody class="filter">
+                                <tr>
+                                    <td/>
+                                    <td>
+                                        <input name="name_i" type="text" style="width:90px;" value="#{userName}" 
+                                        onkeypress="keypress(event,'apply')"/>
+                                    </td>
+                                    <td>
+                                        <input name="email_i" type="text" style="width:110px;" value="#{userEmail}" 
+                                        onkeypress="keypress(event,'apply')"/>
+                                    </td>
+                                    <td/>
+                                    <td colspan="2" style="width:150px;">
+                                        <form id="sf" action="identities.jsf">
+                                            <input type="hidden" name="view" value="users"/>
+                                            <input type="hidden" name="name"/>
+                                            <input type="hidden" name="email"/>
+                                        </form>
+                                        <a id="apply" accesskey="a" 
+                                        onclick="document.getElementsByName('name')[0].value=document.getElementsByName('name_i')[0].value;document.getElementsByName('email')[0].value=document.getElementsByName('email_i')[0].value;document.getElementById('sf').submit();return false;"><h:outputText 
+                                        value="#{msgs['filter.apply']}"/></a>
+                                        <h:outputLink style="margin-left:10px">
+                                            <f:param name="view" value="users"/>
+                                            <h:outputText value="#{msgs['filter.clear']}"/>
+                                        </h:outputLink>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <h:outputText>
+                                <ga:attribute name="rendered" value="#{! empty users}"/>
+                                <tbody class="results">
+                                    <gd:repeat value="#{users}" var="user" idVar="rid" first="#{users_pager.first}" limit="#{users_pager.limit}">
+                                        <gs:tr styleClass="#{rid % 2 == 0 ? 'odd' : 'even'}">
+                                            <td>
+                                                <h:outputText value="#{user.id}"/>
+                                            </td>
+                                            <td>
+                                                <h:outputText value="#{user.name}"/>
+                                            </td>
+                                            <td>
+                                                <h:outputText value="#{user.email}"/>
+                                            </td>
+                                            <td>
+                                                <ga:responseActions>
+                                                    <gd:sort source="#{user.memberships}" target="#{memberships}" entryVar="e" 
+                                                    argument="#{e.group.name}"/>
+                                                    <gd:sort source="#{memberships}" target="#{memberships}" entryVar="e" 
+                                                    argument="#{e.group.type}"/>
+                                                </ga:responseActions>
+                                                <gd:repeat value="#{memberships}" var="membership">
+                                                    <h:outputText value="Group (#{membership.group.type}): #{membership.group.name}"/>
+                                                    <h:outputText value=", Role: #{membership.role}" rendered="#{! empty membership.role}"/>
+                                                    <br/>
+                                                </gd:repeat>
+                                            </td>
+                                            <td>
+                                                <h:outputLink value="user.jsf?id=#{user.id}">
+                                                    <h:outputText value="#{msgs['action.examine']}"/>
+                                                </h:outputLink>
+                                            </td>
+                                            <ga:checkRole roles="#{access.role.identities.user.delete}">
+                                                <td>
+                                                    <h:form>
+                                                        <h:commandLink value="Delete" 
+                                                        onclick="return confirm('#{msgs['identities.users.confirm.delete']}')">
+                                                            <f:param name="xid">
+                                                                <ga:attribute name="value" value="#{user.id}"/>
+                                                            </f:param>
+                                                            <ga:parameter name="xid" target="#{xid}"/>
+                                                            <id:loadUser id="#{xid}" target="#{xuser}"/>
+                                                            <id:deleteUser user="#{xuser}"/>
+                                                            <f:setPropertyActionListener value="#{null}" target="#{xuser}"/>
+                                                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                                        </h:commandLink>
+                                                    </h:form>
+                                                </td>
+                                            </ga:checkRole>
+                                        </gs:tr>
+                                    </gd:repeat>
+                                </tbody>
+                            </h:outputText>
+                        </table>
+                    </gs:div>
+                    <ga:checkRole roles="#{access.role.identities.user.add}">
+                        <gs:div>
+                            <ga:attribute name="rendered" value="#{viewMode == 'adduser'}"/>
+                            <h:form>
+                                <table class="results">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">
+                                                <h:outputText value="#{msgs['identities.view.adduser']}"/>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="results">
+                                        <tr>
+                                            <th><h:outputText value="#{msgs['identities.adduser.prompt.name']}"/></th>
+                                            <td><h:inputText value="#{createUserName}"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><h:outputText value="#{msgs['identities.adduser.prompt.password']}"/></th>
+                                            <td><h:inputSecret value="#{createUserPassword}"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><h:outputText value="#{msgs['identities.adduser.prompt.passwordconfirm']}"/></th>
+                                            <td><h:inputSecret value="#{createUserPasswordConfirm}"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><h:outputText value="#{msgs['identities.adduser.prompt.email']}"/></th>
+                                            <td><h:inputText value="#{createUserEmail}"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th/>
+                                            <td style="text-align:right;">
+                                                <h:commandButton value="#{msgs['identities.adduser.button']}">
+                                                    <id:createUser
+                                                        userName="#{createUserName}"
+                                                        password="#{createUserPassword}"
+                                                        passwordConfirm="#{createUserPasswordConfirm}"
+                                                        email="#{createUserEmail}"
+                                                        />
+                                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                                    <n:nav outcome="success" url="identities.jsf?view=users" storeMessages="true"/>
+                                                </h:commandButton>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </h:form>
+                        </gs:div>
+                    </ga:checkRole>
+                </ga:checkRole>
+                <ga:checkRole roles="#{access.role.identities.group}">
+                    <gs:div>
+                        <ga:attribute name="rendered" value="#{groups != null}"/>
+                        <table class="results">
+                            <thead>
+                                <tr>
+                                    <th colspan="6">
+                                        <ui:decorate template="t_pager.xhtml">
+                                            <ui:param name="pager" value="#{groups_pager}"/>
+                                            <ui:define name="pager_params">
+                                                <f:param name="view" value="groups"/>
+                                                <f:param name="gname" value="#{groupName}"/>
+                                                <f:param name="gtype" value="#{groupType}"/>
+                                                <f:param name="gpname" value="#{groupParentName}"/>
+                                            </ui:define>
+                                        </ui:decorate>
+                                        <h:outputText value="Groups"/>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <h:outputText value="#{msgs['identities.groups.heading.id']}"/>
+                                    </td>
+                                    <td style="width:100px;">
+                                        <h:outputText value="#{msgs['identities.groups.heading.name']}"/>
+                                    </td>
+                                    <td style="width:120px;">
+                                        <h:outputText value="#{msgs['identities.groups.heading.type']}"/>
+                                    </td>
+                                    <td style="width:120px;">
+                                        <h:outputText value="#{msgs['identities.groups.heading.parent']}"/>
+                                    </td>
+                                    <td colspan="2">
+                                        <h:outputText value="#{msgs['identities.groups.heading.actions']}"/>
+                                    </td>
+                                </tr>
+                            </thead>
+                            <tbody class="filter">
+                                <tr>
+                                    <td/>
+                                    <td>
+                                        <input name="gname_i" type="text" style="width:90px;" value="#{groupName}" 
+                                        onkeypress="keypress(event,'gapply')"/>
+                                    </td>
+                                    <td>
+                                        <input name="gtype_i" type="text" style="width:110px;" value="#{groupType}" onkeypress="keypress(event,'gapply')"/>
+                                    </td>
+                                    <td>
+                                        <input name="gpname_i" type="text" style="width:90px;" value="#{groupParentName}" 
+                                        onkeypress="keypress(event,'gapply')"/>
+                                    </td>
+                                    <td colspan="2" style="width:150px;">
+                                        <form id="gsf" action="identities.jsf">
+                                            <input type="hidden" name="view" value="groups"/>
+                                            <input type="hidden" name="gname"/>
+                                            <input type="hidden" name="gtype"/>
+                                            <input type="hidden" name="gpname"/>
+                                        </form>
+                                        <a id="gapply" accesskey="a" 
+                                        onclick="document.getElementsByName('gname')[0].value=document.getElementsByName('gname_i')[0].value;document.getElementsByName('gpname')[0].value=document.getElementsByName('gpname_i')[0].value;document.getElementsByName('gtype')[0].value=document.getElementsByName('gtype_i')[0].value;document.getElementById('gsf').submit();return false;"><h:outputText 
+                                        value="#{msgs['filter.apply']}"/></a>
+                                        <h:outputLink style="margin-left:10px">
+                                            <f:param name="view" value="groups"/>
+                                            <h:outputText value="#{msgs['filter.clear']}"/>
+                                        </h:outputLink>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <h:outputText>
+                                <ga:attribute name="rendered" value="#{! empty groups}"/>
+                                <tbody class="results">
+                                    <gd:repeat value="#{groups}" var="group" idVar="rid" first="#{groups_pager.first}" 
+                                    limit="#{groups_pager.limit}">
+                                        <gs:tr>
+                                            <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                                            <td>
+                                                <h:outputText value="#{group.id}"/>
+                                            </td>
+                                            <td>
+                                                <h:outputText value="#{group.name}"/>
+                                            </td>
+                                            <td>
+                                                <h:outputText value="#{group.type}"/>
+                                            </td>
+                                            <td>
+                                                <h:outputText value="#{group.parent.name}"/>
+                                            </td>
+                                            <td>
+                                                <h:outputLink value="group.jsf?id=#{group.id}">
+                                                    <h:outputText value="#{msgs['action.examine']}"/>
+                                                </h:outputLink>
+                                            </td>
+                                            <ga:checkRole roles="#{access.role.identities.group.delete}">
+                                                <td>
+                                                    <h:form>
+                                                        <h:commandLink value="Delete" 
+                                                        onclick="return confirm('#{msgs['identities.groups.confirm.delete']}')">
+                                                            <f:param name="xid">
+                                                                <ga:attribute name="value" value="#{group.id}"/>
+                                                            </f:param>
+                                                            <ga:parameter name="xid" target="#{xid}"/>
+                                                            <id:loadGroup id="#{xid}" target="#{xgroup}"/>
+                                                            <id:deleteGroup group="#{xgroup}"/>
+                                                            <f:setPropertyActionListener value="#{null}" target="#{xgroup}"/>
+                                                            <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                                            <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                                        </h:commandLink>
+                                                    </h:form>
+                                                </td>
+                                            </ga:checkRole>
+                                        </gs:tr>
+                                    </gd:repeat>
+                                </tbody>
+                            </h:outputText>
+                        </table>
+                    </gs:div>
+                    <ga:checkRole roles="#{access.role.identities.group.add}">
+                        <gs:div>
+                            <ga:attribute name="rendered" value="#{viewMode == 'addgroup'}"/>
+                            <h:form>
+                                <table class="results">
+                                    <thead>
+                                        <tr>
+                                            <th colspan="2">
+                                                <h:outputText value="#{msgs['identities.view.addgroup']}"/>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="results">
+                                        <tr>
+                                            <th><h:outputText value="#{msgs['identities.addgroup.prompt.name']}"/></th>
+                                            <td><h:inputText value="#{createGroupName}"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><h:outputText value="#{msgs['identities.addgroup.prompt.type']}"/></th>
+                                            <td><h:inputText value="#{createGroupType}"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th><h:outputText value="#{msgs['identities.addgroup.prompt.parent']}"/></th>
+                                            <td><h:inputText value="#{createGroupParentName}"/></td>
+                                        </tr>
+                                        <tr>
+                                            <th/>
+                                            <td style="text-align:right;">
+                                                <h:commandButton value="#{msgs['identities.addgroup.button']}">
+                                                    <id:loadGroupByName
+                                                        groupName="#{createGroupParentName}"
+                                                        target="#{parentGroup}"
+                                                        unless="#{empty createGroupParentName}"
+                                                    />
+                                                    <id:createGroup
+                                                        groupName="#{createGroupName}"
+                                                        type="#{createGroupType}"
+                                                        parentGroup="#{parentGroup}"
+                                                    />
+                                                    <n:nav outcome="success" url="identities.jsf?view=groups" storeMessages="true"/>
+                                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                                </h:commandButton>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </h:form>
+                        </gs:div>
+                    </ga:checkRole>
+                </ga:checkRole>
+            </ga:checkRole>
+        </ui:define>
+    </ui:composition>
+
+
+</html>

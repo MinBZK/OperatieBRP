@@ -1,0 +1,35 @@
+
+
+
+select gesl.Code ,his.dataanvgel as DAG, his.dateindegel as DEG, his.tsreg, his.tsverval, his.nadereaandverval, 
+ai_v.lo3categorie || ai_v.lo3stapelvolgnr::text || ai_v.lo3voorkomenvolgnr::text as Ai_herkomst, 
+aag_v.lo3categorie || aag_v.lo3stapelvolgnr::text || aag_v.lo3voorkomenvolgnr::text as Aag_herkomst, 
+av_v.lo3categorie || av_v.lo3stapelvolgnr::text || av_v.lo3voorkomenvolgnr::text as Av_herkomst, 
+his.indvoorkomentbvlevmuts, case when his.actievervaltbvlevmuts is null then null else true end as isActieMutsGevuld, 
+ai_a.admhnd as admhndai, aag_a.admhnd as admhndaag, av_a.admhnd as admhndav, amuts_a.admhnd as admhndgaav, ai_sah.naam as naamai, aag_sah.naam as naamaag, av_sah.naam as naamav, amuts_sah.naam as naamgaav
+from kern.His_PersGeslachtsaand his
+
+join kern.Geslachtsaand gesl on gesl.id = his.Geslachtsaand
+
+left join kern.actie ai_a on ai_a.id = his.actieinh
+left join kern.actie aag_a on aag_a.id = his.actieaanpgel
+left join kern.actie av_a on av_a.id = his.actieverval
+left join kern.actie amuts_a on amuts_a.id = his.actievervaltbvlevmuts
+
+left join verconv.lo3voorkomen ai_v on ai_v.actie = his.actieinh
+left join verconv.lo3voorkomen aag_v on aag_v.actie = his.actieaanpgel
+left join verconv.lo3voorkomen av_v on av_v.actie = his.actieverval
+left join verconv.lo3voorkomen amuts_v on amuts_v.actie = his.actievervaltbvlevmuts
+
+left join kern.admhnd ai_ah on ai_ah.id = ai_a.admhnd
+left join kern.admhnd aag_ah on aag_ah.id = aag_a.admhnd
+left join kern.admhnd av_ah on av_ah.id = av_a.admhnd
+left join kern.admhnd amuts_ah on amuts_ah.id = amuts_a.admhnd
+
+left join kern.srtadmhnd ai_sah on ai_sah.id = ai_ah.srt
+left join kern.srtadmhnd aag_sah on aag_sah.id = aag_ah.srt
+left join kern.srtadmhnd av_sah on av_sah.id = av_ah.srt
+left join kern.srtadmhnd amuts_sah on amuts_sah.id = amuts_ah.srt
+
+where pers = 1
+order by his.tsreg DESC;

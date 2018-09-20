@@ -1,0 +1,565 @@
+<project name="ISC" basedir="." default="fail">
+
+	<!--
+	 | Algemene properties
+	 |
+	 | server.host
+	 | server.host.node1
+	 | server.host.node2
+	 | server.username
+	 | server.password
+	 |
+	 | File properties
+	 |
+	 | application.source
+	 | application.file
+	 |
+	 | ISC properties
+	 |
+	 | isc.database.host
+	 | isc.database.name
+	 | isc.database.username
+	 | isc.database.password
+	 |
+	 | isc.clustered
+	 | isc.cluster.bindport
+	 |
+	 | isc.cluster.name
+	 | isc.cluster.peerid
+	 |
+	-->
+	
+	<property name="application.directory" value="isc" />
+
+	<property name="isc.database.port" value="5432" />
+	
+	<property name="application.jdbc.source" value="deps/isc" />
+	<property name="application.jdbc.file" value="postgresql-9.1-901.jdbc4.jar" />
+	
+	<target name="checkProperties">
+		<fail unless="server.host" message="server.host property is verplicht." />
+		<fail unless="server.host.node1" message="server.host.node1 property is verplicht." />
+		<fail unless="server.host.node2" message="server.host.node2 property is verplicht." />
+		<fail unless="server.username" message="server.username property is verplicht." />
+		<fail unless="server.password" message="server.password property is verplicht." />
+		
+		<fail unless="isc.clustered" message="isc.clustered property is verplicht." />
+		<fail unless="isc.cluster.name" message="isc.cluster.name property is verplicht." />
+		<fail unless="isc.cluster.peerid" message="isc.cluster.peerid property is verplicht." />
+	</target>
+
+	<target name="checkInstallProperties" depends="checkProperties">
+		<!-- Check file settings -->
+		<fail unless="application.bin.source" message="application.bin.source property is verplicht bij het installeren." />
+		<fail unless="application.bin.file" message="application.bin.file property is verplicht bij het installeren." />
+		<fail unless="application.esb.source" message="application.esb.source property is verplicht bij het installeren." />
+		<fail unless="application.esb.file" message="application.esb.file property is verplicht bij het installeren." />
+		<fail unless="application.logging.source" message="application.logging.source property is verplicht bij het installeren." />
+		<fail unless="application.logging.file" message="application.logging.file property is verplicht bij het installeren." />
+		<fail unless="application.queues.source" message="application.queues.source property is verplicht bij het installeren." />
+		<fail unless="application.queues.file" message="application.queues.file property is verplicht bij het installeren." />
+		<fail unless="application.console.source" message="application.console.source property is verplicht bij het installeren." />
+		<fail unless="application.console.file" message="application.console.file property is verplicht bij het installeren." />
+		<fail unless="application.jdbc.source" message="application.jdbc.source property is verplicht bij het installeren." />
+		<fail unless="application.jdbc.file" message="application.jdbc.file property is verplicht bij het installeren." />
+	
+		<!-- Check file(s) exist -->
+		<fail message="${application.bin.source}/${application.bin.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1" >
+						<fileset dir="${application.bin.source}">
+							<include name="${application.bin.file}" />
+						</fileset>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+		<!-- 
+		 | ESB is optioneel (bij test VOISC willen we de ESB niet geinstalleerd)
+		 |
+		<fail message="${application.esb.source}/${application.esb.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1" >
+						<fileset dir="${application.esb.source}">
+							<include name="${application.esb.file}" />
+						</fileset>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+		-->
+		<fail message="${application.logging.source}/${application.logging.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1" >
+						<fileset dir="${application.logging.source}">
+							<include name="${application.logging.file}" />
+						</fileset>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+		<fail message="${application.queues.source}/${application.queues.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1" >
+						<fileset dir="${application.queues.source}">
+							<include name="${application.queues.file}" />
+						</fileset>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+		<fail message="${application.console.source}/${application.console.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1" >
+						<fileset dir="${application.console.source}">
+							<include name="${application.console.file}" />
+						</fileset>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+		<fail message="${application.jdbc.source}/${application.jdbc.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1" >
+						<fileset dir="${application.jdbc.source}">
+							<include name="${application.jdbc.file}" />
+						</fileset>
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+		
+		<!-- Check configuration settings -->
+		<fail unless="isc.database.host" message="isc.database.host property is verplicht." />
+		<fail unless="isc.database.name" message="isc.database.name property is verplicht." />
+		<fail unless="isc.database.username" message="isc.database.username property is verplicht." />
+		<fail unless="isc.database.password" message="isc.database.password property is verplicht." />
+		
+		<fail unless="isc.cluster.bindport" message="isc.cluster.bindport property is verplicht." />
+	</target>
+	
+    <target name="install" depends="checkInstallProperties,createLocalConfigurationFiles">
+		<echo message="Installing ${ant.project.name} ..." />
+
+		<echo message="Setup temporary directory" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+
+		<echo message="Copy ${application.bin.file}" />
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+			<fileset dir="${application.bin.source}">
+				<include name="${application.bin.file}" />
+			</fileset>
+		</scp>
+		
+		<echo message="Unpacking ${ant.project.name}" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~; mkdir ${application.directory}; cd ${application.directory}; unzip -o -q /tmp/${application.directory}/${application.bin.file} -d ." />
+
+		<echo message="Making scripts executable" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="chmod u+x ~/${application.directory}/jboss-as/bin/*.sh" />
+		
+		<echo message="Copying profile" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cp -R ~/${application.directory}/jboss-as/server/production ~/${application.directory}/jboss-as/server/isc" />
+
+		<echo message="Setup users and roles (soa-users.properties, soa-roles.properties)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/conf/props" trust="true" >
+			<fileset dir="deps/isc">
+				<include name="soa-users.properties" />
+				<include name="soa-roles.properties" />
+			</fileset>
+		</scp>
+		
+		<echo message="Setup run script (run.sh)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/bin" trust="true" >
+			<fileset dir="deps/isc">
+				<include name="run.sh" />
+			</fileset>
+		</scp>
+
+    	<echo message="Setup run script (run.conf)" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/bin" trust="true" >
+            <fileset dir="tmp">
+                <include name="run.conf" />
+            </fileset>
+        </scp>
+
+    	<echo message="Setup run script (run.conf)" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc" trust="true" >
+            <fileset dir="tmp">
+                <include name="run.conf" />
+            </fileset>
+        </scp>
+			
+		<echo message="Setup messaging port (remoting-bisocket-service.xml)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/messaging" trust="true" >
+			<fileset dir="deps/isc/messaging">
+				<include name="remoting-bisocket-service.xml" />
+			</fileset>
+		</scp>
+		
+		<echo message="Setup JMX remoting (jmx-remoting.sar)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy" trust="true" >
+			<fileset dir="deps/isc">
+				<include name="jmx-remoting.sar" />
+			</fileset>
+		</scp>
+		
+		<echo message="Copying ${application.jdbc.file}" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/lib" trust="true" >
+			<fileset dir="${application.jdbc.source}">
+				<include name="${application.jdbc.file}" />
+			</fileset>
+		</scp>
+
+		<echo message="Running database configuration utility" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/tools/schema" trust="true" >
+			<fileset dir="tmp">
+				<include name="isc.properties" />
+			</fileset>
+		</scp>
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/tools/schema; ant -propertyfile isc.properties" />
+		
+		<echo message="Setup JBPM configuration (jbpm.cfg.xml)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/jbpm.esb" trust="true" >
+			<fileset dir="deps/isc/jbpm">
+				<include name="jbpm.cfg.xml" />
+			</fileset>
+		</scp>		
+
+        <echo message="Setup Jbpm command configuration (remoteNode.properties)" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/jbpm.esb" trust="true" >
+            <fileset dir="tmp">
+                <include name="remoteNode.properties" />
+            </fileset>
+        </scp>
+
+        <echo message="Setup beheer configuration (config.properties)" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/jbpm.esb" trust="true" >
+            <fileset dir="tmp">
+                <include name="config.properties" />
+            </fileset>
+        </scp>
+
+		<echo message="Setup queue configuration (jbm-queue-service.xml. destinations.xml)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/jbpm.esb" trust="true" >
+			<fileset dir="deps/isc/jbpm">
+				<include name="jbm-queue-service.xml" />
+			</fileset>
+		</scp>		
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/jbossesb.esb" trust="true" >
+			<fileset dir="deps/isc/jbossesb">
+				<include name="jbm-queue-service.xml" />
+			</fileset>
+		</scp>		
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/messaging" trust="true" >
+			<fileset dir="deps/isc/messaging">
+				<include name="destinations-service.xml" />
+			</fileset>
+		</scp>		
+		
+		
+		<echo message="Setup cluster (jgroups-channelfactory-stacks.xml)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/cluster/jgroups-channelfactory.sar/META-INF" trust="true" >
+			<fileset dir="tmp">
+				<include name="jgroups-channelfactory-stacks.xml" />
+			</fileset>
+		</scp>
+		
+		<echo message="Setup queue database failover (postgresql-persistence-service.xml)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/messaging" trust="true" >
+			<fileset dir="deps/isc/messaging">
+				<include name="postgresql-persistence-service.xml" />
+			</fileset>
+		</scp>
+		
+		<echo message="Slimming ISC profile (deploy)" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/deploy;
+				         rm -Rf bpel-console;rm -Rf deploy.last;rm -Rf httpha-invoker.sar;rm -Rf jbossws.sar;rm -Rf jbrules.esb;rm -Rf juddiv3.war;rm -Rf mail-ra.rar;rm -Rf management;
+						 rm -Rf quartz-ra.rar;rm -Rf riftsaw.sar;rm -Rf riftsaw-esb.esb;rm -Rf slsb.esb;rm -Rf smooks.esb;rm -Rf snmp-adaptor.sar;rm -Rf soap.esb;rm -Rf soapui-client.sar;
+						 rm -Rf uddi-console.war;rm -Rf uuid-key-generator.sar;rm -Rf xnio-provider.jar;rm -Rf ejb2-container-jboss-beans.xml;rm -Rf ejb2-timer-service.xml;
+                         rm -Rf ejb3-connectors-jboss-beans.xml;rm -Rf ejb3-container-jboss-beans.xml;rm -Rf ejb3-interceptors-aop.xml;rm -Rf ejb3-timerservice-jboss-beans.xml;
+						 rm -Rf hdscanner-jboss-beans.xml;rm -Rf iiop-service.xml;rm -Rf jsr88-service.xml;rm -Rf mail-service.xml;rm -Rf monitoring-service.xml;
+						 rm -Rf properties-service.xml;rm -Rf schedule-manager-service.xml;rm -Rf sqlexception-service.xml;rm -Rf vfs-jboss-beans.xml" />
+		<echo message="Slimming ISC profile (deployers)" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/deployers;
+				         rm -Rf bsh.deployer;rm -Rf jboss-threads.deployer;rm -Rf jbossws.deployer;rm -Rf riftsaw-as5.deployer;rm -Rf seam.deployer;rm -Rf snio.deployer;
+						 rm -Rf alias-deployers-jboss-beans.xml;rm -Rf clustering-deployer-jboss-beans.xml;rm -Rf dependency-deployers-jboss-beans.xml;rm -Rf directory-deployer-jboss-beans.xml;
+						 rm -Rf ear-deployer-jboss-beans.xml;rm -Rf ejb3-deployers-jboss-beans.xml;rm -Rf ejb-deployer-jboss-beans.xml;rm -Rf hibernate-deployer-jboss-beans.xml;
+						 rm -Rf jboss-ejb3-metrics-deployer.jar;rm -Rf jsr77-deployers-jboss-beans.xml;rm -Rf logbridge-jboss-beans.xml;rm -Rf messaging-definitions-jboss-beans.xml" />
+		<echo message="Slimming ISC profile (conf)" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/conf;
+				         rm -Rf jacorb.properties; rm -Rf jax-ws-catalog.xml" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/conf" trust="true" >
+			<fileset dir="deps/isc/conf">
+				<include name="jndi.properties" />
+			</fileset>
+		</scp>
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/conf/props;
+				         rm -Rf AMConfig.properties; rm -Rf jbossws-roles.properties; rm -Rf jbossws-users.properties" />
+		<echo message="Slimming ISC profile (lib)" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/lib;
+				         rm -Rf commons-httpclient-3.1.jar;rm -Rf gwt-console-rpc.jar;rm -Rf gwt-console-server-integration.jar;rm -Rf h2-1.2.124.jar;rm -Rf jacorb.jar;rm -Rf jcip-annotations.jar;
+                         rm -Rf	picketlink*.jar;rm -Rf trove4j-3.0.2.jar" />
+		<echo message="Slimming ISC profile (deployers)" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/deployers;
+				         rm -Rf bsh.deployer;rm -Rf jboss-threads.deployer;rm -Rf jbossws.deployer;rm -Rf riftsaw-as5.deployer;rm -Rf seam.deployer;rm -Rf xnio.deployer;
+						 rm -Rf alias-deployer-jboss-beans.xml;rm -Rf clustering-deployer-jboss-beans.xml;rm -Rf dependency-deployer-jboss-beans.xml;rm -Rf directory-deployer-jboss-beans.xml;
+						 rm -Rf ear-deployer-jboss-beans.xml;rm -Rf ejb3-deployer-jboss-beans.xml;rm -Rf ejb-deployer-jboss-beans.xml;rm -Rf hibernate-deployer-jboss-beans.xml;
+						 rm -Rf jboss-ejb3-metrics-deployer.jar;rm -Rf jsr77-deployer-jboss-beans.xml;rm -Rf logbridge-jboss-beans.xml;rm -Rf messaging-definitions-jboss-beans.xml" />
+
+
+        <echo message="Fixing ISC console (ROOT.war)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/ROOT.war" trust="true" >
+			<fileset dir="deps/isc/root.war">
+				<include name="index.html" />
+				<include name="soaheader.html" />
+				<include name="tomcat.html" />
+			</fileset>
+		</scp>
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/ROOT.war/css" trust="true" >
+			<fileset dir="deps/isc/root.war">
+				<include name="header.js" />
+			</fileset>
+		</scp>
+
+        <echo message="Fixing ISC console (jmx-console.war)" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/jmx-console.war" trust="true" >
+			<fileset dir="deps/isc/jmx-console">
+				<include name="filterView.jsp" />
+				<include name="index.jsp" />
+			</fileset>
+		</scp>
+		
+		<antcall target="update" />
+		
+		<echo message="Succesfully installed ${ant.project.name}" />
+	</target>
+	
+	<target name="update" depends="checkInstallProperties">
+		<echo message="Updating ${ant.project.name} ..." />
+
+		<antcall target="internalUpdate" />
+		
+		<echo message="Succesfully updated ${ant.project.name}" />
+	</target>
+	
+	<target name="internalUpdate" depends="internalUpdateLogging, internalUpdateQueues, internalUpdateEsb, internalUpdateConsole">
+	</target>
+	
+	<target name="internalUpdateLogging">
+		<echo message="Copying ${application.logging.file}" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/deploy/jbpm.esb; rm -f migr-isc-jbpm-logging*" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/jbpm.esb" trust="true" >
+			<fileset dir="${application.logging.source}">
+				<include name="${application.logging.file}" />
+			</fileset>
+		</scp>	
+	</target>
+	<target name="internalUpdateQueues">
+		<echo message="Copying ${application.queues.file}" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/deploy; rm -f migr-isc-queues*" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy" trust="true" >
+			<fileset dir="${application.queues.source}">
+				<include name="${application.queues.file}" />
+			</fileset>
+		</scp>	
+	</target>
+	<target name="internalUpdateEsb" unless="isc-as.skip.update.esb">
+		<echo message="Copying ${application.esb.file}" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/deploy; rm -f migr-isc-esb*" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy" trust="true" >
+			<fileset dir="${application.esb.source}">
+				<include name="${application.esb.file}" />
+			</fileset>
+		</scp>	
+	</target>
+	<target name="internalUpdateConsole">
+		<echo message="Copying ${application.console.file}" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd ~/${application.directory}/jboss-as/server/isc/deploy/jbpm.esb; rm -rf jbpm-console*; rm -f migr-isc-console*" />
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/jboss-as/server/isc/deploy/jbpm.esb" trust="true" >
+			<fileset dir="${application.console.source}">
+				<include name="${application.console.file}" />
+			</fileset>
+		</scp>				
+	</target>
+	
+	
+	
+	<target name="createLocalConfigurationFiles" depends="checkInstallProperties">
+		<echo message="Creating configuration files for ${ant.project.name} ..." />
+		<delete dir="tmp" />
+		<mkdir dir="tmp" />
+		
+		<copy file="deps/isc/cluster/jgroups-channelfactory-stacks.xml" tofile="tmp/jgroups-channelfactory-stacks.xml" />
+		<replace file="tmp/jgroups-channelfactory-stacks.xml" token="@@@BINDPORT@@@" value="${isc.cluster.bindport}" />
+		
+        <echo file="tmp/isc.properties">org.jboss.esb.server.config=isc
+org.jboss.esb.server.clustered=${isc.clustered}
+source.dir=postgresql91
+db.name=${isc.database.name}
+db.hostname=${isc.database.host}
+db.port=${isc.database.port}
+db.username=${isc.database.username}
+db.password=${isc.database.password}
+        </echo>
+
+		<echo file="tmp/remoteNode.properties">jmx.connectie.url=service:jmx:rmi:///jndi/rmi://localhost:1090/jmxconnector
+jmx.conenctie.user=admin
+jmx.connectie.password=admin
+    </echo>
+		
+		<echo file="tmp/run.conf">
+## -*- shell-script -*- ######################################################
+##                                                                          ##
+##  JBoss Bootstrap Script Configuration                                    ##
+##                                                                          ##
+##############################################################################
+
+### $Id: run.conf 91533 2009-07-22 01:20:05Z gbadner $
+
+#
+# This shell script is sourced by run.sh to initialize the environment 
+# variables that run.sh uses. It is recommended to use this file to
+# configure these variables, rather than modifying run.sh itself. 
+#
+
+#
+# Specify the maximum file descriptor limit, use "max" or "maximum" to use
+# the default, as queried by the system.
+#
+# Defaults to "maximum"
+#
+#MAX_FD="maximum"
+
+#
+# Specify the JBoss Profiler configuration file to load.
+#
+# Default is to not load a JBoss Profiler configuration file.
+#
+#PROFILER=""
+
+#
+# Specify the location of the Java home directory.  If set then $JAVA will
+# be defined to $JAVA_HOME/bin/java, else $JAVA will be "java".
+#
+#JAVA_HOME="/usr/java/jdk1.6.0"
+
+#
+# Specify the exact Java VM executable to use.
+#
+#JAVA=""
+
+#
+# Specify options to pass to the Java VM.
+#
+if [ "x$JAVA_OPTS" = "x" ]; then
+   JAVA_OPTS="-Xms512m -Xmx1536m -XX:MaxPermSize=512m -Djava.awt.headless=true -Dorg.apache.xml.dtm.DTMManager=org.apache.xml.dtm.ref.DTMManagerDefault -Dorg.jboss.net.protocol.file.useURI=false  -Dorg.jboss.resolver.warning=true -Dsun.rmi.dgc.client.gcInterval=3600000 -Dsun.rmi.dgc.server.gcInterval=3600000 -Dsun.lang.ClassLoader.allowArraySyntax=true"
+fi
+## Specify the Security Manager options
+#JAVA_OPTS="$JAVA_OPTS -Djava.security.manager -Djava.security.policy=$POLICY"
+
+# Sample JPDA settings for remote socket debugging
+#JAVA_OPTS="$JAVA_OPTS -Xrunjdwp:transport=dt_socket,address=8787,server=y,suspend=n"
+
+# Sample JPDA settings for shared memory debugging 
+#JAVA_OPTS="$JAVA_OPTS -Xrunjdwp:transport=dt_shmem,address=jboss,server=y,suspend=n"
+
+# Use TCP instead of UDP for clustering.
+JAVA_OPTS="$JAVA_OPTS -Djboss.default.jgroups.stack=tcp -Djboss.jgroups.tcp.tcpping.initial_hosts=${server.host.node1}[7600],${server.host.node2}[7600]"
+
+#JBossWS native services
+JAVA_OPTS="$JAVA_OPTS -Djavax.xml.rpc.ServiceFactory=org.jboss.ws.core.jaxrpc.client.ServiceFactoryImpl"
+JAVA_OPTS="$JAVA_OPTS -Djavax.xml.soap.MessageFactory=org.jboss.ws.core.soap.MessageFactoryImpl"
+JAVA_OPTS="$JAVA_OPTS -Djavax.xml.soap.MetaFactory=org.jboss.ws.core.soap.SAAJMetaFactoryImpl"
+JAVA_OPTS="$JAVA_OPTS -Djavax.xml.soap.SOAPConnectionFactory=org.jboss.ws.core.soap.SOAPConnectionFactoryImpl"
+JAVA_OPTS="$JAVA_OPTS -Djavax.xml.soap.SOAPFactory=org.jboss.ws.core.soap.SOAPFactoryImpl"
+JAVA_OPTS="$JAVA_OPTS -Djavax.xml.ws.spi.Provider=org.jboss.ws.core.jaxws.spi.ProviderImpl"
+#END JBossWS native services
+		</echo>
+		
+		<echo file="tmp/config.properties">beheerapp.base.url=http://${server.host}:8280/brp-beheer/#/administratievehandelingen</echo>
+		
+	</target>
+
+    <target name="deinstall" depends="checkProperties">
+		<echo message="Removing ${ant.project.name}  ..." />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+		         command="cd ~; rm -Rf ${application.directory}" />
+
+		<echo message="Succesfully removed ${ant.project.name}" />
+    </target>
+
+	<target name="start" depends="checkProperties">
+		<antcall target="startClustered"/>
+		<antcall target="startNonClustered"/>
+	</target>
+	
+	<target name="startClustered" depends="checkProperties" if="clustered">
+		<echo message="Starting ${ant.project.name}" />
+
+		
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true" 
+		         command="cd ~; cd ${application.directory}/jboss-as/bin; ./run.sh -g ${isc.cluster.name} -b 0.0.0.0 -Djboss.default.jgroups.stack=tcp -Djboss.jgroups.tcp.tcpping.initial_hosts=${server.host.node1}[7600],${server.host.node2}[7600] -Djboss.messaging.ServerPeerID=${isc.cluster.peerid} -Djboss.messaging.groupname=QAPostOffice > output.txt &amp;" />
+		
+
+		<java classname="nl.bzk.migratiebrp.tools.controle.waiter.JbossInitializationWaiter" failonerror="true">
+			<arg line="${waiter.arguments}" />
+			<sysproperty key="jboss.server" value="${server.host}"/>
+		</java>
+        
+		<echo message="Succesfully started ${ant.project.name}" />
+    </target>
+	
+	<target name="startNonClustered" depends="checkProperties" unless="clustered">
+		<echo message="Starting ${ant.project.name}" />
+
+		
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true" 
+		         command="cd ~; cd ${application.directory}/jboss-as/bin; ./run.sh -b 0.0.0.0 -g ${isc.cluster.name} > output.txt &amp;" />
+		
+
+		<java classname="nl.bzk.migratiebrp.tools.controle.waiter.JbossInitializationWaiter" failonerror="true">
+			<arg line="${waiter.arguments}" />
+			<sysproperty key="jboss.server" value="${server.host}"/>
+		</java>
+        
+		<echo message="Succesfully started ${ant.project.name}" />
+    </target>
+	
+	<target name="stop" depends="checkProperties">
+		<echo message="Stopping ${ant.project.name} (and sleeping 15s)" />
+		
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true" failonerror="false" 
+		         command="cd ~; cd ${application.directory}/jboss-as/bin; ./shutdown.sh -S -u admin -p admin; sleep 15s; tail -n 100 ../server/isc/log/server.log" />
+				 
+		<echo message="Succesfully stopped ${ant.project.name}" />
+    </target>
+
+    <target name="clean" depends="checkProperties">
+    </target>
+
+	<target name="fail">
+		<fail message="Call with valid task" />
+	</target>
+	
+</project>

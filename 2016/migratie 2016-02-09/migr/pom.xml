@@ -1,0 +1,1945 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>nl.bzk</groupId>
+    <artifactId>migratiebrp</artifactId>
+    <version>3.2.108-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>Migr - Root POM</name>
+
+    <url>https://www.modernodam.nl/confluence/display/mGBA/Migratie</url>
+    <description>Deze basis pom wordt als parent pom gebruikt voor alle BRP-Migratie projecten. Hierin worden de versies van de
+        frameworks die gebruikt worden gedefinieerd en standaard build configuratie gezet (repositories en de
+        distributionmanagement sectie).
+    </description>
+    <inceptionYear>2011</inceptionYear>
+
+    <organization>
+        <name>Ministerie van Binnenlandse Zaken en Koninkrijksrelaties</name>
+        <url>http://www.operatiebrp.nl/</url>
+    </organization>
+
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>https://www.modernodam.nl/ci</url>
+    </ciManagement>
+
+    <issueManagement>
+        <system>Jira</system>
+        <url>https://www.modernodam.nl/jira</url>
+    </issueManagement>
+
+    <properties>
+		<!-- Java -->
+        <jdk.version>1.7</jdk.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- Dependencies -->
+		<spring.version>4.2.3.RELEASE</spring.version>
+        <spring.data.jpa.version>1.9.1.RELEASE</spring.data.jpa.version>
+        <atomikos.version>3.9.3</atomikos.version>
+		<hibernate.version>4.3.11.Final</hibernate.version>
+		<aspectj.version>1.8.7</aspectj.version>
+		<ehcache.version>2.6.11</ehcache.version>
+		<activemq.version>5.12.1</activemq.version>
+		<jbpm.version>3.2.14</jbpm.version><!-- 3.3.1.GA -->
+		<quartz.version>2.2.2</quartz.version>
+        <apache.poi.version>3.7</apache.poi.version><!-- 3.13 werkt niet -->
+        <postgresql.version>9.4-1201-jdbc41</postgresql.version> <!-- 9.4-1205-jdbc42 werkt niet -->
+		<jackson.version>2.6.3</jackson.version>
+
+		<!-- Dependencies (iv) -->
+		<hornetq.version>2.2.14.Final</hornetq.version>
+
+		<!-- Dependencies (brp) -->
+		<brp.versie>94-SNAPSHOT</brp.versie>
+        <cxf.version>2.7.5</cxf.version> 
+
+        <slf4j.version>1.7.13</slf4j.version>
+        <log4j.version>2.4.1</log4j.version>
+
+		<!-- Test dependencies -->
+        <junit.version>4.10</junit.version>
+        <!-- junit.version>4.12</junit.version -->
+        <mockito.version>1.9.5</mockito.version>
+        <!-- mockito.version>1.10.19</mockito.version -->
+        <powermock.version>1.5.6</powermock.version>
+        <!-- powermock.version>1.6.2</powermock.version -->
+
+        <!-- Code quality plugins -->
+        <findbugs.plugin.version>2.5.3</findbugs.plugin.version>
+        <checkstyle.plugin.version>2.12</checkstyle.plugin.version>
+        <pmd.plugin.version>3.1</pmd.plugin.version>
+        <cobertura.plugin.version>2.6</cobertura.plugin.version>
+
+        <!-- Sonar properties -->
+		<sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+		<sonar.jacoco.itReportPath>${project.basedir}/../jacoco-it.exec</sonar.jacoco.itReportPath>
+		<sonar.jacoco.reportPath>${project.basedir}/../jacoco.exec</sonar.jacoco.reportPath>
+		<sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+		<sonar.language>java</sonar.language>
+        <sonar.exclusions>**/package-info.java</sonar.exclusions>
+
+        <!--  Build properties vanuit Jenkins  -->
+        <build.number>${env.BUILD_NUMBER}</build.number>
+        <svn.revision>${env.SVN_REVISION}</svn.revision>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-clean-plugin</artifactId>
+                    <version>2.6.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.3</version>
+                </plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-javadoc-plugin</artifactId>
+					<version>2.10.3</version>
+				</plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-resources-plugin</artifactId>
+                    <version>2.7</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>2.18.1</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-source-plugin</artifactId>
+                    <version>2.4</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-war-plugin</artifactId>
+                    <version>2.6</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-dependency-plugin</artifactId>
+                    <version>2.10</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.5.5</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-install-plugin</artifactId>
+                    <version>2.5.2</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>exec-maven-plugin</artifactId>
+                    <version>1.3</version>
+                </plugin>
+                <plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>0.7.2.201409121644</version>
+				</plugin>
+                <!-- Reporting -->
+                <plugin>
+                    <groupId>org.codehaus.mojo</groupId>
+                    <artifactId>cobertura-maven-plugin</artifactId>
+                    <version>${cobertura.plugin.version}</version>
+                    <configuration>
+                        <formats>
+                            <format>xml</format>
+                        </formats>
+                    </configuration>
+                </plugin>
+                <!--This plugin's configuration is used to store Eclipse m2e settings only. It has no influence on the Maven build itself.-->
+                <plugin>
+                    <groupId>org.eclipse.m2e</groupId>
+                    <artifactId>lifecycle-mapping</artifactId>
+                    <version>1.0.0</version>
+                    <configuration>
+                        <lifecycleMappingMetadata>
+                            <pluginExecutions>
+                                <pluginExecution>
+                                    <pluginExecutionFilter>
+                                        <groupId>
+                                            org.apache.maven.plugins
+                                        </groupId>
+                                        <artifactId>
+                                            maven-checkstyle-plugin
+                                        </artifactId>
+                                        <versionRange>
+                                            [2.12,)
+                                        </versionRange>
+                                        <goals>
+                                            <goal>checkstyle</goal>
+                                        </goals>
+                                    </pluginExecutionFilter>
+                                    <action>
+                                        <ignore />
+                                    </action>
+                                </pluginExecution>
+                            </pluginExecutions>
+                        </lifecycleMappingMetadata>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>com.google.code.maven-replacer-plugin</groupId>
+                    <artifactId>replacer</artifactId>
+                    <version>1.5.3</version>
+                </plugin>
+				<plugin>
+                        <groupId>org.eclipse.jetty</groupId>
+                        <artifactId>jetty-maven-plugin</artifactId>
+                        <version>9.2.12.v20150709</version>
+				</plugin>
+				<plugin>
+					<groupId>org.codehaus.mojo</groupId>
+					<artifactId>jaxb2-maven-plugin</artifactId>
+					<version>1.5</version>
+					<dependencies>
+						<dependency>
+							<groupId>org.jvnet.jaxb2_commons</groupId>
+							<artifactId>jaxb2-basics</artifactId>
+							<version>0.6.4</version>
+						</dependency>
+						<dependency>
+							<groupId>org.jvnet.jaxb2_commons</groupId>
+							<artifactId>jaxb2-commons-lang</artifactId>
+							<version>2.4</version>
+						</dependency>
+					</dependencies>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-enforcer-plugin</artifactId>
+					<version>1.4.1</version>
+					<dependencies>
+						<dependency>
+							<groupId>nl.bzk.migratiebrp.build</groupId>
+							<artifactId>migr-build-lastestsnapshot</artifactId>
+							<version>${project.version}</version>
+						</dependency>
+					</dependencies>
+				</plugin>				
+            </plugins>
+        </pluginManagement>
+
+        <plugins>
+            <!-- Default compiler settings -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>${jdk.version}</source>
+                    <target>${jdk.version}</target>
+                    <testSource>${jdk.version}</testSource>
+                    <testTarget>${jdk.version}</testTarget>
+                    <fork>true</fork>
+                    <showWarnings>true</showWarnings>
+                    <showDeprecation>true</showDeprecation>
+                    <encoding>UTF-8</encoding>
+
+                    <debug>true</debug>
+                    <optimize>false</optimize>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <configuration>
+                    <redirectTestOutputToFile>true</redirectTestOutputToFile>
+					<!-- Geheugen settings hier nodig, anders crashed de test tijdens Sonar op Jenkins -->
+					<!-- ${argLine} nodig, anders doet JaCoCo het niet -->
+					<argLine>-XX:-UseSplitVerifier -XX:MaxPermSize=512M -Xms1024M -Xmx2048M</argLine>
+					<runOrder>hourly</runOrder>
+                </configuration>
+            </plugin>
+
+            <!-- Create JAR with test classes -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Migratie-Project-Group>${project.groupId}</Migratie-Project-Group>
+                            <Migratie-Project-Artifact>${project.artifactId}</Migratie-Project-Artifact>
+                            <Migratie-Project-Name>${project.name}</Migratie-Project-Name>
+                            <Migratie-Project-Version>${project.version}</Migratie-Project-Version>
+                            <Migratie-Build-number>${build.number}</Migratie-Build-number>
+                            <Migratie-Svn-Revision>${svn.revision}</Migratie-Svn-Revision>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>jar-test-jar</id>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                        <configuration>
+                            <skipIfEmpty>true</skipIfEmpty>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Code Quality Plugins -->
+            <!-- disabled findbugs/PMD/checkstyle due to performance issues
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>${findbugs.plugin.version}</version>
+                <configuration>
+                    <jvmArgs>-Xmx2g</jvmArgs>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${pmd.plugin.version}</version>
+                <configuration>
+                    <failOnViolation>true</failOnViolation>
+                    <failurePriority>1</failurePriority>
+                    <printFailingErrors>true</printFailingErrors>
+                    <verbose>true</verbose>
+                    <rulesets>
+                        <ruleset>pmd_migratie.xml</ruleset>
+                    </rulesets>
+                    <targetJdk>${jdk.version}</targetJdk>
+                    <aggregate>true</aggregate>
+                    <detail>true</detail>
+                    <language>nl</language>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>nl.bzk.migratiebrp.build</groupId>
+                        <artifactId>migr-build-util</artifactId>
+                        <version>0.0.1-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.plugin.version}</version>
+                <dependencies>
+                    <dependency>
+                        <groupId>nl.bzk.migratiebrp.build</groupId>
+                        <artifactId>migr-build-util</artifactId>
+                        <version>0.0.1-SNAPSHOT</version>
+                    </dependency>
+                </dependencies>
+                <executions>
+                    <execution>
+                        <id>validate</id>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>checkstyle</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <includeTestSourceDirectory>true</includeTestSourceDirectory>
+                    <configLocation>checkstyle_migratie.xml</configLocation>
+                    <suppressionsLocation>checkstyle_suppressions.xml</suppressionsLocation>
+                    <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                    <propertiesLocation>checkstyle_maven.properties</propertiesLocation>
+                    <propertyExpansion>basedir=${project.basedir}</propertyExpansion>
+                    <failsOnError>false</failsOnError>
+                </configuration>
+            </plugin>
+            -->
+        </plugins>
+    </build>
+
+    <reporting>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jxr-plugin</artifactId>
+                <version>2.3</version>
+            </plugin>
+            <!-- disabled findbugs/PMD/checkstyle due to performance issues
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>findbugs-maven-plugin</artifactId>
+                <version>${findbugs.plugin.version}</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-pmd-plugin</artifactId>
+                <version>${pmd.plugin.version}</version>
+                <configuration>
+                    <linkXRef>true</linkXRef>
+                    <verbose>true</verbose>
+                    <printFailingErrors>true</printFailingErrors>
+                    <rulesets>
+                        <ruleset>pmd_migratie.xml</ruleset>
+                    </rulesets>
+                    <targetJdk>${jdk.version}</targetJdk>
+
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>${checkstyle.plugin.version}</version>
+                <configuration>
+                    <includeTestSourceDirectory>false</includeTestSourceDirectory>
+                    <configLocation>checkstyle.xml</configLocation>
+                    <suppressionsLocation>checkstyle_suppressions.xml</suppressionsLocation>
+                    <suppressionsFileExpression>checkstyle.suppressions.file</suppressionsFileExpression>
+                    <propertiesLocation>checkstyle_maven.properties</propertiesLocation>
+                    <propertyExpansion>basedir=${project.basedir}</propertyExpansion>
+                </configuration>
+            </plugin>
+             -->
+			 <!--
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>cobertura-maven-plugin</artifactId>
+                <version>${cobertura.plugin.version}</version>
+                <configuration>
+                    <check>
+                        <branchRate>80</branchRate>
+                        <lineRate>80</lineRate>
+                        <haltOnFailure>true</haltOnFailure>
+                        <totalBranchRate>80</totalBranchRate>
+                        <totalLineRate>80</totalLineRate>
+                        <packageLineRate>80</packageLineRate>
+                        <packageBranchRate>80</packageBranchRate>
+                    </check>
+                </configuration>
+            </plugin>
+			-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>dashboard-maven-plugin</artifactId>
+                <version>1.0.0-beta-1</version>
+            </plugin>
+        </plugins>
+    </reporting>
+
+    <distributionManagement>
+        <repository>
+            <id>brpcentral</id>
+            <name>mGBA releases voor Migratie</name>
+            <url>https://www.modernodam.nl/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>brpcentral</id>
+            <name>mGBA snapshots voor Migratie</name>
+            <url>https://www.modernodam.nl/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <dependencies>
+        <!-- LIBS -->
+        <dependency>
+            <groupId>nl.bzk.migratiebrp</groupId>
+            <artifactId>migr-extern</artifactId>
+            <version>${project.version}</version>
+            <type>pom</type>
+        </dependency>
+
+		<!-- junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Mockito -->
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-all</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.kubek2k</groupId>
+			<artifactId>springockito</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Powermock -->
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4-rule-agent</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-core</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- dbunit -->
+		<dependency>
+			<groupId>org.dbunit</groupId>
+			<artifactId>dbunit</artifactId>
+			<scope>test</scope>
+		</dependency>
+
+		<!-- Vaak gebruikte spring test libraries -->
+		<dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- HSQLDB Database for testing -->
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- Project -->
+			<!-- migr-bericht -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.bericht</groupId>
+                <artifactId>migr-bericht-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+			<dependency>
+				<!-- dependency nodig voor volgorde van projecten -->
+				<groupId>nl.bzk.migratiebrp.build</groupId>
+				<artifactId>migr-build-lastestsnapshot</artifactId>
+                <version>${project.version}</version>
+				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>*</groupId>
+						<artifactId>*</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<!-- migr-conversie -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.conversie</groupId>
+                <artifactId>migr-conversie-model</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.conversie</groupId>
+                <artifactId>migr-conversie-model</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.conversie</groupId>
+                <artifactId>migr-conversie-regels</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.conversie</groupId>
+                <artifactId>migr-conversie-regels</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.ggo</groupId>
+                <artifactId>migr-ggo-viewer</artifactId>
+                <type>war</type>
+                <version>${project.version}</version>
+            </dependency>
+			<!-- migr-init -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init.logging</groupId>
+                <artifactId>migr-init-logging-model</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init.logging</groupId>
+                <artifactId>migr-init-logging-model</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init.logging</groupId>
+                <artifactId>migr-init-logging-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init.logging</groupId>
+                <artifactId>migr-init-logging-verschilanalyse</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init</groupId>
+                <artifactId>migr-init-naarbrp</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init</groupId>
+                <artifactId>migr-init-naarbrp</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init</groupId>
+                <artifactId>migr-init-naarlo3</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init</groupId>
+                <artifactId>migr-init-naarisc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.init</groupId>
+                <artifactId>migr-init-naarvoisc</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+			<!-- migr-isc -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.console</groupId>
+                <artifactId>migr-isc-console-mig4jsf</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.console</groupId>
+                <artifactId>migr-isc-console-webapp</artifactId>
+                <version>${project.version}</version>
+				<type>war</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc</groupId>
+                <artifactId>migr-isc-database</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc</groupId>
+                <artifactId>migr-isc-database</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc</groupId>
+                <artifactId>migr-isc-esb</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-algemeen</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-algemeen</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-command</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-logging</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-uc202</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-uc301</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-uc309</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-uc311</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-uc811</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-uc812</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc.jbpm</groupId>
+                <artifactId>migr-isc-jbpm-uc1003</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc</groupId>
+                <artifactId>migr-isc-opschoner</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc</groupId>
+                <artifactId>migr-isc-runtime</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.isc</groupId>
+                <artifactId>migr-isc-telling</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+			<!-- migr-register -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.register</groupId>
+                <artifactId>migr-register-client</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.register</groupId>
+                <artifactId>migr-register-client</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+			<!-- migr-routering -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.routering</groupId>
+                <artifactId>migr-routering-runtime</artifactId>
+                <version>${project.version}</version>
+				<type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.routering</groupId>
+                <artifactId>migr-routering-runtime</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+			<!-- migr-synchronisatie -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.synchronisatie</groupId>
+                <artifactId>migr-synchronisatie-dal</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.synchronisatie</groupId>
+                <artifactId>migr-synchronisatie-dal</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.synchronisatie</groupId>
+                <artifactId>migr-synchronisatie-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+			<!-- migr-test -->
+			<dependency>
+				<groupId>nl.bzk.migratiebrp.test</groupId>
+				<artifactId>migr-test-isc</artifactId>
+                <version>${project.version}</version>
+			</dependency>
+			<!-- migr-tools -->
+			<dependency>
+				<groupId>nl.bzk.migratiebrp.tools</groupId>
+				<artifactId>migr-tools-amlezer</artifactId>
+                <version>${project.version}</version>
+			</dependency>
+			<dependency>
+                <groupId>nl.bzk.migratiebrp.tools</groupId>
+                <artifactId>migr-tools-brp-routering</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+			<dependency>
+                <groupId>nl.bzk.migratiebrp.tools</groupId>
+                <artifactId>migr-tools-controle</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.tools</groupId>
+                <artifactId>migr-tools-mailbox</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+			<dependency>
+				<groupId>nl.bzk.migratiebrp.tools</groupId>
+				<artifactId>migr-tools-levering-vergelijker</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>nl.bzk.migratiebrp.tools</groupId>
+				<artifactId>migr-tools-proefsynchronisatie</artifactId>
+				<version>${project.version}</version>
+			</dependency>
+
+			<!-- migr-test -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.test</groupId>
+                <artifactId>migr-test-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.test</groupId>
+                <artifactId>migr-test-dal</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+			<!-- migr-util -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.util</groupId>
+                <artifactId>migr-util-common</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.util</groupId>
+                <artifactId>migr-util-excel</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+			<!-- migr-voisc -->
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.voisc</groupId>
+                <artifactId>migr-voisc-database</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.voisc</groupId>
+                <artifactId>migr-voisc-runtime</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>nl.bzk.migratiebrp.voisc</groupId>
+                <artifactId>migr-voisc-spd</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+
+			<!-- migr-extern -->
+			<dependency>
+				<groupId>nl.bzk.migratiebrp.util</groupId>
+				<artifactId>migr-util-gbav</artifactId>
+                <version>3.1.84</version>
+			</dependency>
+
+
+			<!-- GBAV -->
+			<dependency>
+				<groupId>gbav</groupId>
+				<artifactId>core</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>gbav</groupId>
+				<artifactId>spontaan</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>gbav</groupId>
+				<artifactId>spontaan-api</artifactId>
+				<version>1.1</version>
+			</dependency>
+			<dependency>
+				<groupId>gbav</groupId>
+				<artifactId>bcm</artifactId>
+				<version>2.7</version>
+			</dependency>
+			<dependency>
+				<groupId>gbav</groupId>
+				<artifactId>export</artifactId>
+				<version>1.0</version>
+			</dependency>
+			<dependency>
+				<groupId>gbav</groupId>
+				<artifactId>spg-test</artifactId>
+				<version>1.0</version>
+				<scope>test</scope>
+			</dependency>
+
+
+            <!-- Logging -->
+            <dependency>
+                <groupId>org.slf4j</groupId>
+                <artifactId>slf4j-api</artifactId>
+                <version>${slf4j.version}</version>
+            </dependency>
+	        <dependency>
+	            <groupId>org.slf4j</groupId>
+	            <artifactId>jcl-over-slf4j</artifactId>
+	            <version>${slf4j.version}</version>
+	        </dependency>
+			<dependency>
+				<groupId>org.slf4j</groupId>
+				<artifactId>jul-to-slf4j</artifactId>
+	            <version>${slf4j.version}</version>
+			</dependency>
+
+	        <dependency>
+	            <groupId>org.apache.logging.log4j</groupId>
+	            <artifactId>log4j-slf4j-impl</artifactId>
+	            <version>${log4j.version}</version>
+	        </dependency>
+	        <dependency>
+	            <groupId>org.apache.logging.log4j</groupId>
+	            <artifactId>log4j-core</artifactId>
+	            <version>${log4j.version}</version>
+	        </dependency>
+
+			<dependency>
+				<groupId>org.jboss.logging</groupId>
+				<artifactId>jboss-logging</artifactId>
+				<version>3.3.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.logging</groupId>
+				<artifactId>jboss-logging-annotations</artifactId>
+				<version>2.0.1.Final</version>
+			</dependency>
+
+            <!-- junit -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit.version}</version>
+            </dependency>
+
+            <!-- Mockito -->
+            <dependency>
+                <groupId>org.mockito</groupId>
+                <artifactId>mockito-all</artifactId>
+                <version>${mockito.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.kubek2k</groupId>
+                <artifactId>springockito</artifactId>
+                <version>1.0.4</version>
+            </dependency>
+
+            <!-- Powermock -->
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4-rule-agent</artifactId>
+                <version>${powermock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-core</artifactId>
+                <version>${powermock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-module-junit4</artifactId>
+                <version>${powermock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.powermock</groupId>
+                <artifactId>powermock-api-mockito</artifactId>
+                <version>${powermock.version}</version>
+            </dependency>
+
+			<dependency>
+				<groupId>com.mockrunner</groupId>
+				<artifactId>mockrunner</artifactId>
+				<version>0.3.1</version>
+			</dependency>
+
+			<!-- mock queue -->
+			<dependency>
+				<groupId>com.mockrunner</groupId>
+				<artifactId>mockrunner-jms</artifactId>
+				<version>0.4.7</version>
+				<exclusions>
+					<exclusion>
+						<groupId>ant</groupId>
+						<artifactId>ant</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- dbunit -->
+			<dependency>
+				<groupId>org.dbunit</groupId>
+				<artifactId>dbunit</artifactId>
+				<version>2.4.9</version>
+			</dependency>
+			<dependency>
+				<groupId>xmlunit</groupId>
+				<artifactId>xmlunit</artifactId>
+				<version>1.3</version>
+			</dependency>
+
+			<!-- In memory database -->
+			<dependency>
+				<groupId>org.hsqldb</groupId>
+				<artifactId>hsqldb</artifactId>
+				<version>2.3.3</version>
+			</dependency>
+            <dependency>
+                <groupId>com.h2database</groupId>
+                <artifactId>h2</artifactId>
+                <version>1.3.176</version>
+			</dependency>
+
+            <!-- PostgreSQL JDBC -->
+            <dependency>
+                <groupId>org.postgresql</groupId>
+                <artifactId>postgresql</artifactId>
+                <version>${postgresql.version}</version>
+            </dependency>
+
+            <!-- Java API for Microsoft Documents -->
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi</artifactId>
+                <version>${apache.poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-ooxml</artifactId>
+                <version>${apache.poi.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.poi</groupId>
+                <artifactId>poi-scratchpad</artifactId>
+                <version>${apache.poi.version}</version>
+            </dependency>
+
+			<dependency>
+				<groupId>javax.inject</groupId>
+				<artifactId>javax.inject</artifactId>
+				<version>1</version>
+			</dependency>
+
+			<!-- Commons -->
+			<dependency>
+				<groupId>commons-beanutils</groupId>
+				<artifactId>commons-beanutils</artifactId>
+				<version>1.9.2</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-codec</groupId>
+				<artifactId>commons-codec</artifactId>
+				<version>1.10</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-collections</groupId>
+				<artifactId>commons-collections</artifactId>
+				<version>3.2.1</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-configuration</groupId>
+				<artifactId>commons-configuration</artifactId>
+				<version>1.10</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-cli</groupId>
+				<artifactId>commons-cli</artifactId>
+				<version>1.3.1</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-dbcp</groupId>
+				<artifactId>commons-dbcp</artifactId>
+				<version>1.4</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-dbutils</groupId>
+				<artifactId>commons-dbutils</artifactId>
+				<version>1.6</version>
+			</dependency>
+
+            <dependency>
+                <groupId>commons-fileupload</groupId>
+                <artifactId>commons-fileupload</artifactId>
+                <version>1.3.1</version>
+            </dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-lang3</artifactId>
+				<version>3.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.commons</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>1.3.2</version>
+			</dependency>
+	        <dependency>
+	            <groupId>commons-io</groupId>
+	            <artifactId>commons-io</artifactId>
+				<version>2.4</version>
+	        </dependency>
+
+
+			<!-- JAXB -->
+			<dependency>
+				<groupId>javax.xml.bind</groupId>
+				<artifactId>jaxb-api</artifactId>
+				<version>2.1</version>
+			</dependency>
+			<dependency>
+				<groupId>com.sun.xml.bind</groupId>
+				<artifactId>jaxb-impl</artifactId>
+				<version>2.2.6</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jvnet.jaxb2_commons</groupId>
+				<artifactId>jaxb2-basics</artifactId>
+				<version>0.6.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jvnet.jaxb2_commons</groupId>
+				<artifactId>jaxb2-commons-lang</artifactId>
+				<version>2.4</version>
+			</dependency>
+
+
+			<!-- JBoss Jbpm -->
+	        <dependency>
+	            <groupId>org.jbpm.jbpm3</groupId>
+	            <artifactId>jbpm-jpdl</artifactId>
+	            <version>${jbpm.version}</version>
+	            <exclusions>
+	                <exclusion>
+	                    <groupId>org.hibernate</groupId>
+	                    <artifactId>hibernate</artifactId>
+	                </exclusion>
+					<exclusion>
+						<artifactId>dom4j</artifactId>
+						<groupId>dom4j</groupId>
+					</exclusion>
+					<exclusion>
+						<artifactId>hsqldb</artifactId>
+						<groupId>hsqldb</groupId>
+					</exclusion>
+	            </exclusions>
+	        </dependency>
+	        <dependency>
+	            <groupId>org.jbpm.jbpm3</groupId>
+	            <artifactId>jsf-console-jbpm4jsf</artifactId>
+	            <version>${jbpm.version}</version>
+	        </dependency>
+	        <dependency>
+	            <groupId>org.jbpm.jbpm3</groupId>
+	            <artifactId>jbpm-identity</artifactId>
+	            <version>${jbpm.version}</version>
+	        </dependency>
+	        <dependency>
+	            <groupId>bsh</groupId>
+	            <artifactId>bsh</artifactId>
+				<version>1.3.0</version>
+	        </dependency>
+            <dependency>
+                <groupId>backport-util-concurrent</groupId>
+                <artifactId>backport-util-concurrent</artifactId>
+                <version>3.1</version>
+            </dependency>
+     		<dependency>
+            	<groupId>org.mvel</groupId>
+            	<artifactId>mvel2</artifactId>
+            	<version>2.1.0.drools2</version>
+        	</dependency>
+            <dependency>
+                <groupId>jboss.jbossts</groupId>
+                <artifactId>jbossts-common</artifactId>
+                <version>4.6.1.GA</version>
+            </dependency>
+
+
+			<!-- Spring -->
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aop</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-aspects</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-beans</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-context-support</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-core</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework.data</groupId>
+				<artifactId>spring-data-jpa</artifactId>
+				<version>${spring.data.jpa.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jdbc</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-jms</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-orm</artifactId>
+				<version>${spring.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.springframework</groupId>
+				<artifactId>spring-test</artifactId>
+				<version>${spring.version}</version>
+				<scope>test</scope>
+			</dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-tx</artifactId>
+				<version>${spring.version}</version>
+            </dependency>
+			<dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+				<version>${spring.version}</version>
+            </dependency>
+			<dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+				<version>${spring.version}</version>
+            </dependency>
+
+
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjrt</artifactId>
+                <version>${aspectj.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.aspectj</groupId>
+                <artifactId>aspectjweaver</artifactId>
+                <version>${aspectj.version}</version>
+            </dependency>
+
+			<!-- Quartz -->
+			<dependency>
+				<groupId>org.quartz-scheduler</groupId>
+				<artifactId>quartz</artifactId>
+				<version>${quartz.version}</version>
+			</dependency>
+
+			<!-- ATOMIKOS -->
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>transactions-hibernate3</artifactId>
+				<version>${atomikos.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.atomikos</groupId>
+				<artifactId>transactions-jdbc</artifactId>
+				<version>${atomikos.version}</version>
+			</dependency>
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions-jms</artifactId>
+                <version>${atomikos.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.atomikos</groupId>
+                <artifactId>transactions-jta</artifactId>
+                <version>${atomikos.version}</version>
+            </dependency>
+
+			<!-- Hibernate -->
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-core</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-ehcache</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-entitymanager</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.common</groupId>
+				<artifactId>hibernate-commons-annotations</artifactId>
+				<version>4.0.5.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate.javax.persistence</groupId>
+				<artifactId>hibernate-jpa-2.1-api</artifactId>
+				<version>1.0.0.Final</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>4.2.0.Final</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.validation</groupId>
+				<artifactId>validation-api</artifactId>
+				<version>1.0.0.GA</version>
+			</dependency>
+
+			<!-- EHCache -->
+    		<dependency>
+    			<groupId>net.sf.ehcache</groupId>
+    			<artifactId>ehcache-core</artifactId>
+    			<version>${ehcache.version}</version>
+    		</dependency>
+
+			<!-- Connnection Pooling -->
+			<dependency>
+				<groupId>com.mchange</groupId>
+				<artifactId>c3p0</artifactId>
+				<version>0.9.5.1</version>
+			</dependency>
+
+
+			<!-- JMS -->
+			<dependency>
+				<groupId>javax.jms</groupId>
+				<artifactId>jms-api</artifactId>
+				<version>1.1-rev-1</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.geronimo.specs</groupId>
+				<artifactId>geronimo-jms_1.1_spec</artifactId>
+				<version>1.1.1</version>
+			</dependency>
+
+			<dependency>
+				<groupId>javax.transaction</groupId>
+				<artifactId>jta</artifactId>
+				<version>1.1</version>
+			</dependency>
+
+			<!-- JSF -->
+			<dependency>
+				<groupId>javax.faces</groupId>
+				<artifactId>jsf-api</artifactId>
+				<version>1.2_13</version>
+			</dependency>
+	  		<dependency>
+	            <groupId>javax.el</groupId>
+	            <artifactId>el-api</artifactId>
+	            <version>1.0</version>
+	        </dependency>
+   			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>servlet-api</artifactId>
+				<version>2.5</version>
+			</dependency>
+			<dependency>
+				<groupId>javax.servlet</groupId>
+				<artifactId>javax.servlet-api</artifactId>
+				<version>3.1.0</version>
+			</dependency>
+
+			 <dependency>
+				<groupId>org.javassist</groupId>
+				<artifactId>javassist</artifactId>
+				<version>3.20.0-GA</version>
+			</dependency>
+
+			<!-- BIRT -->
+			<dependency>
+				<groupId>org.eclipse.birt.runtime</groupId>
+				<artifactId>org.eclipse.birt.runtime</artifactId>
+				<version>4.2.1a</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.eclipse.birt.runtime.3_7_1</groupId>
+						<artifactId>org.apache.xerces</artifactId>
+					</exclusion>
+					   <exclusion>
+						   <groupId>org.eclipse.birt.runtime</groupId>
+						   <artifactId>org.apache.commons.logging</artifactId>
+					   </exclusion>
+					   <exclusion>
+						   <groupId>org.milyn</groupId>
+						   <artifactId>flute</artifactId>
+					   </exclusion>
+				</exclusions>
+			   </dependency>
+			<dependency>
+				<groupId>birt</groupId>
+				<artifactId>controls</artifactId>
+				<version>2.5.2.1</version>
+			</dependency>
+
+			<!-- JAX-RS -->
+			<dependency>
+				<groupId>org.jboss.resteasy</groupId>
+				<artifactId>resteasy-jaxrs</artifactId>
+				<version>1.2.1.GA</version>
+			</dependency>
+
+
+			<!-- Active MQ -->
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-client</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-spring</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-pool</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-broker</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-jaas</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-kahadb-store</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.activemq</groupId>
+				<artifactId>activemq-jdbc-store</artifactId>
+				<version>${activemq.version}</version>
+			</dependency>
+
+			<!-- Reflections -->
+			<dependency>
+				<groupId>org.reflections</groupId>
+				<artifactId>reflections</artifactId>
+				<version>0.9.10</version>
+			</dependency>
+
+			<!-- XML serialization and configuration framework for Java -->
+			<dependency>
+				<groupId>org.simpleframework</groupId>
+				<artifactId>simple-xml</artifactId>
+				<version>2.7.1</version>
+			</dependency>
+
+			<!-- Velocity -->
+            <dependency>
+                <groupId>org.apache.velocity</groupId>
+                <artifactId>velocity</artifactId>
+                <version>1.7</version>
+            </dependency>
+
+            <!-- Jackson JSON Mapper -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-annotations</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>jackson-datatype-hibernate4</artifactId>
+                <version>${jackson.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<artifactId>jackson-dataformat-smile</artifactId>
+                <version>${jackson.version}</version>
+			</dependency>
+
+			<!-- Security authenticatie etc. -->
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-core</artifactId>
+				<version>1.2.4</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.shiro</groupId>
+				<artifactId>shiro-web</artifactId>
+				<version>1.2.4</version>
+			</dependency>
+
+
+			<dependency>
+				<groupId>xml-apis</groupId>
+				<artifactId>xml-apis</artifactId>
+				<version>1.4.01</version>
+			</dependency>
+
+			<!--  selenium -->
+			<dependency>
+				<groupId>org.seleniumhq.selenium</groupId>
+				<artifactId>selenium-java</artifactId>
+				<version>2.47.1</version>
+			</dependency>
+			<dependency>
+				<groupId>xerces</groupId>
+				<artifactId>xercesImpl</artifactId>
+				<version>2.10.0</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>xalan</groupId>
+				<artifactId>xalan</artifactId>
+				<version>2.7.1</version>
+				<scope>provided</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>jp.vmi</groupId>
+				<artifactId>selenese-runner-java</artifactId>
+				<version>1.4.3</version>
+
+				<exclusions>
+					<exclusion>
+						<groupId>org.seleniumhq.selenium</groupId>
+						<artifactId>selenium-server</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>xerces</groupId>
+						<artifactId>xercesImpl</artifactId>
+					</exclusion>
+
+					<exclusion>
+						<groupId>com.github.detro.ghostdriver</groupId>
+						<artifactId>phantomjsdriver</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>commons-codec</groupId>
+						<artifactId>commons-codec</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>jcl-over-slf4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ch.qos.logback</groupId>
+						<artifactId>logback-classic</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.google.inject</groupId>
+						<artifactId>guice</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.webbitserver</groupId>
+						<artifactId>webbit</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>io.netty</groupId>
+						<artifactId>netty</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.slf4j</groupId>
+						<artifactId>jul-to-slf4j</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.floreysoft</groupId>
+						<artifactId>jmte</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.json</groupId>
+						<artifactId>json</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+
+
+			<!-- HornetQ -->
+			<dependency>
+				<groupId>org.hornetq</groupId>
+				<artifactId>hornetq-core-client</artifactId>
+				<version>${hornetq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hornetq</groupId>
+				<artifactId>hornetq-jms-client</artifactId>
+				<version>${hornetq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hornetq</groupId>
+				<artifactId>hornetq-core</artifactId>
+				<version>${hornetq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.hornetq</groupId>
+				<artifactId>hornetq-logging</artifactId>
+				<version>${hornetq.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.jboss.netty</groupId>
+				<artifactId>netty</artifactId>
+				<version>3.2.7.Final</version>
+			</dependency>
+
+			<!-- JMinix om de JMX van bv HornetQ via een firewall beschikbaar
+            te stellen -->
+			<dependency>
+				<groupId>org.jminix</groupId>
+				<artifactId>jminix</artifactId>
+				<version>1.1.0</version>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-beanutils</groupId>
+						<artifactId>commons-beanutils</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- openCSV -->
+			<dependency>
+				<groupId>net.sf.opencsv</groupId>
+				<artifactId>opencsv</artifactId>
+				<version>2.3</version>
+			</dependency>
+
+			<!-- File encoding detector -->
+			<dependency>
+				<groupId>com.googlecode.juniversalchardet</groupId>
+				<artifactId>juniversalchardet</artifactId>
+				<version>1.0.3</version>
+			</dependency>
+
+			<!-- classworld -->
+			<dependency>
+				<groupId>classworlds</groupId>
+				<artifactId>classworlds</artifactId>
+				<version>1.1</version>
+			</dependency>
+
+			<!-- Apache CXF -->
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-frontend-jaxws</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-transports-http</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-ws-security</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.cxf</groupId>
+				<artifactId>cxf-rt-ws-policy</artifactId>
+				<version>${cxf.version}</version>
+			</dependency>
+			<!-- Bouncycastle tbv WS-Security -->
+			<dependency>
+				<groupId>org.bouncycastle</groupId>
+				<artifactId>bcprov-jdk15on</artifactId>
+				<version>1.48</version>
+			</dependency>
+
+			<!-- SSH -->
+			<dependency>
+				<groupId>com.jcraft</groupId>
+				<artifactId>jsch</artifactId>
+				<version>0.1.50</version>
+			</dependency>
+
+
+
+			<!-- BRP (Integratie TEST) -->
+			<dependency>
+				<groupId>nl.bzk.brp.algemeen.util</groupId>
+				<artifactId>brp-algemeen-util-versie</artifactId>
+				<version>${brp.versie}</version>
+			</dependency>
+			<dependency>
+				<groupId>nl.bzk.brp.algemeen.util</groupId>
+				<artifactId>brp-algemeen-util-logging</artifactId>
+				<version>${brp.versie}</version>
+			</dependency>
+
+			<dependency>
+				<groupId>nl.bzk.brp.levering.kern</groupId>
+				<artifactId>brp-levering-kern-lo3conversie</artifactId>
+				<version>${brp.versie}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-slf4j-impl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun</groupId>
+						<artifactId>tools</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>nl.bzk.brp.bijhouding</groupId>
+				<artifactId>brp-bijhouding-business</artifactId>
+				<version>${brp.versie}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-slf4j-impl</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>org.apache.logging.log4j</groupId>
+						<artifactId>log4j-api</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>com.sun</groupId>
+						<artifactId>tools</artifactId>
+					</exclusion>
+				</exclusions>
+			</dependency>
+
+			<!-- JiBX -->
+			<dependency>
+				<groupId>org.jibx</groupId>
+				<artifactId>jibx-run</artifactId>
+				<version>1.2.5</version>
+				<exclusions>
+				<exclusion>
+					<groupId>xpp3</groupId>
+					<artifactId>xpp3</artifactId>
+				</exclusion>
+			</exclusions>
+			</dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <profiles>
+        <profile>
+            <id>unknown-build-number</id>
+            <activation>
+                <property>
+                    <name>!env.BUILD_NUMBER</name>
+                </property>
+            </activation>
+            <properties>
+                <build.number>UNKNOWN</build.number>
+            </properties>
+        </profile>
+        <profile>
+            <id>unknown-svn-revision</id>
+            <activation>
+                <property>
+                    <name>!env.SVN_REVISION</name>
+                </property>
+            </activation>
+            <properties>
+                <svn.revision>UNKNOWN</svn.revision>
+            </properties>
+        </profile>
+
+        <profile>
+            <id>coverage</id>
+            <build>
+                <plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<configuration>
+							<redirectTestOutputToFile>true</redirectTestOutputToFile>
+							<!-- Geheugen settings hier nodig, anders crashed de test tijdens Sonar op Jenkins -->
+							<!-- ${argLine} nodig, anders doet JaCoCo het niet -->
+							<argLine>-XX:-UseSplitVerifier -XX:MaxPermSize=512M -Xms1024M -Xmx2048M ${argLine}</argLine>
+						</configuration>
+					</plugin>
+                    <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <configuration>
+                            <destFile>${project.basedir}/../jacoco.exec</destFile>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>prepare-agent</id>
+                                <goals>
+                                    <goal>prepare-agent</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    <profile>
+        <id>remove_suppressions</id>
+        <build>
+            <plugins>
+                <plugin>
+                    <groupId>com.google.code.maven-replacer-plugin</groupId>
+                    <artifactId>replacer</artifactId>
+                    <executions>
+                        <execution>
+                            <phase>process-sources</phase>
+                            <goals>
+                                <goal>replace</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <basedir>${project.basedir}</basedir>
+                        <includes>
+                            <include>**/*.java</include>
+                        </includes>
+                        <replacements>
+                            <!-- checkstyle and PMD -->
+                            <replacement>
+                                <token>@SuppressWarnings.*</token>
+                                <value />
+                            </replacement>
+                            <!-- FindBugs -->
+                            <replacement>
+                                <token>@SuppressFBWarnings.*</token>
+                                <value />
+                            </replacement>
+                        </replacements>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </build>
+    </profile>
+
+		<profile>
+            <id>sources</id>
+			<activation>
+                <property>
+                    <name>!sources.skip</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+		    <!-- Create JAR with sources -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-source-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>attach-sources</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+		<profile>
+            <id>javadoc</id>
+			<activation>
+                <property>
+                    <name>!javadoc.skip</name>
+                </property>
+            </activation>
+            <build>
+                <plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-javadoc-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>attach-javadoc</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+                </plugins>
+            </build>
+        </profile>
+
+    </profiles>
+</project>

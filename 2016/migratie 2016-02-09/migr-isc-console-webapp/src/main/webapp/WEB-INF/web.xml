@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<!-- JBOSS EL implementatie, anders gaat gravel stuk -->
+	<context-param>
+		<param-name>com.sun.faces.expressionFactory</param-name>
+		<param-value>org.jboss.el.ExpressionFactoryImpl</param-value>
+	</context-param>
+
+	<context-param>
+	    <param-name>contextConfigLocation</param-name>
+	    <param-value>/WEB-INF/jbpm-beans.xml</param-value>
+	</context-param>
+
+	 <filter>
+        <filter-name>TransactionFilter</filter-name>
+        <filter-class>nl.bzk.migratiebrp.isc.console.webapp.filter.TransactionFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>TransactionFilter</filter-name>
+        <url-pattern>/app/*</url-pattern>
+    </filter-mapping>
+
+	<listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+
+	<!-- RESTEASY CONFIG FOR REPORTS -->
+   <context-param>
+      <param-name>javax.ws.rs.Application</param-name>
+      <param-value>nl.bzk.migratiebrp.isc.console.webapp.report.jaxrs.ReportApplication</param-value>
+   </context-param>
+
+   <context-param>
+      <param-name>resteasy.servlet.mapping.prefix</param-name>
+      <param-value>/rs</param-value>
+   </context-param>
+
+   <context-param>
+      <param-name>resteasy.providers</param-name>
+      <param-value>nl.bzk.migratiebrp.isc.console.webapp.report.jaxrs.FileWriter</param-value>
+   </context-param>
+
+   <listener>
+      <listener-class>
+         org.jboss.resteasy.plugins.server.servlet.ResteasyBootstrap
+      </listener-class>
+   </listener>
+
+   <servlet>
+      <servlet-name>Resteasy</servlet-name>
+      <servlet-class>
+         org.jboss.resteasy.plugins.server.servlet.HttpServletDispatcher
+      </servlet-class>
+   </servlet>
+
+   <servlet-mapping>
+      <servlet-name>Resteasy</servlet-name>
+      <url-pattern>/rs/*</url-pattern>
+   </servlet-mapping>
+	<!-- END:RESTEASY CONFIG -->
+
+  <servlet>
+    <description>Enable the JSF servlet, see also faces-config.xml</description>
+    <servlet-name>Faces Servlet</servlet-name>
+    <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+
+  <!-- Mapping for all plain pages. -->
+  <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>*.jsf</url-pattern>
+  </servlet-mapping>
+
+  <!-- This mapping is for the process images. -->
+  <servlet-mapping>
+      <servlet-name>Faces Servlet</servlet-name>
+      <url-pattern>/app/pi/*</url-pattern>
+  </servlet-mapping>
+
+  <context-param>
+      <description> Use Documents Saved as *.xhtml </description>
+      <param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+      <param-value>.xhtml</param-value>
+  </context-param>
+
+  <context-param>
+      <description> Facelets debug output </description>
+      <param-name>facelets.DEVELOPMENT</param-name>
+      <param-value>false</param-value>
+  </context-param>
+
+  <!-- A simple JSP to redirect to the basic search page. -->
+  <welcome-file-list>
+      <welcome-file>index.jsp</welcome-file>
+  </welcome-file-list>
+
+   <!--
+     This role list should be changed to include all the relevant roles for your
+     environment.
+  -->
+  <security-role>
+      <role-name>admin</role-name>
+  </security-role>
+  <security-role>
+      <role-name>user</role-name>
+  </security-role>
+  <security-role>
+      <role-name>beheer</role-name>
+  </security-role>
+
+  <!--
+    Security constraints - optionally customize the role name to require a login
+    before access is allowed. Also, be sure to edit jboss-web.xml to configure
+    the security domain if you are deploying inside JBoss AS.
+  -->
+  <security-constraint>
+      <web-resource-collection>
+          <web-resource-name>Secure Area</web-resource-name>
+          <url-pattern>/app/*</url-pattern>
+      </web-resource-collection>
+      <auth-constraint>
+          <role-name>user</role-name>
+      </auth-constraint>
+  </security-constraint>
+
+  <login-config>
+      <auth-method>FORM</auth-method>
+      <form-login-config>
+          <form-login-page>/login.jsp</form-login-page>
+          <form-error-page>/login.jsp?error=1</form-error-page>
+      </form-login-config>
+  </login-config>
+
+</web-app>

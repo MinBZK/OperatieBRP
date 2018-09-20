@@ -1,0 +1,65 @@
+brp_db:
+  container_name: brp_db
+  image: migr-tools-brp-database
+  ports:
+    - "5432:5432"
+
+gbav_db:
+  container_name: gbav_db
+  image: migr-tools-gbav-database
+  ports:
+    - "5832:5432"
+
+iv_routering:
+  container_name: iv_routering
+  image: migr-tools-hornetq
+  ports:
+    - "5445:5445"
+    - "5465:5465"
+  environment:
+      - "JMX_HOST=192.168.99.100"
+      - "JMX_PORT=5465"
+
+synchronisatie_naarbrp:
+  container_name: synchronisatie_naarbrp
+  image: migr-synchronisatie-runtime-naarbrp
+  links:
+      - "brp_db"
+      - "iv_routering"
+  ports:
+    - "1799:1799"
+  environment:
+        - "JMX_HOST=192.168.99.100"
+        - "JMX_PORT=1799"
+        - "BRP_DB_ENV_HOSTNAME=brp_db"
+        - "IV_ROUTERING_ENV_HOSTNAME=iv_routering"
+
+synchronisatie_naarlo3:
+  container_name: synchronisatie_naarlo3
+  image: migr-synchronisatie-runtime-naarlo3
+  links:
+      - "brp_db"
+      - "iv_routering"
+  ports:
+    - "1899:1899"
+  environment:
+        - "JMX_HOST=192.168.99.100"
+        - "JMX_PORT=1899"
+        - "BRP_DB_ENV_HOSTNAME=brp_db"
+        - "IV_ROUTERING_ENV_HOSTNAME=iv_routering"
+
+iv_logging:
+  container_name: iv_logging
+  image: migr-init-logging-runtime
+  links:
+      - "gbav_db"
+      - "brp_db"
+      - "iv_routering"
+  ports:
+    - "1699:1699"
+  environment:
+        - "JMX_HOST=192.168.99.100"
+        - "JMX_PORT=1699"
+        - "GBAV_DB_ENV_HOSTNAME=gbav_db"
+        - "BRP_DB_ENV_HOSTNAME=brp_db"
+        - "IV_ROUTERING_ENV_HOSTNAME=iv_routering"

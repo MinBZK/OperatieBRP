@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <!-- Hornet queue -->
+    <bean name="queueConnectionFactory" class="org.hornetq.jms.client.HornetQXAConnectionFactory">
+        <constructor-arg value="false"/>
+        <constructor-arg>
+            <bean name="transportConfiguration" class="org.hornetq.api.core.TransportConfiguration">
+                <constructor-arg value="org.hornetq.core.remoting.impl.netty.NettyConnectorFactory"/>
+                <constructor-arg>
+                    <map key-type="java.lang.String" value-type="java.lang.Object">
+                        <entry key="host" value="${initQueue.host}"/>
+                        <entry key="port" value="${initQueue.port}"/>
+                    </map>
+                </constructor-arg>
+            </bean>
+        </constructor-arg>
+        <property name="connectionTTL" value="600000"/>
+        <property name="callTimeout" value="300000"/>
+        <property name="retryInterval" value="1000"/>
+        <property name="retryIntervalMultiplier" value="1.5"/>
+        <property name="reconnectAttempts" value="1000"/>
+        <property name="maxRetryInterval" value="60000"/>
+        <property name="producerWindowSize" value="100"/>
+    </bean>
+
+    <!-- Cache for JMS connection -->
+    <bean id="cachedConnectionFactory"
+          class="org.springframework.jms.connection.CachingConnectionFactory"
+          p:targetConnectionFactory-ref="queueConnectionFactory"
+          p:sessionCacheSize="10"/>
+
+    <!-- Hornet Queue -->
+    <bean name="initVullingQueueHornet" class="org.hornetq.jms.client.HornetQQueue">
+        <constructor-arg value="${initQueue.name}"/>
+    </bean>
+
+    <!-- jmsTemplate -->
+    <bean name="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="cachedConnectionFactory"/>
+        <property name="receiveTimeout" value="30000"/>
+        <property name="sessionTransacted" value="true"/>
+    </bean>
+
+</beans>

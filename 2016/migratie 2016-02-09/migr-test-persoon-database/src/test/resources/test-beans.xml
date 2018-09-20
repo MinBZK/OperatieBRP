@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-4.2.xsd">
+
+    <context:property-placeholder
+            location="classpath:datasource.properties"/>
+
+    <import resource="synchronisatie-dal.xml"/>
+
+    <context:component-scan base-package="nl.bzk.migratiebrp.test"/>
+    <context:component-scan base-package="nl.bzk.migratiebrp.init.logging.verschilanalyse"/>
+
+    <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+
+    <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout">
+            <value>300</value>
+        </property>
+    </bean>
+
+    <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+    <bean id="syncDalTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager"/>
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction"/>
+        </property>
+    </bean>
+
+    <beans profile="!memoryDS">
+        <bean id="syncDalDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+            <property name="uniqueResourceName">
+                <bean class="nl.bzk.migratiebrp.util.common.UniqueName">
+                    <property name="baseName" value="syncDalDatabase"/>
+                </bean>
+            </property>
+
+            <property name="xaDataSourceClassName" value="${database.driver:org.postgresql.xa.PGXADataSource}"/>
+            <property name="xaProperties">
+                <props>
+                    <prop key="ServerName">${database.host:localhost}</prop>
+                    <prop key="PortNumber">${database.port:5432}</prop>
+                    <prop key="DatabaseName">${database.name:BRP}</prop>
+                    <prop key="User">${database.username:postgres}</prop>
+                    <prop key="Password">${database.password:postgres}</prop>
+                </props>
+            </property>
+            <property name="maxPoolSize" value="${database.maxpool:200}"/>
+            <property name="minPoolSize" value="${database.minpool:1}"/>
+            <property name="testQuery" value="select 41+1"/>
+        </bean>
+
+        <bean name="syncDalJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            <property name="showSql" value="false"/>
+            <property name="generateDdl" value="false"/>
+            <property name="databasePlatform" value="${database.dialect:org.hibernate.dialect.PostgreSQL82Dialect}"/>
+        </bean>
+    </beans>
+
+    <beans profile="memoryDS">
+        <!-- In memory profile -->
+        <jdbc:initialize-database data-source="syncDalDataSource">
+            <jdbc:script location="classpath:sql/hsqldb/HSQLDB.sql"/>
+            <jdbc:script location="classpath:sql/hsqldb/4_brp-migratie-tijdelijk.sql"/>
+        </jdbc:initialize-database>
+
+
+        <bean name="syncDalDataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+            <property name="uniqueResourceName">
+                <!--
+                 | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+                 | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+                  -->
+                <bean class="nl.bzk.migratiebrp.util.common.UniqueName">
+                    <property name="baseName" value="syncDalDatabase"/>
+                </bean>
+            </property>
+            <property name="url" value="jdbc:hsqldb:mem:syncDal"/>
+            <property name="driverClassName" value="org.hsqldb.jdbcDriver"/>
+            <property name="user" value="sa"/>
+            <property name="password" value=""/>
+            <property name="maxPoolSize" value="20"/>
+            <property name="minPoolSize" value="10"/>
+        </bean>
+
+        <bean name="syncDalJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+            <property name="showSql" value="false"/>
+            <property name="generateDdl" value="false"/>
+            <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+        </bean>
+    </beans>
+</beans>

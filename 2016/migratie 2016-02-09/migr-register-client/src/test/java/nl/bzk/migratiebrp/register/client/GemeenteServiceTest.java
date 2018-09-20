@@ -1,0 +1,29 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.migratiebrp.register.client;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+
+public class GemeenteServiceTest extends AbstractIntegrationTest {
+
+    public GemeenteServiceTest() {
+        super("classpath:test-gemeenteregister-dummy.xml", "classpath:register-client-gemeente.xml");
+    }
+
+    @Autowired
+    private GemeenteService subject;
+
+    @Test
+    public void Test() {
+        subject.refreshRegister();
+
+        Assert.assertNotNull(subject.geefRegister());
+    }
+
+}

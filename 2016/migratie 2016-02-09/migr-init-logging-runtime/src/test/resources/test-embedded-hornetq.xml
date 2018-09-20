@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+	<bean id="embeddedHornetQ" class="org.hornetq.core.server.embedded.EmbeddedHornetQ" init-method="start" destroy-method="stop">
+		<property name="configResourcePath" value="test-embedded-hornetq-configuration.xml" />
+	</bean>
+
+	<bean class="nl.bzk.migratiebrp.init.logging.runtime.HornetQConfigurer">
+		<property name="embeddedHornetQ" ref="embeddedHornetQ" />
+		<property name="queues">
+			<list>
+				<value>init.vulling.naarlo3</value>
+	      		<value>init.vulling.naarlo3.response</value>
+	      		<value>init.vulling.naarbrp</value>
+	      		<value>init.vulling.naarbrp.response</value>
+			</list>
+		</property>
+	</bean>
+</beans>

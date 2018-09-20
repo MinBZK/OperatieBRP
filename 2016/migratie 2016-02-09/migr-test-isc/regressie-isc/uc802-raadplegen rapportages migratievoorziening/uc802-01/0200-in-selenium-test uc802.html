@@ -1,0 +1,701 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://map42.modernodam.nl:8080/" />
+<title>jbpm-console-uc814</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">jbpm-console-login</td></tr>
+</thead><tbody>
+<!--UC80201C10 - Fouten-->
+<tr>
+	<td>store</td>
+	<td>beheerder</td>
+	<td>username</td>
+</tr>
+<tr>
+	<td>store</td>
+	<td>beheerder</td>
+	<td>password</td>
+</tr>
+<!--Inloggen-->
+<tr>
+	<td>open</td>
+	<td>/jbpm-console/app/processinstances.jsf</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>You must provide security credentials to access this management console. </td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=j_username</td>
+	<td>${username}</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=j_password</td>
+	<td>${password}</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!--Rapporten-->
+<tr>
+	<td>selectWindow</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=Rapporten</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForText</td>
+	<td>//body/table/tbody/tr[3]/td/table/tbody/tr/th</td>
+	<td>Rapporten</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//td/table/tbody/tr[2]/td/a</td>
+	<td>Fouten</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//tr[3]/td/a</td>
+	<td>Openstaande processen</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//tr[4]/td/a</td>
+	<td>Afhandeling processen</td>
+</tr>
+<!--Fouten-->
+<tr>
+	<td>selectWindow</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>link=Fouten</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForText</td>
+	<td>//body/form/fieldset/legend</td>
+	<td>Rapportage parameters</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/form/fieldset/p[1]/label</td>
+	<td>Datum van:</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date(); yyyy=d.getFullYear();</td>
+	<td>huidig_jaar</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date();d.setFullYear(d.getFullYear() - 1); yyyy=d.getFullYear();</td>
+	<td>jaar_eerder</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date();d.setFullYear(d.getFullYear() + 1); yyyy=d.getFullYear();</td>
+	<td>jaar_later</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date(); dd=d.getMonth()+1;dd=(dd &lt; 10) ? '0' + dd: dd;</td>
+	<td>huidige_maand</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>date=new Date(); date.setDate(date.getDate()+1); dd=date.getMonth(); dd= (dd == 0) ? '12' : dd; dd=(dd &lt; 10) ? '0' + dd: dd;</td>
+	<td>maand_eerder</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date(); dd=d.getDate();dd=(dd &lt; 10) ? '0' + dd: dd;</td>
+	<td>vandaag</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date(); dd=d.getDate();dd=(dd &lt; 10) ? '0' + dd: (dd &gt;30 &amp; (d.getMonth() != 7)) ? '01' : dd;</td>
+	<td>datumVan_dag</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date(); d.setDate(d.getDate() + 1);dd=d.getDate();dd=(dd &lt; 10) ? '0' + dd: dd;</td>
+	<td>morgen</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date(); dd=(${morgen} == '01') ?&nbsp;&nbsp;d.getMonth()+2 : d.getMonth()+1;dd=(dd &lt; 10) ? '0' + dd: dd;</td>
+	<td>maand_morgen</td>
+</tr>
+<tr>
+	<td>storeEval</td>
+	<td>d=new Date(); yyyy=(${maand_eerder} == '12') ?&nbsp;&nbsp;d.getFullYear() - 1 : d.getFullYear();</td>
+	<td>huidig_jaar_van_param</td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${vandaag}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${morgen}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${jaar_eerder}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${huidig_jaar}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${jaar_later}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${maand_eerder}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${huidige_maand}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${maand_morgen}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${huidig_jaar_van_param}</td>
+	<td></td>
+</tr>
+<tr>
+	<td>echo</td>
+	<td>${datumVan_dag}</td>
+	<td></td>
+</tr>
+<!--* Geldige invoer *-->
+<!--UC80201C10T10 - TG-1 Standaard Datum van is ingevuld-->
+<tr>
+	<td>assertValue</td>
+	<td>//*[@id=&quot;datumVan&quot;]</td>
+	<td>${datumVan_dag}-${maand_eerder}-${huidig_jaar_van_param}</td>
+</tr>
+<!--UC80201C10T20 - TG-2 Standaard Datum tot is ingevuld-->
+<tr>
+	<td>assertValue</td>
+	<td>//*[@id=&quot;datumTot&quot;]</td>
+	<td>${vandaag}-${huidige_maand}-${huidig_jaar}</td>
+</tr>
+<!--UC80201C10T30 - TG-3 Standaard Datum van en Datum tot gebruikt - geen resultaten-->
+<tr>
+	<td>selectFrame</td>
+	<td>reportIframe</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//input[@type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/div[1]</td>
+	<td>Opgetreden fouten</td>
+</tr>
+<!--UC80201C10T40 - TG-4 Een Datum tot groter dan vandaag met een standaard Datum van-->
+<tr>
+	<td>selectFrame</td>
+	<td>relative=parent</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Fouten</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForText</td>
+	<td>//body/form/fieldset/legend</td>
+	<td>Rapportage parameters</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>//*[@id=&quot;datumTot&quot;]</td>
+	<td>${morgen}-${maand_morgen}-${huidig_jaar}</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//input[@type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!--UC80201C10T100 - TG-10 Datum van wordt weergegeven in het rapport-->
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[1]/td[1]/div</td>
+	<td>Datum van</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[1]/td[2]/div</td>
+	<td>${datumVan_dag}-${maand_eerder}-${huidig_jaar_van_param}</td>
+</tr>
+<!--UC80201C10T110 - TG-11 Datum tot wordt weergegeven in het rapport-->
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[1]/div</td>
+	<td>Datum tot</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[2]/div</td>
+	<td>${morgen}-${maand_morgen}-${huidig_jaar}</td>
+</tr>
+<!--UC80201C10T120 - TG-12 Gemeentecode wordt weergegeven in het rapport-->
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[1]</td>
+	<td>Gemeente</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/th/div/a</td>
+	<td>3000200</td>
+</tr>
+<!--UC80201C10T130 - TG-13 Type proces wordt weergegeven in het rapport-->
+<tr>
+	<td>assertElementPresent</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[2]/div/img</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td/div/a</td>
+	<td>1</td>
+</tr>
+<!--* ongespecificeerd - grafiek gegenereerd*-->
+<tr>
+	<td>assertElementPresent</td>
+	<td>//body/table/tbody/tr[2]/td/div[2]/img</td>
+	<td></td>
+</tr>
+<!--* ongespecificeerd - gemeentedetails *-->
+<tr>
+	<td>clickAndWait</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/th/div/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[1]/td[1]/div</td>
+	<td>Datum van</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[1]/td[2]/div</td>
+	<td>${datumVan_dag}-${maand_eerder}-${huidig_jaar_van_param}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[1]/div</td>
+	<td>Datum tot</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[2]/div</td>
+	<td>${morgen}-${maand_morgen}-${huidig_jaar}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[3]/td[1]/div</td>
+	<td>Gemeente</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[3]/td[2]/div</td>
+	<td>3000200</td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>//body/table/tbody/tr[2]/td/div[2]/img</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[1]/div</td>
+	<td>Proces</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[1]/div/a</td>
+	<td>uc811</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[2]/div</td>
+	<td>Aantal</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[2]/div</td>
+	<td>1</td>
+</tr>
+<!--* ongespecificeerd - procesdetails *-->
+<tr>
+	<td>clickAndWait</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[1]/div/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[1]/td[1]/div</td>
+	<td>Datum van</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[1]/td[2]/div</td>
+	<td>${datumVan_dag}-${maand_eerder}-${huidig_jaar_van_param}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[1]/div</td>
+	<td>Datum tot</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[2]/div</td>
+	<td>${morgen}-${maand_morgen}-${huidig_jaar}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[3]/td[1]/div</td>
+	<td>Gemeente</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[3]/td[2]/div</td>
+	<td>3000200</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[4]/td[1]/div</td>
+	<td>Proces</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[4]/td[2]/div</td>
+	<td>uc811</td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>//body/table/tbody/tr[2]/td/div[2]/img</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[1]/div</td>
+	<td>Foutcode</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[1]/div/a</td>
+	<td>uc811.deblokkeren.foutiefbericht</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[2]/div</td>
+	<td>Aantal</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[2]/div</td>
+	<td>1</td>
+</tr>
+<!--* ongespecificeerd - foutcodedetails *-->
+<tr>
+	<td>clickAndWait</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[1]/div/a</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[1]/td[1]/div</td>
+	<td>Datum van</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[1]/td[2]/div</td>
+	<td>${datumVan_dag}-${maand_eerder}-${huidig_jaar_van_param}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[1]/div</td>
+	<td>Datum tot</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[2]/td[2]/div</td>
+	<td>${morgen}-${maand_morgen}-${huidig_jaar}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[3]/td[1]/div</td>
+	<td>Gemeente</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[3]/td[2]/div</td>
+	<td>3000200</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[4]/td[1]/div</td>
+	<td>Proces</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[4]/td[2]/div</td>
+	<td>uc811</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[5]/td[1]/div</td>
+	<td>Foutcode</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[1]/tbody/tr[5]/td[2]/div</td>
+	<td>uc811.deblokkeren.foutiefbericht</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[1]/div</td>
+	<td>Tijdstip</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[2]/div</td>
+	<td>Proces instantie</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[3]/div</td>
+	<td>Doel gemeente</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[4]/div</td>
+	<td>Resolutie</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[1]/th[5]/div</td>
+	<td>Detail melding</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[1]/div</td>
+	<td>${vandaag}-${huidige_maand}-${huidig_jaar}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[2]/div</td>
+	<td>regexp:[0-9]*</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[3]/div</td>
+	<td>0599</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[4]/div</td>
+	<td>end</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td[5]/div</td>
+	<td>OngeldigBericht is niet een verwacht bericht.</td>
+</tr>
+<!--UC80201C10T50 - TG-5 Datum van eerder dan een maand geleden met een Datum tot in de toekomst-->
+<tr>
+	<td>selectWindow</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Fouten</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>//*[@id=&quot;datumVan&quot;]</td>
+	<td>${datumVan_dag}-${maand_eerder}-${jaar_eerder}</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>//*[@id=&quot;datumTot&quot;]</td>
+	<td>${morgen}-${maand_morgen}-${huidig_jaar}</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>//input[@type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/th/div/a</td>
+	<td>3000200</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[2]/td/table[2]/tbody/tr[2]/td/div/a</td>
+	<td>1</td>
+</tr>
+<!--* Ongeldige invoer *-->
+<!--UC80201C10T60 - TG-6 Datum van later dan Datum tot-->
+<tr>
+	<td>selectWindow</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Fouten</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>//*[@id=&quot;datumVan&quot;]</td>
+	<td>${datumVan_dag}-${huidige_maand}-${jaar_later}</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[@type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<!--* todo foutmeldingcontrole *-->
+<!--UC80201C10T70 - TG-7 Datum van is leeg-->
+<tr>
+	<td>selectWindow</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Fouten</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>//*[@id=&quot;datumVan&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[@type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/form/fieldset/p[1]/label[2]</td>
+	<td>Dit is een verplicht veld.</td>
+</tr>
+<!--UC80201C10T80 - TG-8 Datum tot is leeg-->
+<tr>
+	<td>selectWindow</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Fouten</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>//*[@id=&quot;datumTot&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[@type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/form/fieldset/p[2]/label[2]</td>
+	<td>Dit is een verplicht veld.</td>
+</tr>
+<!--UC80201C10T90 - TG-9 Datum van en Datum tot zijn leeg-->
+<tr>
+	<td>selectWindow</td>
+	<td></td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Fouten</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>//*[@id=&quot;datumVan&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>//*[@id=&quot;datumTot&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>//input[@type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/form/fieldset/p[1]/label[2]</td>
+	<td>Dit is een verplicht veld.</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/form/fieldset/p[2]/label[2]</td>
+	<td>Dit is een verplicht veld.</td>
+</tr>
+<!--Afmelden-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Afmelden</td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

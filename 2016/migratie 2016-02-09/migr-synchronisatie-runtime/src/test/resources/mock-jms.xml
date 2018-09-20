@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd">
+
+    <bean id="destinationManager" class="com.mockrunner.jms.DestinationManager"/>
+    <bean id="configurationManager" class="com.mockrunner.jms.ConfigurationManager"/>
+
+    <!-- Wrap the XA ConnectionFactory to make it aware of the JTA Transaction manager -->
+    <bean id="queueConnectionFactory"  class="com.mockrunner.mock.jms.MockQueueConnectionFactory" >
+        <constructor-arg index="0" ref="destinationManager" />
+        <constructor-arg index="1" ref="configurationManager" />
+    </bean>
+
+    <bean id="queueInbound"  factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/sync.request"/>
+    </bean>
+
+    <bean id="queueOutbound"  factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0"  value="queue/sync.response"/>
+    </bean>
+
+	<bean id="gemeenteVerzoekQueue"  factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/gemeente.verzoek"/>
+    </bean>
+    <bean id="afnemerVerzoekQueue"  factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="queue/afnemer.verzoek"/>
+    </bean>
+
+    <bean id="brpQueueConnectionFactory"  class="com.mockrunner.mock.jms.MockQueueConnectionFactory" >
+        <constructor-arg index="0" ref="destinationManager" />
+        <constructor-arg index="1" ref="configurationManager" />
+    </bean>
+
+    <bean id="gbaBijhoudingen" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0"  value="GBABijhoudingen"/>
+    </bean>
+    <bean id="gbaAfnemerindicaties" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0"  value="gbaAfnemerindicaties"/>
+    </bean>
+    <bean id="gbaAfnemerindicatiesAntwoord" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0"  value="gbaAfnemerindicatiesAntwoord"/>
+    </bean>
+
+
+	<bean id="queueSyncVerzoek"  factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="iv.request"/>
+    </bean>
+    <bean id="queueSyncAntwoord"  factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0"  value="iv.response"/>
+    </bean>
+</beans>

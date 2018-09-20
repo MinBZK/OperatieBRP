@@ -1,0 +1,207 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head profile="http://selenium-ide.openqa.org/profiles/test-case">
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link rel="selenium.base" href="http://localhost:8080/" />
+<title>jbpm-console-login</title>
+</head>
+<body>
+<table cellpadding="1" cellspacing="1" border="1">
+<thead>
+<tr><td rowspan="1" colspan="3">jbpm-console-login</td></tr>
+</thead><tbody>
+<!--UC80103C10T10 - Onverwachte gerelateerd proces-->
+<tr>
+	<td>store</td>
+	<td>beheerder</td>
+	<td>username</td>
+</tr>
+<tr>
+	<td>store</td>
+	<td>beheerder</td>
+	<td>password</td>
+</tr>
+<!--Inloggen (lange wachttijd voor laden jboss)-->
+<tr>
+	<td>open</td>
+	<td>/jbpm-console/app/processinstances.jsf</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>You must provide security credentials to access this management console. </td>
+	<td></td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=j_username</td>
+	<td>${username}</td>
+</tr>
+<tr>
+	<td>type</td>
+	<td>name=j_password</td>
+	<td>${password}</td>
+</tr>
+<tr>
+	<td>click</td>
+	<td>css=input[type=&quot;submit&quot;]</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForPageToLoad</td>
+	<td>60000</td>
+	<td></td>
+</tr>
+<!--Procesinstanties-->
+<tr>
+	<td>assertTextPresent</td>
+	<td>Procesinstanties</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Processen</td>
+	<td></td>
+</tr>
+<tr>
+	<td>waitForPageToLoad</td>
+	<td>5000</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr/td[4]/span</td>
+	<td>In uitvoering</td>
+</tr>
+<tr>
+	<td>verifyElementNotPresent</td>
+	<td>//table[@class='results']/tbody[@class='results']/tr[2]/td[4]/span</td>
+	<td></td>
+</tr>
+<tr>
+	<td>check</td>
+	<td>id=ended_i</td>
+	<td></td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>id=apply</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr[2]/td[4]/span</td>
+	<td>regexp:Be.indigd</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr/td</td>
+	<td>foutafhandelingProcesId</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr/td[5]</td>
+	<td>foutafhandelingStartDateTime</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr[2]/td</td>
+	<td>uc811ProcesId</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr[2]/td[5]</td>
+	<td>uc811ProcesStartDateTime</td>
+</tr>
+<tr>
+	<td>storeText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr[2]/td[6]</td>
+	<td>uc811ProcesEndDateTime</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>xpath=(//a[contains(text(),'Bekijken')])[2]</td>
+	<td></td>
+</tr>
+<!--uc811 procesinstantie-->
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td/div/table/tbody/tr[3]/td</td>
+	<td>regexp:ID\ ${uc811ProcesId}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td/div/table/tbody/tr[4]/td</td>
+	<td>regexp:Be.indigd</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td/div/table/tbody/tr[5]/td</td>
+	<td>${uc811ProcesStartDateTime}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td/div/table/tbody/tr[6]/td</td>
+	<td>${uc811ProcesEndDateTime}</td>
+</tr>
+<!--Gerelateerd proces-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Gerelateerde processen</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr/td</td>
+	<td>${foutafhandelingProcesId}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr/td[3]</td>
+	<td>foutafhandeling</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td[2]/div/table/tbody[2]/tr/td[5]</td>
+	<td>${foutafhandelingStartDateTime}</td>
+</tr>
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Bekijken</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td/div/table/tbody/tr[3]/td</td>
+	<td>regexp:ID\ ${foutafhandelingProcesId}</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td/div/table/tbody/tr[4]/td/span</td>
+	<td>In uitvoering</td>
+</tr>
+<tr>
+	<td>assertText</td>
+	<td>//body/table/tbody/tr[3]/td/div/table/tbody/tr[5]/td</td>
+	<td>${foutafhandelingStartDateTime}</td>
+</tr>
+<tr>
+	<td>assertElementPresent</td>
+	<td>//div/img</td>
+	<td></td>
+</tr>
+<!--Afmelden-->
+<tr>
+	<td>clickAndWait</td>
+	<td>link=Afmelden</td>
+	<td></td>
+</tr>
+<tr>
+	<td>assertTextPresent</td>
+	<td>You must provide security credentials to access this management console. </td>
+	<td></td>
+</tr>
+</tbody></table>
+</body>
+</html>

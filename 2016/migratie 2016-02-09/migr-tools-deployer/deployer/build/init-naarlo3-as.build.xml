@@ -1,0 +1,133 @@
+<project name="migr-init-naarlo3" basedir="." default="fail">
+
+    <!--
+     | Algemene properties
+     |
+     | server.host
+     | server.username
+     | server.password
+     |
+     | File properties
+     |
+     | application.source
+     | application.file
+     |
+     | Init naar Lo3 properties
+     |
+     | jdbc.url
+     | jdbc.username
+     | jdbc.password
+     |
+     | initQueue.host
+     | initQueue.port
+     | initQueue.name
+     |
+    -->
+
+    <property name="application.directory" value="migr-init-naarlo3" />
+
+    <target name="checkProperties">
+        <fail unless="server.host" message="server.host property is verplicht." />
+        <fail unless="server.username" message="server.username property is verplicht." />
+        <fail unless="server.password" message="server.password property is verplicht." />
+
+        <fail unless="initQueue.host" message="initQueue.host property is verplicht." />
+        <fail unless="initQueue.port" message="initQueue.port property is verplicht." />
+        <fail unless="initQueue.name" message="initQueue.name property is verplicht." />
+    </target>
+
+    <target name="checkInstallProperties" depends="checkProperties">
+        <!-- Check file settings -->
+        <fail unless="application.source" message="application.source property is verplicht bij het installeren." />
+        <fail unless="application.file" message="application.file property is verplicht bij het installeren." />
+
+        <!-- Check file exists -->
+        <fail message="${application.source}/${application.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+            <condition>
+                <not>
+                    <resourcecount count="1" >
+                        <fileset dir="${application.source}">
+                            <include name="${application.file}" />
+                        </fileset>
+                    </resourcecount>
+                </not>
+            </condition>
+        </fail>
+    
+    </target>
+
+    <target name="install" depends="checkInstallProperties,createLocalConfigurationFile">
+        <echo message="Installing ${ant.project.name} ...." />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+        
+        <echo message="Copying ${application.file}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true" failonerror="true">
+            <fileset dir="${application.source}">
+                <include name="${application.file}" />
+            </fileset>
+        </scp>
+        
+        <echo message="Unpacking ${application.file}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; mkdir ${application.directory}; cd ${application.directory}; unzip -o /tmp/${application.directory}/${application.file} -d .;" />
+
+        <echo message="Copying configuration files" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; cd ${application.directory}/conf; rm init-naarlo3.properties; rm log4j2.xml;" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/" trust="true" failonerror="true">
+            <fileset dir="tmp">
+                <include name="init-naarlo3.properties" />
+            </fileset>
+        </scp>
+
+		<scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/conf" trust="true" >
+			<fileset dir="deps/algemeen">
+				<include name="log4j2.xml" />
+			</fileset>
+		</scp>
+
+    </target>
+
+    <target name="createLocalConfigurationFile" depends="checkProperties">
+     <echo message="Creating configuration ${ant.project.name}" />
+         <delete dir="tmp" />
+         <mkdir dir="tmp" />
+         <echo file="tmp/init-naarlo3.properties" append="false" force="true"><![CDATA[# BRP database verbinding
+jdbc.url=${jdbc.url}
+jdbc.username=${jdbc.username}
+jdbc.password=${jdbc.password}
+
+# MVI queue verbinding
+initQueue.host=${initQueue.host}
+initQueue.port=${initQueue.port}
+initQueue.name=${initQueue.name}
+
+batch.aantal=100
+vanaf.anummer=0
+]]></echo>
+     </target>
+
+    <target name="deinstall" depends="checkProperties">
+        <echo message="Removing ${ant.project.name}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; rm -Rf ${application.directory}" />
+    </target>
+    
+    <target name="start" depends="checkProperties">
+        <echo message="Starting ${ant.project.name}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; cd ${application.directory}; ./runLo3QueueVulling.sh" />
+    </target>
+
+    <target name="stop" depends="checkProperties">
+    </target>
+
+    <target name="clean" depends="checkProperties">
+    </target>
+
+    <target name="fail">
+        <fail message="Call with valid task" />
+    </target>
+    
+</project>

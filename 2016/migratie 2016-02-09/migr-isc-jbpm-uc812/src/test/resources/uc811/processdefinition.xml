@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="uc811">
+
+    <!--  -->
+    <!--  -->
+    <!-- START -->
+    <!--  -->
+    <!--  -->
+
+    <start-state name="Start (vanuit beheerdersscherm)">
+        <transition to="Loggen start proces">
+            <script>
+                <expression>
+                    functioneleStap="uc811.start.stap";
+                    bronGemeente = "BRP";
+                    doelGemeente = "GBAV";
+                </expression>
+                <variable name='functioneleStap' access='write' />
+                <variable name='bronGemeente' access='write' />
+                <variable name='doelGemeente' access='write' />
+            </script>
+        </transition>
+    </start-state>
+
+    <state name="IX-3. Timeout">
+        <timer name="timeout" transition="timeout" duedate="#{synchronisatieVraagPauzeDueDate}"></timer>
+        <transition to="SYNCHRONISATIE VRAAG" name="timeout"></transition>
+    </state>
+
+    <node name="Loggen start proces">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                startProcesInstantieAction
+            </bean>
+        </action>
+        <transition to="Loggen einde proces"></transition>
+    </node>
+
+    <!--  -->
+    <!--  -->
+    <!-- Einde -->
+    <!--  -->
+    <!--  -->
+
+    <node name="Loggen einde proces">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                beeindigProcesInstantieAction
+            </bean>
+        </action>
+        <transition to="Afgerond" name="log einde"></transition>
+    </node>
+
+    <end-state name="Afgerond"></end-state>
+
+    <exception-handler>
+        <action name="exception-handler" class="nl.bzk.isc.jbpm.ExceptionLogger"/>
+    </exception-handler>
+</process-definition>

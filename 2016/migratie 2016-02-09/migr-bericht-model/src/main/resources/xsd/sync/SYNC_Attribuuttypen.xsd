@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+    targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified" attributeFormDefault="unqualified"
+    version="000101">
+
+    <!-- Algemene (simple) type definities (alfabetisch gesorteerd) -->
+
+    <simpleType name="AanvullendeZoekPersoonCriteriaType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="AdministratieveHandelingIdType">
+        <restriction base="long" />
+    </simpleType>
+
+    <simpleType name="AdellijkeTitelPredicaatType">
+        <restriction base="string">
+            <enumeration value="B"/>
+            <enumeration value="BS"/>
+            <enumeration value="G"/>
+            <enumeration value="GI"/>
+            <enumeration value="H"/>
+            <enumeration value="HI"/>
+            <enumeration value="M"/>
+            <enumeration value="MI"/>
+            <enumeration value="P"/>
+            <enumeration value="PS"/>
+            <enumeration value="JH"/>
+            <enumeration value="JV"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="AfnemerCodeType">
+        <restriction base="string">
+            <maxLength value="7" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="AfnemernaamType">
+        <restriction base="string">
+            <maxLength value="80" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="AfnemersindicatieFoutcodeType">
+        <restriction base="string">
+        	<!-- B: controle blokkering gebeurt in het proces, niet in de BRP service voor plaatsen/verwijderen
+            <enumeration value="B"><annotation><documentation>PL is geblokkeerd i.v.m. verhuizing naar gemeente "code"</documentation></annotation></enumeration>
+             -->
+            <enumeration value="G"><annotation><documentation>Persoon komt niet voor</documentation></annotation></enumeration>
+            <enumeration value="H"><annotation><documentation>Betrokkene heeft om geheimhouding verzocht</documentation></annotation></enumeration>
+            <enumeration value="I"><annotation><documentation>Reeds (bij plaatsen)/geen (bij verwijderen) afnemersindicatie geplaatst bij deze persoon</documentation></annotation></enumeration>
+            <enumeration value="R"><annotation><documentation>Geen autorisatie voor het plaatsen van een afnemersindicatie bij deze persoon</documentation></annotation></enumeration>
+            <!-- U: het zoeken van de persoon gebeurt in het proces, niet in de BRP service voor plaatsen/verwijderen
+            <enumeration value="U"><annotation><documentation>Eenduidige identificatie niet gelukt</documentation></annotation></enumeration>
+             -->
+            <!-- V: controle op gemeente van inschrijving van gevonden persoon gebeurt in het proces, niet in de BRP service voor plaatsen/verwijderen
+            <enumeration value="V"><annotation><documentation>Persoon is verhuisd naar gemeente "code"</documentation></annotation></enumeration>
+             -->
+            <enumeration value="X"><annotation><documentation>Geen autorisatie voor de gevraagde actie</documentation></annotation></enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="AfnemersVerstrekkingenType">
+        <restriction base="string"/>
+    </simpleType>
+
+    <simpleType name="AktenummerType">
+        <restriction base="string">
+            <maxLength value="7"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="AntwoordFormaatType">
+        <restriction base="string">
+            <enumeration value="Lo3" />
+            <enumeration value="Lo3XML" />
+            <enumeration value="Brp" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="ANummerLijstType">
+        <list itemType="sync:ANummerType"/>
+    </simpleType>
+
+    <simpleType name="ANummerType">
+        <restriction base="string">
+            <maxLength value="10" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="BerichtAanduidingType">
+        <restriction base="int">
+            <minInclusive value="0"/>
+            <maxInclusive value="1"/>
+        </restriction>
+    </simpleType>
+
+	<simpleType name="BerichtDataType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="BevoegdheidType">
+        <restriction base="int">
+            <minInclusive value="0"/>
+            <maxInclusive value="1"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="BsnType">
+        <restriction base="string">
+            <maxLength value="9" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="ConditioneleVerstrekkingType">
+        <restriction base="int">
+            <minInclusive value="0"/>
+            <maxInclusive value="1"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="DatumType">
+        <restriction base="positiveInteger"/>
+    </simpleType>
+
+    <simpleType name="DienstIdType">
+        <restriction base="int"/>
+    </simpleType>
+
+    <simpleType name="FoutmeldingType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="FoutredenType">
+    	<restriction base="string">
+            <enumeration value="B">
+                <annotation>
+                    <documentation>PL is geblokkeerd i.v.m. verhuizing.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="G">
+                <annotation>
+                    <documentation>Persoon komt niet voor.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="N">
+                <annotation>
+                    <documentation>Actuele gegevens PL komen niet overeen met gegevens van voor het rechtsfeit in het bericht.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="O">
+                <annotation>
+                    <documentation>Bijhouden PL opgeschort wegens overlijden.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="U">
+                <annotation>
+                    <documentation>Eenduidigie identificatie niet gelukt.</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="V">
+                <annotation>
+                    <documentation>Persoon is verhuisd naar andere gemeente.</documentation>
+                </annotation>
+            </enumeration>
+	    </restriction>
+    </simpleType>
+
+    <simpleType name="GeheimhoudingType">
+        <restriction base="short">
+            <minInclusive value="0"/>
+            <maxInclusive value="1"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="GemeentecodeType">
+        <restriction base="string">
+            <minLength value="4"/>
+            <maxLength value="4"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="GemeentecodeOfNaamType">
+        <restriction base="string">
+            <minLength value="0"/>
+            <maxLength value="40"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="GeslachtsaanduidingType">
+        <restriction base="string">
+            <maxLength value="1"/>
+            <enumeration value="M">
+                <annotation>
+                    <documentation>Man</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="V">
+                <annotation>
+                    <documentation>Vrouw</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="O">
+                <annotation>
+                    <documentation>Onbekend</documentation>
+                </annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="GeslachtsnaamType">
+        <restriction base="string">
+            <maxLength value="200"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="HuisletterType">
+        <restriction base="string">
+            <maxLength value="1"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="HuisnummerType">
+        <restriction base="string"/>
+    </simpleType>
+
+    <simpleType name="HuisnummerToevoegingType">
+        <restriction base="string">
+            <maxLength value="4" />
+        </restriction>
+    </simpleType>
+
+   <simpleType name="InstantieCodeType">
+       <restriction base="int" />
+   </simpleType>
+
+    <simpleType name="JaType">
+        <restriction base="string">
+            <maxLength value="1"/>
+            <enumeration value="J">
+                <annotation>
+                    <documentation>Ja</documentation>
+                </annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="LandType">
+        <restriction base="string">
+            <minLength value="4"/>
+            <maxLength value="4"/>
+        </restriction>
+    </simpleType>
+    
+    <simpleType name="LockIdType">
+        <restriction base="long"/>
+    </simpleType>
+
+    <simpleType name="Lo3PlType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="LogCodeType">
+         <restriction base="string">
+              <maxLength value="20" />
+         </restriction>
+    </simpleType>
+
+   <simpleType name="LogLo3CategorieType">
+        <restriction base="positiveInteger">
+             <maxInclusive value="99"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogLo3ElementType">
+         <restriction base="string">
+            <maxLength value="4"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogLo3StapelType">
+        <restriction base="integer">
+            <minInclusive value="-1"/>
+            <maxInclusive value="999"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogLo3VoorkomenType">
+        <restriction base="integer">
+            <minInclusive value="-1"/>
+            <maxInclusive value="99"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="LogSeverityType">
+        <restriction base="positiveInteger">
+             <maxInclusive value="999"/>
+        </restriction>
+   </simpleType>
+
+   <simpleType name="MediumType">
+        <restriction base="string">
+            <maxLength value="1"/>
+            <enumeration value="A">
+                <annotation>
+                    <documentation>Alternatief medium</documentation>
+                </annotation>
+            </enumeration>
+            <enumeration value="N">
+                <annotation>
+                    <documentation>Netwerk</documentation>
+                </annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>
+
+   <simpleType name="OntvangendePartijType">
+       <restriction base="string">
+           <minLength value="4"/>
+           <maxLength value="7"/>
+       </restriction>
+   </simpleType>
+
+   <simpleType name="PartijcodeType">
+       <restriction base="string">
+           <minLength value="6"/>
+           <maxLength value="6"/>
+       </restriction>
+   </simpleType>
+
+   <simpleType name="PersoonsaanduidingType">
+       <restriction base="string">
+           <maxLength value="31"/>
+           <enumeration value="Verhuizend van LO3 naar BRP">
+               <annotation>
+                   <documentation/>
+               </annotation>
+           </enumeration>
+           <enumeration value="Verhuizend van BRP naar LO3 GBA">
+               <annotation>
+                   <documentation/>
+               </annotation>
+           </enumeration>
+           <enumeration value="Verhuizend van BRP naar LO3 RNI">
+               <annotation>
+                   <documentation/>
+               </annotation>
+           </enumeration>
+       </restriction>
+   </simpleType>
+
+    <simpleType name="PersoonIdType">
+        <restriction base="int"/>
+    </simpleType>
+
+    <simpleType name="PostcodeType">
+        <restriction base="string">
+            <maxLength value="6"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="ProcessIdType">
+        <restriction base="string">
+            <maxLength value="100"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="RedenBeeindigingRelatieType">
+        <restriction base="string">
+            <maxLength value="1"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="ReferentieType">
+        <restriction base="string">
+            <maxLength value="36" />
+        </restriction>
+    </simpleType>
+
+	<simpleType name="RichtingType">
+        <restriction base="string">
+			<enumeration value="INGAAND" />
+			<enumeration value="UITGAAND" />
+		</restriction>
+    </simpleType>
+
+    <simpleType name="RubriekenType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="SoortRelatieType">
+        <restriction base="string">
+        	<enumeration value="H">
+        		<annotation>
+        			<documentation>Huwelijk</documentation>
+        		</annotation>
+        	</enumeration>
+        	<enumeration value="P">
+        		<annotation>
+        			<documentation>Geregistreerd partnerschap</documentation>
+        		</annotation>
+        	</enumeration>
+        	<enumeration value="F">
+        		<annotation>
+        			<documentation>Familierechtelijke betrekking</documentation>
+        		</annotation>
+        	</enumeration>
+        	<enumeration value="E">
+        		<annotation>
+        			<documentation>Erkenning ongeboren vrucht</documentation>
+        		</annotation>
+        	</enumeration>
+        	<enumeration value="O">
+        		<annotation>
+        			<documentation>Ontkenning ouderschap ongeboren vrucht</documentation>
+        		</annotation>
+        	</enumeration>
+        	<enumeration value="N">
+        		<annotation>
+        			<documentation>Naamskeuze ongeboren vrucht</documentation>
+        		</annotation>
+        	</enumeration>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="SearchResultaatType">
+        <restriction base="string">
+            <enumeration value="Toevoegen" />
+            <enumeration value="Vervangen" />
+            <enumeration value="Negeren" />
+            <enumeration value="Onduidelijk" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="SelectiePeriodeType">
+       <restriction base="int"/>
+    </simpleType>
+
+    <simpleType name="SelectieSoortType">
+        <restriction base="int">
+            <minInclusive value="0"/>
+            <maxInclusive value="4"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="SoortBerichtType">
+       <restriction base="string"/>
+    </simpleType>
+
+    <simpleType name="StatusType">
+        <restriction base="string">
+            <enumeration value="Ok" />
+            <enumeration value="Fout" />
+            <!-- Specifieke status voor blokkering -->
+            <enumeration value="Geblokkeerd" />
+            <!-- Specifieke status voor lock verzoek -->
+            <enumeration value="Gelocked" />
+            <!-- Specifieke statussen voor synchroniseer naar BRP -->
+            <enumeration value="Toegevoegd" />
+            <enumeration value="Vervangen" />
+            <enumeration value="Onduidelijk" />
+            <enumeration value="Genegeerd" />
+            <enumeration value="Afgekeurd" />
+            <!-- Specifieke statussen voor afnemersindicatie -->
+            <enumeration value="Waarschuwing" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="StraatnaamType">
+        <restriction base="string">
+            <maxLength value="40" />
+        </restriction>
+    </simpleType>
+
+	<simpleType name="SysteemType">
+        <restriction base="string">
+            <enumeration value="GBANetwerk" />
+            <enumeration value="Migratievoorzieningen" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="TechnischeSleutelType">
+        <restriction base="string">
+            <minLength value="1" />
+            <maxLength value="40" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="TijdstipType">
+        <restriction base="dateTime" />
+    </simpleType>
+    
+    <simpleType name="ToegangLeveringsautorisatieIdType">
+        <restriction base="int"/>
+    </simpleType>
+
+    <simpleType name="ToelichtingType">
+        <restriction base="string" />
+    </simpleType>
+
+    <simpleType name="VersieNrType">
+       <restriction base="int"/>
+    </simpleType>
+
+    <simpleType name="VerstrekkingsbeperkingType">
+        <restriction base="short">
+            <minInclusive value="0"/>
+            <maxInclusive value="2"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="VoornamenType">
+        <restriction base="string">
+            <maxLength value="200"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="VoorvoegselType">
+        <restriction base="string">
+            <maxLength value="200"/>
+        </restriction>
+    </simpleType>
+
+    <simpleType name="VoorwaarderegelType">
+        <restriction base="string">
+            <maxLength value="4096" />
+        </restriction>
+    </simpleType>
+
+    <simpleType name="ZoekPersoonResultaatType">
+        <restriction base="string">
+            <enumeration value="Geen">
+ 				<annotation>
+                   <documentation>Geen personen gevonden die voldoen aan de gegeven zoekcriteria.</documentation>
+               </annotation>
+            </enumeration>
+            <enumeration value="Meerdere" >
+ 				<annotation>
+                   <documentation>Meer dan een personen gevonden die voldoen aan de gegeven zoekcriteria.</documentation>
+               </annotation>
+            </enumeration>
+            <enumeration value="Gevonden">
+ 				<annotation>
+                   <documentation>Exact een persoon gevonden die voldoet aan de gegeven zoekcriteria.</documentation>
+               </annotation>
+            </enumeration>
+        </restriction>
+    </simpleType>
+
+</schema>

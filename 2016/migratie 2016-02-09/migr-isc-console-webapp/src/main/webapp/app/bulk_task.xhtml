@@ -1,0 +1,110 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+    >
+<ui:composition template="t_loggedin.xhtml">
+
+<ui:define name="actions">
+    <ga:responseActions>
+        <ga:parameter name="view" target="#{viewMode}" default="none"/>
+        <ga:parameter name="gemeente" target="#{lq01_gemeente}" />
+        <ga:parameter name="anummer" target="#{lq01_anummer}" />
+    </ga:responseActions>
+</ui:define>
+
+<ui:define name="menu">
+<gs:div style="padding:0;margin:0">
+    <table class="leftmenu">
+        <tbody>
+            <tr class="leftmenuheader">
+                <th colspan="2">#{msgs['actions.actions']}</th>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <gs:ul>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'selecteren' ? 'font-weight:bold' : ''}">
+                                <f:param name="view" value="selecteren"/>#{msgs['actions.bulktask.selecteren']}
+                            </h:outputLink>
+                        </gs:li>
+                    </gs:ul>
+                </td>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <gs:ul>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'controleren' ? 'font-weight:bold' : ''}">
+                                <f:param name="view" value="controleren"/>#{msgs['actions.bulktask.controleren']}
+                            </h:outputLink>
+                        </gs:li>
+                    </gs:ul>
+                </td>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <gs:ul>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'uitvoeren' ? 'font-weight:bold' : ''}">
+                                <f:param name="view" value="uitvoeren"/>#{msgs['actions.bulktask.uitvoeren']}
+                            </h:outputLink>
+                        </gs:li>
+                    </gs:ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</gs:div>
+</ui:define>
+
+<ui:define name="body">
+    <gs:div>
+        <ga:attribute name="rendered" value="#{viewMode == 'none'}"/>
+        <h:form id="none">
+        <p/>Welkom bij de bulkverwerking van taken.
+        <p/>Gebruik de menu optie 'selecteren' om in bulk taken te starten en aan jezelf toe te kennen.
+        <p/>Gebruik de menu optie 'controleren' om een bulk verwerking van (aan jezelf toegekende, gestarte) taken te controleren.
+        <p/>Gebruik de menu optie 'uitvoeren' om een bulk verwerking van (aan jezelf toegekende, gestarte) taken uit te voeren.
+        </h:form>
+    </gs:div>
+
+    <gs:div>
+        <ga:attribute name="rendered" value="#{viewMode == 'selecteren'}"/>
+        !! Op basis van niet gestarte taken
+        !! Filter velden
+        !! Knop 'start geselecteerde'
+        !! Knop 'start geselecteerde en ga naar controle'
+        !! Knop 'start alles en ga naar controle'
+    </gs:div>
+
+    <gs:div>
+        <ga:attribute name="rendered" value="#{viewMode == 'controleren'}"/>
+        !! Op basis van 'eigen' gestarte taken
+        !! Filter velden
+        !! Veld met 'restart'-keuze (dropdown bepalen obv taken lijst)
+        !! Knop 'controleren en ga naar uitvoeren'
+    </gs:div>
+
+    <gs:div>
+        <ga:attribute name="rendered" value="#{viewMode == 'uitvoeren'}"/>
+        !! Op basis van 'eigen' gestarte taken
+        !! Filter velden (zelfde als bij controleren)
+        !! Veld met 'restart'-keuze (dropdown bepalen obv taken lijst, zelfde als bij controleren)
+        !! Knop 'uitvoeren' (en ga naar 'none')
+    </gs:div>
+
+</ui:define>
+
+</ui:composition>
+
+</html>

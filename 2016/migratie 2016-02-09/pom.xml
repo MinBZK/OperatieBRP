@@ -1,0 +1,379 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>nl.bzk.migratiebrp</groupId>
+    <artifactId>migr-modules</artifactId>
+    <version>3.2.108-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>MigratieBRP Modules</name>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-release-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <autoVersionSubmodules>true</autoVersionSubmodules>
+
+                    <!-- Als we tijdens de release:prepare de install doen hebben we de goede versies,
+                         kan Jenkins de artifacts deployen naar Artifactory en hoeven we niet een
+                         release:perform te doen (aangezien release:perform bedoelt is om de release
+                         te deployen, maar dat kan bij ons alleen via Jenkins -->
+
+                    <preparationGoals>clean install</preparationGoals>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <scm>
+        <developerConnection>scm:svn:https://www.modernodam.nl/svn/isc-code/trunk</developerConnection>
+        <connection>scm:svn:https://www.modernodam.nl/svn/isc-code/trunk</connection>
+    </scm>
+    <distributionManagement>
+        <repository>
+            <id>brpcentral</id>
+            <name>mGBA releases voor Migratie</name>
+            <url>https://www.modernodam.nl/nexus/content/repositories/releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>brpcentral</id>
+            <name>mGBA snapshots voor Migratie</name>
+            <url>https://www.modernodam.nl/nexus/content/repositories/snapshots</url>
+        </snapshotRepository>
+    </distributionManagement>
+
+    <properties>
+        <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+        <sonar.jacoco.itReportPath>${project.basedir}/../jacoco-it.exec</sonar.jacoco.itReportPath>
+        <sonar.jacoco.reportPath>${project.basedir}/../jacoco.exec</sonar.jacoco.reportPath>
+        <sonar.dynamicAnalysis>reuseReports</sonar.dynamicAnalysis>
+        <sonar.language>java</sonar.language>
+    </properties>
+
+    <profiles>
+        <profile>
+            <id>modules-extern</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-extern</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-bericht</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-bericht</module>
+                <module>migr-bericht-model</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-conversie</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-conversie</module>
+                <module>migr-conversie-model</module>
+                <module>migr-conversie-regels</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-ggo</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-ggo</module>
+                <module>migr-ggo-viewer</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-init</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-init</module>
+                <module>migr-init-logging</module>
+                <module>migr-init-logging-runtime</module>
+                <module>migr-init-logging-verschilanalyse</module>
+                <module>migr-init-logging-model</module>
+                <module>migr-init-naarbrp</module>
+                <module>migr-init-naarisc</module>
+                <module>migr-init-naarlo3</module>
+                <module>migr-init-naarvoisc</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-register</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-register</module>
+                <module>migr-register-client</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-isc</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-isc</module>
+                <module>migr-isc-console</module>
+                <module>migr-isc-console-mig4jsf</module>
+                <module>migr-isc-console-webapp</module>
+                <module>migr-isc-database</module>
+                <module>migr-isc-jbpm</module>
+                <module>migr-isc-jbpm-command</module>
+                <module>migr-isc-jbpm-algemeen</module>
+                <module>migr-isc-jbpm-uc202</module>
+                <module>migr-isc-jbpm-uc301</module>
+                <module>migr-isc-jbpm-uc309</module>
+                <module>migr-isc-jbpm-uc311</module>
+                <module>migr-isc-jbpm-uc811</module>
+                <module>migr-isc-jbpm-uc812</module>
+                <module>migr-isc-jbpm-uc1003</module>
+                <module>migr-isc-opschoner</module>
+                <module>migr-isc-runtime</module>
+                <module>migr-isc-telling</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-release</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-release</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-routering</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-routering</module>
+                <module>migr-routering-runtime</module>
+            </modules>
+        </profile>
+
+
+        <profile>
+            <id>modules-synchronisatie</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-synchronisatie</module>
+                <module>migr-synchronisatie-dal</module>
+                <module>migr-synchronisatie-runtime</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-test</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-test</module>
+                <module>migr-test-afnemersindicatie</module>
+                <module>migr-test-autorisatie</module>
+                <module>migr-test-common</module>
+                <module>migr-test-dal</module>
+                <module>migr-test-isc</module>
+                <module>migr-test-perf</module>
+                <module>migr-test-perf-isc</module>
+                <module>migr-test-perf-levering</module>
+                <module>migr-test-perf-synchronisatie</module>
+                <module>migr-test-persoon</module>
+                <module>migr-test-persoon-database</module>
+                <module>migr-test-persoon-naarbrp</module>
+                <module>migr-test-persoon-naarlo3</module>
+                <module>migr-test-persoon-preconditie</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-test-coverage</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-test-persoon-naarbrp</module>
+                <module>migr-test-afnemersindicatie</module>
+                <module>migr-test-autorisatie</module>
+                <module>migr-test-persoon-preconditie</module>
+                <module>migr-test-persoon-database</module>
+                <!--<module>migr-test-persoon-naarlo3</module>-->
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-tools</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-tools</module>
+                <module>migr-tools-amlezer</module>
+                <module>migr-tools-brp-database</module>
+                <module>migr-tools-gbav-database</module>
+                <module>migr-tools-brp-routering</module>
+                <module>migr-tools-controle</module>
+                <module>migr-tools-deployer</module>
+                <module>migr-tools-levering-vergelijker</module>
+                <module>migr-tools-lg01</module>
+                <module>migr-tools-lo3-vermooier</module>
+                <module>migr-tools-mailbox</module>
+                <module>migr-tools-proefsynchronisatie</module>
+                <module>migr-tools-hornetq</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-util</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr</module>
+                <module>migr-util</module>
+                <module>migr-util-common</module>
+                <module>migr-util-excel</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-build</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr</module>
+                <module>migr-build</module>
+                <module>migr-build-util</module>
+                <module>migr-build-latestsnapshot</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>modules-voisc</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <modules>
+                <module>migr-voisc</module>
+                <module>migr-voisc-database</module>
+                <module>migr-voisc-runtime</module>
+                <module>migr-voisc-spd</module>
+            </modules>
+        </profile>
+
+        <profile>
+            <id>all</id>
+            <modules>
+                <module>migr-extern</module>
+                <module>migr-bericht</module>
+                <module>migr-bericht-model</module>
+                <module>migr-conversie</module>
+                <module>migr-conversie-model</module>
+                <module>migr-conversie-regels</module>
+                <module>migr-ggo</module>
+                <module>migr-ggo-viewer</module>
+                <module>migr-init</module>
+                <module>migr-init-logging</module>
+                <module>migr-init-logging-runtime</module>
+                <module>migr-init-logging-verschilanalyse</module>
+                <module>migr-init-logging-model</module>
+                <module>migr-init-naarbrp</module>
+                <module>migr-init-naarisc</module>
+                <module>migr-init-naarlo3</module>
+                <module>migr-init-naarvoisc</module>
+                <module>migr-register</module>
+                <module>migr-register-client</module>
+                <module>migr-isc</module>
+                <module>migr-isc-console</module>
+                <module>migr-isc-console-mig4jsf</module>
+                <module>migr-isc-console-webapp</module>
+                <module>migr-isc-database</module>
+                <module>migr-isc-jbpm</module>
+                <module>migr-isc-jbpm-command</module>
+                <module>migr-isc-jbpm-algemeen</module>
+                <module>migr-isc-jbpm-uc202</module>
+                <module>migr-isc-jbpm-uc301</module>
+                <module>migr-isc-jbpm-uc309</module>
+                <module>migr-isc-jbpm-uc311</module>
+                <module>migr-isc-jbpm-uc811</module>
+                <module>migr-isc-jbpm-uc812</module>
+                <module>migr-isc-jbpm-uc1003</module>
+                <module>migr-isc-opschoner</module>
+                <module>migr-isc-runtime</module>
+                <module>migr-isc-telling</module>
+                <!-- module>migr-release</module -->
+                <module>migr-routering</module>
+                <module>migr-routering-runtime</module>
+                <module>migr-synchronisatie</module>
+                <module>migr-synchronisatie-dal</module>
+                <module>migr-synchronisatie-runtime</module>
+
+                <module>migr-test</module>
+                <module>migr-test-afnemersindicatie</module>
+                <module>migr-test-autorisatie</module>
+                <module>migr-test-common</module>
+                <module>migr-test-dal</module>
+                <module>migr-test-isc</module>
+                <module>migr-test-perf</module>
+                <module>migr-test-perf-isc</module>
+                <module>migr-test-perf-levering</module>
+                <module>migr-test-perf-synchronisatie</module>
+                <module>migr-test-persoon</module>
+                <module>migr-test-persoon-database</module>
+                <module>migr-test-persoon-naarbrp</module>
+                <module>migr-test-persoon-naarlo3</module>
+                <module>migr-test-persoon-preconditie</module>
+
+                <module>migr-tools</module>
+                <module>migr-tools-amlezer</module>
+                <module>migr-tools-brp-database</module>
+                <module>migr-tools-gbav-database</module>
+                <module>migr-tools-brp-routering</module>
+                <module>migr-tools-controle</module>
+                <module>migr-tools-deployer</module>
+                <module>migr-tools-levering-vergelijker</module>
+                <module>migr-tools-lg01</module>
+                <module>migr-tools-mailbox</module>
+                <module>migr-tools-proefsynchronisatie</module>
+                <module>migr-tools-hornetq</module>
+                <module>migr</module>
+                <module>migr-util</module>
+                <module>migr-util-common</module>
+                <module>migr-util-excel</module>
+                <module>migr-build</module>
+                <module>migr-build-util</module>
+                <module>migr-voisc</module>
+                <module>migr-voisc-database</module>
+                <module>migr-voisc-runtime</module>
+                <module>migr-voisc-spd</module>
+                <module>migr-docker</module>
+            </modules>
+        </profile>
+    </profiles>
+</project>

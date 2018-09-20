@@ -1,0 +1,308 @@
+brpdatabase:
+  image: brp/database
+  container_name: brpdb
+  net: tb02
+  ports:
+    - "5432:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+activemqdatabase:
+  image: brp/database
+  container_name: activemqdb
+  net: tb02
+  ports:
+    - "5442:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+archiveringdatabase:
+  image: brp/database
+  container_name: archiveringdb
+  net: tb02
+  ports:
+    - "5452:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+lockingdatabase:
+  image: brp/database
+  container_name: lockingdb
+  net: tb02
+  ports:
+    - "5462:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+sleutelbos:
+  image: fac-reg.modernodam.nl:5000/sleutel
+  container_name: sleutebos
+  net: tb02
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+brpgbacentrale:
+  image: brp/gba-centrale
+  container_name: brpgbacentrale
+  net: tb02
+  ports:
+    - "12990:12990"
+  volumes:
+    - /opt/appserver/logs
+  environment:
+    BRPDB_ENV_HOSTNAME: brpdb
+    BRPDB_PORT_5432_TCP_PORT: 5432
+    BRPDB_ENV_DBNAME: brp
+    BRPDB_ENV_DBUSER: brp
+    BRPDB_ENV_DBPASS: brp
+    ARCHIVERINGDB_ENV_HOSTNAME: archiveringdb
+    ARCHIVERINGDB_PORT_5432_TCP_PORT: 5432
+    ARCHIVERINGDB_ENV_DBNAME: brp
+    ARCHIVERINGDB_ENV_DBUSER: brp
+    ARCHIVERINGDB_ENV_DBPASS: brp
+    LOCKINGDB_ENV_HOSTNAME: lockingdb
+    LOCKINGDB_PORT_5432_TCP_PORT: 5432
+    LOCKINGDB_ENV_DBNAME: brp
+    LOCKINGDB_ENV_DBUSER: brp
+    LOCKINGDB_ENV_DBPASS: brp
+    CATALINA_OPTS: -Dcom.sun.management.jmxremote -Djava.rmi.server.hostname=${DOCKER_IP} -Dcom.sun.management.jmxremote.port=12990 -Dcom.sun.management.jmxremote.rmi.port=12990 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false
+    ISCROUTERING_ENV_PORT: 61616
+    ISCROUTERING_ENV_HOSTNAME: iscroutering
+    ROUTERINGCENTRALE_PORT_61616_TCP_PORT: 61616
+    ROUTERINGCENTRALE_ENV_HOSTNAME: routeringcentrale
+    JMX_PORT: 12990
+    JMX_HOST: ${DOCKER_IP}
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+brpmessagebroker:
+  image: brp/brp-message-broker
+  container_name: routeringcentrale
+  net: tb02
+  ports:
+    - "11990:11990"
+    - "61616:61616"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    ROUTERINGCENTRALE_PORT_61616_TCP_PORT: 61616
+    ACTIVEMQDB_ENV_HOSTNAME: activemqdb
+    ACTIVEMQDB_PORT_5432_TCP_PORT: 5432
+    ACTIVEMQDB_ENV_DBNAME: brp
+    ACTIVEMQDB_ENV_DBUSER: brp
+    ACTIVEMQDB_ENV_DBPASS: brp
+    JAVA_OPTS: -Xms128M -Xmx1G
+    CATALINA_OPTS: -Dcom.sun.management.jmxremote -Djava.rmi.server.hostname=${DOCKER_IP} -Dcom.sun.management.jmxremote.port=11990 -Dcom.sun.management.jmxremote.rmi.port=11990 -Dcom.sun.management.jmxremote.ssl=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.local.only=false
+    JMX_PORT: 11990
+    JMX_HOST: ${DOCKER_IP}
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+mailbox:
+  image: migr-tools-mailbox
+  container_name: mailbox
+  net: tb02
+  ports:
+    - "1599:1599"
+    - "1212:1212"
+  environment:
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 1599
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+iscrouteringdatabase:
+  image: migr-routering-database
+  container_name: iscrouteringdatabase
+  net: tb02
+  ports:
+    - "5532:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+iscroutering:
+  image: migr-routering-runtime
+  container_name: iscroutering
+  net: tb02
+  ports:
+    - "1199:1199"
+    - "61617:61616"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    ROUTERING_DB_ENV_HOSTNAME: iscrouteringdatabase
+    ROUTERING_DB_ENV_PORT: 5432
+    ROUTERING_DB_ENV_NAME: routering
+    ROUTERING_DB_ENV_USERNAME: migratie
+    ROUTERING_DB_ENV_PASSWORD: M1gratie
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 1199
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+synchronisatie:
+  image: migr-synchronisatie-runtime
+  container_name: iscsynchronisatie
+  net: tb02
+  ports:
+    - "1799:1799"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    BRP_DB_ENV_HOSTNAME: brpdb
+    BRP_DB_ENV_PORT: 5432
+    BRP_DB_ENV_NAME: brp
+    BRP_DB_ENV_USERNAME: brp
+    BRP_DB_ENV_PASSWORD: brp
+    ROUTERING_ENV_PORT: 61616
+    ROUTERING_ENV_HOSTNAME: iscroutering
+    BRPROUTERING_ENV_PORT: 61616
+    BRPROUTERING_ENV_HOSTNAME: routeringcentrale
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 1799
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+iscdatabase:
+  image: migr-isc-database
+  container_name: iscdatabase
+  net: tb02
+  ports:
+    - "5732:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+isc:
+  image: migr-isc-runtime
+  container_name: isc
+  net: tb02
+  ports:
+    - "1099:1099"
+  volumes:
+      - /opt/appserver/logs
+  environment:
+    ISC_DB_ENV_HOSTNAME: iscdatabase
+    ISC_DB_ENV_PORT: 5432
+    ISC_DB_ENV_NAME: isc
+    ISC_DB_ENV_USERNAME: migratie
+    ISC_DB_ENV_PASSWORD: M1gratie
+    ROUTERING_ENV_PORT: 61616
+    ROUTERING_ENV_HOSTNAME: iscroutering
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 1099
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+iscconsole:
+  image: migr-isc-console
+  container_name: iscconsole
+  net: tb02
+  ports:
+    - "8080:8080"
+  volumes:
+    - /opt/appserver/logs
+  environment:
+    ISC_DB_ENV_HOSTNAME: iscdatabase
+    ISC_DB_ENV_PORT: 5432
+    ISC_DB_ENV_NAME: isc
+    ISC_DB_ENV_USERNAME: migratie
+    ISC_DB_ENV_PASSWORD: M1gratie
+    ISC_ENV_JMX_HOSTNAME: isc
+    ISC_ENV_JMX_PORT: 1099
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+voiscdatabase:
+  image: migr-voisc-database
+  container_name: voiscdatabase
+  net: tb02
+  ports:
+    - "5632:5432"
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+voisc:
+  image: migr-voisc-runtime
+  container_name: voisc
+  net: tb02
+  ports:
+    - "1399:1399"
+  volumes:
+    - /opt/appserver/logs
+  environment:
+    VOISC_DB_ENV_HOSTNAME: voiscdatabase
+    VOISC_DB_ENV_PORT: 5432
+    VOISC_DB_ENV_NAME: voisc
+    VOISC_DB_ENV_USERNAME: migratie
+    VOISC_DB_ENV_PASSWORD: M1gratie
+    MAILBOX_ENV_HOSTNAME: mailbox
+    MAILBOX_ENV_PORT: 1212
+    ROUTERING_ENV_PORT: 61616
+    ROUTERING_ENV_HOSTNAME: iscroutering
+    JMX_HOST: ${DOCKER_IP}
+    JMX_PORT: 1399
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+elasticsearch:
+  image: brp-beheer-logging-elasticsearch
+  container_name: elasticsearch
+  net: tb02
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+kibana:
+  image: brp-beheer-logging-kibana
+  container_name: kibana
+  net: tb02
+  ports:
+    - "5601:5601"
+  environment:
+    ELASTICSEARCH_URL: http://elasticsearch:9200  
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"
+
+logstash:
+  image: brp-beheer-logging-logstash
+  container_name: logstash
+  net: tb02
+  log_driver: "json-file"
+  log_opt:
+    max-size: "1m"
+    max-file: "5"

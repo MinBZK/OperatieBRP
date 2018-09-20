@@ -1,0 +1,1 @@
+select count(*) from mig_bericht where ms_sequence_number = 1;

@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    ">
+
+    <bean id="destinationManager" class="com.mockrunner.jms.DestinationManager"/>
+
+    <bean id="initVullingNaarLo3QueueHornet" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="/queue/init.vulling.naarlo3"/>
+    </bean>
+
+    <bean name="initVullingNaarBrpResponseQueueHornet" factory-bean="destinationManager" factory-method="createQueue">
+        <constructor-arg index="0" value="/queue/init.vulling.naarbrp.response"/>
+    </bean>
+
+    <bean id="terugConversieJmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <property name="destination" ref="initVullingNaarLo3QueueHornet"/>
+
+        <property name="messageListener">
+            <bean class="nl.bzk.migratiebrp.init.logging.runtime.listeners.TerugConversieMessageListener"/>
+        </property>
+    </bean>
+
+    <bean id="naarBrpResponseJmsContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="true"/>
+        <property name="sessionTransacted" value="true"/>
+
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
+        <property name="destination" ref="initVullingNaarBrpResponseQueueHornet"/>
+
+        <property name="messageListener">
+            <bean class="nl.bzk.migratiebrp.init.logging.runtime.listeners.NaarBrpMessageListener"/>
+        </property>
+    </bean>
+
+    <!-- puur voor de test om iets op de queue te zetten -->
+    <bean id="configurationManager" class="com.mockrunner.jms.ConfigurationManager"/>
+
+    <bean id="jmsConnectionFactory" class="com.mockrunner.mock.jms.MockQueueConnectionFactory">
+        <constructor-arg index="0" ref="destinationManager"/>
+        <constructor-arg index="1" ref="configurationManager"/>
+    </bean>
+
+    <bean name="jmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="jmsConnectionFactory"/>
+    </bean>
+
+</beans>

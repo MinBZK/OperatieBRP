@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd">
+
+    <bean id="synchronisatieJmx" class= "nl.bzk.migratiebrp.synchronisatie.runtime.JMXImpl" />
+
+    <bean id="synchronisatieMBeanServer" class="org.springframework.jmx.support.MBeanServerFactoryBean">
+        <property name="locateExistingServerIfPossible" value="true"/>
+    </bean>
+
+    <bean id="synchronisatieMBeanExporter" class="org.springframework.jmx.export.MBeanExporter" lazy-init="false">
+        <property name="assembler" ref="synchronisatieMBeanAssembler" />
+        <property name="server" ref="synchronisatieMBeanServer" />
+        <property name="namingStrategy" ref="synchronisatieNamingStrategy" />
+        <property name="autodetect" value="true" />
+    </bean>
+
+    <bean id="synchronisatieJmsAttributeSource" class="org.springframework.jmx.export.annotation.AnnotationJmxAttributeSource"/>
+    <bean id="synchronisatieMBeanAssembler" class="org.springframework.jmx.export.assembler.MetadataMBeanInfoAssembler">
+        <property name="attributeSource" ref="synchronisatieJmsAttributeSource"/>
+    </bean>
+    <bean id="synchronisatieNamingStrategy" class="nl.bzk.migratiebrp.util.common.jmx.DynamicDomainNamingStrategy">
+    	<property name="delegate">
+    		<bean class="org.springframework.jmx.export.naming.MetadataNamingStrategy">
+		        <property name="attributeSource" ref="synchronisatieJmsAttributeSource"/>
+    		</bean>
+    	</property>
+        <property name="domain" value="nl.bzk.migratiebrp.synchronisatie"/>
+    </bean>
+    
+    <!-- EH Cache (migr-synchronisatie-dal) -->
+	<bean id="ehCacheJMX" class="net.sf.ehcache.management.ManagementService" init-method="init" destroy-method="dispose">
+        <constructor-arg ref="conversietabelEhCache"/>
+        <constructor-arg ref="synchronisatieMBeanServer"/>
+        <constructor-arg index="2" value="true"/>
+        <constructor-arg index="3" value="true"/>
+        <constructor-arg index="4" value="true"/>
+        <constructor-arg index="5" value="true"/>
+ </bean>    
+</beans>

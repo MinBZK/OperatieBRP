@@ -1,0 +1,3 @@
+update voisc.bericht set 
+tijdstip_verzonden = (SELECT date_trunc('day',LOCALTIMESTAMP - interval '75 hours'))
+where originator = '3000200' and recipient = '0310010' and status = 'SENT_TO_MAILBOX';

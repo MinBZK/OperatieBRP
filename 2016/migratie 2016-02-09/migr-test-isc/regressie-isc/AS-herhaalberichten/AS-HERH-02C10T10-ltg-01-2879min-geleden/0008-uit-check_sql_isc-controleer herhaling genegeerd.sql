@@ -1,0 +1,1 @@
+select count(*) from mig_bericht where actie = 'herhalingBeantwoord';

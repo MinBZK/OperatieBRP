@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+    targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified" attributeFormDefault="unqualified"
+    version="000101">
+
+    <include schemaLocation="SYNC_Objecttypen.xsd"/>
+
+    <!--
+     | Berichten die te maken hebben met het verwerken van LO3-toevallige gebeurtenis berichten (Tb02).
+     +-->
+
+    <element name="verwerkToevalligeGebeurtenisVerzoek" type="sync:VerwerkToevalligeGebeurtenisVerzoekType"/>
+    <element name="verwerkToevalligeGebeurtenisAntwoord" type="sync:VerwerkToevalligeGebeurtenisAntwoordType"/>
+
+    <!-- Verwerk toevallige gebeurtenis in BRP -->
+
+    <complexType name="VerwerkToevalligeGebeurtenisVerzoekType">
+        <sequence>
+        	<element name="doelGemeente" type="sync:OntvangendePartijType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="persoon" type="sync:PersoonType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <choice minOccurs="1" maxOccurs="1">
+				<element name="naamGeslacht" type="sync:NaamGeslachtType" minOccurs="1" maxOccurs="1" nillable="false" />
+	            <element name="familierechtelijkeBetrekking" type="sync:FamilierechtelijkeBetrekkingType" minOccurs="1" maxOccurs="1" nillable="false" />
+	            <element name="overlijden" type="sync:OverlijdenType" minOccurs="1" maxOccurs="1" nillable="false" />
+	            <element name="relatie" type="sync:RelatieType" minOccurs="1" maxOccurs="1" nillable="false" />
+            </choice>
+			<element name="akte" type="sync:AkteGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+			<element name="geldigheid" type="sync:GeldigheidGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+    <complexType name="VerwerkToevalligeGebeurtenisAntwoordType">
+        <sequence>
+            <element name="status" minOccurs="1" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:StatusType">
+                        <enumeration value="Fout">
+                            <annotation><documentation>
+                                Dit resultaat geeft aan dat er een fout is op getreden bij het verwerken van de toevallige gebeurtenis in de BRP.
+                            </documentation></annotation>
+                        </enumeration>
+                        <enumeration value="Ok">
+                            <annotation><documentation>
+                                Dit resultaat geeft aan dat de toevallige gebeurtenis succesvol is verwerkt in de BRP.
+                            </documentation></annotation>
+                        </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="foutreden" minOccurs="0" maxOccurs="1" nillable="false">
+                <simpleType>
+                    <restriction base="sync:FoutredenType">
+			            <enumeration value="B">
+			                <annotation>
+			                    <documentation>PL is geblokkeerd i.v.m. verhuizing.</documentation>
+			                </annotation>
+			            </enumeration>
+			            <enumeration value="G">
+			                <annotation>
+			                    <documentation>Persoon komt niet voor.</documentation>
+			                </annotation>
+			            </enumeration>
+			            <enumeration value="N">
+			                <annotation>
+			                    <documentation>Actuele gegevens PL komen niet overeen met gegevens van voor het rechtsfeit in het bericht.</documentation>
+			                </annotation>
+			            </enumeration>
+			            <enumeration value="O">
+			                <annotation>
+			                    <documentation>Bijhouden PL opgeschort wegens overlijden.</documentation>
+			                </annotation>
+			            </enumeration>
+			            <enumeration value="U">
+			                <annotation>
+			                    <documentation>Eenduidige identificatie niet gelukt.</documentation>
+			                </annotation>
+			            </enumeration>
+			            <enumeration value="V">
+			                <annotation>
+			                    <documentation>Persoon is verhuisd naar gemeente.</documentation>
+			                </annotation>
+			            </enumeration>
+                    </restriction>
+                </simpleType>
+            </element>
+            <element name="administratieveHandelingId" type="sync:AdministratieveHandelingIdType" minOccurs="0" maxOccurs="unbounded"/>
+            <element name="bijhoudingGemeenteCode" type="sync:GemeentecodeType" minOccurs="0" maxOccurs="1">
+				<annotation>
+					<documentation>Gemeente bij foutreden 'B' of 'V'.</documentation>
+				</annotation>
+			</element>
+        </sequence>
+    </complexType>
+
+</schema>

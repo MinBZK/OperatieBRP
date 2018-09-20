@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+                           http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+	<!-- Config -->
+	<context:annotation-config />
+    <context:property-placeholder />
+
+  	<amq:connectionFactory id="connectionFactory" brokerURL="tcp://localhost:61622"/>
+  	<bean name="autorisatieConnectionFactory, gemeenteConnectionFactory" class="nl.bzk.migratiebrp.register.client.util.RefBeanFactory">
+  		<property name="bean" ref="connectionFactory"/>
+  	</bean>
+
+  	<amq:topic id="gemeenteRegisterTopic" physicalName="gemeente.register" />
+  	<amq:queue id="gemeenteVerzoekQueue" physicalName="gemeente.verzoek" />
+  	<amq:topic id="autorisatieRegisterTopic" physicalName="autorisatie.register" />
+  	<amq:queue id="autorisatieVerzoekQueue" physicalName="autorisatie.verzoek" />
+
+</beans>

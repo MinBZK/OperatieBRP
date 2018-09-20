@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+    ">
+
+    <bean id="conversietabelFactory" class="nl.bzk.migratiebrp.conversie.regels.tabel.ConversietabelFactoryImpl"/>
+
+    <!-- Definitie van DataSource specifiek voor test -->
+    <jdbc:embedded-database id="inMemoryDatabase">
+        <jdbc:script location="classpath:sql/hsqldb/createInitVullingTables.sql"/>
+        <jdbc:script location="classpath:sql/hsqldb/insertGbavResult.sql"/>
+    </jdbc:embedded-database>
+
+    <bean id="loggingJpaVendorAdapter"
+          class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <property name="database" value="HSQL"/>
+        <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+    </bean>
+
+    <bean id="loggingEntityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceXmlLocation" value="META-INF/test-persistence.xml" />
+        <property name="persistenceUnitName" value="LogEntities"/>
+        <property name="dataSource" ref="inMemoryDatabase"/>
+        <property name="jpaVendorAdapter" ref="loggingJpaVendorAdapter"/>
+    </bean>
+</beans>

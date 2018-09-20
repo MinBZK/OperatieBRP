@@ -1,0 +1,37 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.migratiebrp.voisc.runtime.jobs;
+
+import nl.bzk.migratiebrp.util.common.logging.Logger;
+import nl.bzk.migratiebrp.util.common.logging.LoggerFactory;
+import nl.bzk.migratiebrp.util.common.logging.MDC;
+import nl.bzk.migratiebrp.util.common.logging.MDC.MDCCloser;
+import nl.bzk.migratiebrp.voisc.runtime.VoiscService;
+import org.quartz.DisallowConcurrentExecution;
+import org.quartz.Job;
+import org.quartz.JobDataMap;
+import org.quartz.JobExecutionContext;
+
+/**
+ * Job om berichten te versturen naar en te ontvangen van de mailbox.
+ */
+@DisallowConcurrentExecution
+public final class VerzendenEnOntvangenMailboxJob implements Job {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger();
+
+    @Override
+    public void execute(final JobExecutionContext arg0) {
+        try (MDCCloser verwerkingCloser = MDC.startVerwerking()) {
+            LOGGER.debug("Start job: versturen berichten naar en ontvangen berichten van mailbox.");
+            final JobDataMap jdm = arg0.getMergedJobDataMap();
+            final VoiscService voiscService = (VoiscService) jdm.get("voiscService");
+            voiscService.berichtenVerzendenNaarEnOntvangenVanMailbox();
+            LOGGER.debug("Einde job: versturen berichten naar en ontvangen berichten van mailbox.");
+        }
+    }
+}

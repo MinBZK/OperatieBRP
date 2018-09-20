@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xmlns="http://www.springframework.org/schema/beans" xmlns:cache="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd">
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"/>
+
+    <bean id="syncDalEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="BrpEntities"/>
+        <property name="dataSource" ref="syncDalDataSource"/>
+        <property name="jpaVendorAdapter" ref="syncDalJpaVendorAdapter"/>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.transaction.manager_lookup_class">
+                    com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup
+                </prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                <prop key="hibernate.transaction.jta.platform">
+                    nl.bzk.migratiebrp.synchronisatie.dal.repository.jta.AtomikosJtaPlatform
+                </prop>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+                <prop key="hibernate.cache.region.factory_class">org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory</prop>
+                <prop key="net.sf.ehcache.configurationResourceName">synchronisatie-dal-stamtabel-ehcache.xml</prop>
+                <prop key="hibernate.generate_statistics">${synchronisatie.dal.hibernate.statistics:false}</prop>
+                <prop key="hibernate.use_sql_comments">false</prop>
+                <prop key="hibernate.format_sql">false</prop>
+            </props>
+        </property>
+    </bean>
+
+    <cache:annotation-driven/>
+
+    <!-- the cache -->
+    <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager" p:cacheManager-ref="conversietabelEhCache"/>
+    <bean id="conversietabelEhCache" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean" p:configLocation="classpath:conversietabel-ehcache.xml"/>
+
+    <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
+        <property name="forceShutdown">
+            <value>true</value>
+        </property>
+    </bean>
+
+    <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout">
+            <value>300</value>
+        </property>
+    </bean>
+
+    <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+    <bean id="syncDalTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager">
+            <ref bean="atomikosTransactionManager"/>
+        </property>
+        <property name="userTransaction">
+            <ref bean="atomikosUserTransaction"/>
+        </property>
+    </bean>
+
+    <bean id="syncDalDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+        <property name="uniqueResourceName">
+            <bean class="nl.bzk.migratiebrp.util.common.UniqueName">
+                <property name="baseName" value="syncDalDatabase"/>
+            </bean>
+        </property>
+
+        <property name="xaDataSourceClassName" value="${database.driver:org.postgresql.xa.PGXADataSource}"/>
+        <property name="xaProperties">
+            <props>
+                <prop key="ServerName">${database.host:localhost}</prop>
+                <prop key="PortNumber">${database.port:5432}</prop>
+                <prop key="DatabaseName">${database.name:BRP}</prop>
+                <prop key="User">${database.username:postgres}</prop>
+                <prop key="Password">${database.password:postgres}</prop>
+            </props>
+        </property>
+        <property name="maxPoolSize" value="${database.maxpool:200}"/>
+        <property name="minPoolSize" value="${database.minpool:1}"/>
+        <property name="testQuery" value="select 41+1"/>
+    </bean>
+
+    <bean name="syncDalJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <property name="databasePlatform" value="${database.dialect:org.hibernate.dialect.PostgreSQL82Dialect}"/>
+    </bean>
+
+    <!-- Datasource Definitie voor persisteren protocollering -->
+    <bean id="viewerDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${viewer.jdbc.driverClassName}"/>
+        <property name="jdbcUrl" value="${viewer.jdbc.url}"/>
+        <property name="user" value="${viewer.jdbc.username}"/>
+        <property name="password" value="${viewer.jdbc.password}"/>
+        <property name="minPoolSize" value="1"/>
+        <property name="maxPoolSize" value="10"/>
+        <property name="maxIdleTime" value="3600"/>
+        <property name="testConnectionOnCheckin" value="true"/>
+        <property name="idleConnectionTestPeriod" value="30"/>
+        <property name="preferredTestQuery" value="SELECT 41+1"/>
+    </bean>
+
+    <bean id="viewerJpaVendorAdapter"
+          class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+        <property name="showSql" value="false"/>
+        <property name="generateDdl" value="false"/>
+        <!-- property name="database" value="POSTGRESQL" /> -->
+        <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQL82Dialect"/>
+    </bean>
+
+    <bean id="viewerEntityManagerFactory"
+          class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+          depends-on="">
+        <property name="persistenceUnitName" value="ViewerEntities"/>
+        <property name="dataSource" ref="viewerDataSource"/>
+        <property name="jpaVendorAdapter" ref="viewerJpaVendorAdapter"/>
+    </bean>
+
+    <!-- Common -->
+    <tx:annotation-driven transaction-manager="viewerTransactionManager"/>
+
+    <jpa:repositories base-package="nl.bzk.migratiebrp.ggo.viewer.repository"/>
+
+    <bean id="viewerJpaDialect" class="org.springframework.orm.jpa.vendor.HibernateJpaDialect"/>
+
+    <bean id="viewerTransactionManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="viewerEntityManagerFactory"/>
+        <property name="jpaDialect" ref="viewerJpaDialect"/>
+    </bean>
+
+</beans>

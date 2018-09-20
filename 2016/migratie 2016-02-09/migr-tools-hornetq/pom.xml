@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>migr-tools</artifactId>
+        <groupId>nl.bzk.migratiebrp</groupId>
+        <version>3.2.108-SNAPSHOT</version>
+        <relativePath>../migr-tools/pom.xml</relativePath>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.bzk.migratiebrp.tools</groupId>
+    <artifactId>migr-tools-hornetq</artifactId>
+    <packaging>pom</packaging>
+    <name>Migr - Tools - HornetQ</name>
+
+    <dependencies>
+        <dependency>
+            <groupId>org.jboss</groupId>
+            <artifactId>hornetq</artifactId>
+            <version>2.2.14.Final</version>
+            <type>zip</type>
+            <scope>runtime</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+
+        </plugins>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>docker</id>
+            <properties>
+                <docker.registry>fac-reg.modernodam.nl:5000</docker.registry>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>docker-assembly</id>
+                                <phase>integration-test</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                                <configuration>
+                                    <finalName>docker</finalName>
+                                    <appendAssemblyId>false</appendAssemblyId>
+                                    <descriptor>src/main/assembly/assembly.xml</descriptor>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.4.0</version>
+                        <executions>
+                            <execution>
+                                <id>docker-make</id>
+                                <phase>post-integration-test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>target/docker</workingDirectory>
+                                    <executable>docker</executable>
+                                    <commandlineArgs>build -t migr-tools-hornetq .</commandlineArgs>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+      <id>docker-release</id>
+      <properties>
+        <docker.registry>fac-reg.modernodam.nl:5000</docker.registry>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>exec-maven-plugin</artifactId>
+            <version>1.4.0</version>
+            <executions>
+              <execution>
+                <id>docker-tag-image</id>
+                <phase>install</phase>
+                <goals>
+                  <goal>exec</goal>
+                </goals>
+                <configuration>
+                  <workingDirectory>target</workingDirectory>
+                  <executable>docker</executable>
+                  <commandlineArgs>tag ${project.artifactId} ${project.artifactId}:${project.version}</commandlineArgs>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+    </profiles>
+</project>

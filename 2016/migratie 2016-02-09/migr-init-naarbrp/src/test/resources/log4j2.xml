@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %msg%n" />
+		</Console>
+
+		<RollingRandomAccessFile name="Systeem"
+			fileName="target/logs/systeem.log" filePattern="target/logs/systeem-%d{yyyy-MM-dd}-%i.log.gz">
+			<MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY"
+				onMismatch="ACCEPT" />
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="7" compressionLevel="9" />
+		</RollingRandomAccessFile>
+	</Appenders>
+
+	<Loggers>
+		<Root level="INFO">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="Systeem" />
+		</Root>
+		<Logger name="nl.bzk.migratiebrp.init.naarbrp" level="DEBUG" />
+	</Loggers>
+
+</Configuration>

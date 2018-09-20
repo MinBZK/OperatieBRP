@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+    >
+<ui:composition template="t_loggedin.xhtml">
+
+<ui:define name="actions">
+<ga:responseActions>
+    <!-- filter -->
+    <ga:parameter name="kanaal" target="#{filter_kanaal}" default="" />
+    <ga:parameter name="richting" target="#{filter_richting}" default="" />
+    <ga:parameter name="bron" target="#{filter_bron}" default="" />
+    <ga:parameter name="doel" target="#{filter_doel}" default="" />
+    <ga:parameter name="type" target="#{filter_type}" default="" />
+    <ga:parameter name="berichtId" target="#{filter_berichtid}" default="" />
+    <ga:parameter name="correlatieId" target="#{filter_correlatieid}" default="" />
+    <mig:berichtenFilter target="#{berichtenList_filter}" kanaal="#{filter_kanaal}" richting="#{filter_richting}"
+        bron="#{filter_bron}" doel="#{filter_doel}" type="#{filter_type}" berichtId="#{filter_berichtid}"
+        correlatieId="#{filter_correlatieid}"
+     />
+
+    <!-- paginering -->
+    <ga:parameter name="page" target="#{page}">
+        <f:convertNumber integerOnly="true"/>
+    </ga:parameter>
+    <mig:pager target="#{berichtenList_pager}" page="#{page}" pageSize="25" />
+
+    <mig:listBerichten target="#{berichtenList}" pager="#{berichtenList_pager}" filter="#{berichtenList_filter}"/>
+</ga:responseActions>
+</ui:define>
+
+<ui:define name="menu">
+<gs:div style="padding:0;margin:0">
+    <table class="leftmenu">
+        <tbody>
+            <tr class="leftmenuheader">
+                <th colspan="2">#{msgs['menu.actions']}</th>
+            </tr>
+        </tbody>
+    </table>
+</gs:div>
+</ui:define>
+
+<ui:define name="body">
+    <gs:div>
+        <h:outputText>
+            <ui:decorate template="t_berichten.xhtml">
+                <ui:param name="berichten" value="#{berichtenList}"/>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="berichten"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+    </gs:div>
+</ui:define>
+</ui:composition>
+
+</html>

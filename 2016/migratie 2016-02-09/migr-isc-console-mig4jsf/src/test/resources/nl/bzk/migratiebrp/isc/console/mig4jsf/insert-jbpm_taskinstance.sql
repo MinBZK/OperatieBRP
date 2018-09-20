@@ -1,0 +1,1 @@
+insert into jbpm_taskinstance (id_, class_, version_, actorid_, start_) values (4567, 'A', 1, 'jaap', now());

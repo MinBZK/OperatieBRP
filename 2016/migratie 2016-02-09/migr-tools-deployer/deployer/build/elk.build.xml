@@ -1,0 +1,300 @@
+<project name="migr-init-logging" basedir="." default="fail">
+
+    <!--
+     | Algemene properties
+     |
+     | server.host
+     | server.username
+     | server.password
+     |
+     | File properties
+     |
+     | application.source
+     | application.file.elasticsearch
+     | application.file.logstash
+     | application.file.kibana
+     |
+    -->
+
+    <property name="application.directory" value="elk" />
+    <property name="application.directory.elasticsearch" value="elasticsearch-1.5.2" />
+    <property name="application.directory.logstash" value="logstash-1.4.2" />
+    <property name="application.directory.logstash.plugin" value="log4j2" />
+    <property name="application.directory.kibana" value="kibana-4.0.2-linux-x64" />
+
+    <target name="checkProperties">
+        <fail unless="server.host" message="server.host property is verplicht." />
+        <fail unless="server.username" message="server.username property is verplicht." />
+        <fail unless="server.password" message="server.password property is verplicht." />
+    </target>
+
+    <target name="checkInstallProperties" depends="checkProperties">
+        <!-- Check file settings -->
+        <fail unless="application.source" message="application.source property is verplicht bij het installeren." />
+        <fail unless="application.file.elasticsearch" message="application.file.elasticsearch property is verplicht bij het installeren." />
+        <fail unless="application.file.logstash" message="application.file.logstash property is verplicht bij het installeren." />
+        <fail unless="application.file.logstash.plugin" message="application.file.logstash.plugin property is verplicht bij het installeren." />
+        <fail unless="application.file.kibana" message="application.file.kibana property is verplicht bij het installeren." />
+
+        <!-- Check files exists -->
+        <fail message="${application.source}/${application.file.elasticsearch} bestaat niet (of leidt niet tot exact 1 bestand).">
+            <condition>
+                <not>
+                    <resourcecount count="1" >
+                        <fileset dir="${application.source}">
+                            <include name="${application.file.elasticsearch}" />
+                        </fileset>
+                    </resourcecount>
+                </not>
+            </condition>
+        </fail>
+        
+            <fail message="${application.source}/${application.file.logstash} bestaat niet (of leidt niet tot exact 1 bestand).">
+                <condition>
+                    <not>
+                        <resourcecount count="1" >
+                            <fileset dir="${application.source}">
+                                <include name="${application.file.logstash}" />
+                            </fileset>
+                        </resourcecount>
+                    </not>
+                </condition>
+            </fail>
+        
+            <fail message="${application.source}/${application.file.logstash.plugin} bestaat niet (of leidt niet tot exact 1 bestand).">
+                <condition>
+                    <not>
+                        <resourcecount count="1" >
+                            <fileset dir="${application.source}">
+                                <include name="${application.file.logstash.plugin}" />
+                            </fileset>
+                        </resourcecount>
+                    </not>
+                </condition>
+            </fail>
+    
+        <fail message="${application.source}/${application.file.kibana} bestaat niet (of leidt niet tot exact 1 bestand).">
+            <condition>
+                <not>
+                    <resourcecount count="1" >
+                        <fileset dir="${application.source}">
+                            <include name="${application.file.kibana}" />
+                        </fileset>
+                    </resourcecount>
+                </not>
+            </condition>
+        </fail>
+            
+    </target>
+
+    <target name="install" depends="checkInstallProperties,createLocalConfigurationFile">
+        <echo message="Installing ${ant.project.name} ...." />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *; mkdir ${application.directory.elasticsearch}; mkdir ${application.directory.logstash}; mkdir ${application.directory.kibana}" />
+        
+        <echo message="Copying ${application.file.elasticsearch}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}/${application.directory.elasticsearch}" trust="true" failonerror="true">
+            <fileset dir="${application.source}">
+                <include name="${application.file.elasticsearch}" />
+            </fileset>
+        </scp>
+        
+        <echo message="Copying ${application.file.logstash}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}/${application.directory.logstash}" trust="true" failonerror="true">
+            <fileset dir="${application.source}">
+                <include name="${application.file.logstash}" />
+            </fileset>
+        </scp>
+        
+        <echo message="Copying ${application.file.logstash}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}/" trust="true" failonerror="true">
+            <fileset dir="${application.source}">
+                <include name="${application.file.logstash.plugin}" />
+            </fileset>
+        </scp>
+        
+        <echo message="Copying ${application.file.kibana}" />
+        <scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}/${application.directory.kibana}" trust="true" failonerror="true">
+            <fileset dir="${application.source}">
+                <include name="${application.file.kibana}" />
+            </fileset>
+        </scp>
+        
+        <echo message="Unpacking ${application.file.elasticsearch}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; mkdir ${application.directory}; cd ${application.directory}; unzip -o /tmp/${application.directory}/${application.directory.elasticsearch}/${application.file.elasticsearch} -d .;" />
+        
+        <echo message="Unpacking ${application.file.logstash}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; cd ${application.directory}; unzip -o /tmp/${application.directory}/${application.directory.logstash}/${application.file.logstash} -d .;" />
+        
+        <echo message="Unpacking ${application.file.logstash.plugin}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; cd ${application.directory}; unzip -o /tmp/${application.directory}/${application.file.logstash.plugin};" />
+        
+        <echo message="Unpacking ${application.file.kibana}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; cd ${application.directory}; cp /tmp/${application.directory}/${application.directory.kibana}/${application.file.kibana} .; tar -xf ${application.file.kibana};" />
+
+        <echo message="Copying configuration files" />
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/${application.directory.logstash}/bin" trust="true" failonerror="true">
+            <fileset dir="tmp">
+                <include name="logstash.conf" />
+            </fileset>
+        </scp>
+        <scp todir="${server.username}:${server.password}@${server.host}:~/${application.directory}/${application.directory.kibana}/config" trust="true" failonerror="true">
+            <fileset dir="tmp">
+                <include name="kibana.yml" />
+            </fileset>
+        </scp>
+    	
+        <echo message="Copying Log4J2 plugin (Logstash)" />
+   		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+            command="cd ~; cd ${application.directory}/${application.directory.logstash}/lib/logstash/inputs; cp ~/${application.directory}/${application.directory.logstash.plugin}/lib/logstash/inputs/log4j2.rb ." />
+   		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+            command="cd ~; cd ${application.directory}/${application.directory.logstash}/vendor; cp ~/${application.directory}/${application.directory.logstash.plugin}/vendor/*.jar ." />
+
+    </target>
+
+    <target name="createLocalConfigurationFile" depends="checkProperties">
+     <echo message="Creating configuration ${ant.project.name}" />
+         <delete dir="tmp" />
+         <mkdir dir="tmp" />
+         <echo file="tmp/logstash.conf" append="false" force="true"><![CDATA[
+input {
+
+#  Indien via log4j2 wordt gelogd naar logstash deze gebruiken.
+log4j2 {
+     type => "log4j2"
+     host => "0.0.0.0"
+     mode => "server"
+     port => "5000"
+   }
+
+
+#  Indien via files wordt gelogd naar logstash deze gebruiken.
+file {
+     path => "/opt/appserver/brp/logs/logstash-failover.log"
+     codec => json { charset => "UTF-8" }
+     type => "BRP-Log"
+   }
+}
+
+output {
+
+  elasticsearch {
+    host => "localhost"
+    port => "9300"
+	protocol => "transport"
+	manage_template => false
+  }
+         	
+}
+]]></echo>
+	
+    <echo file="tmp/kibana.yml" append="false" force="true"><![CDATA[
+
+# Kibana is served by a back end server. This controls which port to use.
+port: 5601
+
+# The host to bind the server to.
+host: "0.0.0.0"
+
+# The Elasticsearch instance to use for all your queries.
+elasticsearch_url: "http://localhost:9200"
+
+# preserve_elasticsearch_host true will send the hostname specified in `elasticsearch`. If you set it to false,
+# then the host you use to connect to *this* Kibana instance will be sent.
+elasticsearch_preserve_host: false
+
+# Kibana uses an index in Elasticsearch to store saved searches, visualizations
+# and dashboards. It will create a new index if it doesn't already exist.
+kibana_index: ".kibana"
+
+# If your Elasticsearch is protected with basic auth, this is the user credentials
+# used by the Kibana server to perform maintence on the kibana_index at statup. Your Kibana
+# users will still need to authenticate with Elasticsearch (which is proxied thorugh
+# the Kibana server)
+# kibana_elasticsearch_username: user
+# kibana_elasticsearch_password: pass
+
+# If your Elasticsearch requires client certificate and key
+# kibana_elasticsearch_client_crt: /path/to/your/client.crt
+# kibana_elasticsearch_client_key: /path/to/your/client.key
+
+# If you need to provide a CA certificate for your Elasticsarech instance, put
+# the path of the pem file here.
+# ca: /path/to/your/CA.pem
+
+# The default application to load.
+default_app_id: "discover"
+
+# Time in milliseconds to wait for responses from the back end or elasticsearch.
+# This must be > 0
+request_timeout: 300000
+
+# Time in milliseconds for Elasticsearch to wait for responses from shards.
+# Set to 0 to disable.
+shard_timeout: 0
+
+# Set to false to have a complete disregard for the validity of the SSL
+# certificate.
+verify_ssl: true
+
+# SSL for outgoing requests from the Kibana Server (PEM formatted)
+# ssl_key_file: /path/to/your/server.key
+# ssl_cert_file: /path/to/your/server.crt
+
+# Set the path to where you would like the process id file to be created.
+# pid_file: /var/run/kibana.pid
+
+# Plugins that are included in the build, and no longer found in the plugins/ folder
+bundled_plugin_ids:
+ - plugins/dashboard/index
+ - plugins/discover/index
+ - plugins/doc/index
+ - plugins/kibana/index
+ - plugins/markdown_vis/index
+ - plugins/metric_vis/index
+ - plugins/settings/index
+ - plugins/table_vis/index
+ - plugins/vis_types/index
+ - plugins/visualize/index
+]]></echo>
+     </target>
+
+    <target name="deinstall" depends="checkProperties">
+        <echo message="Removing ${ant.project.name}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; rm -Rf ${application.directory}" />
+    </target>
+    
+    <target name="start" depends="checkProperties">
+        <echo message="Starting ${ant.project.name}" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="cd ~; cd ${application.directory}/${application.directory.elasticsearch}/bin; ./elasticsearch -p pids -XX:-UseSuperWord > output.txt 2> output_2.txt &amp;" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="sleep 20s; cd ~; cd ${application.directory}/${application.directory.logstash}/bin; ./logstash agent -f logstash.conf -- web > output.txt 2> output_2.txt &amp;" />
+        <sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}" 
+                 command="sleep 20s; cd ~; cd ${application.directory}/${application.directory.kibana}/bin; ./kibana > output.txt 2> output_2.txt &amp;" />
+    </target>
+
+    <target name="stop" depends="checkProperties">
+        <echo message="Stopping ${ant.project.name} (and sleeping 15s)" />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+		                 command=" if [[ $( ps aux | grep elasticsearc[h] -c) != 0 ]]; then echo &quot;terminated&quot;; pkill -f elasticsearc[h]; else echo &quot;already stopped&quot;; fi" />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+		                 command=" if [[ $( ps aux | grep logstas[h] -c) != 0 ]]; then echo &quot;terminated&quot;; pkill -f logstas[h]; else echo &quot;already stopped&quot;; fi" />
+		<sshexec host="${server.host}" trust="true" username="${server.username}" password="${server.password}"
+		                 command=" if [[ $( ps aux | grep kiban[a] -c) != 0 ]]; then echo &quot;terminated&quot;; pkill -f kiban[a]; else echo &quot;already stopped&quot;; fi" />
+
+    </target>
+
+    <target name="clean" depends="checkProperties">
+    </target>
+
+    <target name="fail">
+        <fail message="Call with valid task" />
+    </target>
+    
+</project>

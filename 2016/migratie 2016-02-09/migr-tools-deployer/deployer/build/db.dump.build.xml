@@ -1,0 +1,217 @@
+<project name="Database Dump" basedir="." default="fail">
+	<taskdef resource="net/sf/antcontrib/antcontrib.properties"/>
+	
+	<!--
+	 | Algemene properties
+	 |
+	 | server.host
+	 | server.username
+	 | server.password
+	 |
+	 | database.name
+	 | database.username
+	 | database.password
+	 |
+	 | File properties
+	 |
+	 | application.dump.source
+	 | application.dump.file
+	 | application.install.source
+	 | application.install.file
+	 | application.clean.source
+	 | application.clean.file
+	 | application.drop.source
+	 | application.drop.file
+	 |
+	-->
+	
+	<property name="application.directory" value="dump" />
+	
+	<target name="checkProperties">
+		<fail unless="server.host" message="server.host property is verplicht." />
+		<fail unless="server.username" message="server.username property is verplicht." />
+		<fail unless="server.password" message="server.password property is verplicht." />
+
+		<fail unless="database.name" message="database.name property is verplicht." />
+		<fail unless="database.username" message="database.username property is verplicht." />
+		<fail unless="database.password" message="database.password property is verplicht." />
+	</target>
+
+	<target name="checkInstallProperties" depends="checkProperties">
+			<!-- Check file settings -->
+		<fail unless="application.dump.source" message="application.dump.source property is verplicht." />
+		<fail unless="application.dump.file" message="application.dump.file property is verplicht." />
+		<fail unless="application.install.source" message="application.install.source property is verplicht." />
+		<fail unless="application.install.file" message="application.install.file property is verplicht." />
+	
+		<!-- Check file(s) exist -->
+		<fail message="${application.dump.source}/${application.dump.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset dir="${application.dump.source}" includes="${application.dump.file}" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+		<fail message="${application.install.source}/${application.install.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset dir="${application.install.source}" includes="${application.install.file}" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+	</target>
+	
+	<target name="checkCleanProperties" depends="checkProperties">
+			<!-- Check file settings -->
+		<fail unless="application.clean.source" message="application.clean.source property is verplicht." />
+		<fail unless="application.clean.file" message="application.clean.file property is verplicht." />
+	
+		<!-- Check file(s) exist -->
+		<fail message="${application.clean.source}/${application.clean.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset dir="${application.clean.source}" includes="${application.clean.file}" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+	</target>
+	
+	<target name="checkDeinstallProperties" depends="checkProperties">
+			<!-- Check file settings -->
+		<fail unless="application.drop.source" message="application.drop.source property is verplicht." />
+		<fail unless="application.drop.file" message="application.drop.file property is verplicht." />
+	
+		<!-- Check file(s) exist -->
+		<fail message="${application.drop.source}/${application.drop.file} bestaat niet (of leidt niet tot exact 1 bestand).">
+			<condition>
+				<not>
+					<resourcecount count="1">
+						<fileset dir="${application.drop.source}" includes="${application.drop.file}" />
+					</resourcecount>
+				</not>
+			</condition>
+		</fail>
+	</target>
+	
+	
+    <target name="install" depends="checkInstallProperties,createLocalConfigurationFiles">
+		<echo message="Installing ${ant.project.name} ..." />
+		
+		<echo message="Setup temporary directory" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+
+		<echo message="Copy ${application.dump.file}" />
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+			<fileset dir="${application.dump.source}"  includes="${application.dump.file}" />
+		</scp>	
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+			<fileset dir="${application.install.source}"  includes="${application.install.file}" />
+		</scp>	
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+			<fileset dir="tmp">
+				<include name="executeRestore.sh" />
+				<include name="executeInstall.sh" />
+			</fileset>
+		</scp>
+		
+		<echo message="Executing restore" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd /tmp; cd ${application.directory}; chmod u+x executeRestore.sh; ./executeRestore.sh" />
+		<echo message="Executing install" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd /tmp; cd ${application.directory}; chmod u+x executeInstall.sh; ./executeInstall.sh" />
+	</target>
+
+    <target name="deinstall" depends="checkDeinstallProperties,createLocalConfigurationFiles">
+		<echo message="Removing ${ant.project.name}  ..." />
+		<echo message="Setup temporary directory" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+
+		<echo message="Copy ${application.drop.file}" />
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+			<fileset dir="${application.drop.source}"  includes="${application.drop.file}" />
+		</scp>	
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+			<fileset dir="tmp">
+				<include name="executeDrop.sh" />
+			</fileset>
+		</scp>
+		
+		<echo message="Executing restore" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd /tmp; cd ${application.directory}; chmod u+x executeDrop.sh; ./executeDrop.sh" />		
+    </target>
+	
+    <target name="clean" depends="checkCleanProperties,createLocalConfigurationFiles">
+		<echo message="Cleaning ${ant.project.name}  ..." />
+		<echo message="Setup temporary directory" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd /tmp; mkdir ${application.directory}; cd ${application.directory}; rm -rf *;" />
+
+		<echo message="Copy ${application.clean.file}" />
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+			<fileset dir="${application.clean.source}"  includes="${application.clean.file}" />
+		</scp>	
+		<scp todir="${server.username}:${server.password}@${server.host}:/tmp/${application.directory}" trust="true">
+			<fileset dir="tmp">
+				<include name="executeClean.sh" />
+			</fileset>
+		</scp>
+		
+		<echo message="Executing restore" />
+		<sshexec host="${server.host}" username="${server.username}" password="${server.password}" trust="true"
+				 command="cd /tmp; cd ${application.directory}; chmod u+x executeClean.sh; ./executeClean.sh" />		
+    </target>
+	
+
+	<target name="createLocalConfigurationFiles" depends="checkProperties">
+		<echo message="Creating configuration files for ${ant.project.name} ..." />
+		<delete dir="tmp" />
+		<mkdir dir="tmp" />
+		
+		<echo file="tmp/executeRestore.sh" append="false"><![CDATA[export PGPASSWORD=${database.password}
+		
+pg_restore -U ${database.username} -d ${database.name} < ${application.dump.file}
+
+export -n PGPASSWORD
+]]></echo>
+
+		<echo file="tmp/executeInstall.sh" append="false"><![CDATA[export PGPASSWORD=${database.password}
+		
+psql -U ${database.username} -d ${database.name} -f ${application.install.file}
+
+export -n PGPASSWORD
+]]></echo>
+
+		<echo file="tmp/executeClean.sh" append="false"><![CDATA[export PGPASSWORD=${database.password}
+		
+psql -U ${database.username} -d ${database.name} -f ${application.clean.file}
+
+export -n PGPASSWORD
+]]></echo>
+
+		<echo file="tmp/executeDrop.sh" append="false"><![CDATA[export PGPASSWORD=${database.password}
+		
+psql -U ${database.username} -d ${database.name} -f ${application.drop.file}
+
+export -n PGPASSWORD
+]]></echo>
+
+
+
+	</target>
+	
+	
+	<target name="fail">
+		<fail message="Call with valid task" />
+	</target>
+	
+</project>

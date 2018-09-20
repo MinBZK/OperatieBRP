@@ -1,0 +1,29 @@
+/**
+ * This file is copyright 2017 State of the Netherlands (Ministry of Interior Affairs and Kingdom Relations).
+ * It is made available under the terms of the GNU Affero General Public License, version 3 as published by the Free Software Foundation.
+ * The project of which this file is part, may be found at https://github.com/MinBZK/operatieBRP.
+ */
+
+package nl.bzk.migratiebrp.synchronisatie.dal.service.impl.mapper.strategie;
+
+import nl.bzk.migratiebrp.conversie.model.lo3.element.Lo3Onderzoek;
+import nl.bzk.migratiebrp.synchronisatie.dal.domein.brp.kern.entity.Element;
+
+/**
+ * Interface voor een Mapper om op algemene wijze BRP Onderzoek entiteiten te vertalen naar onderzoeken op individuele
+ * attributen in het migratie model.
+ */
+public interface BrpOnderzoekMapper {
+    /**
+     * Bepaal of een attribuut in een onderzoek betrokken is en lever in dat geval een Lo3Onderzoek op.
+     * 
+     * @param entiteit
+     *            De (database) entiteit instantie waar het attribuut onderdeel van uitmaakt.
+     * @param element
+     *            De identificatie van het specifieke attribuut.
+     * @param elementBehoortBijGroepsOnderzoek
+     *            Geeft aan of dit attribuut in onderzoek moet staan als de BRP groep in zijn geheel in onderzoek staat.
+     * @return Het Lo3Onderzoek als dit attribuut in onderzoek staat, of anders <code>null</code>.
+     */
+    Lo3Onderzoek bepaalOnderzoek(Object entiteit, Element element, boolean elementBehoortBijGroepsOnderzoek);
+}

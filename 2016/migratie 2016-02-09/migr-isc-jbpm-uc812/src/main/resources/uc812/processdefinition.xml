@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="uc812">
+
+    <!--  -->
+    <!--  -->
+    <!-- START -->
+    <!--  -->
+    <!--  -->
+
+    <start-state name="Start (ontvang bulk bestand)">
+        <transition to="O-1. Loggen start proces">
+            <script>
+                <expression>
+                    functioneleStap="uc812.start.stap";
+                </expression>
+                <variable name='functioneleStap' access='write' />
+            </script>
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>input</value></entry>
+                </parameters>
+            </action>
+        </transition>
+    </start-state>
+
+    <node name="O-1. Loggen start proces">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                startProcesInstantieAction
+            </bean>
+        </action>
+        <transition to="CONTROLEREN" name="log start"></transition>
+    </node>
+
+    <node name="CONTROLEREN">
+        <transition to="III-1. Valideer bulk bestand">
+            <script>
+                <expression>
+                    functioneleStap="alg.gemeente.stap";
+                </expression>
+                <variable name='functioneleStap' access='write' />
+            </script>
+        </transition>
+    </node>
+
+
+    <node name="III-1. Valideer bulk bestand">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc812ValideerBulkBestandAction
+            </bean>
+        </action>
+        <transition to="VERWERKEN"></transition>
+        <transition to="II-1. Foutafhandeling (controle en lock)" name="3b. Fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc812.validatieBulkBestand.fout";
+                    foutafhandelingIndicatieBeheerder=true;
+                    restart="end";
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("restartAtControleren", "Gemeente register opnieuw ophalen en opnieuw controleren", false, false, false);
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <process-state name="II-1. Foutafhandeling (controle en lock)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="lo3Bericht" name="input"></variable>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="II-2. Keuze (controle en lock)" ></transition>
+    </process-state>
+
+    <decision name="II-2. Keuze (controle en lock)">
+        <transition to="O-2. Loggen einde proces" name="2b. Beeindigen">
+            <condition expression="#{restart == 'end'}"></condition>
+        </transition>
+        <transition to="CONTROLEREN" name="2a. Opnieuw controleren">
+            <condition expression="#{restart == 'restartAtControleren'}"></condition>
+        </transition>
+    </decision>
+
+
+    <!--  -->
+    <!--  -->
+    <!-- FORK -->
+    <!--  -->
+    <!--  -->
+
+    <node name="IV-1. Bepaal voorkomens">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc812BepaalVoorkomensAction
+            </bean>
+        </action>
+        <transition to="UC811 (PER VOORKOMEN IN BULK BESTAND)" name="voorkomen"></transition>
+        <transition to="IV-3. Controleer alle voorkomens verwerkt" name="controle"></transition>
+    </node>
+
+    <!--  -->
+    <!--  -->
+    <!-- Lq01 -->
+    <!--  -->
+    <!--  -->
+
+    <node name="UC811 (PER VOORKOMEN IN BULK BESTAND)">
+        <transition to="IV-2. Start UC811 (Synchronisatievraag)">
+            <script>
+                <expression>
+                    functioneleStap="uc812.lq01.stap";
+                    lq01HerhalingTimeout=nl.bzk.migratiebrp.isc.jbpm.common.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("vospg.timeout");
+                    lq01HerhalingMaxHerhalingen=nl.bzk.migratiebrp.isc.jbpm.common.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsInteger("vospg.herhalingen");
+                </expression>
+                <variable name='functioneleStap' access='write' />
+                <variable name='lq01HerhalingTimeout' access='write' />
+                <variable name='lq01HerhalingMaxHerhalingen' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <node name="EINDE (PER VOORKOMEN)">
+        <transition to="IV-3. Controleer alle voorkomens verwerkt"></transition>
+    </node>
+
+    <!--  -->
+    <!--  -->
+    <!--  JOIN -->
+    <!--  -->
+    <!--  -->
+
+    <node name="IV-3. Controleer alle voorkomens verwerkt">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc812ControleerGemeentenAction
+            </bean>
+        </action>
+        <transition to="EINDE"></transition>
+    </node>
+
+
+
+    <!--  -->
+    <!--  -->
+    <!-- Einde -->
+    <!--  -->
+    <!--  -->
+
+    <node name="O-2. Loggen einde proces">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                beeindigProcesInstantieAction
+            </bean>
+        </action>
+        <transition to="Afgerond" name="log einde"></transition>
+    </node>
+
+    <process-state name="IV-2. Start UC811 (Synchronisatievraag)">
+        <sub-process name="uc811" binding="late"></sub-process>
+        <variable access="read" mapped-name="input" name="input"></variable>
+        <transition to="EINDE (PER VOORKOMEN)"></transition>
+    </process-state>
+
+    <node name="VERWERKEN">
+        <transition to="IV-1. Bepaal voorkomens"></transition>
+    </node>
+
+    <node name="EINDE">
+        <transition to="O-2. Loggen einde proces"></transition>
+    </node>
+
+    <end-state name="Afgerond">
+    </end-state>
+
+    <exception-handler>
+        <action name="exception-handler" class="nl.bzk.migratiebrp.isc.jbpm.common.ExceptionLogger"/>
+    </exception-handler>
+</process-definition>

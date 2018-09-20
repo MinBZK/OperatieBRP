@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>nl.bzk.migratiebrp.isc.deploy</groupId>
+    <artifactId>migr-isc-deploy-gba-iv-db</artifactId>
+    <name>Migr - ISC - Deploy - Deploy GBA IV DB</name>
+	<version>1.0</version>
+	<packaging>pom</packaging>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.7</version>
+				<executions>
+					<execution>
+						<phase>install</phase>
+						<configuration>
+							<target>
+								<fail unless="deploy.target" message="Geen deploy.target opgegeven!" />
+								<fail unless="deploy.propfile" message="Geen deploy.propfile opgegeven!" />
+								<fail message="${deploy.propfile} bestaat niet!">
+									<condition>
+										<not>
+											<resourcecount count="1" >
+												<fileset dir="${basedir}">
+													<include name="${deploy.propfile}" />
+												</fileset>
+											</resourcecount>
+										</not>
+									</condition>
+								</fail>								
+								<ant antfile="${basedir}/build/db.build.xml" useNativeBasedir="true" inheritAll="false" inheritRefs="false" target="${deploy.target}" >
+								  <property file="${deploy.propfile}"/>
+								</ant>							
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.ant</groupId>
+						<artifactId>ant-jsch</artifactId>
+						<version>1.9.2</version>
+					</dependency>
+					<dependency>
+						<groupId>com.jcraft</groupId>
+						<artifactId>jsch</artifactId>
+						<version>0.1.50</version>
+					</dependency>
+					<dependency>
+						<groupId>ant-contrib</groupId>
+						<artifactId>ant-contrib</artifactId>
+						<version>1.0b3</version>					
+						<exclusions>
+							<exclusion>
+								<groupId>ant</groupId>
+								<artifactId>ant</artifactId>
+							</exclusion>
+						</exclusions>
+					</dependency>
+				</dependencies>			
+			</plugin>
+		</plugins>		
+	</build>
+</project>
+		

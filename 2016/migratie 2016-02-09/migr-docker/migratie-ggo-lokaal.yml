@@ -1,0 +1,31 @@
+brpdatabase:
+    image: brp/database
+    container_name: brpdb
+    net: test
+    ports:
+        - "5532:5432"
+
+ggoviewerdatabase:
+    image: migr-ggo-viewer-database
+    container_name: ggoviewerdb
+    net: test
+    ports:
+        - "5632:5432"
+
+ggoviewer:
+  image: migr-ggo-viewer
+  container_name: ggoviewer
+  net: test
+  ports:
+    - "8080:8080"
+  environment:
+    GGOVIEWER_BRP_DB_ENV_HOSTNAME: brpdb
+    GGOVIEWER_BRP_DB_ENV_PORT: 5432
+    GGOVIEWER_BRP_DB_ENV_NAME: brp
+    GGOVIEWER_BRP_DB_ENV_USERNAME: brp
+    GGOVIEWER_BRP_DB_ENV_PASSWORD: brp
+    GGOVIEWER_VIEWER_DB_ENV_HOST: ggoviewerdb
+    GGOVIEWER_VIEWER_DB_ENV_NAME: viewerdb
+    GGOVIEWER_VIEWER_DB_ENV_USERNAME: viewerdb
+    GGOVIEWER_VIEWER_DB_ENV_PASSWORD: viewerdb
+    GGOVIEWER_DEMOMODE: 'false'

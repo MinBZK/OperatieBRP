@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close">
+        <!--  when close is called, should we force transactions to terminate or not? -->
+        <property name="forceShutdown"><value>true</value></property>
+    </bean>
+
+    <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout"><value>300</value></property>
+    </bean>
+
+</beans>

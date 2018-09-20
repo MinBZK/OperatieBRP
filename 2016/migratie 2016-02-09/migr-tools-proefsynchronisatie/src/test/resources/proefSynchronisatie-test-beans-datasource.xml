@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+    <context:property-placeholder/>
+
+    <!-- Datasource Definitie -->
+
+    <bean name="proefSynchronisatie-datasource,voiscDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
+        <property name="driverClass" value="org.h2.Driver"/>
+        <property name="jdbcUrl" value="jdbc:h2:mem:test;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE"/>
+        <property name="user" value="sa"/>
+        <property name="password" value=""/>
+    </bean>
+
+    <jdbc:initialize-database data-source="proefSynchronisatie-datasource">
+        <jdbc:script location="classpath:sql/h2/createGbavFull.sql" />
+        <jdbc:script location="classpath:sql/createProefSyncBericht.sql" />
+        <jdbc:script location="classpath:sql/insertProefSyncBericht.sql" />
+    </jdbc:initialize-database>
+
+    <bean id="proefSynchronisatie-transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="proefSynchronisatie-datasource"/>
+    </bean>
+
+</beans>

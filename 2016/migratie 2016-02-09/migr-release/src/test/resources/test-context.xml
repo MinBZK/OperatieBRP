@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:amq="http://activemq.apache.org/schema/core"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+	<!-- Config -->
+
+	<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+		<property name="properties">
+			<props>
+				<prop key="mailbox.host">localhost</prop>
+				<prop key="mailbox.portnummer">1233</prop>
+				<prop key="voisc.hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+			</props>
+		</property>
+	</bean>
+
+	<!-- INFRA -->
+	<import resource="test-context-datasource.xml" />
+	<import resource="test-context-jta.xml" />
+	<amq:connectionFactory id="connectionFactory" brokerURL="tcp://localhost:61638"/>
+  	<amq:connectionFactory id="brpConnectionFactory" brokerURL="tcp://localhost:61639"/>
+
+	<!-- Mailbox -->
+	<import resource="test-context-mailbox.xml" />
+
+
+</beans>

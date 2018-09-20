@@ -1,0 +1,1 @@
+select datoverlijden from kern.pers where anr = '8432424737'

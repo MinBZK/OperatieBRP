@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout
+				pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %msg%n" />
+		</Console>
+
+		<RollingRandomAccessFile name="Systeem-file"
+			fileName="target/logs/systeem.log" filePattern="target/logs/systeem-%d{yyyy-MM-dd}-%i.log.gz">
+			<MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY"
+				onMismatch="ACCEPT" />
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="7" compressionLevel="9" />
+		</RollingRandomAccessFile>
+
+		<Async name="Systeem">
+			<AppenderRef ref="Systeem-file" />
+		</Async>
+
+		<RollingRandomAccessFile name="Functioneel-file"
+			fileName="target/logs/functioneel.log"
+			filePattern="target/logs/functioneel-%d{yyyy-MM-dd}-%i.log.gz">
+			<MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT"
+				onMismatch="DENY" />
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30" compressionLevel="9" />
+		</RollingRandomAccessFile>
+
+		<Async name="Functioneel">
+			<AppenderRef ref="Functioneel-file" />
+		</Async>
+	</Appenders>
+
+	<Loggers>
+		<Root level="INFO">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="Systeem" />
+			<AppenderRef ref="Functioneel" />
+		</Root>
+		<logger name="org.hibernate" level="INFO" />
+		<logger name="com.atomikos" level="ERROR" />
+		<logger name="org.dbunit.dataset.AbstractTableMetaData" level="ERROR" />
+		
+		<logger name="org.springframework" level="INFO" />
+	</Loggers>
+
+</Configuration>

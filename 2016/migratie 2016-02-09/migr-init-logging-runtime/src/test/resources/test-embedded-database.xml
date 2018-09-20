@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+ 	<bean id="embeddedHsqlDatabaseServer" class="org.hsqldb.server.Server" init-method="start" destroy-method="stop" >
+ 		<property name="port" value="9041" />
+ 		<property name="properties">
+ 			<bean class="org.hsqldb.persist.HsqlProperties">
+ 				<constructor-arg>
+		 			<props>
+		 				<prop key="hsqldb.reconfig_logging">false</prop>
+		 				<prop key="server.database.0">file:target/hsqldb/brp</prop>
+		 				<prop key="server.dbname.0">brp</prop>
+		 				<prop key="server.database.1">file:target/hsqldb/gbav</prop>
+		 				<prop key="server.dbname.1">gbav</prop>
+		 			</props>
+ 				</constructor-arg>
+ 			</bean>
+ 		</property>
+ 	</bean>
+
+	<bean id="initializeBrpDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedHsqlDatabaseServer">
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9041/brp" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+    <jdbc:initialize-database data-source="initializeBrpDataSource" >
+        <jdbc:script location="classpath:sql/hsqldb/HSQLDB.sql" />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="initializeBrpDataSource" ignore-failures="ALL">
+        <jdbc:script location="classpath:sql/hsqldb/4_brp-migratie-tijdelijk.sql" />
+    </jdbc:initialize-database>
+
+	<bean id="initializeGbavDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedHsqlDatabaseServer">
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9041/gbav" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+
+    <jdbc:initialize-database data-source="initializeGbavDataSource"  ignore-failures="ALL">
+        <jdbc:script location="classpath:sql/postgres.sql" />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="initializeGbavDataSource" >
+        <jdbc:script location="classpath:sql/createInitVullingTables.sql" />
+    </jdbc:initialize-database>
+
+</beans>

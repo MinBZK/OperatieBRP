@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+       http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+    <!-- This creates an embedded ActiveMQ Broker -->
+    <amq:broker id="brpRouteringCentrale"
+    			brokerId="brpRouteringCentraleBroker"
+    			brokerName="brpRouteringCentrale"
+
+    			advisorySupport="false"
+                useJmx="true"
+                useShutdownHook="false"
+                enableStatistics="true"
+                dedicatedTaskRunner="false"
+
+    			persistent="true"
+    			dataDirectory="target/brp-activemq-data"
+
+    			schedulerSupport="true"
+    			schedulerDirectory="target/brp-activemq-scheduler">
+
+		<amq:destinations>
+			<amq:queue physicalName="GbaArchief" />
+			<amq:queue physicalName="GbaAfnemerindicaties" />
+			<amq:queue physicalName="GbaAfnemerindicatiesAntwoorden" />
+			<amq:queue physicalName="GbaBijhoudingen" />
+			<amq:queue physicalName="GbaLeveringen" />
+			<amq:queue physicalName="GbaToevalligeGebeurtenissen" />
+			<amq:queue physicalName="GbaToevalligeGebeurtenissenAntwoorden" />
+		</amq:destinations>
+
+		<!-- How can this broker be reached -->
+        <amq:transportConnectors>
+            <amq:transportConnector uri="tcp://localhost:61639"/>
+        </amq:transportConnectors>
+
+		<!-- How do we persistently store messages -->
+        <amq:persistenceAdapter>
+            <amq:jdbcPersistenceAdapter dataSource="#dataSourceBrpActiveMQ" />
+        </amq:persistenceAdapter>
+
+        <amq:destinationPolicy>
+            <amq:policyMap>
+                <amq:policyEntries >
+                    <amq:policyEntry queue=">" producerFlowControl="true" memoryLimit="1mb" >
+						<amq:deadLetterStrategy>
+							<amq:individualDeadLetterStrategy queuePrefix="DLQ." useQueueForQueueMessages="true" />
+						</amq:deadLetterStrategy>
+                    </amq:policyEntry>
+                </amq:policyEntries>
+            </amq:policyMap>
+        </amq:destinationPolicy>
+
+        <amq:systemUsage>
+            <amq:systemUsage>
+                <amq:memoryUsage>
+                    <amq:memoryUsage limit="32 mb"/>
+                </amq:memoryUsage>
+                <amq:storeUsage>
+                    <amq:storeUsage limit="32 mb"/>
+                </amq:storeUsage>
+                <amq:tempUsage>
+                    <amq:tempUsage limit="32 mb"/>
+                </amq:tempUsage>
+            </amq:systemUsage>
+        </amq:systemUsage>
+
+		<amq:plugins>
+			<amq:redeliveryPlugin fallbackToDeadLetter="true" sendToDlqIfMaxRetriesExceeded="true">
+				<amq:redeliveryPolicyMap>
+					<amq:redeliveryPolicyMap>
+						<amq:defaultEntry>
+							<amq:redeliveryPolicy maximumRedeliveries="2" initialRedeliveryDelay="5000" redeliveryDelay="10000" />
+						</amq:defaultEntry>
+					</amq:redeliveryPolicyMap>
+				</amq:redeliveryPolicyMap>
+			</amq:redeliveryPlugin>
+
+			<amq:simpleAuthenticationPlugin anonymousAccessAllowed="true">
+			    <amq:users>
+			        <amq:authenticationUser username="admin" password="admin" groups="admins"/>
+			    </amq:users>
+			</amq:simpleAuthenticationPlugin>
+
+			<amq:authorizationPlugin>
+				<amq:map>
+					<amq:authorizationMap>
+						<amq:authorizationEntries>
+							<!-- Defaults -->
+							<amq:authorizationEntry queue=">" read="admins" write="admins" admin="admins" />
+							<amq:authorizationEntry topic=">" read="admins" write="admins" admin="admins" />
+							<amq:authorizationEntry topic="ActiveMQ.Advisory.>" read="anonymous" write="anonymous" admin="anonymous"/>
+
+							<amq:authorizationEntry queue="GbaArchief" read="anonymous" write="anonymous" admin="admins" />
+							<amq:authorizationEntry queue="GbaAfnemerindicaties" read="anonymous" write="anonymous" admin="admins" />
+							<amq:authorizationEntry queue="GbaAfnemerindicatiesAntwoorden" read="anonymous" write="anonymous" admin="admins" />
+							<amq:authorizationEntry queue="GbaBijhoudingen" read="anonymous" write="anonymous" admin="admins" />
+							<amq:authorizationEntry queue="GbaLeveringen" read="anonymous" write="anonymous" admin="admins" />
+							<amq:authorizationEntry queue="GbaToevalligeGebeurtenissen" read="anonymous" write="anonymous" admin="admins" />
+							<amq:authorizationEntry queue="GbaToevalligeGebeurtenissenAntwoorden" read="anonymous" write="anonymous" admin="admins" />
+						</amq:authorizationEntries>
+					</amq:authorizationMap>
+				</amq:map>
+			</amq:authorizationPlugin>
+		</amq:plugins>
+    </amq:broker>
+
+   <bean id="dataSourceBrpActiveMQ" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
+        <property name="url" value="jdbc:hsqldb:hsql://localhost:9021/activemq"/>
+        <property name="username" value="sa"/>
+        <property name="password" value=""/>
+        <property name="initialSize" value="1"/>
+        <property name="maxActive" value="200"/>
+        <property name="minIdle" value="1"/>
+        <property name="maxIdle" value="5"/>
+        <property name="defaultAutoCommit" value="true"/>
+        <property name="defaultTransactionIsolation" value="2"/>
+    </bean>
+
+</beans>

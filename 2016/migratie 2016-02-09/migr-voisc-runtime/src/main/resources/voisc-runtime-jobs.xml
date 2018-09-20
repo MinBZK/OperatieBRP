@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.0.xsd">
+
+    <bean name="scheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" destroy-method="destroy"
+            depends-on="voiscDataSource">
+        <property name="autoStartup" value="false" />
+        <property name="waitForJobsToCompleteOnShutdown" value="true" />
+        <property name="triggers">
+            <list>
+                <bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                    <property name="cronExpression" value="${voisc.job.isc.cron:0/5 * * * * ?}" />
+                    <property name="jobDetail" >
+                        <bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                                <property name="jobClass" value="nl.bzk.migratiebrp.voisc.runtime.jobs.VersturenNaarIscJob" />
+                                <property name="jobDataAsMap">
+                                    <map>
+                                        <entry key="voiscService" value-ref="voiscService" />
+                                    </map>
+                                </property>
+                            </bean>
+                    </property>
+                </bean>
+                <bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                    <property name="cronExpression" value="${voisc.job.mailbox.cron:0/5 * * * * ?}" />
+                    <property name="jobDetail" >
+                        <bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                            <property name="jobClass" value="nl.bzk.migratiebrp.voisc.runtime.jobs.VerzendenEnOntvangenMailboxJob" />
+                            <property name="jobDataAsMap">
+                                <map>
+                                    <entry key="voiscService" value-ref="voiscService" />
+                                </map>
+                            </property>
+                        </bean>
+                    </property>
+                </bean>
+                <bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                    <property name="cronExpression" value="${voisc.job.opschonen.cron:0 0 0/1 * * ?}" />
+                    <property name="jobDetail" >
+                        <bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                            <property name="jobClass" value="nl.bzk.migratiebrp.voisc.runtime.jobs.OpschonenVerwerkteBerichtenJob" />
+                            <property name="jobDataAsMap">
+                                <map>
+                                    <entry key="aantalUrenSindsVerwerkt" value="${voisc.job.opschonen.wachttijd:75}" />
+                                    <entry key="voiscService" value-ref="voiscService" />
+                                </map>
+                            </property>
+                        </bean>
+                    </property>
+                </bean>
+                <bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                    <property name="cronExpression" value="${voisc.job.herstellen.cron:0 0 0/1 * * ?}" />
+                    <property name="jobDetail" >
+                        <bean class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                            <property name="jobClass" value="nl.bzk.migratiebrp.voisc.runtime.jobs.HerstelStatusBerichtenJob" />
+                            <property name="jobDataAsMap">
+                                <map>
+                                    <entry key="aantalUrenSindsInVerwerking" value="${voisc.job.herstellen.wachttijd:6}" />
+                                    <entry key="voiscService" value-ref="voiscService" />
+                                </map>
+                            </property>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+</beans>

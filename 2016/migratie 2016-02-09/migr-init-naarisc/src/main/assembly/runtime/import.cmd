@@ -1,0 +1,1 @@
+psql -d isc -U migratie -W -f isc-verzender.sql

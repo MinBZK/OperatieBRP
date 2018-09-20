@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+
+	<bean id="embeddedH2DatabaseServer" class="org.h2.tools.Server" factory-method="createTcpServer" init-method="start" destroy-method="stop" >
+    	<constructor-arg value="-tcp,-tcpAllowOthers,-tcpPort,9112,-baseDir,target/h2"/>
+	</bean>
+
+	<bean id="initializeIscDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedH2DatabaseServer">
+		<property name="driverClassName" value="org.h2.Driver" />
+		<property name="url" value="jdbc:h2:tcp://localhost:9112/isc" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+    <jdbc:initialize-database ignore-failures="ALL" data-source="initializeIscDataSource">
+        <jdbc:script location="classpath:sql/mig-drop.sql"  />
+        <jdbc:script location="classpath:sql/jbpm-drop.sql"  />
+        <jdbc:script location="classpath:sql/qrtz-drop.sql" />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="initializeIscDataSource">
+        <jdbc:script location="classpath:sql/jbpm-create.sql" />
+        <jdbc:script location="classpath:sql/mig-create.sql" />
+        <jdbc:script location="classpath:sql/mig-data.sql" />
+        <jdbc:script location="classpath:sql/qrtz-create.sql" />
+    </jdbc:initialize-database>
+
+ 	<bean id="embeddedHsqlDatabaseServer" class="org.hsqldb.server.Server" init-method="start" destroy-method="stop" >
+ 		<property name="port" value="9021" />
+ 		<property name="properties">
+ 			<bean class="org.hsqldb.persist.HsqlProperties">
+ 				<constructor-arg>
+		 			<props>
+		 				<prop key="hsqldb.reconfig_logging">false</prop>
+		 				<prop key="server.database.0">file:target/hsqldb/routering</prop>
+		 				<prop key="server.dbname.0">routering</prop>
+		 				<prop key="server.database.1">file:target/hsqldb/voisc</prop>
+		 				<prop key="server.dbname.1">voisc</prop>
+		 				<prop key="server.database.2">file:target/hsqldb/brp</prop>
+		 				<prop key="server.dbname.2">brp</prop>
+		 				<prop key="server.database.3">file:target/hsqldb/activemq</prop>
+		 				<prop key="server.dbname.3">activemq</prop>
+		 			</props>
+ 				</constructor-arg>
+ 			</bean>
+ 		</property>
+ 	</bean>
+
+	<bean id="initializeRouteringDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedHsqlDatabaseServer">
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9021/routering" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+    <jdbc:initialize-database ignore-failures="ALL" data-source="initializeRouteringDataSource">
+        <jdbc:script location="classpath:sql/activemq-drop.sql"  />
+        <jdbc:script location="classpath:sql/postgres.sql"  />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="initializeRouteringDataSource">
+        <jdbc:script location="classpath:sql/activemq-create.sql" />
+    </jdbc:initialize-database>
+
+	<bean id="initializeVoiscDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedHsqlDatabaseServer">
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9021/voisc" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+    <jdbc:initialize-database ignore-failures="ALL" data-source="initializeVoiscDataSource">
+        <jdbc:script location="classpath:sql/voisc-drop.sql"  />
+        <jdbc:script location="classpath:sql/postgres.sql" />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="initializeVoiscDataSource">
+        <jdbc:script location="classpath:sql/voisc-create.sql"  />
+        <jdbc:script location="classpath:sql/voisc-data.sql" />
+    </jdbc:initialize-database>
+
+	<bean id="initializeBrpDataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource" depends-on="embeddedHsqlDatabaseServer">
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost:9021/brp" />
+		<property name="username" value="sa" />
+		<property name="password" value="" />
+	</bean>
+    <jdbc:initialize-database data-source="initializeBrpDataSource">
+        <jdbc:script location="classpath:sql/hsqldb/HSQLDB.sql" />
+    </jdbc:initialize-database>
+    <jdbc:initialize-database ignore-failures="ALL" data-source="initializeBrpDataSource">
+        <jdbc:script location="classpath:sql/hsqldb/4_brp-migratie-tijdelijk.sql" />
+    </jdbc:initialize-database>
+
+
+</beans>

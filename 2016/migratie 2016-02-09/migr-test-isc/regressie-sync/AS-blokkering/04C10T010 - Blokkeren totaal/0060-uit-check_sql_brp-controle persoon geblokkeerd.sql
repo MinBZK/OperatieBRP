@@ -1,0 +1,1 @@
+select count(*) as aantal from migblok.blokkering where anr = '8520621857';

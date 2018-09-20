@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+    ">
+
+    <context:annotation-config />
+    <context:property-placeholder />
+    <tx:annotation-driven/>
+
+
+    <context:component-scan base-package="nl.bzk.migratiebrp.isc.telling"/>
+
+    <!-- Job -->
+
+
+    <bean name="tellingenScheduler" class="org.springframework.scheduling.quartz.SchedulerFactoryBean" destroy-method="destroy">
+        <property name="autoStartup" value="${isc.telling.autostart:true}" />
+    	<property name="quartzProperties">
+    		<props>
+    			<!-- MAIN -->
+    			<prop key="org.quartz.scheduler.instanceName">TellingenScheduler</prop>
+    			<prop key="org.quartz.scheduler.skipUpdateCheck">true</prop>
+    			<!-- THREADS -->
+    			<prop key="org.quartz.threadPool.class">org.quartz.simpl.SimpleThreadPool</prop>
+    			<prop key="org.quartz.threadPool.threadCount">1</prop>
+    			<prop key="org.quartz.threadPool.threadPriority">5</prop>
+    			<!-- RMI -->
+    			<prop key="org.quartz.scheduler.rmi.export">false</prop>
+    			<prop key="org.quartz.scheduler.rmi.proxy">false</prop>
+    		</props>
+    	</property>
+        <property name="triggers">
+            <list>
+                <bean class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+                    <property name="cronExpression" value="${telling.cron.expression:0 0/20 * * * ?}" />
+                    <property name="jobDetail" >
+                        <bean name="jobDetail" class="org.springframework.scheduling.quartz.JobDetailFactoryBean">
+                            <property name="jobClass" value="nl.bzk.migratiebrp.isc.telling.job.TellingenJob" />
+                            <property name="jobDataAsMap">
+                                <map>
+                                    <entry key="wachtPeriodeInUren" value="${telling.wachtPeriodeInUren:27}" />
+                                    <entry key="tellingenRuntimeService" value-ref="tellingenRuntimeService" />
+                                </map>
+                            </property>
+                        </bean>
+                    </property>
+                </bean>
+            </list>
+        </property>
+    </bean>
+
+    <!-- JMX -->
+
+    <bean id="tellingenJmx" class= "nl.bzk.migratiebrp.isc.telling.TellingenJMXImpl">
+        <property name="aantalUrenSindsVerwerkt" value="${telling.wachtPeriodeInUren:27}" />
+        <property name="tellingenService" ref="tellingenRuntimeService" />
+    </bean>
+
+	<!--  -->
+
+
+    <context:component-scan base-package="nl.bzk.migratiebrp.isc.telling.repository"/>
+    <context:component-scan base-package="nl.bzk.migratiebrp.isc.telling.runtime"/>
+
+	<!--  ENTITY MANAGER -->
+
+    <bean id="tellingEntityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="persistenceUnitName" value="TellingEntities"/>
+        <property name="jtaDataSource" ref="tellingDataSource"/>
+        <property name="jpaVendorAdapter">
+            <bean class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+                <property name="showSql" value="false"/>
+                <property name="generateDdl" value="false"/>
+                <property name="databasePlatform" value="org.hibernate.dialect.PostgreSQLDialect"/>
+            </bean>
+        </property>
+        <property name="jpaProperties">
+            <props>
+                <prop key="hibernate.transaction.manager_lookup_class">com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup</prop>
+                <prop key="hibernate.temp.use_jdbc_metadata_defaults">false</prop>
+                <prop key="hibernate.transaction.jta.platform">nl.bzk.migratiebrp.isc.telling.jta.AtomikosJtaPlatform</prop>
+                <prop key="hibernate.generate_statistics">false</prop>
+                <prop key="hibernate.use_sql_comments">false</prop>
+                <prop key="hibernate.format_sql">false</prop>
+            </props>
+        </property>
+   </bean>
+</beans>

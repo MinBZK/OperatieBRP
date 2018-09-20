@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+	   	http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+	">
+
+	<!--  JMS Container and handler voor inkomende afnemersindicatie antwoorden van BRP -->
+
+    <bean id="jmsContainerAfnemersindicaties" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${afnemersindicaties.autostart:true}" />
+        <property name="sessionTransacted" value="true" />
+        <property name="transactionManager" ref="syncDalTransactionManager" />
+        <property name="connectionFactory" ref="brpQueueConnectionFactory" />
+
+        <property name="destination" ref="gbaAfnemerindicatiesAntwoord" />
+        <property name="messageListener" ref="afnemerindicatiesMessageHandler" />
+    </bean>
+
+    <bean name="afnemerindicatiesMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.AfnemerindicatiesMessageHandler" />
+
+	<!--  JMS Container and handler voor inkomende toevallige gebeurtenis antwoorden van BRP -->
+
+    <bean id="jmsContainerToevalligeGebeurtenissen" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${toevalliggebeurtenissen.autostart:true}" />
+        <property name="sessionTransacted" value="true" />
+        <property name="transactionManager" ref="syncDalTransactionManager" />
+        <property name="connectionFactory" ref="brpQueueConnectionFactory" />
+
+        <property name="destination" ref="gbaToevalligeGebeurtenissenAntwoord" />
+        <property name="messageListener" ref="toevalligeGebeurtenisMessageHandler" />
+    </bean>
+
+    <bean name="toevalligeGebeurtenisMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.ToevalligeGebeurtenisMessageHandler" />
+
+	<!--  JMS Container and handler voor inkomende leveringen van BRP -->
+
+    <bean id="jmsContainerLeveringen" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${leveringen.autostart:true}" />
+        <property name="sessionTransacted" value="true" />
+        <property name="transactionManager" ref="syncDalTransactionManager" />
+        <property name="connectionFactory" ref="brpQueueConnectionFactory" />
+
+        <property name="destination" ref="gbaLeveringen" />
+        <property name="messageListener" ref="leveringenMessageHandler" />
+    </bean>
+
+    <bean name="leveringenMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.LeveringenMessageHandler" />
+
+	<!-- Template  -->
+
+    <bean name="brpQueueJmsTemplate" class="org.springframework.jms.core.JmsTemplate">
+        <property name="connectionFactory" ref="brpQueueConnectionFactory"/>
+        <property name="receiveTimeout" value="30000"/>
+        <property name="sessionTransacted" value="true"/>
+    </bean>
+
+</beans>

@@ -1,0 +1,68 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+        >
+<ui:component>
+<ga:responseActions>
+    <mig:propertyLoader target="#{linkNaarBeheerApp}" property="beheerapp.base.url"/>
+</ga:responseActions>
+
+<table class="results">
+<thead>
+    <tr>
+        <th colspan="2">
+            <ui:decorate template="t_pager.xhtml">
+                <ui:define name="pager_params">
+                    <ui:insert name="params"/>
+                </ui:define>
+                <ui:param name="pager" value="#{gegevensList_pager}"/>
+            </ui:decorate>
+            <ui:insert name="berichten_title">#{msgs['gegevens.heading']}</ui:insert>
+        </th>
+    </tr>
+    <tr>
+        <td style="width:150px;">
+            #{msgs['gegevens.heading.soort']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['gegevens.heading.gegeven']}
+        </td>
+    </tr>
+</thead>
+
+<h:outputText>
+    <ga:attribute name="rendered" value="#{! empty gegevensList}"/>
+    <tbody class="results">
+        <gd:repeat value="#{gegevensList}" var="gegeven" idVar="rid" first="#{gegevensList_pager.first}" limit="#{gegevensList_pager.limit}">
+            <gs:tr>
+                <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                <td>
+                    #{gegeven.soort}
+                </td>
+                <td>
+					<h:outputText rendered="#{gegeven.soort == 'ADH'}">
+						<a href="#{linkNaarBeheerApp}/#{gegeven.gegeven}/" target="_blank">#{gegeven.gegeven}</a>
+					</h:outputText>
+					<h:outputText rendered="#{gegeven.soort != 'ADH'}">
+						#{gegeven.gegeven}					
+					</h:outputText>
+                </td>
+            </gs:tr>
+        </gd:repeat>
+    </tbody>
+</h:outputText>
+</table>
+</ui:component>
+
+</html>

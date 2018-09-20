@@ -1,0 +1,10 @@
+select mrr.srt as mrsrt, p.id as persid, p.srt as perssrt, mr.actieinh as mractieinh, ids.actieinh as idsactieinh, gb.actieinh as gbactieinh, snm.actieinh as snmactieinh, gsl.actieinh as gslactieinh--, doc.actieinh as docactieinh
+from kern.his_multirealiteitregel mr 
+join kern.his_persids ids on mr.actieinh = ids.actieinh 
+join kern.his_persgeboorte gb on gb.actieinh = ids.actieinh
+join kern.multirealiteitregel mrr on mrr.id = mr.multirealiteitregel
+join kern.his_perssamengesteldenaam snm on snm.actieinh = gb.actieinh
+join kern.his_persgeslachtsaand gsl on gsl.actieinh = snm.actieinh
+--join kern.his_doc doc on doc.actieinh = snm.actieinh
+join kern.pers p on p.id = ids.pers and p.id = snm.pers and p.id = mrr.multirealiteitpers and p.id = gb.pers and p.id = gsl.pers
+where p.srt = 3 and mrr.srt = 1

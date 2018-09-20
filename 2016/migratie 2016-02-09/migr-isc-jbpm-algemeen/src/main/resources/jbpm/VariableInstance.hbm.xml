@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN" "http://www.hibernate.org/dtd/hibernate-mapping-3.0.dtd">
+
+<hibernate-mapping auto-import="false" default-access="field">
+  <class name="org.jbpm.context.exe.VariableInstance"
+         table="JBPM_VARIABLEINSTANCE"
+         abstract="true"
+         discriminator-value="V">
+    <id name="id" column="ID_"><generator class="native" /></id>
+    <!-- V : org.jbpm.context.exe.VariableInstance -->
+    <!-- B : org.jbpm.context.exe.variableinstance.ByteArrayInstance -->
+    <!-- D : org.jbpm.context.exe.variableinstance.DateInstance -->
+    <!-- O : org.jbpm.context.exe.variableinstance.DoubleInstance -->
+    <!-- H : org.jbpm.context.exe.variableinstance.HibernateLongInstance -->
+    <!-- I : org.jbpm.context.exe.variableinstance.HibernateStringInstance -->
+    <!-- L : org.jbpm.context.exe.variableinstance.LongInstance -->
+    <!-- S : org.jbpm.context.exe.variableinstance.StringInstance -->
+    <!-- N : org.jbpm.context.exe.variableinstance.NullInstance -->
+    <!-- J : org.jbpm.context.exe.variableinstance.JcrNodeInstance -->
+    <discriminator type="char" column="CLASS_"/>
+    <version name="version" column="VERSION_" />
+
+    <property name="name" column="NAME_"/>
+    <property name="converter"
+              column="CONVERTER_"
+              type="nl.bzk.migratiebrp.isc.runtime.jbpm.hibernate.ConverterEnumType" />
+
+    <many-to-one name="token"
+                 column="TOKEN_"
+                 foreign-key="FK_VARINST_TK"
+                 index="IDX_VARINST_TK" />
+    <many-to-one name="tokenVariableMap"
+                 column="TOKENVARIABLEMAP_"
+                 foreign-key="FK_VARINST_TKVARMP"
+                 index="IDX_VARINST_TKVARMP" />
+    <many-to-one name="processInstance"
+                 column="PROCESSINSTANCE_"
+                 foreign-key="FK_VARINST_PRCINST"
+                 index="IDX_VARINST_PRCINS" />
+
+  </class>
+</hibernate-mapping>

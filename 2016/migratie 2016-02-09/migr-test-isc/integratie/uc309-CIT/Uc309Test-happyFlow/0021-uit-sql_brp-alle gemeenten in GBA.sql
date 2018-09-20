@@ -1,0 +1,1 @@
+update kern.partij set datovergangnaarbrp = null;

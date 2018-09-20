@@ -1,0 +1,36 @@
+INSTALLATIE KLANT CERTIFICAAT
+-----------------------------
+
+Aanmaken certificaat
+--------------------
+ - Login op de server waar de certificaten worden beheerd.
+ - cd naar '/opt/ca/bin'   (of waar het certificaten materiaal is geinstalleerd)
+ - Executeer het 'new_client.sh' script met als argument de naam can de klant (zonder spaties)
+ - In '/opt/ca/distrib' staat nu het nieuwe certificaat materiaal voor de klant. Dit kan naar de
+   klant toegestuurd worden.
+ - Zorg er voor dat de data zoals gemeld in het script onder 'The following data is required...'
+   bij de hand blijft, want deze data is nodig voor het toevoegen van het certificaat aan de 
+   database.
+
+Toevoegen certificaat aan de BRP
+--------------------------------
+ - cd naar '/opt/ca/var'
+ - scp het '<klant>_client.crt' bestand naar de applicatie server
+ - Ga naar de server waar de applicatie server op draait.
+ - Ga naar de folder waar het '<klant>_client.crt' naar toe is gekopieerd.
+ - Executeer het volgende command:
+     
+     keytool -import -alias <klant> -file ./<klant>_client.crt -keystore /opt/tomcat/lib/brpserver_publicstore.jks
+ 
+ - Ga naar de server waar de database op draait.
+ - Open een connectie naar de BRP database.
+ - Executeer het volgende SQL commando voor het toevoegen van het certificaat aan de BRP database,
+   hierbij uiteraard gebruik makend van de eerder gemelde waardes:
+ 
+     INSERT INTO autaut.certificaat (id, subject, serial, signature) VALUES ((select coalesce(max(id), 0) + 1 from autaut.certificaat), '<DB SUBJECT>', <DB SERIAL>, '<DB SIGNATURE>');
+
+ - Executeer het volgende SQL commando voor het toevoegen van de nieuwe klant met zijn certificaat,
+   hierbij dient voor de partij een specifiek id te worden gebruikt welke overeen dient te komen
+   met de id van de partij/gemeente waaraan de klant gekoppeld dient te worden:
+ 
+     INSERT INTO autaut.authenticatiemiddel (id, partij, rol, functie, certificaattbvondertekening, authenticatiemiddelstatushis) VALUES ((select coalesce(max(id), 0) + 1 from autaut.authenticatiemiddel), <PARTIJ ID>, 1, 1, (select max(id) from autaut.certificaat), 'A');

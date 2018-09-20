@@ -1,0 +1,1 @@
+zie: /migr-sync-dal/src/test/resources/sql/readme.txt

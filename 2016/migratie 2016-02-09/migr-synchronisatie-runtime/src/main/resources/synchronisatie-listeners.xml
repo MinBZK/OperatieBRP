@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+        http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+		http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+	   	http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa.xsd
+	">
+
+	<!--  JMS Container and handler voor inkomende sync requests  van ISC -->
+    <bean id="iscBerichtListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${sync.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager" />
+        <property name="connectionFactory" ref="queueConnectionFactory"/>
+
+        <property name="destination" ref="queueSyncVerzoek" />
+        <property name="messageListener" ref="syncMessageHandler" />
+    </bean>
+
+	<!--  JMS Container and handler voor inkomende afnemersindicatie antwoorden van BRP -->
+
+    <bean id="archiveringBerichtListenerContainer" class="org.springframework.jms.listener.DefaultMessageListenerContainer">
+        <property name="autoStartup" value="${archivering.autostart:true}"/>
+        <property name="sessionTransacted" value="true"/>
+        <property name="transactionManager" ref="syncDalTransactionManager" />
+        <property name="connectionFactory" ref="queueConnectionFactory"/>
+
+        <property name="destination" ref="queueArchiveringVerzoek"/>
+        <property name="messageListener">
+        	<bean class="nl.bzk.migratiebrp.synchronisatie.runtime.ArchiveringMessageHandler" />
+        </property>
+    </bean>
+
+
+    <bean name="syncMessageHandler" class="nl.bzk.migratiebrp.synchronisatie.runtime.SynchronisatieMessageHandler">
+        <property name="syncBerichtServices">
+            <list>
+                <ref bean="synchroniseerNaarBrpService" />
+				<ref bean="leesUitBrpService" />
+				
+				<ref bean="zoekPersoonOpActueleGegevensService"  />
+				<ref bean="zoekPersoonOpHistorischeGegevensService" />
+				
+				<ref bean="blokkeringService" />
+				<ref bean="blokkeringInfoService" />
+				<ref bean="deblokkeringService" />
+				
+				<ref bean="plaatsAfnemersindicatieService" />
+				<ref bean="verwijderAfnemersindicatieService" />
+
+				<ref bean="verwerkToevalligeGebeurtenisService" />
+            </list>
+        </property>
+    </bean>
+
+    <!-- Services -->
+    <bean name="synchroniseerNaarBrpService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.SynchroniseerNaarBrpService"/>
+	<bean name="leesUitBrpService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.LeesUitBrpService"/>
+	<bean name="blokkeringService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.BlokkeringVerzoekService"/>
+	<bean name="blokkeringInfoService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.BlokkeringInfoVerzoekService"/>
+	<bean name="deblokkeringService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.DeblokkeringVerzoekService"/>
+	<bean name="plaatsAfnemersindicatieService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.PlaatsAfnemersindicatieService"/>
+	<bean name="verwerkToevalligeGebeurtenisService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.VerwerkToevalligeGebeurtenisService"/>
+	<bean name="verwijderAfnemersindicatieService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.VerwijderAfnemersindicatieService"/>
+
+	<bean name="zoekPersoonFilter" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.zoeken.ZoekPersoonFilterImpl" />
+	<bean name="zoekPersoonOpActueleGegevensService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.zoeken.ZoekPersoonOpActueleGegevensService" />
+	<bean name="zoekPersoonOpHistorischeGegevensService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.zoeken.ZoekPersoonOpHistorischeGegevensService" />
+
+    <context:component-scan base-package="nl.bzk.migratiebrp.synchronisatie.runtime.service.synchronisatie"/>
+    <context:component-scan base-package="nl.bzk.migratiebrp.synchronisatie.runtime.service.toevalligegebeurtenis"/>
+
+	<bean name="gemeenteRegisterService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.GemeenteRegisterService"/>
+	<bean name="autorisatieRegisterService" class="nl.bzk.migratiebrp.synchronisatie.runtime.service.AutorisatieRegisterService"/>
+
+</beans>

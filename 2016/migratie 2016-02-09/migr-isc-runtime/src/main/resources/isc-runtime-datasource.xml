@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+      xmlns:util="http://www.springframework.org/schema/util"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd
+        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+
+    <!-- Datasource Definitie -->
+    <bean id="iscNonTransactionalDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+        <property name="driverClass" value="${isc.database.nonxa.driver:org.postgresql.Driver}"/>
+        <property name="jdbcUrl" value="${isc.database.nonxa.url:jdbc:postgresql://localhost/isc}"/>
+        <property name="user" value="${isc.database.username:postgres}"/>
+        <property name="password" value="${isc.database.password:postgres}"/>
+        <property name="minPoolSize" value="${isc.database.nonxa.minpool:3}"/>
+        <property name="maxPoolSize" value="${isc.database.nonxa.maxpool:20}"/>
+    </bean>
+
+    <bean name="iscDataSource,opschonerDataSource,tellingDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean" init-method="init" destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.migratiebrp.util.common.UniqueName" >
+            	<property name="baseName" value="iscDatabase" />
+            </bean>
+        </property>
+        <property name="xaDataSourceClassName" value="${isc.database.driver:org.postgresql.xa.PGXADataSource}" />
+        <property name="xaProperties">
+            <props>
+                <prop key="ServerName">${isc.database.host:localhost}</prop>
+                <prop key="PortNumber">${isc.database.port:5432}</prop>
+                <prop key="DatabaseName">${isc.database.name:isc}</prop>
+                <prop key="User">${isc.database.username:postgres}</prop>
+                <prop key="Password">${isc.database.password:postgres}</prop>
+            </props>
+        </property>
+        <property name="maxPoolSize" value="${isc.database.maxpool:20}" />
+        <property name="minPoolSize" value="${isc.database.minpool:3}"/>
+    </bean>
+
+</beans>

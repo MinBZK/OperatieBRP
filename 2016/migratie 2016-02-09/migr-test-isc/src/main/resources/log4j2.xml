@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+	<Appenders>
+		<Console name="Console" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %marker %logger{36} - %msg%n" />
+		</Console>
+
+		<RollingRandomAccessFile name="Systeem-file"
+								 fileName="../logs/systeem.log"
+								 filePattern="../logs/systeem-%d{yyyy-MM-dd}-%i.log.gz">
+			<MarkerFilter marker="FUNCTIONELE_LOG" onMatch="DENY" onMismatch="ACCEPT" />
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="7" compressionLevel="9" />
+		</RollingRandomAccessFile>
+
+		<Async name="Systeem">
+			<AppenderRef ref="Systeem-file" />
+		</Async>
+
+		<RollingRandomAccessFile name="Functioneel-file"
+							     fileName="../logs/functioneel.log"
+							     filePattern="../logs/functioneel-%d{yyyy-MM-dd}-%i.log.gz">
+			<MarkerFilter marker="FUNCTIONELE_LOG" onMatch="ACCEPT"	onMismatch="DENY" />
+			<PatternLayout>
+				<pattern>%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n
+				</pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30"
+				compressionLevel="9" />
+		</RollingRandomAccessFile>
+
+		<Async name="Functioneel">
+			<AppenderRef ref="Functioneel-file" />
+		</Async>
+
+		<Socket name="Logstash-Primary" host="map46.modernodam.nl" port="5000"
+			connectTimeoutMillis="100" immediateFail="true" ignoreExceptions="false" />
+
+		<RollingRandomAccessFile name="Logstash-Failover"
+								 fileName="../logs/logstash-failover.log"
+								 filePattern="../logs/logstash-failover-%d{yyyy-MM-dd}-%i.log.gz"
+								 ignoreExceptions="false">
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="250 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="30"
+				compressionLevel="9" />
+			<BrpJsonLayout />
+		</RollingRandomAccessFile>
+
+		<Failover name="Logstash" primary="Logstash-Primary">
+			<Failovers>
+				<AppenderRef ref="Logstash-Failover" />
+			</Failovers>
+		</Failover>
+	</Appenders>
+
+	<Loggers>
+		<Root level="INFO">
+			<AppenderRef ref="Console" />
+			<AppenderRef ref="Systeem" />
+			<AppenderRef ref="Functioneel" />
+			<AppenderRef ref="Logstash" />
+		</Root>
+		<logger name="com.atomikos" level="ERROR" />
+		<logger name="org.springframework" level="WARN" />
+	</Loggers>
+
+</Configuration>

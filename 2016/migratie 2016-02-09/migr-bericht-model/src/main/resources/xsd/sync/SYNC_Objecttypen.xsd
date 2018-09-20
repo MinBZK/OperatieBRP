@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:sync="http://www.bzk.nl/migratiebrp/SYNC/0001"
+        targetNamespace="http://www.bzk.nl/migratiebrp/SYNC/0001" elementFormDefault="qualified" attributeFormDefault="unqualified"
+        version="000101">
+
+    <include schemaLocation="SYNC_Attribuuttypen.xsd"/>
+
+    <!-- Algemene (complex) type definities (alfabetisch gesorteerd) -->
+
+	<complexType name="AkteGroepType">
+		<annotation>
+			<documentation>Representatie van groep 81 Akte</documentation>
+		</annotation>
+		<sequence>
+			<element name="registergemeente" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1" nillable="false" />
+			<element name="aktenummer" type="sync:AktenummerType" minOccurs="1" maxOccurs="1" nillable="false" />
+		</sequence>
+	</complexType>
+
+    <complexType name="BrpPlType">
+        <sequence>
+            <any maxOccurs="unbounded" processContents="lax" />
+        </sequence>
+    </complexType>
+
+    <complexType name="FamilieRechtelijkeBetrekkingGroepType">
+		<annotation>
+			<documentation>Representatie van groep 62 Familierechtelijke betrekking</documentation>
+		</annotation>
+        <sequence>
+            <element name="datumIngang" type="sync:DatumType" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="FamilierechtelijkeBetrekkingType">
+		<annotation>
+			<documentation>Representatie van de gegevens voor akte 1-C, 1-E, 1-J, 1-N, 1-Q, 1-U en 1-V in een Tb02 bericht.
+			</documentation>
+		</annotation>
+	    <sequence>
+			<element name="persoon" minOccurs="0" maxOccurs="1" nillable="false">
+				<annotation>
+					<documentation>Elke wijziging van ouderschap kan leiden tot het wijzigen van de naam van de hoofdpersoon
+					</documentation>
+				</annotation>
+				<complexType>
+					<sequence>
+						<element name="naam" type="sync:NaamGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+					</sequence>
+				</complexType>
+			</element>
+			<choice minOccurs="1" maxOccurs="1" >
+				<element name="erkenning" minOccurs="1" maxOccurs="1" nillable="false" >
+					<complexType>
+						<annotation>
+							<documentation>Representatie van de gegevens voor akte 1-C (erkenning) of 1-J (notariele akte van erkenning).
+							Bij erkenning dient een ouder te worden 'toegevoegd'.
+							</documentation>
+						</annotation>
+						<sequence>
+							<element name="persoon" type="sync:PersoonType" minOccurs="1" maxOccurs="1" nillable="false" />
+							<element name="familierechtelijkeBetrekking" type="sync:FamilieRechtelijkeBetrekkingGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+						</sequence>
+					</complexType>
+				</element>
+				<element name="ontkenning" minOccurs="1" maxOccurs="1" nillable="false" >
+					<complexType>
+						<annotation>
+							<documentation>Representatie van de gegevens voor akte 1-E (ontkenning ouderschap) of 1-U (verklaring ontkenning ouderschap).
+							Bij ontkenning dient een ouder te worden gecorrigeerd (onjuist gemaakt naar juridisch geen ouder) tot aan de geboorte.
+							</documentation>
+						</annotation>
+						<sequence>
+							<element name="historie" minOccurs="1" maxOccurs="1" nillable="false" >
+								<complexType>
+									<sequence>
+										<element name="persoon" type="sync:PersoonType" minOccurs="1" maxOccurs="1" nillable="false" />
+										<element name="familierechtelijkeBetrekking" type="sync:FamilieRechtelijkeBetrekkingGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+									</sequence>
+								</complexType>
+							</element>
+						</sequence>
+					</complexType>
+				</element>
+				<element name="adoptie" minOccurs="1" maxOccurs="1" nillable="false" >
+					<complexType>
+						<annotation>
+							<documentation>Representatie van de gegevens voor akte 1-Q (adoptie) of 1-V (gerechtelijke vaststelling ouderschap).
+							</documentation>
+						</annotation>
+						<sequence>
+							<element name="ouder" minOccurs="1" maxOccurs="2" nillable="false">
+								<complexType>
+									<sequence>
+										<element name="persoon" type="sync:PersoonType" minOccurs="0" maxOccurs="1" nillable="false" />
+										<element name="familierechtelijkeBetrekking" type="sync:FamilieRechtelijkeBetrekkingGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+										<element name="historie" minOccurs="1" maxOccurs="1" nillable="false" >
+											<complexType>
+												<sequence>
+													<element name="persoon" type="sync:PersoonType" minOccurs="1" maxOccurs="1" nillable="false" />
+													<element name="familierechtelijkeBetrekking" type="sync:FamilieRechtelijkeBetrekkingGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+												</sequence>
+											</complexType>
+										</element>
+									</sequence>
+								</complexType>
+							</element>
+						</sequence>
+					</complexType>
+				</element>
+				<element name="vernietiging" minOccurs="1" maxOccurs="1" nillable="false" >
+					<complexType>
+						<annotation>
+							<documentation>Representatie van de gegevens voor akte 1-N (vernietiging ontkenning).
+							Bij vernietiging dient een ouder te worden gecorrigeerd (onjuist gemaakt naar juridisch geen ouder) tot aan de erkenning.
+							</documentation>
+						</annotation>
+						<sequence>
+							<element name="historie" minOccurs="1" maxOccurs="1" nillable="false" >
+								<complexType>
+									<sequence>
+										<element name="persoon" type="sync:PersoonType" minOccurs="1" maxOccurs="1" nillable="false" />
+										<element name="familierechtelijkeBetrekking" type="sync:FamilieRechtelijkeBetrekkingGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+									</sequence>
+								</complexType>
+							</element>
+						</sequence>
+					</complexType>
+				</element>
+			</choice>
+        </sequence>
+    </complexType>
+
+    <complexType name="GeboorteGroepType">
+		<annotation>
+			<documentation>Representatie van groep 03 Geboorte</documentation>
+		</annotation>
+        <sequence>
+            <element name="datum" type="sync:DatumType" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <element name="plaats" type="sync:GemeentecodeOfNaamType" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <element name="land" type="sync:LandType" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </sequence>
+    </complexType>
+
+	<complexType name="GeldigheidGroepType">
+		<annotation>
+			<documentation>Representatie van groep 85 Geldigheid</documentation>
+		</annotation>
+		<sequence>
+			<element name="datumIngang" type="sync:DatumType" minOccurs="1" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+
+    <complexType name="GeslachtGroepType">
+		<annotation>
+			<documentation>Representatie van groep 04 Geslacht</documentation>
+		</annotation>
+        <sequence>
+            <element name="geslachtsaanduiding" type="sync:GeslachtsaanduidingType" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="IdentificatienummersGroepType">
+		<annotation>
+			<documentation>Representatie van groep 01 Identificatienummers</documentation>
+		</annotation>
+        <sequence>
+            <element name="aNummer" type="sync:ANummerType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="burgerservicenummer" type="sync:BsnType" minOccurs="0" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+    <complexType name="LogRegelType">
+        <sequence>
+            <element name="logRegel" minOccurs="0" maxOccurs="unbounded">
+                <complexType>
+                    <sequence>
+                        <element name="lo3Categorie" type="sync:LogLo3CategorieType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="lo3Stapel" type="sync:LogLo3StapelType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="lo3Voorkomen" type="sync:LogLo3VoorkomenType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="severity" type="sync:LogSeverityType" minOccurs="1" maxOccurs="1" nillable="false" />
+                        <element name="code" type="sync:LogCodeType" minOccurs="0" maxOccurs="1" nillable="false" />
+                        <element name="lo3Element" type="sync:LogLo3ElementType" minOccurs="0" maxOccurs="1" nillable="false" />
+                    </sequence>
+                </complexType>
+            </element>
+        </sequence>
+    </complexType>
+
+    <complexType name="Lo3PlXmlType">
+        <sequence>
+            <any maxOccurs="unbounded" processContents="lax" />
+        </sequence>
+    </complexType>
+
+    <complexType name="NaamGroepType">
+		<annotation>
+			<documentation>Representatie van groep 02 Naam</documentation>
+		</annotation>
+        <sequence>
+            <element name="voornamen" type="sync:VoornamenType" minOccurs="0" maxOccurs="1" nillable="false"/>
+            <element name="adellijkeTitelPredicaat" type="sync:AdellijkeTitelPredicaatType" minOccurs="0" maxOccurs="1" nillable="false"/>
+            <element name="voorvoegsel" type="sync:VoorvoegselType" minOccurs="0" maxOccurs="1" nillable="false"/>
+            <element name="geslachtsnaam" type="sync:GeslachtsnaamType" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </sequence>
+    </complexType>
+
+	<complexType name="OverlijdenGroepType">
+		<annotation>
+			<documentation>Representatie van groep 08 Overlijden</documentation>
+		</annotation>
+		<sequence>
+			<element name="datum" type="sync:DatumType" minOccurs="1" maxOccurs="1"/>
+			<element name="plaats" type="sync:GemeentecodeType" minOccurs="1" maxOccurs="1"/>
+			<element name="land" type="sync:LandType" minOccurs="1" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+
+	<complexType name="OverlijdenType">
+		<annotation>
+			<documentation>Representatie van de gegevens voor akte 2-A en 2-G in een Tb02 bericht.</documentation>
+		</annotation>
+		<sequence>
+			<element name="overlijden" type="sync:OverlijdenGroepType" minOccurs="1" maxOccurs="1"/>
+		</sequence>
+	</complexType>
+
+    <complexType name="PersoonType">
+		<annotation>
+			<documentation>Representatie van de gegevens de een persoon identificeren in een Tb02 bericht.</documentation>
+		</annotation>
+        <sequence>
+            <element name="identificatienummers" type="sync:IdentificatienummersGroepType" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="naam" type="sync:NaamGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="geboorte" type="sync:GeboorteGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+            <element name="geslacht" type="sync:GeslachtGroepType" minOccurs="0" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+    <complexType name="RelatieOntbindingGroepType">
+		<annotation>
+			<documentation>Representatie van groep 07 Ontbinding verbintenis</documentation>
+		</annotation>
+	        <sequence>
+            <element name="datum" type="sync:DatumType" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <element name="plaats" type="sync:GemeentecodeOfNaamType" minOccurs="1" maxOccurs="1" nillable="1"/>
+            <element name="land" type="sync:LandType" minOccurs="1" maxOccurs="1" nillable="1"/>
+            <element name="reden" type="sync:RedenBeeindigingRelatieType" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="RelatieSluitingGroepType">
+		<annotation>
+			<documentation>Representatie van groep 06 Sluiting verbintenis</documentation>
+		</annotation>
+        <sequence>
+            <element name="datum" type="sync:DatumType" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <element name="plaats" type="sync:GemeentecodeOfNaamType" minOccurs="1" maxOccurs="1" nillable="1"/>
+            <element name="land" type="sync:LandType" minOccurs="1" maxOccurs="1" nillable="1"/>
+		</sequence>
+    </complexType>
+
+    <complexType name="RelatieSoortGroepType">
+		<annotation>
+			<documentation>Representatie van groep 15 Soort verbintenis</documentation>
+		</annotation>
+        <sequence>
+            <element name="soort" type="sync:SoortRelatieType" minOccurs="1" maxOccurs="1" nillable="false"/>
+        </sequence>
+    </complexType>
+
+    <complexType name="RelatieType">
+		<annotation>
+			<documentation>Representatie van de gegevens voor akte 3-A, 3-B, 3-H, 5-A, 5-B en 5-H in een Tb02 bericht.
+			Bij een sluiting (3-A en 5-A) zal naast het element persoon, enkel het element sluiting worden opgenomen.
+			Bij een ontbinding (3-B en 5-B) zal naast de elementen persoon en sluiting het element ontbinding worden opgenomen.
+			Bij een omzetting (3-H en 5-H) zal naast de elementen persoon en sluiting het element omzetting worden opgenomen.
+			Bij alle akten dienen de elementen akte en geldigheid te worden opgenomen.
+			</documentation>
+		</annotation>
+        <sequence>
+            <element name="persoon" type="sync:PersoonType" minOccurs="1" maxOccurs="1" nillable="false"/>
+            <element name="sluiting" minOccurs="1" maxOccurs="1" nillable="false">
+				<complexType>
+					<sequence>
+						<element name="sluiting" type="sync:RelatieSluitingGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+						<element name="soort" type="sync:RelatieSoortGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+					</sequence>
+				</complexType>
+			</element>
+			<choice minOccurs="0" maxOccurs="1">
+				<element name="ontbinding" minOccurs="1" maxOccurs="1" nillable="false">
+					<complexType>
+						<sequence>
+							<element name="ontbinding" type="sync:RelatieOntbindingGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+						</sequence>
+					</complexType>
+				</element>
+				<element name="omzetting" minOccurs="1" maxOccurs="1" nillable="false">
+					<complexType>
+						<sequence>
+							<element name="sluiting" type="sync:RelatieSluitingGroepType" minOccurs="1" maxOccurs="1" nillable="false" />
+						</sequence>
+					</complexType>
+				</element>
+			</choice>
+		</sequence>
+    </complexType>
+
+    <complexType name="NaamGeslachtType">
+		<annotation>
+			<documentation>Representatie van de gegevens voor akte 1-H, 1-M en 1-S.</documentation>
+		</annotation>
+        <sequence>
+            <element name="naam" type="sync:NaamGroepType" minOccurs="0" maxOccurs="1" nillable="false" />
+            <element name="geslacht" type="sync:GeslachtGroepType" minOccurs="0" maxOccurs="1" nillable="false" />
+        </sequence>
+    </complexType>
+
+	<complexType name="ZenderType">
+		<sequence>
+			<choice minOccurs="0">
+				<element name="afnemer" type="sync:AfnemerCodeType" />
+				<element name="gemeente" type="sync:GemeentecodeType" />
+			</choice>
+			<element name="systeem" type="sync:SysteemType" />
+		</sequence>
+	</complexType>
+</schema>

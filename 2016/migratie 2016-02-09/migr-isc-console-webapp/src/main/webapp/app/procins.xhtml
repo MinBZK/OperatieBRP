@@ -1,0 +1,488 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+    >
+<ui:composition template="t_loggedin.xhtml">
+
+<ui:define name="actions">
+    <ga:responseActions>
+        <ga:parameter name="id" target="#{id}" required="true">
+            <f:validateLongRange minimum="0"/>
+            <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+        </ga:parameter>
+        <ga:parameter name="view" target="#{viewMode}" default="img"/>
+        <j4j:loadProcessInstance id="#{id}" target="#{pi}"/>
+        <gd:reverse source="#{pi.rootToken.comments}" target="#{comments}"/>
+        <j4j:listTokens processInstance="#{pi}" target="#{tokenList}"/>
+        <j4j:getDiagramInfo unless="#{viewMode != 'img'}" process="#{pi.processDefinition}" target="#{diagramInfo}"/>
+        <j4j:listTasksForProcessInstance unless="#{viewMode != 'task'}" target="#{tasks}" processInstance="#{pi}"/>
+
+        <ga:parameter unless="#{viewMode != 'berichten'}" name="page" target="#{page}">
+            <f:convertNumber integerOnly="true"/>
+        </ga:parameter>
+
+        <!-- berichten filter -->
+        <ga:parameter unless="#{viewMode != 'berichten'}" name="kanaal" target="#{filter_kanaal}" default="" />
+        <ga:parameter unless="#{viewMode != 'berichten'}" name="richting" target="#{filter_richting}" default="" />
+        <ga:parameter unless="#{viewMode != 'berichten'}" name="bron" target="#{filter_bron}" default="" />
+        <ga:parameter unless="#{viewMode != 'berichten'}" name="doel" target="#{filter_doel}" default="" />
+        <ga:parameter unless="#{viewMode != 'berichten'}" name="type" target="#{filter_type}" default="" />
+        <ga:parameter unless="#{viewMode != 'berichten'}" name="berichtId" target="#{filter_berichtId}" default="" />
+        <ga:parameter unless="#{viewMode != 'berichten'}" name="correlatieId" target="#{filter_correlatieId}" default="" />
+
+        <mig:pager unless="#{viewMode != 'berichten'}" target="#{berichtenList_pager}" page="#{page}" pageSize="25" />
+        <mig:berichtenFilter unless="#{viewMode != 'berichten'}" target="#{berichtenList_filter}" kanaal="#{filter_kanaal}" richting="#{filter_richting}"
+            bron="#{filter_bron}" doel="#{filter_doel}" type="#{filter_type}" berichtId="#{filter_berichtId}"
+            correlatieId="#{filter_correlatieId}" />
+
+        <mig:listBerichtenForProcessInstance unless="#{viewMode != 'berichten'}" target="#{berichtenList}" processInstance="#{pi}" pager="#{berichtenList_pager}" filter="#{berichtenList_filter}" />
+        <mig:listTransitionsForProcessInstance unless="#{viewMode != 'log'}" target="#{logList}" processInstance="#{pi}"/>
+
+        <mig:pager unless="#{viewMode != 'gegevens'}" target="#{gegevensList_pager}" page="#{page}" pageSize="25" />
+        <mig:listGerelateerdeGegevensForProcessInstance unless="#{viewMode != 'gegevens'}" pager="${gegevensList_pager}" target="#{gegevensList}" processInstance="#{pi}"/>
+
+        <!-- process instances parameters -->
+        <ga:parameter name="pi_key" target="#{pi_key}" default="">
+            <f:converter converterId="gravel.StringWildcardFilter"/>
+        </ga:parameter>
+        <ga:parameter name="fr" target="#{filter_running}" default="${false}">
+            <f:converter converterId="javax.faces.Boolean"/>
+        </ga:parameter>
+        <ga:parameter name="fs" target="#{filter_suspended}" default="${false}">
+            <f:converter converterId="javax.faces.Boolean"/>
+        </ga:parameter>
+        <ga:parameter name="fe" target="#{filter_ended}" default="${false}">
+            <f:converter converterId="javax.faces.Boolean"/>
+        </ga:parameter>
+        <ga:parameter name="anummer" target="#{filter_anummer}" default=""/>
+        <ga:parameter name="partij" target="#{filter_partij}" default=""/>
+        <ga:parameter name="ah" target="#{filter_ah}" default=""/>
+        <ga:parameter name="root" target="#{filter_root}" default="${false}"/>
+        <mig:listProcessInstancesForProcessInstance unless="#{viewMode != 'child'}" target="#{childList}" processInstance="#{pi}"/>
+		<ga:parameter name="page" target="#{page}">
+            <f:convertNumber integerOnly="true"/>
+        </ga:parameter>
+        <gd:pager value="#{childList}" target="#{piList_pager}" page="#{page}"/>
+        <gd:sort if="#{! empty childList}" source="#{childList}" target="#{childList}"
+            entryVar="p" argument="#{p.start != null ? p.start : ''}" reverse="true"/>
+        <gd:filter if="#{filter_ended or filter_suspended or filter_running}" source="#{childList}" target="#{childList}" entryVar="entry"
+        test="#{(filter_ended and entry.end != null) or (filter_suspended and entry.end == null and entry.suspended) or (filter_running and entry.end == null and !entry.suspended)}"/>
+        <gd:filter if="#{! empty pi_key}" entryVar="entry" source="#{childList}" target="#{childList}"
+        filter="#{pi_key}" filterArgument="#{entry.key == null ? '' : entry.key}"/>
+
+        <gd:sort if="#{! empty tasks}" source="#{tasks}" target="#{tasks}"
+            entryVar="t" argument="#{t}" reverse="true" comparator="#{taskComparator}"/>
+
+        <j4j:getVariableMap unless="#{viewMode != 'vars'}" target="#{vars}" value="#{pi}"/>
+        <gd:sort if="#{! empty vars}" source="#{vars}" target="#{vars}" entryVar="e" argument="#{e.key}"/>
+        <!-- tasks parameters -->
+        <ga:parameter name="name" target="#{task_filter_name}" default="">
+            <f:converter converterId="gravel.StringWildcardFilter"/>
+        </ga:parameter>
+        <ga:parameter name="fout" target="#{task_filter_fout}" default="">
+            <f:converter converterId="gravel.StringWildcardFilter"/>
+        </ga:parameter>
+        <ga:parameter name="actor" target="#{task_filter_actor}" default="">
+            <f:converter converterId="gravel.StringWildcardFilter"/>
+        </ga:parameter>
+        <ga:parameter name="fn" target="#{task_filter_notstarted}" default="${true}">
+            <f:converter converterId="javax.faces.Boolean"/>
+        </ga:parameter>
+        <ga:parameter name="fr" target="#{task_filter_running}" default="${true}">
+            <f:converter converterId="javax.faces.Boolean"/>
+        </ga:parameter>
+        <ga:parameter name="fs" target="#{task_filter_suspended}" default="${true}">
+            <f:converter converterId="javax.faces.Boolean"/>
+        </ga:parameter>
+        <ga:parameter name="fe" target="#{task_filter_ended}" default="${false}">
+            <f:converter converterId="javax.faces.Boolean"/>
+        </ga:parameter>
+
+        <gd:filter if="#{task_filter_notstarted or task_filter_running or task_filter_suspended or task_filter_ended}" source="#{tasks}" target="#{tasks}" entryVar="entry"
+        test="#{task_filter_notstarted and entry.start == null and entry.end == null or task_filter_ended and entry.end != null or (entry.start != null and entry.end == null) and (task_filter_suspended and entry.suspended or task_filter_running and ! entry.suspended)}"/>
+        <gd:filter if="#{! empty task_filter_name}" entryVar="entry" source="#{tasks}" target="#{tasks}" filter="#{task_filter_name}" filterArgument="#{entry.name == null ? '' : entry.name}"/>
+        <gd:filter if="#{! empty task_filter_fout}" entryVar="entry" source="#{tasks}" target="#{tasks}" filter="#{task_filter_fout}" filterArgument="#{entry.variables['fout'] == null ? '' : entry.variables['fout']}"/>
+        <gd:filter if="#{! empty task_filter_actor}" entryVar="entry" source="#{tasks}" target="#{tasks}" filter="#{task_filter_actor}" filterArgument="#{entry.actorId == null ? '' : entry.actorId}"/>
+    </ga:responseActions>
+</ui:define>
+
+<ui:define name="menu">
+<gs:div style="padding:0;margin:0">
+    <ga:attribute name="rendered" value="#{pi != null}"/>
+    <table class="leftmenu">
+        <tbody>
+            <tr class="leftmenuheader">
+                <th colspan="2">#{msgs['processinstance.summary']}</th>
+            </tr>
+            <tr class="leftmenu">
+                <th>#{msgs['processdefinition.summary']}</th>
+                <td>
+                    <h:outputLink value="procdef.jsf">
+                        <f:param name="id" value="#{pi.processDefinition.id}"/>
+                        <h:outputText value="#{pi.processDefinition.name} v#{pi.processDefinition.version}"/>
+                    </h:outputLink>
+                </td>
+            </tr>
+
+            <tr class="leftmenu">
+                <th>#{msgs['processinstance.summary']}</th>
+                <td>
+	                <h:outputText value="ID #{id}"/>
+	                <ui:remove><!--
+	                    <h:outputLink style="font-weight:bold">
+	                        <f:param name="id" value="#{id}"/>
+	                        <h:outputText value="ID #{id}"/>
+	                    </h:outputLink>
+                     --></ui:remove>
+                </td>
+            </tr>
+            <ga:checkRole roles="#{access.role.process.details}">
+            <tr class="leftmenu">
+                <th>#{msgs['processinstance.heading.key']}</th>
+                <td>
+                    <h:outputText value="#{pi.key}"/>
+                </td>
+            </tr>
+            </ga:checkRole>
+            <tr class="leftmenu">
+                <th>#{msgs['processinstance.heading.status']}</th>
+                <td>
+                    <h:outputText value="#{msgs['status.ended']}" styleClass="statusEnded">
+                        <ga:attribute name="rendered" value="#{pi.end != null}"/>
+                    </h:outputText>
+                    <h:outputText value=" #{msgs['status.ended.suspended']}" style="font-style:italic">
+                        <ga:attribute name="rendered" value="#{pi.end != null and pi.suspended}"/>
+                    </h:outputText>
+                    <h:outputText>
+                        <ga:attribute name="rendered" value="#{pi.end == null}"/>
+                        <ga:attribute name="value" value="#{pi.suspended ? msgs['status.suspended'] : msgs['status.running']}"/>
+                        <ga:attribute name="styleClass" value="#{pi.suspended ? 'statusSuspended' : 'statusRunning'}"/>
+                    </h:outputText>
+                </td>
+            </tr>
+            <tr class="leftmenu">
+                <th>#{msgs['processinstance.heading.start']}</th>
+                <td>
+                    <h:outputText value="#{pi.start}">
+                        <f:convertDateTime type="both" timeZone="#{j4j:getServerTimeZone()}"/>
+                    </h:outputText>
+                </td>
+            </tr>
+            <tr class="leftmenu">
+                <th>#{msgs['processinstance.heading.end']}</th>
+                <td>
+                    <h:outputText value="#{pi.end}">
+                        <f:convertDateTime type="both" timeZone="#{j4j:getServerTimeZone()}"/>
+                    </h:outputText>
+                </td>
+            </tr>
+            <tr class="leftmenuheader">
+                <th colspan="2" class="nf">#{msgs['menu.views']}</th>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <gs:ul>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'task' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="task"/>
+                                #{msgs['task.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'comments' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="comments"/>
+                                #{msgs['comment.heading']}
+                            </h:outputLink>
+                        </gs:li>
+             			<ga:checkRole roles="#{access.role.process.details}">
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'token' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="token"/>
+                                #{msgs['token.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                        </ga:checkRole>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'berichten' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="berichten"/>
+                                #{msgs['bericht.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'log' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="log"/>
+                                #{msgs['log.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'img' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="img"/>
+                                #{msgs['processimage.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'vars' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="vars"/>
+                                #{msgs['variable.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'child' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="child"/>
+                                #{msgs['child.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                        <gs:li>
+                            <h:outputLink style="#{viewMode == 'gegevens' ? 'font-weight:bold' : ''}">
+                                <f:param name="id" value="#{id}"/>
+                                <f:param name="view" value="gegevens"/>
+                                #{msgs['gegevens.heading']}
+                            </h:outputLink>
+                        </gs:li>
+                    </gs:ul>
+                </td>
+            </tr>
+            <tr class="leftmenuheader">
+                <th colspan="2" class="nf">#{msgs['menu.actions']}</th>
+            </tr>
+            <tr class="leftmenu">
+                <td colspan="2">
+                    <h:form>
+                        <h:inputHidden value="#{id}"/>
+                        <gs:ul>
+						<ga:checkRole roles="#{access.role.execution.suspend.proces}">
+                            <gs:li rendered="#{pi.end == null}">
+								<h:outputText value="#{msgs['processinstance.action.suspend.beforelink']} ">
+									<ga:attribute name="rendered" value="#{! pi.suspended}"/>
+								</h:outputText>
+                                <h:commandLink value="#{msgs['processinstance.action.suspend.link']}">
+                                    <ga:attribute name="rendered" value="#{! pi.suspended}"/>
+                                    <j4j:loadProcessInstance id="#{id}" target="#{pi}"/>
+                                    <mig:suspendProcessInstance processInstance="#{pi}"/>
+                                    <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                </h:commandLink>
+								<h:outputText value=" #{msgs['processinstance.action.suspend.afterlink']} ">
+									<ga:attribute name="rendered" value="#{! pi.suspended}"/>
+								</h:outputText>
+
+								<h:outputText value="#{msgs['processinstance.action.resume.beforelink']} ">
+									<ga:attribute name="rendered" value="#{pi.suspended}"/>
+								</h:outputText>
+                                <h:commandLink value="#{msgs['processinstance.action.resume.link']}">
+                                    <ga:attribute name="rendered" value="#{pi.suspended}"/>
+                                    <j4j:loadProcessInstance id="#{id}" target="#{pi}"/>
+                                    <mig:resumeProcessInstance processInstance="#{pi}"/>
+                                    <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                </h:commandLink>
+								<h:outputText value=" #{msgs['processinstance.action.resume.afterlink']} ">
+									<ga:attribute name="rendered" value="#{pi.suspended}"/>
+								</h:outputText>
+                            </gs:li>
+						</ga:checkRole>
+						<ga:checkRole roles="#{access.role.execution.end}">
+                            <gs:li>
+                                <ga:attribute name="rendered" value="#{pi.end == null}"/>
+
+								<h:outputText value="#{msgs['processinstance.action.end.beforelink']} "/>
+                                <h:commandLink value="#{msgs['processinstance.action.end.link']}" onclick="return confirm('#{msgs['confirm.processinstance.end']}')">
+                                    <j4j:loadProcessInstance id="#{id}" target="#{pi}"/>
+                                    <j4j:cancel value="#{pi}"/>
+                                    <n:nav outcome="success" redirect="true" storeMessages="true"/>
+                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                </h:commandLink>
+								<h:outputText value=" #{msgs['processinstance.action.end.afterlink']} "/>
+                            </gs:li>
+						</ga:checkRole>
+						<ga:checkRole roles="#{access.role.execution.delete}">
+                            <gs:li>
+								<h:outputText value="#{msgs['processinstance.action.delete.beforelink']} "/>
+                                <h:commandLink value="#{msgs['processinstance.action.delete.link']}" onclick="return confirm('#{msgs['confirm.processinstance.delete']}')">
+                                    <j4j:loadProcessInstance id="#{id}" target="#{pi}" forUpdate="false"/>
+                                    <f:setPropertyActionListener value="#{pi.processDefinition.id}" target="#{pdid}"/>
+                                    <j4j:delete value="#{pi}"/>
+                                    <f:setPropertyActionListener value="#{null}" target="#{pi}"/>
+                                    <n:nav outcome="success" url="procdef.jsf?id=#{pdid}" storeMessages="true"/>
+                                    <n:nav outcome="error" redirect="true" storeMessages="true"/>
+                                </h:commandLink>
+                                <h:outputText value=" #{msgs['processinstance.action.delete.afterlink']} "/>
+                            </gs:li>
+						</ga:checkRole>
+                        </gs:ul>
+                    </h:form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+</gs:div>
+</ui:define>
+
+<ui:define name="body">
+    <gs:div>
+        <ga:attribute name="rendered" value="#{pi != null}"/>
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'comments'}"/>
+            <ui:decorate template="t_comments.xhtml">
+                <ui:define name="loadTarget">
+                    <ga:parameter name="id" target="#{id}" required="true">
+                        <f:validateLongRange minimum="0"/>
+                        <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+                    </ga:parameter>
+                    <j4j:loadProcessInstance id="#{id}" target="#{pi}"/>
+                    <f:setPropertyActionListener value="#{pi.rootToken}" target="#{target}"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+        <gs:div>
+            <ga:attribute name="style"
+            value="position:relative;height:#{diagramInfo.height}px;width:#{diagramInfo.width}px"/>
+            <ga:attribute name="rendered" value="#{viewMode == 'img'}"/>
+            <img
+                alt=""
+                src="pi/#{pi.processDefinition.id}.jpg"
+                style="position:absolute;top:0;left:0"/>
+            <gd:repeat value="#{tokenList}" var="token">
+                <ui:fragment>
+                    <ui:param name="node" value="#{diagramInfo.nodeMap[token.node.name]}"/>
+                    <gs:div>
+                        <ga:attribute name="style"
+                        value="top:#{node.y - 12}px;left:#{node.x + 2}px;width:#{node.width - 3}px;height:#{node.height + 11}px"/>
+                        <ga:attribute name="styleClass"
+                        value="#{token.end != null ? 'pboxs_e' : token.suspended ? 'pboxs_s' : 'pboxs'}"/>
+                    </gs:div>
+                    <gs:div>
+                        <ga:attribute name="style"
+                         value="top:#{node.y}px;left:#{node.x}px;width:#{node.width - 3}px;height:#{node.height - 3}px"/>
+                        <ga:attribute name="styleClass"
+                        value="#{token.end != null ? 'pbox_e' : token.suspended ? 'pbox_s' : 'pbox'}"/>
+                    </gs:div>
+                    <gs:div>
+                        <ga:attribute name="style"
+                        value="top:#{node.y - 14}px;left:#{node.x}px;width:#{node.width - 1}px"/>
+                        <ga:attribute name="styleClass" value="pboxce"/>
+                        <gs:div>
+                            <ga:attribute name="styleClass"
+                            value="#{token.end != null ? 'pboxc_e' : token.suspended ? 'pboxc_s' : 'pboxc'}"/>
+                            <ui:remove><!--
+                            <h:outputLink value="token.jsf">
+                                <f:param name="id" value="#{token.id}"/>
+                                <h:outputText value="#{msgs['status.running']}" rendered="#{token.end == null and ! token.suspended}"/>
+                                <h:outputText value="#{msgs['status.suspended']}" rendered="#{token.end == null and token.suspended}"/>
+                                <h:outputText value="#{msgs['status.ended']}" rendered="#{token.end != null}"/>
+                                <h:outputText rendered="#{token.name != null}" value=" &quot;#{token.name}&quot;"/>
+                            </h:outputLink>
+                             --></ui:remove>
+                            <h:outputText value="#{msgs['status.running']}" rendered="#{token.end == null and ! token.suspended}"/>
+                            <h:outputText value="#{msgs['status.suspended']}" rendered="#{token.end == null and token.suspended}"/>
+                            <h:outputText value="#{msgs['status.ended']}" rendered="#{token.end != null}"/>
+                            <h:outputText rendered="#{token.name != null}" value=" &quot;#{token.name}&quot;"/>
+                        </gs:div>
+                    </gs:div>
+                </ui:fragment>
+            </gd:repeat>
+            <gd:repeat value="#{diagramInfo.nodes}" var="node">
+            </gd:repeat>
+        </gs:div>
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'task'}"/>
+            <ui:decorate template="t_tasks.xhtml">
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="task"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'token'}"/>
+            <ui:decorate template="t_tokens.xhtml">
+                <ui:param name="tokens" value="#{tokenList}"/>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="token"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'vars'}"/>
+            <ui:decorate template="t_vars.xhtml">
+                <ui:define name="loadEntity">
+                    <ga:parameter name="id" target="#{id}" required="true">
+                        <f:validateLongRange minimum="0"/>
+                        <f:convertNumber integerOnly="true" maxFractionDigits="0"/>
+                    </ga:parameter>
+                    <j4j:loadProcessInstance id="#{id}" target="#{entity}"/>
+                </ui:define>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="vars"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'berichten'}"/>
+            <ui:decorate template="t_berichten.xhtml">
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="berichten"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'log'}"/>
+            <ui:decorate template="t_transitionlog.xhtml">
+                <ui:param name="logs" value="#{logList}"/>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="log"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+
+  		<h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'child'}"/>
+            <ui:decorate template="t_processinstances.xhtml">
+                <ui:param name="piList" value="#{childList}"/>
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="child"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+
+        <h:outputText>
+            <ga:attribute name="rendered" value="#{viewMode == 'gegevens'}"/>
+            <ui:decorate template="t_gegevens.xhtml">
+                <ui:define name="params">
+                    <f:param name="id" value="#{id}"/>
+                    <f:param name="view" value="gegevens"/>
+                </ui:define>
+            </ui:decorate>
+        </h:outputText>
+
+    </gs:div>
+</ui:define>
+</ui:composition>
+
+</html>

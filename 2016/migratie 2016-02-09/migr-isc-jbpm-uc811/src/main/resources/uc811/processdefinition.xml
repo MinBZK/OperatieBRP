@@ -1,0 +1,1271 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<process-definition  xmlns=""  name="uc811">
+
+    <!--  -->
+    <!--  -->
+    <!-- START -->
+    <!--  -->
+    <!--  -->
+
+    <start-state name="Start (vanuit beheerdersscherm)">
+        <transition to="O-1. Loggen start proces">
+            <script>
+                <expression>
+                    functioneleStap="uc811.start.stap";
+                    bronGemeente = "";
+                    doelGemeente = nl.bzk.migratiebrp.isc.jbpm.common.berichten.JbpmBerichtenDao.INSTANCE.leesBericht(input).getGemeenteCode();
+                </expression>
+                <variable name='functioneleStap' access='write' />
+                <variable name='bronGemeente' access='write' />
+                <variable name='doelGemeente' access='write' />
+                <variable name='input' access='read' />
+            </script>
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>input</value></entry>
+                </parameters>
+            </action>
+        </transition>
+    </start-state>
+
+    <node name="O-1. Loggen start proces">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                startProcesInstantieAction
+            </bean>
+        </action>
+        <transition to="CONTROLEREN"></transition>
+    </node>
+
+    <!--  -->
+    <!--  -->
+    <!-- CONTROLEREN -->
+    <!--  -->
+    <!--  -->
+
+ <node name="CONTROLEREN">
+        <transition to="III-1. Valideer input parameters">
+            <script>
+                <expression>
+                    functioneleStap="alg.gemeente.stap";
+                </expression>
+                <variable name='functioneleStap' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <process-state name="II-1. Foutafhandeling (controle)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="indicatieCyclusFout" name="foutafhandelingIndicatieCyclusFout"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="II-2. Keuze (controle)" ></transition>
+    </process-state>
+
+    <decision name="II-2. Keuze (controle)">
+        <transition to="EINDE" name="2b. Beeindigen">
+            <condition expression="#{restart == 'end' || restart == 'endWithoutPf03'}"></condition>
+        </transition>
+        <transition to="CONTROLEREN" name="2a. Opnieuw controleren">
+            <condition expression="#{restart == 'restartAtControleren'}"></condition>
+        </transition>
+    </decision>
+
+    <decision name="III-1. Valideer input parameters">
+        <handler class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringDecisionHandler">
+            <bean>
+                uc811ValideerInputDecision
+            </bean>
+        </handler>
+        <transition to="III-2. Bepaal verzendende instantie"></transition>
+        <transition to="II-1. Foutafhandeling (controle)" name="3a. Fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.start.fout";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    restart="end";
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtControleren", "Gemeente register opnieuw ophalen en opnieuw
+                    controleren", false, false, false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </decision>
+
+    <node name="III-2. Bepaal verzendende instantie">
+   <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                algBepaalVerzendendeInstantieAction
+            </bean>
+        </action>
+        <transition to="SYNCHRONISATIE VRAAG"></transition>
+        <transition to="II-1. Foutafhandeling (controle)" name="3b. Fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="alg.verzender.fout";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    restart="end";
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtControleren", "Gemeente register opnieuw ophalen en controle
+                    opnieuw uitvoeren", false, false, false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <!--  -->
+    <!--  -->
+    <!--  LQ01 -->
+    <!--  -->
+    <!--  -->
+
+    <node name="SYNCHRONISATIE VRAAG">
+        <transition to="IV-1. Maak Lq01 bericht">
+            <script>
+                <expression>
+                    functioneleStap="uc811.synchronisatievraag.stap";
+                    synchronisatieVraagHerhalingTimeout=nl.bzk.migratiebrp.isc.jbpm.common.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("vospg.timeout");
+                    synchronisatieVraagHerhalingMaxHerhalingen=nl.bzk.migratiebrp.isc.jbpm.common.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsInteger("vospg.herhalingen");
+                </expression>
+                <variable name='functioneleStap' access='write' />
+                <variable name='synchronisatieVraagHerhalingTimeout' access='write' />
+                <variable name='synchronisatieVraagHerhalingMaxHerhalingen' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <node name="IV-1. Maak Lq01 bericht">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811MaakLq01BerichtAction
+            </bean>
+        </action>
+        <transition to="IV-2. Ophalen PL binnen gemeente">
+            <script>
+                <expression>
+                    synchronisatieVraagDueDate = nl.bzk.migratiebrp.isc.jbpm.common.TimerUtil.getDueDate(synchronisatieVraagHerhalingTimeout, synchronisatieVraagHerhaling);
+                </expression>
+                <variable name='synchronisatieVraagDueDate' access='write' />
+                <variable name='synchronisatieVraagHerhalingTimeout' access='read' />
+                <variable name='synchronisatieVraagHerhaling' access='read' />
+            </script>
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>lq01Bericht</value></entry>
+                </parameters>
+            </action>
+        </transition>
+    </node>
+
+    <node name="IV-2. Ophalen PL binnen gemeente">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.actionhandler.EsbActionHandler">
+            <esbCategoryName>
+                ISC
+            </esbCategoryName>
+            <esbServiceName>
+                VOSPG-Outbound
+            </esbServiceName>
+            <bpmToEsbVars>
+                <mapping bpm="lq01Bericht" esb="BODY_CONTENT"></mapping>
+            </bpmToEsbVars>
+            <esbToBpmVars>
+                <mapping bpm="vospgBericht" esb="iscBerichtId"></mapping>
+                <mapping bpm="vospgBerichtType" esb="iscBerichtType"></mapping>
+            </esbToBpmVars>
+        </action>
+        <timer name="timeout" transition="timeout" duedate="#{synchronisatieVraagDueDate}"></timer>
+        <transition to="IV-4. Bepaal antwoord ophalen PL binnen gemeente">
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>vospgBericht</value></entry>
+                </parameters>
+            </action>
+        </transition>
+        <transition to="IV-3. Controleer herhalingen ophalen PL binnen gemeente" name="timeout">
+            <script>
+                <expression>
+                    if(synchronisatieVraagHerhaling == null) {
+                        synchronisatieVraagHerhaling = 1;
+                    } else {
+                        synchronisatieVraagHerhaling = synchronisatieVraagHerhaling + 1;
+                    }
+                </expression>
+                <variable name='synchronisatieVraagHerhaling' access='read,write' />
+            </script>
+        </transition>
+    </node>
+
+    <decision name="IV-3. Controleer herhalingen ophalen PL binnen gemeente">
+        <transition to="IV-1. Maak Lq01 bericht"></transition>
+        <transition to="V-2. Foutafhandeling (lq01)" name="4b. Technische fout (maximum herhalingen)">
+            <condition expression="#{synchronisatieVraagHerhaling &gt; synchronisatieVraagHerhalingMaxHerhalingen}"></condition>
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.synchronisatievraag.maximumherhalingen";
+                    foutafhandelingFoutmelding=null;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtVragen", "Opnieuw proberen persoonslijst op te halen", false,
+                    false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </decision>
+
+    <decision name="IV-4. Bepaal antwoord ophalen PL binnen gemeente">
+        <transition to="IV-5. Valideer La01 bericht">
+            <condition expression="#{vospgBerichtType == 'La01'}"></condition>
+            <script>
+                <expression >
+                    la01Bericht=vospgBericht;
+                </expression>
+                <variable name='la01Bericht' access='write' />
+                <variable name='vospgBericht' access='read' />
+            </script>
+        </transition>
+        <transition to="V-2. Foutafhandeling (lq01)" name="4c. Technische fout (foutief bericht)">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.synchronisatievraag.foutiefbericht";
+                    foutafhandelingFoutmelding=vospgBerichtType + " is niet een verwacht bericht.";
+                    foutafhandelingIndicatieCyclusFout=true;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", true, false, false);
+                    foutafhandelingPaden.put("restartAtVragen", "Opnieuw proberen persoonslijst op te halen", false,
+                    false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='vospgBerichtType' access='read' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+        <transition to="V-2. Foutafhandeling (lq01)" name="4c. Technische fout (ongeldig bericht)">
+            <condition expression="#{vospgBerichtType == 'OngeldigBericht'}"></condition>
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.synchronisatievraag.ongeldigbericht";
+                    foutafhandelingFoutmelding=nl.bzk.migratiebrp.isc.jbpm.common.FoutUtil.beperkFoutmelding(
+                    nl.bzk.migratiebrp.isc.jbpm.common.berichten.JbpmBerichtenDao.INSTANCE.leesBericht(vospgBericht).getMelding());
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", true, false, false);
+                    foutafhandelingPaden.put("restartAtVragen", "Opnieuw proberen persoonslijst op te halen", false,
+                    false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='vospgBericht' access='read' />
+                <variable name='vospgBerichtType' access='read' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+        <transition to="V-1. Maak Lf01 Beheerderskeuzes" name="4d. Lf01Bericht">
+            <condition expression="#{vospgBerichtType == 'Lf01'}"></condition>
+            <script>
+                <expression>
+                    lf01Bericht=vospgBericht;
+
+                    foutafhandelingFout="uc811.synchronisatievraag.fout";
+                    foutafhandelingFoutmelding=nl.bzk.migratiebrp.isc.jbpm.common.FoutUtil.beperkFoutmelding(
+                    nl.bzk.migratiebrp.isc.jbpm.common.berichten.JbpmBerichtenDao.INSTANCE.leesBericht(vospgBericht).getFoutreden().toString());
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtVragen", "Opnieuw proberen persoonslijst op te halen", false,
+                    false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='vospgBericht' access='read' />
+                <variable name='lf01Bericht' access='read,write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+        <transition to="V-2. Foutafhandeling (lq01)" name="4e. Protocol fout">
+            <condition expression="#{vospgBerichtType == 'Pf01' || vospgBerichtType == 'Pf02' || vospgBerichtType == 'Pf03'}"></condition>
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.synchronisatievraag.protocolfout";
+                    foutafhandelingFoutmelding=null;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtVragen", "Opnieuw proberen persoonslijst op te halen", false,
+                    false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='vospgBericht' access='read' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </decision>
+
+    <decision name="IV-5. Valideer La01 bericht">
+        <handler class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringDecisionHandler">
+            <bean>
+                uc811ControleerLa01BerichtDecision
+            </bean>
+        </handler>
+        <transition to="V-2. Foutafhandeling (lq01)" name="4f. Fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.synchronisatievraag.inhoudFout";
+                    foutafhandelingFoutmelding=null;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (en stuur Pf03 naar gemeente)", true, false,
+                    false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtVragen", "Opnieuw proberen persoonslijst op te halen", false,
+                    false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+        <transition to="LOCK" name="La01"></transition>
+    </decision>
+
+    <node name="V-1. Maak Lf01 Beheerderskeuzes">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811BepaalLf01BeheerderKeuzesAction
+            </bean>
+        </action>
+        <transition to="V-2. Foutafhandeling (lq01)"></transition>
+    </node>
+
+    <process-state name="V-2. Foutafhandeling (lq01)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="lo3Bericht" name="vospgBericht"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="indicatieCyclusFout" name="foutafhandelingIndicatieCyclusFout"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="V-3. Keuze (lq01)" ></transition>
+    </process-state>
+
+    <decision name="V-3. Keuze (lq01)">
+        <transition to="EINDE" name="5b. Beeindigen">
+            <condition expression="#{restart == 'end' || restart == 'endWithoutPf03'}"></condition>
+        </transition>
+        <transition to="SYNCHRONISATIE VRAAG" name="5a. Opnieuw vragen">
+            <condition expression="#{restart == 'restartAtVragen'}"></condition>
+        </transition>
+        <transition to="V-4. Bepaal verwijsgegevens" name="5c. Stuur synchronisatievraag naar gemeente uit verwijsgegevens">
+            <condition expression="#{restart == 'vraagViaVerwijsGegevens'}"></condition>
+        </transition>
+    </decision>
+
+    <node name="V-4. Bepaal verwijsgegevens">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811MaakVerwijsUc811BerichtAction
+            </bean>
+        </action>
+        <transition to="V-5. Synchronisatievraag naar gemeente uit verwijsgegevens"></transition>
+    </node>
+
+    <process-state name="V-5. Synchronisatievraag naar gemeente uit verwijsgegevens">
+        <sub-process name="uc811" binding="late"></sub-process>
+        <variable access="read" mapped-name="input" name="verwijsUc811Bericht"></variable>
+        <transition to="EINDE"></transition>
+    </process-state>
+
+    <!--  -->
+    <!--  -->
+    <!-- LOCK -->
+    <!--  -->
+    <!--  -->
+
+    <node name="LOCK">
+        <transition to="VI-1. Verkrijg lock (op a-nummers)">
+            <script>
+                <expression>
+                    functioneleStap="uc811.lock.stap";
+                    lockHerhalingTimeout=nl.bzk.migratiebrp.isc.jbpm.common.configuratie.JbpmConfiguratieDao.INSTANCE.getConfiguratieAsDuration("lock.timeout");
+                </expression>
+                <variable name='functioneleStap' access='write' />
+                <variable name='lockHerhalingTimeout' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <node name="VI-1. Verkrijg lock (op a-nummers)">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811VerkrijgANummerLockAction
+            </bean>
+        </action>
+        <transition to="BLOKKERING INFO"></transition>
+        <transition to="VII-1. Foutafhandeling (lock)" name="6c. Technische fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.lock.technischefout";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (Pf03)", true, false, false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen (zonder Pf03)", false, false, false);
+                    foutafhandelingPaden.put("restartAtLock", "Opnieuw proberen te locken", false, false, false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='leesGemeenteRegisterAntwoord' access='read' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+        <transition to="VII-1. Foutafhandeling (lock)" name="6b. Fout: Lock niet verkregen (automatisch herhalen na pauze)">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.lock.reedsgelocked";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=false;
+                    restart="restartAtLockMetPauze";
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("restartAtLockMetPauze", "Opnieuw proberen te locken", false, false,
+                    false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='leesGemeenteRegisterAntwoord' access='read' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <process-state name="VII-1. Foutafhandeling (lock)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="lo3Bericht" name="la01Bericht"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="indicatieCyclusFout" name="foutafhandelingIndicatieCyclusFout"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="VII-2. Keuze (lock)" ></transition>
+    </process-state>
+
+    <decision name="VII-2. Keuze (lock)">
+        <transition to="EINDE" name="7b. Beeindigen">
+            <condition expression="#{restart == 'end' || restart == 'endWithoutPf03'}"></condition>
+        </transition>
+        <transition to="LOCK" name="7a. Opnieuw locken">
+            <condition expression="#{restart == 'restartAtLock'}"></condition>
+        </transition>
+        <transition to="VI-2. Timeout" name="7c. Opnieuw vragen (na pauze)">
+            <script>
+                <expression>
+                    lockHerhalingDueDate = nl.bzk.migratiebrp.isc.jbpm.common.TimerUtil.getDueDate(lockHerhalingTimeout, null);
+                </expression>
+                <variable name='lockHerhalingDueDate' access='write' />
+                <variable name='lockHerhalingTimeout' access='read' />
+            </script>
+        </transition>
+    </decision>
+
+    <state name="VI-2. Timeout">
+        <timer name="timeout" transition="timeout" duedate="#{lockHerhalingDueDate}"></timer>
+        <transition to="LOCK" name="timeout"></transition>
+    </state>
+
+    <!--  -->
+    <!--  -->
+    <!-- Blokkering info -->
+    <!--  -->
+    <!--  -->
+
+    <node name="BLOKKERING INFO">
+        <transition to="VIII-1. Maak blokkering info bericht">
+            <script>
+                <expression>
+                    functioneleStap="uc811.blokkeringinfo.stap";
+                </expression>
+                <variable name='functioneleStap' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <node name="VIII-1. Maak blokkering info bericht">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811MaakBlokkeringInfoAction
+            </bean>
+        </action>
+        <transition to="VIII-2. Opvragen blokkering info">
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>blokkeringInfoBericht</value></entry>
+                </parameters>
+            </action>
+        </transition>
+    </node>
+
+    <node name="VIII-2. Opvragen blokkering info">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.actionhandler.EsbActionHandler">
+            <esbServiceName>
+                Sync-Outbound
+            </esbServiceName>
+            <esbCategoryName>
+                ISC
+            </esbCategoryName>
+            <bpmToEsbVars>
+                <mapping bpm="blokkeringInfoBericht" esb="BODY_CONTENT"></mapping>
+            </bpmToEsbVars>
+            <esbToBpmVars>
+                <mapping bpm="syncBericht" esb="iscBerichtId"></mapping>
+                <mapping bpm="syncBerichtType" esb="iscBerichtType"></mapping>
+            </esbToBpmVars>
+        </action>
+        <transition to="VIII-4. Bepaal antwoord op blokkering info">
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>syncBericht</value></entry>
+                </parameters>
+            </action>
+        </transition>
+        <transition to="IX-1. Foutafhandeling (blokkering info)" name="afbreken">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.blokkeringinfo.afgebroken";
+                    foutafhandelingFoutmelding=null;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (Pf03)", true, false, false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen (zonder Pf03)", false, false, false);
+                    foutafhandelingPaden.put("restartAtBlokkeringInfo", "Opnieuw proberen blokkering info op te vragen
+                    in BRP", false, false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <decision name="VIII-4. Bepaal antwoord op blokkering info">
+        <transition to="VIII-5. Controleer antwoord op blokkering info">
+            <condition expression="#{syncBerichtType == 'BlokkeringInfoAntwoord'}"></condition>
+            <script>
+                <expression >
+                    blokkeringInfoAntwoordBericht=syncBericht;
+                </expression>
+                <variable name='blokkeringInfoAntwoordBericht' access='write' />
+                <variable name='syncBericht' access='read' />
+            </script>
+        </transition>
+        <transition to="IX-1. Foutafhandeling (blokkering info)" name="8c. Technische fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.blokkeringinfo.foutiefbericht";
+                    foutafhandelingFoutmelding=syncBerichtType + " is niet een verwacht bericht.";
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (Pf03)", true, false, false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen (zonder Pf03)", false, false, false);
+                    foutafhandelingPaden.put("restartAtBlokkeringInfo", "Opnieuw proberen blokkering info op te vragen
+                    in BRP", false, false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='syncBerichtType' access='read' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </decision>
+
+    <node name="VIII-5. Controleer antwoord op blokkering info">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811ControleerBlokkeringInfoAntwoordAction
+            </bean>
+        </action>
+        <transition to="SYNC NAAR BRP"></transition>
+        <transition to="IX-1. Foutafhandeling (blokkering info)" name="8e. Fout: ongeldige blokkeringssituatie">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.blokkeringinfo.blokkeringfout";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    restart="end";
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (Pf03)", true, false, false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen (zonder Pf03)", false, false, false);
+                    foutafhandelingPaden.put("restartAtBlokkeringInfo", "Opnieuw proberen blokkering info op te vragen
+                    in BRP", false, false, false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <process-state name="IX-1. Foutafhandeling (blokkering info)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="lo3Bericht" name="la01Bericht"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="indicatieCyclusFout" name="foutafhandelingIndicatieCyclusFout"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="IX-2. Keuze (blokkering info)"></transition>
+    </process-state>
+
+    <decision name="IX-2. Keuze (blokkering info)">
+        <transition to="UNLOCK" name="9b. Beeindigen">
+            <condition expression="#{restart == 'end' || restart == 'endWithoutPf03'}"></condition>
+        </transition>
+        <transition to="BLOKKERING INFO" name="9a. Opnieuw blokkering info opvragen">
+            <condition expression="#{restart == 'restartAtBlokkeringInfo'}"></condition>
+        </transition>
+    </decision>
+
+    <!--  -->
+    <!--  -->
+    <!-- SYNC NAAR BRP -->
+    <!--  -->
+    <!--  -->
+
+    <node name="SYNC NAAR BRP">
+        <transition to="X-1. Maak opslaan bericht">
+            <script>
+                <expression >
+                    functioneleStap="uc811.syncnaarbrp.stap";
+                </expression>
+                <variable name='functioneleStap' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <node name="X-1. Maak opslaan bericht">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+            <bean>
+                uc811MaakSynchroniseerNaarBrpVerzoekAction
+            </bean>
+        </action>
+        <transition to="X-2. PL Opslaan in BRP">
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>synchroniseerNaarBrpVerzoekBericht</value></entry>
+                </parameters>
+            </action>
+        </transition>
+    </node>
+
+    <node name="X-2. PL Opslaan in BRP">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.actionhandler.EsbActionHandler">
+            <esbServiceName>
+                Sync-Outbound
+            </esbServiceName>
+            <bpmToEsbVars>
+                <mapping bpm="synchroniseerNaarBrpVerzoekBericht" esb="BODY_CONTENT"></mapping>
+            </bpmToEsbVars>
+            <esbToBpmVars>
+                <mapping bpm="syncBericht" esb="iscBerichtId"></mapping>
+                <mapping bpm="syncBerichtType" esb="iscBerichtType"></mapping>
+            </esbToBpmVars>
+            <esbCategoryName>
+                ISC
+            </esbCategoryName>
+        </action>
+        <transition to="X-4. Bepaal antwoord op opslaan">
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>syncBericht</value></entry>
+                </parameters>
+            </action>
+        </transition>
+        <transition to="XI-1. Foutafhandeling (sync naar BRP)" name="afbreken">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.syncnaarbrp.afgebroken";
+                    foutafhandelingFoutmelding=null;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (Pf03)", true, false, false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen (zonder Pf03)", false, false, false);
+                    foutafhandelingPaden.put("restartAtSynchronisatieNaarBrp", "Opnieuw proberen op te slaan in BRP",
+                    false, false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <decision name="X-4. Bepaal antwoord op opslaan">
+        <transition to="X-5. Controleer opslaan antwoord">
+            <condition expression="#{syncBerichtType == 'SynchroniseerNaarBrpAntwoord'}"></condition>
+            <script>
+                <expression >
+                    synchroniseerNaarBrpAntwoordBericht=syncBericht;
+                </expression>
+                <variable name='synchroniseerNaarBrpAntwoordBericht' access='write' />
+                <variable name='syncBericht' access='read' />
+            </script>
+        </transition>
+        <transition to="XI-1. Foutafhandeling (sync naar BRP)" name="10c. Technische fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.syncnaarbrp.foutiefbericht";
+                    foutafhandelingFoutmelding=syncBerichtType + " is niet een verwacht bericht.";
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (Pf03)", true, false, false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen (zonder Pf03)", false, false, false);
+                    foutafhandelingPaden.put("restartAtSynchronisatieNaarBrp", "Opnieuw proberen op te slaan in BRP",
+                    false, false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='syncBerichtType' access='read' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </decision>
+
+    <node name="X-5. Controleer opslaan antwoord">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811ControleerSynchroniseerNaarBrpAntwoordAction
+            </bean>
+        </action>
+        <transition to="DEBLOKKEREN"></transition>
+        <transition to="XII-1. Maak beheerderskeuzes" name="10e. Onduidelijk"></transition>
+        <transition to="XI-1. Foutafhandeling (sync naar BRP)" name="10g. Afgekeurd">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.syncnaarbrp.afgekeurd";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    restart="end";
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (Pf03)", true, false, false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen (zonder Pf03)", false, false, false);
+                    foutafhandelingPaden.put("restartAtLq01", "Persoonslijst opnieuw ophalen bij gemeente", false,
+                    false, false);
+                    foutafhandelingPaden.put("restartAtSynchronisatieNaarBrp", "Opnieuw proberen op te slaan in BRP",
+                    false, false, false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+        <transition to="XI-1. Foutafhandeling (sync naar BRP)" name="10h. Fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.syncnaarbrp.fout";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    restart="end";
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("restartAtLq01", "Persoonslijst opnieuw ophalen bij gemeente", false,
+                    false, false);
+                    foutafhandelingPaden.put("restartAtSynchronisatieNaarBrp", "Opnieuw proberen op te slaan in BRP",
+                    false, false, false);
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen (Pf03)", true, false, false);
+                    foutafhandelingPaden.put("endWithoutPf03", "Proces be&#235;indigen (zonder Pf03)", false, false,
+                    false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='restart' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+        <transition to="UNLOCK" name="10f. Genegeerd"></transition>
+    </node>
+
+    <process-state  name="XI-1. Foutafhandeling (sync naar BRP)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="lo3Bericht" name="la01Bericht"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="indicatieCyclusFout" name="foutafhandelingIndicatieCyclusFout"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="XI-2. Keuze (sync naar BRP)"></transition>
+    </process-state>
+
+    <decision name="XI-2. Keuze (sync naar BRP)">
+        <transition to="UNLOCK" name="11b. Beeindigen">
+            <condition expression="#{restart == 'end' || restart == 'endWithoutPf03'}"></condition>
+        </transition>
+        <transition to="SYNC NAAR BRP" name="11a. Opnieuw synchroniseren">
+            <condition expression="#{restart == 'restartAtSynchronisatieNaarBrp'}"></condition>
+        </transition>
+        <transition to="XVII. Unlock" name="11c. Opnieuw opvragen">
+            <condition expression="#{restart == 'restartAtLq01'}"></condition>
+        </transition>
+    </decision>
+
+    <node name="XII-1. Maak beheerderskeuzes">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+            <bean>
+                uc202MaakBeheerderkeuzesAction
+            </bean>
+        </action>
+        <description>
+            Maak de foutpaden die gekozen moeten worden obv het antwoord van de sync service
+        </description>
+        <transition to="XII-2. Foutafhandeling (uc808)">
+            <script>
+                <expression>
+                    foutafhandelingPaden.put("restartAtLq01", "Persoonslijst opnieuw ophalen bij gemeente", false, false, false);
+                </expression>
+                <variable name='foutafhandelingPaden' access='read,write' />
+            </script>
+        </transition>
+    </node>
+
+    <process-state name="XII-2. Foutafhandeling (uc808)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="lo3Bericht" name="la01Bericht"></variable>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="afhandelingType" name="foutafhandelingType"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="persoonslijstOverzicht" name="persoonslijstOverzicht"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="XII-3. Verwerk beheerderkeuze"></transition>
+    </process-state>
+
+    <node name="XII-3. Verwerk beheerderkeuze">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+            <bean>
+                uc202VerwerkBeheerderkeuzeAction
+            </bean>
+        </action>
+        <transition to="XI-2. Keuze (sync naar BRP)"></transition>
+    </node>
+
+    <node name="XVII. Unlock">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811VerwijderLockAction
+            </bean>
+        </action>
+
+        <transition to="SYNCHRONISATIE VRAAG"></transition>
+        <transition to="XVIII-1. Foutafhandeling (unlock)" name="b. Technische fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.unlock.technischefout";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("continue", "Doorgaan", false, false, false);
+                    foutafhandelingPaden.put("restartAtUnlock", "Opnieuw proberen te unlocken", false, false, false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <process-state name="XVIII-1. Foutafhandeling (unlock)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="indicatieCyclusFout" name="foutafhandelingIndicatieCyclusFout"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="XVIII-2. Keuze (unlock)"></transition>
+    </process-state>
+
+    <decision name="XVIII-2. Keuze (unlock)">
+        <transition to="SYNCHRONISATIE VRAAG" name="18b. Doorgaan">
+            <condition expression="#{restart == 'continue'}"></condition>
+        </transition>
+        <transition to="XVII. Unlock" name="18a. Opnieuw unlocken">
+            <condition expression="#{restart == 'restartAtUnlock'}"></condition>
+        </transition>
+    </decision>
+
+    <!--  -->
+    <!--  -->
+    <!-- Deblokkeren -->
+    <!--  -->
+    <!--  -->
+
+    <node name="DEBLOKKEREN">
+        <transition to="XIII-1. Controleren verhuizing">
+            <script>
+                <expression >
+                    functioneleStap="uc811.deblokkeren.stap";
+                </expression>
+                <variable name='functioneleStap' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <decision name="XIII-1. Controleren verhuizing">
+        <handler class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringDecisionHandler">
+            <bean>
+                uc811ControleerVerhuizingDecision
+            </bean>
+        </handler>
+        <transition to="UNLOCK" name="13e. Geen verhuizing"></transition>
+        <transition to="XIII-2. Maak deblokkering bericht"></transition>
+    </decision>
+
+    <node name="XIII-2. Maak deblokkering bericht">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+            <bean>
+                uc811MaakDeblokkerenBerichtAction
+            </bean>
+        </action>
+        <transition to="XIII-3. Deblokkeren PL in BRP">
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>deblokkeringBericht</value></entry>
+                </parameters>
+            </action>
+        </transition>
+    </node>
+
+    <node name="XIII-3. Deblokkeren PL in BRP">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.actionhandler.EsbActionHandler">
+            <esbServiceName>
+                Sync-Outbound
+            </esbServiceName>
+            <bpmToEsbVars>
+                <mapping bpm="deblokkeringBericht" esb="BODY_CONTENT"></mapping>
+            </bpmToEsbVars>
+            <esbToBpmVars>
+                <mapping bpm="syncBericht" esb="iscBerichtId"></mapping>
+                <mapping bpm="syncBerichtType" esb="iscBerichtType"></mapping>
+            </esbToBpmVars>
+            <esbCategoryName>
+                ISC
+            </esbCategoryName>
+        </action>
+        <transition to="XIII-5. Bepaal antwoord op deblokkering">
+            <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler" config-type="bean">
+                <bean>registreerGerelateerdeInformatieAction</bean>
+                <parameters>
+                    <entry><key>berichtIdVariabele</key><value>syncBericht</value></entry>
+                </parameters>
+            </action>
+        </transition>
+        <transition to="XIV-1. Foutafhandeling (deblokkeren)" name="afbreken">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.deblokkeren.afgebroken";
+                    foutafhandelingFoutmelding=null;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtDeblokkeren", "Opnieuw proberen op te deblokkeren in BRP", false,
+                    false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <decision name="XIII-5. Bepaal antwoord op deblokkering">
+        <transition to="UNLOCK">
+            <condition expression="#{syncBerichtType == 'DeblokkeringAntwoord'}"></condition>
+            <script>
+                <expression >
+                    deblokkerenAntwoordBericht=syncBericht;
+                </expression>
+                <variable name='deblokkerenAntwoordBericht' access='write' />
+                <variable name='syncBericht' access='read' />
+            </script>
+        </transition>
+        <transition to="XIV-1. Foutafhandeling (deblokkeren)" name="13c. Technische fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.deblokkeren.foutiefbericht";
+                    foutafhandelingFoutmelding=syncBerichtType + " is niet een verwacht bericht.";
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtDeblokkeren", "Opnieuw proberen op te deblokkeren in BRP", false,
+                    false, false);
+                </expression>
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='syncBerichtType' access='read' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </decision>
+
+    <process-state name="XIV-1. Foutafhandeling (deblokkeren)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="indicatieCyclusFout" name="foutafhandelingIndicatieCyclusFout"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="XIV-2. Keuze (deblokkeren)"></transition>
+    </process-state>
+
+    <decision name="XIV-2. Keuze (deblokkeren)">
+        <transition to="UNLOCK" name="14b. Beeindigen">
+            <condition expression="#{restart == 'end'}"></condition>
+        </transition>
+        <transition to="DEBLOKKEREN" name="14a. Opnieuw deblokkeren">
+            <condition expression="#{restart == 'restartAtDeblokkeren'}"></condition>
+        </transition>
+    </decision>
+
+    <!--  -->
+    <!--  -->
+    <!-- UNLOCK -->
+    <!--  -->
+    <!--  -->
+
+    <node name="UNLOCK">
+        <transition to="XV-1. Verwijder lock (unlock)">
+            <script>
+                <expression>
+                    functioneleStap="uc811.unlock.stap";
+                </expression>
+                <variable name='functioneleStap' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <node name="XV-1. Verwijder lock (unlock)">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                uc811VerwijderLockAction
+            </bean>
+        </action>
+
+        <transition to="EINDE"></transition>
+        <transition to="XVI-1. Foutafhandeling (unlock)" name="b. Technische fout">
+            <script>
+                <expression>
+                    foutafhandelingFout="uc811.unlock.technischefout";
+                    foutafhandelingFoutmelding=actieFoutmelding;
+                    foutafhandelingIndicatieCyclusFout=false;
+
+                    foutafhandelingIndicatieBeheerder=true;
+                    foutafhandelingPaden=new nl.bzk.migratiebrp.isc.jbpm.common.jsf.FoutafhandelingPaden();
+                    foutafhandelingPaden.put("end", "Proces be&#235;indigen", false, false, false);
+                    foutafhandelingPaden.put("restartAtUnlock", "Opnieuw proberen te unlocken", false, false, false);
+                </expression>
+                <variable name='actieFoutmelding' access='read' />
+                <variable name='foutafhandelingFout' access='write' />
+                <variable name='foutafhandelingFoutmelding' access='write' />
+                <variable name='foutafhandelingIndicatieCyclusFout' access='write' />
+                <variable name='foutafhandelingIndicatieBeheerder' access='write' />
+                <variable name='foutafhandelingPaden' access='write' />
+            </script>
+        </transition>
+    </node>
+
+    <process-state name="XVI-1. Foutafhandeling (unlock)">
+        <sub-process name="foutafhandeling" binding="late"></sub-process>
+        <variable access="read" mapped-name="bronGemeente" name="bronGemeente"></variable>
+        <variable access="read" mapped-name="doelGemeente" name="doelGemeente"></variable>
+        <variable access="read" mapped-name="functioneleStap" name="functioneleStap"></variable>
+        <variable access="read" mapped-name="fout" name="foutafhandelingFout" ></variable>
+        <variable access="read" mapped-name="foutmelding" name="foutafhandelingFoutmelding"></variable>
+        <variable access="read" mapped-name="indicatieBeheerder" name="foutafhandelingIndicatieBeheerder"></variable>
+        <variable access="read" mapped-name="indicatieCyclusFout" name="foutafhandelingIndicatieCyclusFout"></variable>
+        <variable access="read,write"  mapped-name="restart" name="restart"></variable>
+        <variable access="read"  mapped-name="foutafhandelingPaden" name="foutafhandelingPaden"></variable>
+        <transition to="XVI-2. Keuze (unlock)"></transition>
+    </process-state>
+
+    <decision name="XVI-2. Keuze (unlock)">
+        <transition to="EINDE" name="16b. Beeindigen">
+            <condition expression="#{restart == 'end'}"></condition>
+        </transition>
+        <transition to="UNLOCK" name="16a. Opnieuw unlocken">
+            <condition expression="#{restart == 'restartAtUnlock'}"></condition>
+        </transition>
+    </decision>
+
+    <!--  -->
+    <!--  -->
+    <!-- Einde -->
+    <!--  -->
+    <!--  -->
+
+    <node name="EINDE">
+        <transition to="O-2. Loggen einde proces"></transition>
+    </node>
+
+    <node name="O-2. Loggen einde proces">
+        <action class="nl.bzk.migratiebrp.isc.jbpm.common.spring.SpringActionHandler">
+            <bean>
+                beeindigProcesInstantieAction
+            </bean>
+        </action>
+        <transition to="Afgerond"></transition>
+    </node>
+
+    <end-state name="Afgerond"></end-state>
+
+    <exception-handler>
+        <action name="exception-handler" class="nl.bzk.migratiebrp.isc.jbpm.common.ExceptionLogger"/>
+    </exception-handler>
+</process-definition>

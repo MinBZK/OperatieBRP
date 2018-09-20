@@ -1,0 +1,1 @@
+select count(*) as aantal from ber.ber where srt = 102 and zendendesysteem = 'GBANetwerk' and ontvangendesysteem = 'Migratievoorzieningen' and richting = 1 and zendendepartij = 630 and ontvangendepartij = 2000;

@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+      xmlns:mig="http://www.bzk.nl/migratiebrp"
+        >
+<ui:component>
+
+<table class="results">
+<thead>
+    <tr>
+        <th colspan="10">
+            <ui:decorate template="t_pager.xhtml">
+                <ui:define name="pager_params">
+                    <ui:insert name="params"/>
+                    <f:param name="kanaal" value="#{filter_kanaal}"/>
+                    <f:param name="richting" value="#{filter_richting}"/>
+                    <f:param name="bron" value="#{filter_bron}"/>
+                    <f:param name="doel" value="#{filter_doel}"/>
+                    <f:param name="type" value="#{filter_type}"/>
+                    <f:param name="berichtId" value="#{filter_berichtId}"/>
+                    <f:param name="correlatieId" value="#{filter_correlatieId}"/>
+                </ui:define>
+                <ui:param name="pager" value="#{berichtenList_pager}"/>
+            </ui:decorate>
+            <ui:insert name="berichten_title">#{msgs['bericht.heading']}</ui:insert>
+        </th>
+    </tr>
+    <tr>
+        <td style="width:150px;">
+            #{msgs['bericht.heading.tijdstip']}
+        </td>
+        <td style="width:75px;">
+            #{msgs['bericht.heading.kanaal']}
+        </td>
+        <td style="width:75px;">
+            #{msgs['bericht.heading.richting']}
+        </td>
+        <td style="width:75px;">
+            #{msgs['bericht.heading.bron']}
+        </td>
+        <td style="width:75px;">
+            #{msgs['bericht.heading.doel']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['bericht.heading.type']}
+        </td>
+        <td style="width:75px;">
+            #{msgs['bericht.heading.processInstanceId']}
+        </td>
+        <td style="width:300px;">
+            #{msgs['bericht.heading.messageid']}
+        </td>
+        <td style="width:300px;">
+            #{msgs['bericht.heading.correlationid']}
+        </td>
+        <td style="width:150px;">
+            #{msgs['menu.actions']}
+        </td>
+    </tr>
+</thead>
+<tbody class="filter">
+    <tr>
+        <td><!-- Filter Tijdstip -->
+        </td>
+        <td><!-- Filter Kanaal -->
+            <input name="kanaal_i" type="text" style="width:65px;" value="#{filter_kanaal}" onkeypress="keypress(event,'apply')"/>
+        </td>
+        <td><!-- Filter Richting -->
+            <select name="richting_i" style="width:65px;" onkeypress="keypress(event,'apply')">
+                <option label="" value="" />
+                <option label="INKOMEND" value="I" >INKOMEND</option>
+                <option label="UITGAAND" value="U" >UITGAAND</option>
+            </select>
+            <script>
+                var richtingSelect = document.getElementsByName('richting_i')[0];
+                for(var i = 0; i &lt; richtingSelect.length; i++) {
+                    if(richtingSelect.options[i].value == '#{filter_richting}') {
+                        richtingSelect.options[i].selected = true;
+                    }
+                }
+            </script>
+        </td>
+        <td><!-- Filter Bron -->
+            <input name="bron_i" type="text" style="width:65px;" value="#{filter_bron}" onkeypress="keypress(event,'apply')"/>
+        </td>
+        <td><!-- Filter Doel -->
+            <input name="doel_i" type="text" style="width:65px;" value="#{filter_doel}" onkeypress="keypress(event,'apply')"/>
+        </td>
+        <td><!-- Filter Type -->
+            <input name="type_i" type="text" style="width:140px;" value="#{filter_type}" onkeypress="keypress(event,'apply')"/>
+        </td>
+        <td><!-- Filter Process instance id -->
+        </td>
+        <td><!-- Filter Message id -->
+            <input name="berichtid_i" type="text" style="width:240px;" value="#{filter_berichtId}" onkeypress="keypress(event,'apply')"/>
+        </td>
+        <td><!-- Filter Correlation id -->
+            <input name="correlatieid_i" type="text" style="width:240px;" value="#{filter_correlatieId}" onkeypress="keypress(event,'apply')"/>
+        </td>
+        <td colspan="4" style="width:150px;">
+            <gs:form id="sfber">
+                <input type="hidden" name="id" value="#{id}"/>
+                <input type="hidden" name="view" value="#{viewMode}"/>
+                <input type="hidden" name="kanaal"/>
+                <input type="hidden" name="richting"/>
+                <input type="hidden" name="bron"/>
+                <input type="hidden" name="doel"/>
+                <input type="hidden" name="type"/>
+                <input type="hidden" name="berichtId"/>
+                <input type="hidden" name="correlatieId"/>
+            </gs:form>
+            <a id="applyber" accesskey="a"
+               onclick="
+               document.getElementsByName('kanaal')[0].value=document.getElementsByName('kanaal_i')[0].value;
+               document.getElementsByName('richting')[0].value=document.getElementsByName('richting_i')[0].value;
+               document.getElementsByName('bron')[0].value=document.getElementsByName('bron_i')[0].value;
+               document.getElementsByName('doel')[0].value=document.getElementsByName('doel_i')[0].value;
+               document.getElementsByName('type')[0].value=document.getElementsByName('type_i')[0].value;
+               document.getElementsByName('berichtId')[0].value=document.getElementsByName('berichtid_i')[0].value;
+               document.getElementsByName('correlatieId')[0].value=document.getElementsByName('correlatieid_i')[0].value;
+               document.getElementById('sfber').submit();return false;">#{msgs['filter.apply']}</a>
+            <h:outputLink style="margin-left:10px">
+                <h:outputText value="#{msgs['filter.clear']}"/>
+                <ui:insert name="params"/>
+            </h:outputLink>
+        </td>
+    </tr>
+</tbody>
+
+<h:outputText>
+    <ga:attribute name="rendered" value="#{! empty berichtenList}"/>
+    <tbody class="results">
+        <gd:repeat value="#{berichtenList}" var="bericht" idVar="rid" first="#{berichtenList_pager.first}" limit="#{berichtenList_pager.limit}">
+            <gs:tr>
+                <ga:attribute name="styleClass" value="#{rid % 2 == 0 ? 'odd' : 'even'}"/>
+                <td>
+                    #{bericht.tijdstip}
+                </td>
+                <td>
+                    #{bericht.kanaal}
+                </td>
+                <td>
+                    #{bericht.richting}
+                </td>
+                <td>
+                    #{bericht.bronGemeente}
+                </td>
+                <td>
+                    #{bericht.doelGemeente}
+                </td>
+                <td>
+                    #{bericht.naam}
+                </td>
+                <td>
+                    <h:outputLink value="procins.jsf?id=#{bericht.processInstanceId}">
+                        #{bericht.processInstanceId}
+                    </h:outputLink>
+                </td>
+                <td>
+                    #{bericht.messageId}
+                </td>
+                <td>
+                    #{bericht.correlationId}
+                </td>
+                <td>
+                    <h:outputLink value="bericht.jsf?id=#{bericht.id}">
+                        #{msgs['action.examine']}
+                    </h:outputLink>
+                </td>
+            </gs:tr>
+        </gd:repeat>
+    </tbody>
+</h:outputText>
+</table>
+</ui:component>
+
+</html>

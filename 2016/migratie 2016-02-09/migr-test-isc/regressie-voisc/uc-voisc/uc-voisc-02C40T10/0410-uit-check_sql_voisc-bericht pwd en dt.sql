@@ -1,0 +1,1 @@
+select mailboxpwd from voisc.lo3_mailbox where  instantiecode = '0981' and mailboxpwd ='test0981';

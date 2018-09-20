@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:gd="http://gravel.jboss.org/jsf/1.0/data"
+      xmlns:ga="http://gravel.jboss.org/jsf/1.0/action"
+      xmlns:gs="http://gravel.jboss.org/jsf/1.0/simple"
+      xmlns:n="http://gravel.jboss.org/jsf/1.0/navigation"
+      xmlns:j4j="http://jbpm.org/jbpm4jsf/core"
+>
+    <ui:composition template="t_loggedin.xhtml">
+
+        <ui:define name="menu">
+            <table class="leftmenu">
+                <tbody>
+                    <tr class="leftmenuheader">
+                        <th>
+							#{msgs['menu.reports']}
+                        </th>
+                    </tr>
+                    <tr class="leftmenu">
+                        <td>
+							<h:outputLink target="reportIframe" value="report_fouten.jsf">#{msgs['reports.fouten']}</h:outputLink>
+                        </td>
+                    </tr>
+                    <tr class="leftmenu">
+                        <td>
+                        	<h:outputLink target="reportIframe" value="../rs/report/view/jbpm-lopende-processen">#{msgs['reports.us47']}</h:outputLink>
+                        </td>
+                    </tr>
+                    <tr class="leftmenu">
+                        <td>
+                            <h:outputLink target="reportIframe" value="report_afhandeling_processen.jsf">#{msgs['reports.afhandelingProcessen']}</h:outputLink>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </ui:define>
+
+        <ui:define name="body">
+            <script language="JavaScript">
+             function autoResize(id){
+                 var newheight;
+                 var newwidth;
+
+                 if(document.getElementById){
+                     newheight=document.getElementById(id).contentWindow.document .body.scrollHeight;
+
+                     if(newheight &lt; 350) {
+                    	 newheight = 350;
+                     }
+
+                     newwidth=document.getElementById(id).contentWindow.document .body.scrollWidth;
+                 }
+
+                 document.getElementById(id).height= (newheight) + "px";
+                 document.getElementById(id).width= (newwidth) + "px";
+             }
+            </script>
+			<iframe id="reportIframe" name="reportIframe" width="100%" height="150px" marginheight="0" frameborder="0" onLoad="autoResize('reportIframe');" srcdoc="#{msgs['reports.select']}">#{msgs['reports.select']}</iframe>
+        </ui:define>
+
+    </ui:composition>
+</html>

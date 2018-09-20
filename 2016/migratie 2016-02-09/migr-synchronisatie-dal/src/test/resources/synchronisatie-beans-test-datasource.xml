@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns="http://www.springframework.org/schema/beans"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+
+        http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+    	<property name="properties">
+    		<props>
+    			<prop key="synchronisatie.dal.dialect">org.hibernate.dialect.HSQLDialect</prop>
+    		</props>
+    	</property>
+    </bean>
+
+
+ 	<bean id="embeddedDatabaseServer" class="org.hsqldb.server.Server" init-method="start" destroy-method="stop" >
+ 		<property name="port" value="9001" />
+ 		<property name="properties">
+ 			<bean class="org.hsqldb.persist.HsqlProperties">
+ 				<constructor-arg>
+		 			<props>
+		 				<prop key="hsqldb.reconfig_logging">false</prop>
+		 				<prop key="server.database.0">file:target/hsqldb/brp</prop>
+		 				<prop key="server.dbname.0">brp</prop>
+		 			</props>
+ 				</constructor-arg>
+ 			</bean>
+ 		</property>
+ 	</bean>
+
+
+    <!-- Datasource Definitie -->
+    <bean id="syncDalDataSource" class="com.atomikos.jdbc.nonxa.AtomikosNonXADataSourceBean">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.migratiebrp.util.common.UniqueName" >
+            	<property name="baseName" value="syncDatabase" />
+            </bean>
+        </property>
+        <property name="url" value="jdbc:hsqldb:hsql://localhost:9001/brp"/>
+        <property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver"/>
+        <property name="user" value="sa"/>
+        <property name="password" value="" />
+        <property name="maxPoolSize" value="20" />
+        <property name="minPoolSize" value="10"/>
+    </bean>
+
+
+    <jdbc:initialize-database data-source="syncDalDataSource">
+        <jdbc:script location="classpath:sql/hsqldb/HSQLDB.sql" encoding="UTF-8"/>
+    </jdbc:initialize-database>
+    <jdbc:initialize-database data-source="syncDalDataSource" ignore-failures="ALL">
+        <jdbc:script location="classpath:sql/hsqldb/4_brp-migratie-tijdelijk.sql" encoding="UTF-8"/>
+    </jdbc:initialize-database>
+
+
+    <!-- Construct Atomikos USerTransactionService, needed to specify Atomikos settings -->
+    <bean id="atomikosUserTransactionService"  class="com.atomikos.icatch.config.UserTransactionServiceImp" init-method="init" destroy-method="shutdownForce">
+        <constructor-arg>
+            <!-- IMPORTANT: specify all Atomikos properties here -->
+            <props>
+                <prop key="com.atomikos.icatch.service">com.atomikos.icatch.standalone.UserTransactionServiceFactory</prop>
+                <prop key="com.atomikos.icatch.tm_unique_name">transactionmanager_${atomikos.unique_name:local}_</prop>
+                <prop key="com.atomikos.icatch.log_base_name">transactionlog_${atomikos.unique_name:local}_</prop>
+                <prop key="com.atomikos.icatch.force_shutdown_on_vm_exit">false</prop>
+            </props>
+        </constructor-arg>
+    </bean>
+
+    <!-- Construct Atomikos UserTransactionManager, needed to configure Spring -->
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager" init-method="init" destroy-method="close" depends-on="atomikosUserTransactionService">
+        <!-- IMPORTANT: disable startup because the userTransactionService above does this -->
+        <property name="startupTransactionService" value="false"/>
+
+        <!--  when close is called, should we force transactions to terminate or not? -->
+        <property name="forceShutdown"><value>true</value></property>
+    </bean>
+
+    <!-- Also use Atomikos UserTransactionImp, needed to configure Spring  -->
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp" depends-on="atomikosUserTransactionService" >
+        <property name="transactionTimeout"><value>${atomikos.max.timeout:30000}</value></property>
+    </bean>
+
+    <!-- Configure the Spring framework to use JTA transactions from Atomikos -->
+    <bean id="syncDalTransactionManager" class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager"><ref bean="atomikosTransactionManager"  /></property>
+        <property name="userTransaction"><ref bean="atomikosUserTransaction"  /></property>
+    </bean>
+
+
+     <bean name="syncDalJpaVendorAdapter" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
+         <property name="showSql" value="false"/>
+         <property name="generateDdl" value="false"/>
+         <property name="databasePlatform" value="org.hibernate.dialect.HSQLDialect"/>
+     </bean>
+</beans>

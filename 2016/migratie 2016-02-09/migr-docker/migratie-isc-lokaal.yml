@@ -1,0 +1,91 @@
+brpdatabase:
+  image: migr-tools-brp-database
+  ports:
+    - "5432:5432"
+
+brproutering:
+  image: migr-tools-brp-routering
+  ports:
+    - "61616:61616"
+    - "11990:11990"
+  environment:
+    - "JMX_HOST=192.168.99.100"
+    - "JMX_PORT=11990"
+
+mailbox:
+  image: migr-tools-mailbox
+  ports:
+    - "1599:1599"
+    - "1212:1212"
+  environment:
+    - "JMX_HOST=192.168.99.100"
+    - "JMX_PORT=1599"
+
+routeringdatabase:
+  image: migr-routering-database
+  ports:
+    - "5532:5432"
+
+routering:
+  image: migr-routering-runtime
+  links:
+    - "routeringdatabase:routering_db"
+  ports:
+    - "1199:1199"
+    - "61617:61616"
+  environment:
+      - "JMX_HOST=192.168.99.100"
+      - "JMX_PORT=1199"
+
+synchronisatie:
+  image: migr-synchronisatie-runtime
+  links:
+    - "brpdatabase:brp_db"
+    - routering
+    - brproutering
+  ports:
+    - "1799:1799"
+  environment:
+    - "JMX_HOST=192.168.99.100"
+    - "JMX_PORT=1799"
+
+iscdatabase:
+  image: migr-isc-database
+  ports:
+    - "5732:5432"
+
+isc:
+  image: migr-isc-runtime
+  links:
+    - "iscdatabase:isc_db"
+    - routering
+  ports:
+    - "1099:1099"
+  environment:
+    - "JMX_HOST=192.168.99.100"
+    - "JMX_PORT=1099"
+
+iscconsole:
+  image: migr-isc-console
+  links:
+    - isc
+    - "iscdatabase:isc_db"
+  ports:
+    - "8080:8080"
+
+voiscdatabase:
+  image: migr-voisc-database
+  ports:
+    - "5632:5432"
+
+voisc:
+  image: migr-voisc-runtime
+  links:
+    - "voiscdatabase:voisc_db"
+    - routering
+    - mailbox
+  ports:
+    - "1399:1399"
+  environment:
+    - "JMX_HOST=192.168.99.100"
+    - "JMX_PORT=1399"

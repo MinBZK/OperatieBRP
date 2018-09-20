@@ -1,0 +1,1 @@
+select count(*) as aantal_verzenders from mig_verzender

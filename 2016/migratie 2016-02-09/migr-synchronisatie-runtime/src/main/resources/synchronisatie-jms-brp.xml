@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:amq="http://activemq.apache.org/schema/core"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://activemq.apache.org/schema/core http://activemq.apache.org/schema/core/activemq-core.xsd">
+
+  	<amq:xaConnectionFactory id="brpXaConnectionFactory" brokerURL="${brp.queue.url:tcp://localhost:61616}"/>
+
+    <!-- Atomikos JTA-enabled ConnectionFactory, configured with the vendor's XA factory. -->
+    <bean name="brpQueueConnectionFactory" class="com.atomikos.jms.AtomikosConnectionFactoryBean" init-method="init" destroy-method="close">
+        <property name="uniqueResourceName">
+            <!--
+             | Tijdens jUnit testen kan de ApplicationContext meerdere keren worden geinstantieerd.
+             | Elke keer dient een unique naam gebruikt te worden, anders gaat Atomikos fout.
+              -->
+            <bean class="nl.bzk.migratiebrp.util.common.UniqueName" >
+            	<property name="baseName" value="brpQueues" />
+            </bean>
+        </property>        <property name="xaConnectionFactory" ref="brpXaConnectionFactory" />
+        <property name="minPoolSize" value="${brp.queue.minpool:3}" />
+        <property name="maxPoolSize" value="${brp.queue.maxpool:20}" />
+	</bean>
+
+	<!--  BRP QUEUES -->
+
+   	<amq:queue id="gbaArchief" physicalName="${brp.queue.archief:GbaArchief}" />
+   	<amq:queue id="gbaAfnemerindicaties" physicalName="${brp.queue.afnemersindicaties:GbaAfnemerindicaties}" />
+   	<amq:queue id="gbaAfnemerindicatiesAntwoord" physicalName="${brp.queue.afnemersindicaties.antwoord:GbaAfnemerindicatiesAntwoorden}" />
+   	<amq:queue id="gbaBijhoudingen" physicalName="${brp.queue.bijhouden:GbaBijhoudingen}" />
+   	<amq:queue id="gbaLeveringen" physicalName="${brp.queue.leveringen:GbaLeveringen}" />
+   	<amq:queue id="gbaToevalligeGebeurtenissen" physicalName="${brp.queue.toevalligegebeurtenissen:GbaToevalligeGebeurtenissen}" />
+   	<amq:queue id="gbaToevalligeGebeurtenissenAntwoord" physicalName="${brp.queue.toevalligegebeurtenissen.antwoord:GbaToevalligeGebeurtenissenAntwoorden}" />
+
+</beans>

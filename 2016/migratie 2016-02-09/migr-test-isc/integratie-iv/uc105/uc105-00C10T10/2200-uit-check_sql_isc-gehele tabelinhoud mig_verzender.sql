@@ -1,0 +1,1 @@
+select * from mig_verzender;
